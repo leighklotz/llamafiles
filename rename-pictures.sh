@@ -22,10 +22,11 @@
 # You need to have a system with at minimum 8gb of RAM. This will work
 # even on older computers without GPUs; just let it run overnight!
 
-## TODO:
-## Use remote or local model transparently
-## fixed removal of mistral, too slow and wrong
-## fix spaces and special chars in existing filenames (space, paren) with %q
+# [KLOTZ Fri Jan  5 12:11:36 PM PST 2024] Updates
+# - removed filename check and just append to existing filename
+# - changed to print script instead of act
+# TODO:
+# - Use remote or local model transparently
 
 LLAVA_MODEL=~klotz/wip/llamafiles/llava-v1.5-7b-q4-main.llamafile
 MISTRAL_MODEL=~klotz/wip/llamafiles/mistral-7b-instruct-v0.1-Q4_K_M-main.llamafile
