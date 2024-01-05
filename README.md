@@ -1,5 +1,5 @@
 # LLM Help CLI for Linux
-- using llamafile and scripts from https://github.com/jart
+- using https://github.com/Mozilla-Ocho/llamafile and scripts from https://github.com/jart
 
 # Script Files
 - cli.sh
