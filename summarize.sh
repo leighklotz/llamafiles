@@ -1,12 +1,70 @@
 #!/bin/bash
 
+# args, "[-m model-type]
+if [[ "${1}" == "-m" ]]; then
+    shift; M=$1; shift;
+else
+    M="mistral"
+fi
+
 URL="${1}"
-PROMPT="Summarize the following article:\n"
-TEXT="$(links -codepage utf-8 -force-html -width 72 -dump ${URL})"
-#echo "${TEXT:0:128}"
+#TEXT="$(links -codepage utf-8 -force-html -width 72 -dump ${URL})"
+TEXT="$(lynx --dump ${URL})"
+# truncate
+TEXT="${TEXT:0:8000}"
+SYSTEM_MESSAGE=$(printf "%b" "Summarize the following web page article and ignore website header at the start and look for the main article:\n")
 
-#TEXT="$(echo $'[INST]Summarize the following article:\n'; links -codepage utf-8 -force-html -width 72 -dump "${URL}" | cut -c1-5800; echo $'\n[/INST]\n')"
-#TEXT="$(echo $'<|im_start|>Summarize the following article in a maximum of 3 bullet points:\n'; cat article.txt; echo $'\n<|im_end|>\n')"
-#echo $TEXT
-/home/klotz/wip/llamafiles/mistral-7b-instruct-v0.1-Q4_K_M-main.llamafile --temp 0 -n 1000 -c 6000 -p "[INST]${PROMPT}${TEXT:0:5900}[/INST]" --silent-prompt 2>/dev/null 
+case "${M}" in
+    ## Model: dolphin mxtral 8x7b
+    dolphin)
+	MODEL=/home/klotz/wip/llamafiles/dolphin-2.5-mixtral-8x7b.Q4_K_M.llamafile
+PROMPT="<|im_start|>system
+${SYSTEM_MESSAGE}<|im_end|>
+<|im_start|>user
+${TEXT}<|im_end|>
+<|im_start|>assistant"
+	NGL=25
+	SILENT="--silent-prompt"
+	;;
 
+    ## Model: mistral-7b-instruct
+    mistral)
+	MODEL=/home/klotz/wip/llamafiles/mistral-7b-instruct-v0.1-Q4_K_M-main.llamafile
+	PROMPT="[INST]${SYSTEM_MESSAGE}${TEXT}[/INST]"
+	NGL=33
+	SILENT="--silent-prompt"
+	;;
+
+    ## Model: oobabooga/text-generation-webui/models/codebooga-34b-v0.1.Q4_K_M.gguf
+    codebooga)
+	MODEL="/home/klotz/wip/llamafile-main-0.1 -m /home/klotz/wip//oobabooga/text-generation-webui/models/codebooga-34b-v0.1.Q4_K_M.gguf"
+	PROMPT="[INST]${SYSTEM_MESSAGE}${TEXT}[/INST]"
+	NGL=40
+	;;
+    ## Debug Model
+    debug)
+	MODEL="echo model"
+	PROMPT=$(printf "%b" "S=${SYSTEM_MESSAGE} Q=${TEXT}")
+	NGL=0
+	SILENT="--silent-prompt"
+	;;
+
+    ## fail
+    *)
+	echo "usage: $0 [-m model-type] question words"
+	exit 1
+	;;
+esac
+
+if ! GPU=$(command -v nvidia-detector) || [[ "$GPU" == "None" ]]; then
+    NGL=0
+fi
+
+## Run
+#  -n 1000 ???
+
+#echo "############"
+#echo "${PROMPT}"
+#echo "############"
+
+${MODEL} --temp 0 -c 8192 -ngl "${NGL}" -p "${PROMPT}" "${SILENT}" 2>/dev/null 
