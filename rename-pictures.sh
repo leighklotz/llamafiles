@@ -27,8 +27,8 @@
 ## fixed removal of mistral, too slow and wrong
 ## fix spaces and special chars in existing filenames (space, paren) with %q
 
-LLAVA_MODEL=~klotz/wip/llamafile/llava-v1.5-7b-q4-main.llamafile
-MISTRAL_MODEL=~klotz/wip/llamafile/mistral-7b-instruct-v0.1-Q4_K_M-main.llamafile
+LLAVA_MODEL=~klotz/wip/llamafiles/llava-v1.5-7b-q4-main.llamafile
+MISTRAL_MODEL=~klotz/wip/llamafiles/mistral-7b-instruct-v0.1-Q4_K_M-main.llamafile
 
 abort() {
   printf '%s\n' "renaming terminated." >&2

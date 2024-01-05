@@ -13,7 +13,7 @@ SYSTEM_MESSAGE=$(printf "%b" "Answer the following user question about Linux, ba
 case "${M}" in
     ## Model: dolphin mxtral 8x7b
     dolphin)
-	MODEL=/home/klotz/wip/llamafile/dolphin-2.5-mixtral-8x7b.Q4_K_M.llamafile
+	MODEL=/home/klotz/wip/llamafiles/dolphin-2.5-mixtral-8x7b.Q4_K_M.llamafile
 PROMPT="<|im_start|>system
 ${SYSTEM_MESSAGE}<|im_end|>
 <|im_start|>user
@@ -25,7 +25,7 @@ ${QUESTION}<|im_end|>
 
     ## Model: mistral-7b-instruct
     mistral)
-	MODEL=/home/klotz/wip/llamafile/mistral-7b-instruct-v0.1-Q4_K_M-main.llamafile
+	MODEL=/home/klotz/wip/llamafiles/mistral-7b-instruct-v0.1-Q4_K_M-main.llamafile
 	PROMPT="[INST]${SYSTEM_MESSAGE}${QUESTION}[/INST]"
 	NGL=33
 	SILENT="--silent-prompt"
