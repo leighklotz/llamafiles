@@ -8,7 +8,7 @@ else
 fi
 
 QUESTION="${*}"
-SYSTEM_MESSAGE=$(printf "%b" "Answer the following user question about Linux, Python, or other programming:\n")
+SYSTEM_MESSAGE=$(printf "%b" "Answer the following user question about Linux, bash, python, or other programming:\n")
 
 case "${M}" in
     ## Model: dolphin mxtral 8x7b
@@ -31,9 +31,9 @@ ${QUESTION}<|im_end|>
 	SILENT="--silent-prompt"
 	;;
 
-    ## Model: ./oobabooga/text-generation-webui/models/codebooga-34b-v0.1.Q4_K_M.gguf
+    ## Model: oobabooga/text-generation-webui/models/codebooga-34b-v0.1.Q4_K_M.gguf
     codebooga)
-	MODEL="./llamafile-main-0.1 -m /home/klotz/wip//oobabooga/text-generation-webui/models/codebooga-34b-v0.1.Q4_K_M.gguf"
+	MODEL="/home/klotz/wip/llamafile-main-0.1 -m /home/klotz/wip//oobabooga/text-generation-webui/models/codebooga-34b-v0.1.Q4_K_M.gguf"
 	PROMPT="[INST]${SYSTEM_MESSAGE}${QUESTION}[/INST]"
 	NGL=40
 	;;
@@ -52,7 +52,10 @@ ${QUESTION}<|im_end|>
 	;;
 esac
 
+if ! GPU=$(command -v nvidia-detector) || [[ "$GPU" == "None" ]]; then
+    NGL=0
+fi
+
 ## Run
 #  -n 1000 ???
 ${MODEL} --temp 0 -c 6000 -ngl "${NGL}" -p "${PROMPT}" "${SILENT}" 2>/dev/null 
-
