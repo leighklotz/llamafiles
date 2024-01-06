@@ -1,13 +1,18 @@
 #!/bin/bash
 
-# args, "[-m model-type]
+# args, "[-m model-type] [--stdin] QUESTION QUESTION QUESTION"
+M="mistral"
+QUESTION="${*}"
+INPUT=""
+
 if [[ "${1}" == "-m" ]]; then
-    shift; M=$1; shift;
-else
-    M="mistral"
+    shift; M="$1"; shift;
 fi
 
-QUESTION="${*}"
+if [[ "${1}" == "--stdin" ]]; then
+    shift; INPUT=$(cat)
+fi
+
 SYSTEM_MESSAGE=$(printf "%b" "Answer the following user question about Linux, bash, python, or other programming:\n")
 
 case "${M}" in
@@ -17,7 +22,8 @@ case "${M}" in
 PROMPT="<|im_start|>system
 ${SYSTEM_MESSAGE}<|im_end|>
 <|im_start|>user
-${QUESTION}<|im_end|>
+${QUESTION}
+${INPUT}<|im_end|>
 <|im_start|>assistant"
 	NGL=25
 	SILENT="--silent-prompt"
@@ -26,21 +32,21 @@ ${QUESTION}<|im_end|>
     ## Model: mistral-7b-instruct
     mistral)
 	MODEL=/home/klotz/wip/llamafiles/mistral-7b-instruct-v0.1-Q4_K_M-main.llamafile
-	PROMPT="[INST]${SYSTEM_MESSAGE}${QUESTION}[/INST]"
+	PROMPT=$(printf "%b" "[INST]${SYSTEM_MESSAGE}\n${QUESTION}\n${INPUT}[/INST]")
 	NGL=33
 	SILENT="--silent-prompt"
 	;;
 
     ## Model: oobabooga/text-generation-webui/models/codebooga-34b-v0.1.Q4_K_M.gguf
     codebooga)
-	MODEL="/home/klotz/wip/llamafile-main-0.1 -m /home/klotz/wip//oobabooga/text-generation-webui/models/codebooga-34b-v0.1.Q4_K_M.gguf"
-	PROMPT="[INST]${SYSTEM_MESSAGE}${QUESTION}[/INST]"
+	MODEL="/home/klotz/wip/llamafiles/llamafile-main-0.1 -m /home/klotz/wip//oobabooga/text-generation-webui/models/codebooga-34b-v0.1.Q4_K_M.gguf"
+	PROMPT=$(printf "%b" "[INST]${SYSTEM_MESSAGE}\n${QUESTION}\n${INPUT}[/INST]")
 	NGL=40
 	;;
     ## Debug Model
     debug)
 	MODEL="echo model"
-	PROMPT=$(printf "%b" "S=${SYSTEM_MESSAGE} Q=${QUESTION}")
+	PROMPT=$(printf "%b" "S=${SYSTEM_MESSAGE} Q=${QUESTION} I=${INPUT}")
 	NGL=0
 	SILENT="--silent-prompt"
 	;;
@@ -52,6 +58,8 @@ ${QUESTION}<|im_end|>
 	;;
 esac
 
+
+
 if ! GPU=$(command -v nvidia-detector) || [[ "$GPU" == "None" ]]; then
     NGL=0
 fi
@@ -59,3 +67,5 @@ fi
 ## Run
 #  -n 1000 ???
 ${MODEL} --temp 0 -c 6000 -ngl "${NGL}" -p "${PROMPT}" "${SILENT}" 2>/dev/null 
+
+
