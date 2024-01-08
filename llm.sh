@@ -1,18 +1,18 @@
 #!/bin/bash
 
 # args, "[-m model-type] [--stdin] QUESTION QUESTION QUESTION"
-M="mistral"
-QUESTION="${*}"
-INPUT=""
 
+M="mistral"
 if [[ "${1}" == "-m" ]]; then
     shift; M="$1"; shift;
 fi
 
+INPUT=""
 if [[ "${1}" == "--stdin" ]]; then
     shift; INPUT=$(cat)
 fi
 
+QUESTION="${*}"
 SYSTEM_MESSAGE="${SYSTEM_MESSAGE-$(printf "%b" "Answer the following user question:\n")}"
 
 case "${M}" in
@@ -64,4 +64,5 @@ fi
 
 ## Run
 #  -n 1000 ???
+# echo "${PROMPT}"
 ${MODEL} --temp 0 -c 6000 -ngl "${NGL}" -p "${PROMPT}" "${SILENT}" 2>/dev/null 
