@@ -9,7 +9,10 @@ fi
 
 INPUT=""
 if [[ "${1}" == "--stdin" ]]; then
-    shift; INPUT=$(cat)
+   if [ -t 0 ]; then
+      echo "Give input followed by Ctrl-D:"
+   fi
+   shift; INPUT=$(cat)
 fi
 
 QUESTION="${*}"
