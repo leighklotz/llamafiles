@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # rename-pictures.sh
 # Author: Justine Tunney <jtunney@gmail.com>
 # License: Apache 2.0
@@ -30,6 +30,8 @@
 
 LLAVA_MODEL=~klotz/wip/llamafiles/llava-v1.5-7b-q4-main.llamafile
 MISTRAL_MODEL=~klotz/wip/llamafiles/mistral-7b-instruct-v0.1-Q4_K_M-main.llamafile
+#MISTRAL_MODEL=~klotz/wip/llamafiles/mistral-7b-instruct-v0.2.Q5_K_M.llamafile
+NGL=35
 
 abort() {
   printf '%s\n' "renaming terminated." >&2
@@ -67,7 +69,7 @@ isgood() {
 
 pickname() {
   "$LLAVA" \
-      --image "$1" --temp 0.3 -ngl 35 \
+      --image "$1" --temp 0.3 -ngl $NGL \
       --grammar 'root ::= [a-zA-Z]+ (" " [a-zA-Z]+)+' -n 10 \
       -p '### User: A good title for this image is...
 ### Assistant:' \
