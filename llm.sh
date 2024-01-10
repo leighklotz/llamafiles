@@ -2,7 +2,6 @@
 
 USAGE="[-m model-type] [--stdin] [--] QUESTION QUESTION QUESTION"
 
-#
 M="mistral"
 INPUT=""
 QUESTION=""
@@ -12,7 +11,6 @@ QUESTION=""
 if [[ "${1}" == "-"* ]]; then
     for ((index=1; index<$#; index ++)); do
 	arg=${@:$index:1}
-	#echo "index=$index arg=$arg"
 	if [[ "${arg}" == "-m" ]]; then
 	    M="$2"; ((index ++));
 	elif [[ "${arg}" != "-"* ]]; then
@@ -21,7 +19,7 @@ if [[ "${1}" == "-"* ]]; then
 	elif [[ "${arg}" == "--" ]]; then
 	    QUESTION=("${*:index + 1}")
 	    break
-	elif [[ "${1}" == "--stdin" ]]; then
+	elif [[ "${arg}" == "--stdin" ]]; then
 	    if [ -t 0 ]; then
 		echo "Give input followed by Ctrl-D:"
 	    fi
@@ -61,6 +59,7 @@ ${INPUT}<|im_end|>
     codebooga)
 	MODEL="/home/klotz/wip/llamafiles/llamafile-main-0.1 -m /home/klotz/wip/oobabooga/text-generation-webui/models/codebooga-34b-v0.1.Q4_K_M.gguf"
 	PROMPT=$(printf "%b" "[INST]${SYSTEM_MESSAGE}\n${QUESTION}\n${INPUT}[/INST]")
+	SILENT_PROMPT=""	# not supported by codebooga
 	NGL=40
 	;;
     ## Debug Model
@@ -84,5 +83,5 @@ fi
 
 ## Run
 # -n 1000 ???
-# printf 'Prompt Is %s"' "${PROMPT}"
+# printf '* Prompt is %s"' "${PROMPT}"
 printf '%s' "${PROMPT}" | ${MODEL} --temp 0 -c 6000 -ngl "${NGL}" -f /dev/stdin ${SILENT} 2>/dev/null 

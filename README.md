@@ -19,10 +19,29 @@ USAGE="[-m model-type] [--stdin] [--] QUESTION QUESTION QUESTION"
 - `--`: unambiguously terminate args
 - `QUESTION`: word or words, can be quoted or not, can be multiline (but also see `--stdin`)
 
-Example:
+### Bash Coding Example
 ```bash
 $ help.sh -m codebooga -- "split bash argument array into left and right with double hyphen as the separator using special bash builtin functions or operators as needed "
+```
+
+### General Linux Example
+```bash
 $ help.sh what is my ip address
+
+### JQ Example
+
+```bash
+    $ ~/wip/llama/llama.cpp/gguf-py/scripts/gguf-dump.py ~/wip/oobabooga/text-generation-webui/models/dolphin-2.7-mixtral-8x7b.Q4_K_M.gguf --no-tensors --json | help.sh -m dolphin --stdin -- "give me a jq cli to get value the value of the named \`llama.context_length\` (note the dot is part of the field name) in the following JSON:  "
+
+    To get the value of `llama.context_length` using jq, you can use the following command:
+
+    ```bash
+    cat file.json | jq '.metadata["llama.context_length"].value'
+    ```
+    Replace `file.json` with the path to your JSON file. This command will output the value of `llama.context_length`, which is 32768 in this case.
+    klotz@tensor:~/wip/llama/llama.cpp/gguf-py$ ~/wip/llama/llama.cpp/gguf-py/scripts/gguf-dump.py ~/wip/oobabooga/text-generation-webui/models/dolphin-2.7-mixtral-8x7b.Q4_K_M.gguf --no-tensors --json | jq '.metadata["llama.context_length"].value'
+    32768
+    klotz@tensor:~/wip/llama/llama.cpp/gguf-py$ 
 ```
 
 # LLamafile binaries
