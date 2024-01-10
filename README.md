@@ -35,16 +35,23 @@ $ help.sh what is my ip address
 This example takes a live JSON input and shows how to extract a slightly tricky value. As a bonus, the model gives the value of the field.
 
 ```bash
-	$ ./llama.cpp/gguf-py/scripts/gguf-dump.py ./models/dolphin-2.7-mixtral-8x7b.Q4_K_M.gguf --no-tensors --json | help.sh -m dolphin --stdin -- 'give me a jq cli to get the value of the named `llama.context_length` (note the dot is part of the field name) in the following JSON:'
+$ ./llama.cpp/gguf-py/scripts/gguf-dump.py ./models/dolphin-2.7-mixtral-8x7b.Q4_K_M.gguf --no-tensors --json | help.sh -m dolphin --stdin -- 'give me a jq cli to get the value of the named `llama.context_length` (note the dot is part of the field name) in the following JSON:'
 
-	 To get the value of `llama.context_length` using jq, you can use the following command:
+To get the value of `llama.context_length` using jq, you can use the following command:
 
 	```bash
 	cat file.json | jq '.metadata["llama.context_length"].value'
 	```
 
-	Replace `file.json` with the path to your JSON file. This command will output the value of `llama.context_length`, which is 32768 in this case.
-	$  
+Replace `file.json` with the path to your JSON file. This command will output the value of `llama.context_length`, which is 32768 in this case.
+$  
+```
+
+Proof it works:
+```bash
+$ ./llama.cpp/gguf-py/scripts/gguf-dump.py ./models/dolphin-2.7-mixtral-8x7b.Q4_K_M.gguf --no-tensors --json | jq '.metadata["llama.context_length"].value'
+    32768
+$
 ```
 
 # LLamafile binaries
