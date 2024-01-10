@@ -5,6 +5,10 @@ USAGE="[-m model-type] [--stdin] [--] QUESTION QUESTION QUESTION"
 M="mistral"
 INPUT=""
 QUESTION=""
+ERROR_OUTPUT="/dev/null"
+SILENT_PROMPT="--silent-prompt"
+TEMPERATURE="0"
+CONTEXT_LENGTH="8192"
 
 # If there are any args, require "--" or any non-hyphen word to terminate args and start question.
 # Assume the whole args is a question if there's no hyphen to start.
@@ -24,6 +28,9 @@ if [[ "${1}" == "-"* ]]; then
 		echo "Give input followed by Ctrl-D:"
 	    fi
 	    INPUT=$(cat)
+	elif [[ "${arg}" == "--debug" ]]; then
+	  ERROR_OUTPUT="/dev/stdout"
+	  SILENT_PROMPT=""
 	fi
     done
 else
@@ -44,30 +51,21 @@ ${QUESTION}
 ${INPUT}<|im_end|>
 <|im_start|>assistant"
 	NGL=25
-	SILENT="--silent-prompt"
 	;;
 
     ## Model: mistral-7b-instruct
     mistral)
 	MODEL=/home/klotz/wip/llamafiles/mistral-7b-instruct-v0.1-Q4_K_M-main.llamafile
-	PROMPT=$(printf "%b" "[INST]${SYSTEM_MESSAGE}\n${QUESTION}\n${INPUT}[/INST]")
+	PROMPT=$(printf "%b" "[INST]${SYSTEM_MESSAGE}\n${QUESTION}\n${INPUT}[/INST]\n")
 	NGL=33
-	SILENT="--silent-prompt"
 	;;
 
     ## Model: oobabooga/text-generation-webui/models/codebooga-34b-v0.1.Q4_K_M.gguf
     codebooga)
 	MODEL="/home/klotz/wip/llamafiles/llamafile-main-0.1 -m /home/klotz/wip/oobabooga/text-generation-webui/models/codebooga-34b-v0.1.Q4_K_M.gguf"
-	PROMPT=$(printf "%b" "[INST]${SYSTEM_MESSAGE}\n${QUESTION}\n${INPUT}[/INST]")
+	PROMPT=$(printf "%b" "[INST]${SYSTEM_MESSAGE}\n${QUESTION}\n${INPUT}[/INST]\n")
 	SILENT_PROMPT=""	# not supported by codebooga
 	NGL=40
-	;;
-    ## Debug Model
-    debug)
-	MODEL="echo model"
-	PROMPT=$(printf "%b" "S=${SYSTEM_MESSAGE} Q=${QUESTION} I=${INPUT}")
-	NGL=0
-	SILENT="--silent-prompt"
 	;;
 
     ## fail
@@ -84,4 +82,4 @@ fi
 ## Run
 # -n 1000 ???
 # printf '* Prompt is %s"' "${PROMPT}"
-printf '%s' "${PROMPT}" | ${MODEL} --temp 0 -c 6000 -ngl "${NGL}" -f /dev/stdin ${SILENT} 2>/dev/null 
+printf '%s' "${PROMPT}" | ${MODEL} --temp ${TEMPERATURE} -c ${CONTEXT_LENGTH} -ngl "${NGL}" -f /dev/stdin $SILENT_PROMPT 2> "${ERROR_OUTPUT}"
