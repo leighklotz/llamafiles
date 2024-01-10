@@ -54,6 +54,27 @@ $ ./llama.cpp/gguf-py/scripts/gguf-dump.py ./models/dolphin-2.7-mixtral-8x7b.Q4_
 $
 ```
 
+### LSHW Example
+
+The Codebooga llamafile I'm using doesn't yet support --silent-prompt so I elided the re-printed prompt manually.
+```bash
+sudo lshw | wc 
+    727    2411   31214
+$ sudo lshw | help.sh -c 16384 -m codebooga --stdin -- 'Summarize the following lshw output:\n\n'
+
+	This output shows information about the hardware components of a
+	computer system, including the motherboard, CPU, memory, storage
+	devices, and peripherals. The system is a desktop with an Intel Core
+	i9-10900K processor, 64GB RAM, and two NVIDIA GeForce RTX 3090
+	graphics cards. It has a Samsung SSD 970 EVO 1TB and a Samsung SSD 990
+	PRO 4TB as storage devices, and an ASUS ROG MAXIMUS XII APEX
+	motherboard with Intel Comet Lake chipset. The system is running
+	Ubuntu Linux with kernel version 6.2.0-39-generic, and has a wireless
+	network interface (Intel Comet Lake PCH CNVi WiFi) and an Ethernet
+	interface (Intel Ethernet Controller I225-V). The computer also has
+	USB ports, audio devices, and an SMBus controller.  [end of text]
+```
+
 # LLamafile binaries
 https://github.com/Mozilla-Ocho/llamafile
 - `llamafile-0.1.zip`
