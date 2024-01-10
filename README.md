@@ -27,6 +27,7 @@ $ help.sh -m codebooga -- "split bash argument array into left and right with do
 ### General Linux Example
 ```bash
 $ help.sh what is my ip address
+```
 
 ### JQ Example
 
