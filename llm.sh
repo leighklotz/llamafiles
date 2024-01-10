@@ -19,9 +19,11 @@ if [[ "${1}" == "-"* ]]; then
     for ((index=1; index<$#; index ++)); do
 	arg=${@:$index:1}
 	if [[ "${arg}" == "-m" ]]; then
-	    M="$2"; ((index ++));
+	    ((index ++));
+	    M="${@:$index:1}"
 	elif [[ "${arg}" == "-c" ]]; then
-	    CONTEXT_LENGTH="$2"; ((index ++));
+	    ((index ++));
+	    CONTEXT_LENGTH="${@:$index:1}"
 	elif [[ "${arg}" != "-"* ]]; then
 	    QUESTION=("${*:index + 1}")
 	    break
@@ -77,6 +79,7 @@ ${INPUT}<|im_end|>
 
     ## fail
     *)
+	echo "Unknown -m ${M}"
 	echo "usage: $0 ${USAGE}"
 	exit 1
 	;;
