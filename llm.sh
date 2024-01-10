@@ -7,8 +7,8 @@ INPUT=""
 QUESTION=""
 ERROR_OUTPUT="/dev/null"
 SILENT_PROMPT="--silent-prompt"
-TEMPERATURE="0"
-CONTEXT_LENGTH=16384
+TEMPERATURE="0.33"
+CONTEXT_LENGTH=8000
 MAX_CONTEXT_LENGTH=${CONTEXT_LENGTH}
 # Use environment variable to change SYSTEM_MESSAGE, as it is not a parameter
 SYSTEM_MESSAGE="${SYSTEM_MESSAGE-$(printf "%b" "Answer the following user question:\n")}"
