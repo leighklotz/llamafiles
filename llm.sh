@@ -10,6 +10,8 @@ SILENT_PROMPT="--silent-prompt"
 TEMPERATURE="0"
 CONTEXT_LENGTH=16384
 MAX_CONTEXT_LENGTH=${CONTEXT_LENGTH}
+# Use environment variable to change SYSTEM_MESSAGE, as it is not a parameter
+SYSTEM_MESSAGE="${SYSTEM_MESSAGE-$(printf "%b" "Answer the following user question:\n")}"
 
 # If there are any args, require "--" or any non-hyphen word to terminate args and start question.
 # Assume the whole args is a question if there's no hyphen to start.
@@ -40,8 +42,6 @@ else
     QUESTION="${*}"
 fi
 
-# Use environment variable to change SYSTEM_MESSAGE
-SYSTEM_MESSAGE="${SYSTEM_MESSAGE-$(printf "%b" "Answer the following user question:\n")}"
 
 case "${M}" in
     ## Model: dolphin mxtral 8x7b
