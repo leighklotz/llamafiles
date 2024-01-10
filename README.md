@@ -40,9 +40,9 @@ $ help.sh what is my ip address
     cat file.json | jq '.metadata["llama.context_length"].value'
     ```
     Replace `file.json` with the path to your JSON file. This command will output the value of `llama.context_length`, which is 32768 in this case.
-    klotz@tensor:~/wip/llama/llama.cpp/gguf-py$ ~/wip/llama/llama.cpp/gguf-py/scripts/gguf-dump.py ~/wip/oobabooga/text-generation-webui/models/dolphin-2.7-mixtral-8x7b.Q4_K_M.gguf --no-tensors --json | jq '.metadata["llama.context_length"].value'
+    $ ~/wip/llama/llama.cpp/gguf-py/scripts/gguf-dump.py ~/wip/oobabooga/text-generation-webui/models/dolphin-2.7-mixtral-8x7b.Q4_K_M.gguf --no-tensors --json | jq '.metadata["llama.context_length"].value'
     32768
-    klotz@tensor:~/wip/llama/llama.cpp/gguf-py$ 
+    $ 
 ```
 
 # LLamafile binaries
