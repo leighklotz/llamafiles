@@ -222,5 +222,5 @@ if [ "${DEBUG}" ]; then
     printf '* Prompt; ngl=%s context_length=%s est_len=%s: %s' "${NGL}" "${CONTEXT_LENGTH}" "${PROMPT_LENGTH_EST}" "${PROMPT}"
     set -x
 fi
-set -x
+#set -x
 printf '%s' "${PROMPT}" | ${MODEL_RUNNER} ${MODEL} --temp ${TEMPERATURE} -c ${CONTEXT_LENGTH} -ngl "${NGL}" --batch-size ${BATCH_SIZE} --no-penalize-nl --repeat-penalty 1 -t 10 -f /dev/stdin $SILENT_PROMPT 2> "${ERROR_OUTPUT}"
