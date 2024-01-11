@@ -10,6 +10,8 @@
 - server.sh
 - summarize.sh
 
+# Models
+
 
 ## help.sh
 
@@ -76,6 +78,8 @@ $ sudo lshw | help.sh -c 16384 -m codebooga --stdin -- 'Summarize the following 
 ```
 
 # LLamafile binaries
+These go in `bin/`:
+
 https://github.com/Mozilla-Ocho/llamafile
 - `llamafile-0.1.zip`
 - `llamafile-llava-cli-0.1`
@@ -83,9 +87,12 @@ https://github.com/Mozilla-Ocho/llamafile
 - `llamafile-main-0.1`
 - `llamafile-quantize-0.1`
 - `llamafile-server-0.1`
+- `zipalign-0.1`
 
 # Models and all-in-one
 You need to download these from various places on HF and llamafile
+These go in `models/`:
+
 - `dolphin-2.5-mixtral-8x7b.Q4_K_M.llamafile`
 - `llava-v1.5-7b-q4-main.llamafile`
 - `llava-v1.5-7b-q4-server.llamafile`

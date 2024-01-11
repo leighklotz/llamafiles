@@ -13,11 +13,15 @@ MAX_CONTEXT_LENGTH=${CONTEXT_LENGTH}
 SYSTEM_MESSAGE="${SYSTEM_MESSAGE-$(printf "%b" "Answer the following user question:\n")}"
 SILENT_PROMPT="--silent-prompt"
 BATCH_SIZE=${BATCH_SIZE:-$(($CONTEXT_LENGTH / 2))}
-NGL=-1
+NGL=""
 PRIORITY="manual" # manual|speed|context
 
 # memory allocation: assume 4 chars per token
 PROMPT_LENGTH_EST=$(((75+${#SYSTEM_MESSAGE}+${#QUESTION}+${#INPUT})/4))
+
+# TODO: CLI parameters vs ENV vs bundles of settings is a mess
+# Sort out --context/--ngl vs --speed/--context vs default
+# sort out -c vs --context
 
 # echo "PROMPT_LENGTH_EST=$PROMPT_LENGTH_EST"
 
@@ -69,7 +73,10 @@ function dolphin_priority {
  	    CONTEXT_LENGTH=12288
  	    ;;
  	manual)
- 	    NGL=${NGL:-33}
+	    if [[ -z "${NGL:-}" ]]; then
+ 		NGL=${NGL:=20}
+	        CONTEXT_LENGTH=${CONTEXT_LENGTH:=4000}
+	    fi
  	    ;;
  	*)
  	    echo "usage: unknown priority $PRIORITY"
@@ -89,7 +96,10 @@ function mixtral_priority {
 	    CONTEXT_LENGTH=7999
 	    ;;
 	manual)
-	    NGL=${NGL:-33}
+	    if [[ -z "${NGL:-}" ]]; then
+ 		NGL=${NGL:=33}
+	        CONTEXT_LENGTH=${CONTEXT_LENGTH:=4000}
+	    fi
 	    ;;
 	*)
 	    echo "usage: unknown priority $PRIORITY"
@@ -109,7 +119,10 @@ function codebooga_priority {
  	    CONTEXT_LENGTH=16383
  	    ;;
  	manual)
- 	    NGL=${NGL:-33}
+	    if [[ -z "${NGL:-}" ]]; then
+ 		NGL=33
+		CONTEXT_LENGTH=2048
+	    fi
  	    ;;
  	*)
  	    echo "usage: unknown priority $PRIORITY"
@@ -135,7 +148,7 @@ ${INPUT}<|im_end|>
 case "${MODEL_TYPE}" in
     ## Model: dolphin mxtral 8x7b
     dolphin)
- 	MODEL=/home/klotz/wip/llamafiles/dolphin-2.5-mixtral-8x7b.Q4_K_M.llamafile
+ 	MODEL=/home/klotz/wip/llamafiles/models/dolphin-2.5-mixtral-8x7b.Q4_K_M.llamafile
  	MAX_CONTEXT_LENGTH=12288
 	dolphin_prompt
 	dolphin_priority
@@ -143,7 +156,7 @@ case "${MODEL_TYPE}" in
 
     ## Model: mistral-7b-instruct
     mistral)
-	MODEL=/home/klotz/wip/llamafiles/mistral-7b-instruct-v0.1-Q4_K_M-main.llamafile
+	MODEL=/home/klotz/wip/llamafiles/models/mistral-7b-instruct-v0.1-Q4_K_M-main.llamafile
 	MAX_CONTEXT_LENGTH=7999
 	PROMPT=$(printf "%b" "[INST]${SYSTEM_MESSAGE}\n${QUESTION}\n${INPUT}[/INST]\n")
 	mixtral_priority
@@ -151,7 +164,7 @@ case "${MODEL_TYPE}" in
  
     ## Model: oobabooga/text-generation-webui/models/codebooga-34b-v0.1.Q4_K_M.gguf
     codebooga)
- 	MODEL="/home/klotz/wip/llamafiles/llamafile-main-0.1 -m /home/klotz/wip/oobabooga/text-generation-webui/models/codebooga-34b-v0.1.Q4_K_M.gguf"
+ 	MODEL="/home/klotz/wip/llamafiles/bin/llamafile-main-0.1 -m /home/klotz/wip/oobabooga/text-generation-webui/models/codebooga-34b-v0.1.Q4_K_M.gguf"
 	MAX_CONTEXT_LENGTH=32768
  	PROMPT=$(printf "%b" "[INST]${SYSTEM_MESSAGE}\n${QUESTION}\n${INPUT}[/INST]\n")
  	SILENT_PROMPT=""	# not supported by codebooga
@@ -182,6 +195,8 @@ fi
 # -n 1000 ???
 PROMPT_LENGTH_EST=$((${#PROMPT}/4))
 
-# printf '* Prompt; ngl=%s context_length=%s est_len=%s: %s' "${NGL}" "${CONTEXT_LENGTH}" "${PROMPT_LENGTH_EST}" "${PROMPT}"
-set -x
+if [ "${SILENT_PROMPT}" == "" ]; then
+    printf '* Prompt; ngl=%s context_length=%s est_len=%s: %s' "${NGL}" "${CONTEXT_LENGTH}" "${PROMPT_LENGTH_EST}" "${PROMPT}"
+    set -x
+fi
 printf '%s' "${PROMPT}" | ${MODEL} --temp ${TEMPERATURE} -c ${CONTEXT_LENGTH} -ngl "${NGL}" --batch-size ${BATCH_SIZE} --no-penalize-nl --repeat-penalty 1 -t 10 -f /dev/stdin $SILENT_PROMPT 2> "${ERROR_OUTPUT}"
