@@ -29,8 +29,7 @@
 # - Use remote or local model transparently
 
 LLAVA_MODEL=~klotz/wip/llamafiles/llava-v1.5-7b-q4-main.llamafile
-MISTRAL_MODEL=~klotz/wip/llamafiles/mistral-7b-instruct-v0.1-Q4_K_M-main.llamafile
-#MISTRAL_MODEL=~klotz/wip/llamafiles/mistral-7b-instruct-v0.2.Q5_K_M.llamafile
+# MISTRAL_MODEL=~klotz/wip/llamafiles/mistral-7b-instruct-v0.2.Q5_K_M.llamafile
 NGL=35
 
 abort() {
@@ -44,11 +43,11 @@ if ! LLAVA=$(command -v ${LLAVA_MODEL}); then
   abort
 fi
 
-if ! MISTRAL=$(command -v ${MISTRAL_MODEL}); then
-  printf '%s\n' "${MISTRAL_MODEL}: fatal error: update this script with the path of your mistral llamafile" >&2
-  printf '%s\n' "please download https://huggingface.co/jartine/mistral-7b.llamafile/resolve/main/${MISTRAL_MODEL} and put it on the system path" >&2
-  abort
-fi
+# if ! MISTRAL=$(command -v ${MISTRAL_MODEL}); then
+#  printf '%s\n' "${MISTRAL_MODEL}: fatal error: update this script with the path of your mistral llamafile" >&2
+#  printf '%s\n' "please download https://huggingface.co/jartine/mistral-7b.llamafile/resolve/main/${MISTRAL_MODEL} and put it on the system path" >&2
+#  abort
+# fi
 
 if ! CONVERT=$(command -v convert); then
   printf '%s\n' "${0##*/}: warning: convert command not found (please install imagemagick so we can analyze image formats like webp)" >&2
