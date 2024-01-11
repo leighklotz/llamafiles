@@ -196,7 +196,6 @@ fi
 ## Run
 # -n 1000 ???
 PROMPT_LENGTH_EST=$((${#PROMPT}/4))
-
 if [ "${DEBUG}" ]; then
     printf '* Prompt; ngl=%s context_length=%s est_len=%s: %s' "${NGL}" "${CONTEXT_LENGTH}" "${PROMPT_LENGTH_EST}" "${PROMPT}"
     set -x
