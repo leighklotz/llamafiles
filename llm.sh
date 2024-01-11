@@ -15,6 +15,7 @@ SILENT_PROMPT="--silent-prompt"
 NGL=""
 PRIORITY="manual" # manual|speed|context
 DEBUG=""
+MODEL_RUNNER="/usr/bin/env"
 
 # memory allocation: assume 4 chars per token
 PROMPT_LENGTH_EST=$(((75+${#SYSTEM_MESSAGE}+${#QUESTION}+${#INPUT})/4))
@@ -157,7 +158,7 @@ ${INPUT}<|im_end|>
 case "${MODEL_TYPE}" in
     ## Model: dolphin mixtral 8x7b
     dolphin|mixtral)
- 	MODEL=~klotz/wip/llamafiles/models/dolphin-2.5-mixtral-8x7b.Q4_K_M.llamafile
+ 	MODEL=${HOME}/wip/llamafiles/models/dolphin-2.5-mixtral-8x7b.Q4_K_M.llamafile
  	MAX_CONTEXT_LENGTH=12288
 	dolphin_prompt
 	dolphin_priority
@@ -166,9 +167,9 @@ case "${MODEL_TYPE}" in
     ## Model: mistral-7b-instruct
     mistral)
 	MODEL=$(find_first_file \
-		    ~klotz/wip/llamafiles/models/mistral-7b-instruct-v0.1-Q4_K_M-main.llamafile \
-		    ~klotz/wip/llamafiles/models/mistral-7b-instruct-v0.2.Q4_K_M.llamafile \
-		    ~klotz/wip/llamafiles/models/mistral-7b-instruct-v0.2.Q5_K_M.llamafile)
+		    ${HOME}/wip/llamafiles/models/mistral-7b-instruct-v0.1-Q4_K_M-main.llamafile \
+		    ${HOME}/wip/llamafiles/models/mistral-7b-instruct-v0.2.Q4_K_M.llamafile \
+		    ${HOME}/wip/llamafiles/models/mistral-7b-instruct-v0.2.Q5_K_M.llamafile)
 	MAX_CONTEXT_LENGTH=7999
 	PROMPT=$(printf "%b" "[INST]${SYSTEM_MESSAGE}\n${QUESTION}\n${INPUT}[/INST]\n")
 	mistral_priority
@@ -176,7 +177,8 @@ case "${MODEL_TYPE}" in
  
     ## Model: oobabooga/text-generation-webui/models/codebooga-34b-v0.1.Q4_K_M.gguf
     codebooga)
- 	MODEL="~klotz/wip/llamafiles/bin/llamafile-main-0.1 -m ~klotz/wip/oobabooga/text-generation-webui/models/codebooga-34b-v0.1.Q4_K_M.gguf"
+	MODEL_RUNNER="${HOME}/wip/llamafiles/bin/llamafile-main-0.1 -m "
+ 	MODEL="${HOME}/wip/oobabooga/text-generation-webui/models/codebooga-34b-v0.1.Q4_K_M.gguf"
 	MAX_CONTEXT_LENGTH=32768
  	PROMPT=$(printf "%b" "[INST]${SYSTEM_MESSAGE}\n${QUESTION}\n${INPUT}[/INST]\n")
  	SILENT_PROMPT=""	# not supported by codebooga
@@ -205,7 +207,8 @@ if [ "$CONTEXT_LENGTH" -gt "$MAX_CONTEXT_LENGTH" ]; then
     echo "* Truncated context length to $CONTEXT_LENGTH"
 fi
 
-if [ ! -f "${MODEL}" ]; then
+echo "Checking ${MODEL}"
+if [ ! -f $MODEL ]; then
     echo "Model not found: ${MODEL}"
     exit 1
 fi
@@ -220,4 +223,4 @@ if [ "${DEBUG}" ]; then
     set -x
 fi
 set -x
-printf '%s' "${PROMPT}" | ${MODEL} --temp ${TEMPERATURE} -c ${CONTEXT_LENGTH} -ngl "${NGL}" --batch-size ${BATCH_SIZE} --no-penalize-nl --repeat-penalty 1 -t 10 -f /dev/stdin $SILENT_PROMPT 2> "${ERROR_OUTPUT}"
+printf '%s' "${PROMPT}" | ${MODEL_RUNNER} ${MODEL} --temp ${TEMPERATURE} -c ${CONTEXT_LENGTH} -ngl "${NGL}" --batch-size ${BATCH_SIZE} --no-penalize-nl --repeat-penalty 1 -t 10 -f /dev/stdin $SILENT_PROMPT 2> "${ERROR_OUTPUT}"
