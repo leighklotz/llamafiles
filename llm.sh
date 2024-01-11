@@ -107,7 +107,7 @@ function dolphin_priority {
 function mixtral_priority {
     case "${PRIORITY}" in
 	speed)
-	    NGL=33
+	    NGL=23
 	    CONTEXT_LENGTH=2048
 	    ;;
 	context)
