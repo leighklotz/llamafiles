@@ -1,7 +1,6 @@
 models
 bin
+private
 *.zip
 *.log
-
-
-
+*~*
