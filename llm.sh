@@ -8,13 +8,14 @@ INPUT=${INPUT:-}
 QUESTION=${QUESTION:-}
 ERROR_OUTPUT="/dev/null"
 TEMPERATURE=${TEMPERATURE:-0.33}
-CONTEXT_LENGTH=${CONTEXT_LENGTH:-8000}
+CONTEXT_LENGTH=${CONTEXT_LENGTH:-7999}
 MAX_CONTEXT_LENGTH=${CONTEXT_LENGTH}
 SYSTEM_MESSAGE="${SYSTEM_MESSAGE-$(printf "%b" "Answer the following user question:\n")}"
 SILENT_PROMPT="--silent-prompt"
 BATCH_SIZE=${BATCH_SIZE:-$(($CONTEXT_LENGTH / 2))}
 NGL=""
 PRIORITY="manual" # manual|speed|context
+DEBUG=""
 
 # memory allocation: assume 4 chars per token
 PROMPT_LENGTH_EST=$(((75+${#SYSTEM_MESSAGE}+${#QUESTION}+${#INPUT})/4))
@@ -48,6 +49,7 @@ if [[ "${1}" == "-"* ]]; then
 	elif [[ "${arg}" == "--debug" ]]; then
 	  ERROR_OUTPUT="/dev/stdout"
 	  SILENT_PROMPT=""
+	  DEBUG=1
 	elif [[ "${arg}" == "--stdin" ]]; then
 	    if [ -t 0 ]; then
 		echo "Give input followed by Ctrl-D:"
@@ -195,7 +197,7 @@ fi
 # -n 1000 ???
 PROMPT_LENGTH_EST=$((${#PROMPT}/4))
 
-if [ "${SILENT_PROMPT}" == "" ]; then
+if [ "${DEBUG}" ]; then
     printf '* Prompt; ngl=%s context_length=%s est_len=%s: %s' "${NGL}" "${CONTEXT_LENGTH}" "${PROMPT_LENGTH_EST}" "${PROMPT}"
     set -x
 fi
