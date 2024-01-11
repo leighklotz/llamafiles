@@ -84,7 +84,7 @@ function find_first_file() {
 function dolphin_priority {
     case "${PRIORITY}" in
  	speed)
-	    NGL=33
+	    NGL=23
  	    CONTEXT_LENGTH=2048
  	    ;;
  	context)
@@ -93,7 +93,7 @@ function dolphin_priority {
  	    ;;
  	manual)
 	    if [[ -z "${NGL:-}" ]]; then
- 		NGL=${NGL:=33}
+ 		NGL=${NGL:=23}
 	        CONTEXT_LENGTH=${CONTEXT_LENGTH:=2048}
 	    fi
  	    ;;
