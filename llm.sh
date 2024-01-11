@@ -21,8 +21,8 @@ DEBUG=""
 PROMPT_LENGTH_EST=$(((75+${#SYSTEM_MESSAGE}+${#QUESTION}+${#INPUT})/4))
 
 # TODO: CLI parameters vs ENV vs bundles of settings is a mess
-# Sort out --context/--ngl vs --speed/--context vs default
-# sort out -c vs --context
+# Sort out --length/--ngl vs --speed/--length vs default
+# sort out -c vs --length
 # idea: calculate context length = MIN_CONTEXT_LENGTH <= (input length * 2) <= MAX_CONTEXT_LENGTH???
 
 # echo "PROMPT_LENGTH_EST=$PROMPT_LENGTH_EST"
@@ -35,9 +35,10 @@ if [[ "${1}" == "-"* ]]; then
 	if [[ "${arg}" == "-m" ]]; then
 	    ((index ++));
 	    MODEL_TYPE="${@:$index:1}"
-	elif [[ "${arg}" == "--priority" ]]; then
-	    ((index ++));
-	    PRIORITY="${@:$index:1}"
+	elif [[ "${arg}" == "--speed" ]]; then
+	    PRIORITY="speed"
+	elif [[ "${arg}" == "--length" ]]; then
+	    PRIORITY="length"
 	elif [[ "${arg}" == "-c" ]]; then
 	    ((index ++));
 	    CONTEXT_LENGTH="${@:$index:1}"
@@ -64,6 +65,21 @@ if [[ "${1}" == "-"* ]]; then
 else
     QUESTION="${*}"
 fi
+
+# Example usage:
+# Set the variable to the path of the first existing file in the list.
+# file_path=$(find_first_file /path/to/file1 /path/to/file2 /path/to/file3)
+function find_first_file() {
+  local files=("$@")
+  local file
+  for file in "${files[@]}"; do
+    if [ -e "$file" ]; then
+      echo "$file"
+      return 0
+    fi
+  done
+  return 1
+}
 
 function dolphin_priority {
     case "${PRIORITY}" in
@@ -127,10 +143,6 @@ function codebooga_priority {
 		CONTEXT_LENGTH=2048
 	    fi
  	    ;;
- 	*)
- 	    echo "usage: unknown priority $PRIORITY"
- 	    exit 1
- 	    ;;
 	*)
  	    echo "Unknown -m ${MODEL_TYPE}"
  	    echo "usage: $0 ${USAGE}"
@@ -149,9 +161,9 @@ ${INPUT}<|im_end|>
 }
 
 case "${MODEL_TYPE}" in
-    ## Model: dolphin mxtral 8x7b
-    dolphin)
- 	MODEL=/home/klotz/wip/llamafiles/models/dolphin-2.5-mixtral-8x7b.Q4_K_M.llamafile
+    ## Model: dolphin mixtral 8x7b
+    dolphin|mixtral)
+ 	MODEL=~klotz/wip/llamafiles/models/dolphin-2.5-mixtral-8x7b.Q4_K_M.llamafile
  	MAX_CONTEXT_LENGTH=12288
 	dolphin_prompt
 	dolphin_priority
@@ -159,7 +171,10 @@ case "${MODEL_TYPE}" in
 
     ## Model: mistral-7b-instruct
     mistral)
-	MODEL=/home/klotz/wip/llamafiles/models/mistral-7b-instruct-v0.1-Q4_K_M-main.llamafile
+	MODEL=$(find_first_file \
+		    ~klotz/wip/llamafiles/models/mistral-7b-instruct-v0.1-Q4_K_M-main.llamafile \
+		    ~klotz/wip/llamafiles/models/mistral-7b-instruct-v0.2.Q4_K_M.llamafile \
+		    ~klotz/wip/llamafiles/models/mistral-7b-instruct-v0.2.Q5_K_M.llamafile)
 	MAX_CONTEXT_LENGTH=7999
 	PROMPT=$(printf "%b" "[INST]${SYSTEM_MESSAGE}\n${QUESTION}\n${INPUT}[/INST]\n")
 	mixtral_priority
@@ -167,7 +182,7 @@ case "${MODEL_TYPE}" in
  
     ## Model: oobabooga/text-generation-webui/models/codebooga-34b-v0.1.Q4_K_M.gguf
     codebooga)
- 	MODEL="/home/klotz/wip/llamafiles/bin/llamafile-main-0.1 -m /home/klotz/wip/oobabooga/text-generation-webui/models/codebooga-34b-v0.1.Q4_K_M.gguf"
+ 	MODEL="~klotz/wip/llamafiles/bin/llamafile-main-0.1 -m ~klotz/wip/oobabooga/text-generation-webui/models/codebooga-34b-v0.1.Q4_K_M.gguf"
 	MAX_CONTEXT_LENGTH=32768
  	PROMPT=$(printf "%b" "[INST]${SYSTEM_MESSAGE}\n${QUESTION}\n${INPUT}[/INST]\n")
  	SILENT_PROMPT=""	# not supported by codebooga
@@ -181,7 +196,9 @@ case "${MODEL_TYPE}" in
 esac
 
 if ! GPU=$(command -v nvidia-detector) || [[ "$GPU" == "None" ]]; then
-    echo "NO GPU"
+    if [ "${DEBUG}" ]; then
+	echo "* NO GPU"
+    fi
     NGL=0
 fi
 
@@ -194,6 +211,11 @@ if [ "$CONTEXT_LENGTH" -gt "$MAX_CONTEXT_LENGTH" ]; then
     echo "* Truncated context length to $CONTEXT_LENGTH"
 fi
 
+if [ ! -f "${MODEL}" ]; then
+    echo "Model not found: ${MODEL}"
+    exit 1
+fi
+
 ## Run
 # -n 1000 ???
 PROMPT_LENGTH_EST=$((${#PROMPT}/4))
@@ -201,4 +223,5 @@ if [ "${DEBUG}" ]; then
     printf '* Prompt; ngl=%s context_length=%s est_len=%s: %s' "${NGL}" "${CONTEXT_LENGTH}" "${PROMPT_LENGTH_EST}" "${PROMPT}"
     set -x
 fi
+# set -x
 printf '%s' "${PROMPT}" | ${MODEL} --temp ${TEMPERATURE} -c ${CONTEXT_LENGTH} -ngl "${NGL}" --batch-size ${BATCH_SIZE} --no-penalize-nl --repeat-penalty 1 -t 10 -f /dev/stdin $SILENT_PROMPT 2> "${ERROR_OUTPUT}"
