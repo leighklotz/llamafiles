@@ -42,6 +42,7 @@ if [[ "${1}" == "-"* ]]; then
 	    ((index ++));
 	    CONTEXT_LENGTH="${@:$index:1}"
 	elif [[ "${arg}" != "-"* ]]; then
+	    # consumes rest of line
 	    QUESTION=("${*:index + 1}")
 	    break
 	elif [[ "${arg}" == "--ngl" ]]; then
@@ -91,10 +92,8 @@ function dolphin_priority {
  	    CONTEXT_LENGTH=12288
  	    ;;
  	manual)
-	    if [[ -z "${NGL:-}" ]]; then
- 		NGL=${NGL:=23}
-	        CONTEXT_LENGTH=${CONTEXT_LENGTH:=2048}
-	    fi
+ 	    NGL=${NGL:=23}
+	    CONTEXT_LENGTH=${CONTEXT_LENGTH:=2048}
  	    ;;
  	*)
  	    echo "usage: unknown priority $PRIORITY"
@@ -103,19 +102,19 @@ function dolphin_priority {
     esac
 }
 
-function mixtral_priority {
+function mistral_priority {
     case "${PRIORITY}" in
-	speed)
-	    NGL=23
-	    CONTEXT_LENGTH=2048
+	speed|context)
+	    NGL=33
+	    CONTEXT_LENGTH=2000
 	    ;;
 	context)
-	    NGL=8
+	    NGL=33
 	    CONTEXT_LENGTH=7999
 	    ;;
 	manual)
-	    NGL=${NGL:=23}
-	    CONTEXT_LENGTH=${CONTEXT_LENGTH:=2048}
+	    NGL=${NGL:=33}
+	    CONTEXT_LENGTH=${CONTEXT_LENGTH:=2000}
 	    ;;
 	*)
 	    echo "usage: unknown priority $PRIORITY"
@@ -172,7 +171,7 @@ case "${MODEL_TYPE}" in
 		    ~klotz/wip/llamafiles/models/mistral-7b-instruct-v0.2.Q5_K_M.llamafile)
 	MAX_CONTEXT_LENGTH=7999
 	PROMPT=$(printf "%b" "[INST]${SYSTEM_MESSAGE}\n${QUESTION}\n${INPUT}[/INST]\n")
-	mixtral_priority
+	mistral_priority
 	;;
  
     ## Model: oobabooga/text-generation-webui/models/codebooga-34b-v0.1.Q4_K_M.gguf
