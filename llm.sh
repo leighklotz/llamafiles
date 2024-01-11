@@ -23,6 +23,7 @@ PROMPT_LENGTH_EST=$(((75+${#SYSTEM_MESSAGE}+${#QUESTION}+${#INPUT})/4))
 # TODO: CLI parameters vs ENV vs bundles of settings is a mess
 # Sort out --context/--ngl vs --speed/--context vs default
 # sort out -c vs --context
+# idea: calculate context length = MIN_CONTEXT_LENGTH <= (input length * 2) <= MAX_CONTEXT_LENGTH???
 
 # echo "PROMPT_LENGTH_EST=$PROMPT_LENGTH_EST"
 
