@@ -93,8 +93,8 @@ function dolphin_priority {
  	    ;;
  	manual)
 	    if [[ -z "${NGL:-}" ]]; then
- 		NGL=${NGL:=20}
-	        CONTEXT_LENGTH=${CONTEXT_LENGTH:=4000}
+ 		NGL=${NGL:=33}
+	        CONTEXT_LENGTH=${CONTEXT_LENGTH:=2048}
 	    fi
  	    ;;
  	*)
@@ -115,10 +115,8 @@ function mixtral_priority {
 	    CONTEXT_LENGTH=7999
 	    ;;
 	manual)
-	    if [[ -z "${NGL:-}" ]]; then
- 		NGL=${NGL:=33}
-	        CONTEXT_LENGTH=${CONTEXT_LENGTH:=4000}
-	    fi
+	    NGL=${NGL:=23}
+	    CONTEXT_LENGTH=${CONTEXT_LENGTH:=2048}
 	    ;;
 	*)
 	    echo "usage: unknown priority $PRIORITY"
@@ -138,10 +136,8 @@ function codebooga_priority {
  	    CONTEXT_LENGTH=16383
  	    ;;
  	manual)
-	    if [[ -z "${NGL:-}" ]]; then
- 		NGL=33
-		CONTEXT_LENGTH=2048
-	    fi
+	    NGL=${NGL:=33}
+	    CONTEXT_LENGTH=${CONTEXT_LENGTH:=2048}
  	    ;;
 	*)
  	    echo "Unknown -m ${MODEL_TYPE}"
