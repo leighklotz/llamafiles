@@ -15,6 +15,7 @@ SILENT_PROMPT="--silent-prompt"
 NGL=""
 PRIORITY="manual" # manual|speed|context
 DEBUG=""
+VERBOSE=${VERBOSE:-}
 MODEL_RUNNER="/usr/bin/env"
 DO_STDIN=""
 THREADS=$(cat /proc/cpuinfo | grep -c '^processor\s:')
@@ -42,6 +43,8 @@ if [[ "${1}" == "-"* ]]; then
             PRIORITY="speed"
         elif [[ "${arg}" == "--length" ]]; then
             PRIORITY="length"
+        elif [[ "${arg}" == "--verbose" ]]; then
+            VERBOSE=1
         elif [[ "${arg}" == "-c" ]]; then
             ((index ++));
             CONTEXT_LENGTH="${@:$index:1}"
@@ -275,10 +278,8 @@ fi
 PROMPT_LENGTH_EST=$((${#PROMPT}/4))
 BATCH_SIZE=${BATCH_SIZE:-$(($CONTEXT_LENGTH / 2))}
 
-if [ "${DEBUG}" ]; then
-    printf '* Prompt; ngl=%s context_length=%s est_len=%s: %s' "${NGL}" "${CONTEXT_LENGTH}" "${PROMPT_LENGTH_EST}" "${PROMPT}"
+if [ "${DEBUG}" ] || [ "${VERBOSE}" ]; then
+    printf '* Prompt; ngl=%s context_length=%s est_len=%s:' "${NGL}" "${CONTEXT_LENGTH}" "${PROMPT_LENGTH_EST}"
     set -x
 fi
-#printf '%s' "${PROMPT}" 
-set -x
 printf '%s' "${PROMPT}" | ${MODEL_RUNNER} ${MODEL} --temp ${TEMPERATURE} -c ${CONTEXT_LENGTH} -ngl "${NGL}" --batch-size ${BATCH_SIZE} --no-penalize-nl --repeat-penalty 1 -t ${THREADS} -f /dev/stdin $SILENT_PROMPT 2> "${ERROR_OUTPUT}"
