@@ -97,3 +97,7 @@ These go in `models/`:
 - `llava-v1.5-7b-q4-main.llamafile`
 - `llava-v1.5-7b-q4-server.llamafile`
 - `mistral-7b-instruct-v0.1-Q4_K_M-main.llamafile`
+
+## RPI5 and other small models
+- `rocket-3b.Q4_K_M.llamafile`
+- `mistral-7b-instruct-v0.2.Q3_K_S.llamafile`
