@@ -16,6 +16,8 @@ NGL=""
 PRIORITY="manual" # manual|speed|context
 DEBUG=""
 MODEL_RUNNER="/usr/bin/env"
+DO_STDIN=""
+THREADS=$(cat /proc/cpuinfo | grep -c '^processor\s:')
 
 # memory allocation: assume 4 chars per token
 PROMPT_LENGTH_EST=$(((75+${#SYSTEM_MESSAGE}+${#QUESTION}+${#INPUT})/4))
@@ -32,6 +34,7 @@ PROMPT_LENGTH_EST=$(((75+${#SYSTEM_MESSAGE}+${#QUESTION}+${#INPUT})/4))
 if [[ "${1}" == "-"* ]]; then
     for ((index=1; index<$#; index ++)); do
 	arg=${@:$index:1}
+	#echo "processing $arg"
 	if [[ "${arg}" == "-m" ]]; then
 	    ((index ++));
 	    MODEL_TYPE="${@:$index:1}"
@@ -42,30 +45,34 @@ if [[ "${1}" == "-"* ]]; then
 	elif [[ "${arg}" == "-c" ]]; then
 	    ((index ++));
 	    CONTEXT_LENGTH="${@:$index:1}"
-	elif [[ "${arg}" != "-"* ]]; then
-	    # consumes rest of line
-	    QUESTION=("${*:index + 1}")
-	    break
 	elif [[ "${arg}" == "--ngl" ]]; then
 	    ((index ++));
 	    NGL="${@:$index:1}"
 	elif [[ "${arg}" == "--debug" ]]; then
-	  ERROR_OUTPUT="/dev/stdout"
-	  SILENT_PROMPT=""
-	  DEBUG=1
+	    ERROR_OUTPUT="/dev/stdout"
+ 	    SILENT_PROMPT=""
+	    DEBUG=1
 	elif [[ "${arg}" == "--stdin" ]]; then
-	    if [ -t 0 ]; then
-		echo "Give input followed by Ctrl-D:"
-	    fi
-	    INPUT=$(cat)
+	    DO_STDIN=1
 	elif [[ "${arg}" == "--" ]]; then
-	    QUESTION=("${*:index + 1}")
-	    break
+	   QUESTION=("${*:index + 1}")
+	   break
+	else 
+	   QUESTION=("${*:index}")
+	   break
 	fi
     done
 else
     QUESTION="${*}"
 fi
+
+if [ "$DO_STDIN" != "" ]; then
+    if [ -t 0 ]; then
+	echo "Give input followed by Ctrl-D:"
+    fi
+    INPUT=$(cat)
+fi
+
 
 # Example usage:
 # Set the variable to the path of the first existing file in the list.
@@ -146,13 +153,32 @@ function codebooga_priority {
     esac
 }
 
+function rocket_priority {
+	MAX_CONTEXT_LENGTH=2048
+	CONTEXT_LENGTH=${CONTEXT_LENGTH:=2048}
+	BATCH_SIZE=${BATCH_SIZE:-128}
+	NGL=${NGL:=0}
+}
+
+
 function dolphin_prompt {
     PROMPT="<|im_start|>system
 ${SYSTEM_MESSAGE}<|im_end|>
 <|im_start|>user
 ${QUESTION}
 ${INPUT}<|im_end|>
-<|im_start|>assistant"
+<|im_start|>assistant
+"
+}
+
+function rocket_prompt {
+    PROMPT="<|im_start|>system
+${SYSTEM_MESSAGE}<|im_end|>
+<|im_start|>user
+${QUESTION}
+${INPUT}<|im_end|>
+<|im_start|>assistant
+"
 }
 
 case "${MODEL_TYPE}" in
@@ -167,9 +193,10 @@ case "${MODEL_TYPE}" in
     ## Model: mistral-7b-instruct
     mistral)
 	MODEL=$(find_first_file \
-		    ${HOME}/wip/llamafiles/models/mistral-7b-instruct-v0.1-Q4_K_M-main.llamafile \
 		    ${HOME}/wip/llamafiles/models/mistral-7b-instruct-v0.2.Q4_K_M.llamafile \
-		    ${HOME}/wip/llamafiles/models/mistral-7b-instruct-v0.2.Q5_K_M.llamafile)
+		    ${HOME}/wip/llamafiles/models/mistral-7b-instruct-v0.1-Q4_K_M-main.llamafile \
+		    ${HOME}/wip/llamafiles/models/mistral-7b-instruct-v0.2.Q5_K_M.llamafile \
+		    ${HOME}/wip/llamafiles/models/mistral-7b-instruct-v0.2.Q3_K_S.llamafile)
 	MAX_CONTEXT_LENGTH=7999
 	PROMPT=$(printf "%b" "[INST]${SYSTEM_MESSAGE}\n${QUESTION}\n${INPUT}[/INST]\n")
 	mistral_priority
@@ -183,6 +210,13 @@ case "${MODEL_TYPE}" in
  	PROMPT=$(printf "%b" "[INST]${SYSTEM_MESSAGE}\n${QUESTION}\n${INPUT}[/INST]\n")
  	SILENT_PROMPT=""	# not supported by codebooga
 	codebooga_priority
+	;;
+
+    rocket)
+	MODEL="${HOME}/wip/llamafiles/models/rocket-3b.Q4_K_M.llamafile"
+        PROMPT=$(printf "%b" "<|im_start|>system\n{system_message}<|im_end|>\n<|im_start|>user\n{prompt}<|im_end|>\n<|im_start|>assistant\n")
+	rocket_prompt
+	rocket_priority
 	;;
 
     *)
@@ -207,7 +241,6 @@ if [ "$CONTEXT_LENGTH" -gt "$MAX_CONTEXT_LENGTH" ]; then
     echo "* Truncated context length to $CONTEXT_LENGTH"
 fi
 
-echo "Checking ${MODEL}"
 if [ ! -f $MODEL ]; then
     echo "Model not found: ${MODEL}"
     exit 1
@@ -215,6 +248,7 @@ fi
 
 ## Run
 # -n 1000 ???
+#set -x
 PROMPT_LENGTH_EST=$((${#PROMPT}/4))
 BATCH_SIZE=${BATCH_SIZE:-$(($CONTEXT_LENGTH / 2))}
 
@@ -222,5 +256,6 @@ if [ "${DEBUG}" ]; then
     printf '* Prompt; ngl=%s context_length=%s est_len=%s: %s' "${NGL}" "${CONTEXT_LENGTH}" "${PROMPT_LENGTH_EST}" "${PROMPT}"
     set -x
 fi
+#printf '%s' "${PROMPT}" 
 #set -x
-printf '%s' "${PROMPT}" | ${MODEL_RUNNER} ${MODEL} --temp ${TEMPERATURE} -c ${CONTEXT_LENGTH} -ngl "${NGL}" --batch-size ${BATCH_SIZE} --no-penalize-nl --repeat-penalty 1 -t 10 -f /dev/stdin $SILENT_PROMPT 2> "${ERROR_OUTPUT}"
+printf '%s' "${PROMPT}" | ${MODEL_RUNNER} ${MODEL} --temp ${TEMPERATURE} -c ${CONTEXT_LENGTH} -ngl "${NGL}" --batch-size ${BATCH_SIZE} --no-penalize-nl --repeat-penalty 1 -t ${THREADS} -f /dev/stdin $SILENT_PROMPT 2> "${ERROR_OUTPUT}"
