@@ -160,25 +160,43 @@ function rocket_priority {
 	NGL=${NGL:=0}
 }
 
-
-function dolphin_prompt {
-    PROMPT="<|im_start|>system
-${SYSTEM_MESSAGE}<|im_end|>
-<|im_start|>user
-${QUESTION}
-${INPUT}<|im_end|>
-<|im_start|>assistant
-"
+function phi_priority {
+	MAX_CONTEXT_LENGTH=2048
+	CONTEXT_LENGTH=${CONTEXT_LENGTH:=2048}
+	BATCH_SIZE=${BATCH_SIZE:-128}
+	NGL=${NGL:=0}
 }
 
-function rocket_prompt {
-    PROMPT="<|im_start|>system
+
+function llama_prompt {
+    PROMPT=$(printf "%b" "[INST]${SYSTEM_MESSAGE}\n${QUESTION}\n${INPUT}[/INST]\n")
+}
+
+function chatml_prompt {
+    PROMPT=$(printf "%b" "<|im_start|>system
 ${SYSTEM_MESSAGE}<|im_end|>
 <|im_start|>user
 ${QUESTION}
 ${INPUT}<|im_end|>
 <|im_start|>assistant
-"
+")
+}
+
+
+function phi_prompt {
+  Instruct: {prompt}
+  Output:
+
+    if [ "${INPUT}" == "" ]; then
+      PROMPT=$(printf "%b" "Instruct: ${SYSTEM_MESSAGE}
+${QUESTION}
+Output:")
+    else
+      PROMPT=$(printf "%b" "Instruct: ${QUESTION}
+${INPUT}
+${QUESTION}
+Output:")
+    fi
 }
 
 case "${MODEL_TYPE}" in
@@ -186,7 +204,7 @@ case "${MODEL_TYPE}" in
     dolphin|mixtral)
  	MODEL=${HOME}/wip/llamafiles/models/dolphin-2.5-mixtral-8x7b.Q4_K_M.llamafile
  	MAX_CONTEXT_LENGTH=12288
-	dolphin_prompt
+	chatml_prompt
 	dolphin_priority
 	;;
 
@@ -198,7 +216,7 @@ case "${MODEL_TYPE}" in
 		    ${HOME}/wip/llamafiles/models/mistral-7b-instruct-v0.2.Q5_K_M.llamafile \
 		    ${HOME}/wip/llamafiles/models/mistral-7b-instruct-v0.2.Q3_K_S.llamafile)
 	MAX_CONTEXT_LENGTH=7999
-	PROMPT=$(printf "%b" "[INST]${SYSTEM_MESSAGE}\n${QUESTION}\n${INPUT}[/INST]\n")
+	llama_prompt
 	mistral_priority
 	;;
  
@@ -207,16 +225,22 @@ case "${MODEL_TYPE}" in
 	MODEL_RUNNER="${HOME}/wip/llamafiles/bin/llamafile-main-0.1 -m "
  	MODEL="${HOME}/wip/oobabooga/text-generation-webui/models/codebooga-34b-v0.1.Q4_K_M.gguf"
 	MAX_CONTEXT_LENGTH=32768
- 	PROMPT=$(printf "%b" "[INST]${SYSTEM_MESSAGE}\n${QUESTION}\n${INPUT}[/INST]\n")
  	SILENT_PROMPT=""	# not supported by codebooga
+	llama_prompt
 	codebooga_priority
 	;;
 
     rocket)
 	MODEL="${HOME}/wip/llamafiles/models/rocket-3b.Q4_K_M.llamafile"
-        PROMPT=$(printf "%b" "<|im_start|>system\n{system_message}<|im_end|>\n<|im_start|>user\n{prompt}<|im_end|>\n<|im_start|>assistant\n")
-	rocket_prompt
+        # PROMPT=$(printf "%b" "<|im_start|>system\n{system_message}<|im_end|>\n<|im_start|>user\n{prompt}<|im_end|>\n<|im_start|>assistant\n")
+	chatml_prompt
 	rocket_priority
+	;;
+
+    phi)
+	MODEL="${HOME}/wip/llamafiles/models/phi-2.Q6_K.llamafile"
+	phi_prompt
+	phi_priority
 	;;
 
     *)
@@ -257,5 +281,5 @@ if [ "${DEBUG}" ]; then
     set -x
 fi
 #printf '%s' "${PROMPT}" 
-#set -x
+set -x
 printf '%s' "${PROMPT}" | ${MODEL_RUNNER} ${MODEL} --temp ${TEMPERATURE} -c ${CONTEXT_LENGTH} -ngl "${NGL}" --batch-size ${BATCH_SIZE} --no-penalize-nl --repeat-penalty 1 -t ${THREADS} -f /dev/stdin $SILENT_PROMPT 2> "${ERROR_OUTPUT}"

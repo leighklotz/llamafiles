@@ -101,3 +101,5 @@ These go in `models/`:
 ## RPI5 and other small models
 - `rocket-3b.Q4_K_M.llamafile`
 - `mistral-7b-instruct-v0.2.Q3_K_S.llamafile`
+- `models/phi-2.Q6_K.llamafile`
+
