@@ -1,0 +1,24 @@
+klotz@raspberrypi:~/wip/llamafiles $ man less | grep -i color | ./help.sh --stdin -m rocket 'how do I enable ANSI colors in the input. Man page follows'
+To enable ANSI colors in the input, you can use the `--color` or `-D` options in your command line interface. These options change the color of different parts of the displayed text. 
+
+The `--color` option works as follows:
+- `-Dxcolor` or `--color=xcolor`: This changes the color of different parts of the displayed text. `x` is a single character that selects the type of text whose color is being set.
+- Uppercase letters can be used only when the `--use-color` option is enabled. When text color is specified by both an uppercase letter and a lowercase letter, the uppercase letter takes precedence.
+- A lowercase letter may be followed by a + to indicate that both the normal format change and the specified color should be used.
+- Color is either a 4-bit color string or an 8-bit color string.
+
+Here's an example of how to use the `--color` option:
+```
+$ less -R file.txt --color=Dngk
+```
+In this example, `Dngk` is the color string, and `file.txt` is the file you want to view with ANSI colors enabled.
+
+Alternatively, you can use the `--use-color` option to enable colored text in various places:
+```
+$ less -R file.txt --use-color
+```
+
+To learn more about ANSI color escape sequences and how to use them, you can set the `LESSANSIENDCHARS` environment variable to a list of characters that can end a color escape sequence. This will prevent less from thinking that characters other than "m" can end an ANSI color escape sequence.
+
+Remember to check if your terminal supports ANSI color escape sequences before enabling them, as not all terminals support these escape sequences.
+klotz@raspberrypi:~/wip/llamafiles $ cat .gitignore 
