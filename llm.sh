@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 
 USAGE="[-m model-type] [--stdin] [--] QUESTION QUESTION QUESTION"
 
@@ -19,12 +19,6 @@ MODEL_RUNNER="/usr/bin/env"
 
 # memory allocation: assume 4 chars per token
 PROMPT_LENGTH_EST=$(((75+${#SYSTEM_MESSAGE}+${#QUESTION}+${#INPUT})/4))
-
-# TODO: CLI parameters vs ENV vs bundles of settings is a mess
-# Sort out --length/--ngl vs --speed/--length vs default
-# sort out -c vs --length
-# idea: calculate context length = MIN_CONTEXT_LENGTH <= (input length * 2) <= MAX_CONTEXT_LENGTH???
-
 # echo "PROMPT_LENGTH_EST=$PROMPT_LENGTH_EST"
 
 # If there are any args, require "--" or any non-hyphen word to terminate args and start question.
@@ -39,6 +33,9 @@ if [[ "${1}" == "-"* ]]; then
 	    PRIORITY="speed"
 	elif [[ "${arg}" == "--length" ]]; then
 	    PRIORITY="length"
+	elif [[ "${arg}" == "--temperature" ]]; then
+	    ((index ++));
+	    TEMPERATURE="${@:$index:1}"
 	elif [[ "${arg}" == "-c" ]]; then
 	    ((index ++));
 	    CONTEXT_LENGTH="${@:$index:1}"
@@ -61,6 +58,9 @@ if [[ "${1}" == "-"* ]]; then
 	elif [[ "${arg}" == "--" ]]; then
 	    QUESTION=("${*:index + 1}")
 	    break
+	else
+	    echo "Unrecognized option at index ${index}: ${arg}"
+	    exit 1
 	fi
     done
 else
@@ -82,6 +82,37 @@ function find_first_file() {
   return 1
 }
 
+function gpu_check {
+    local layer_per_gb=("$@")
+    if [ "${layer_per_gb}" == "" ]; then
+	layer_per_gb=1
+    fi
+    if ! GPU=$(command -v nvidia-detector) || [[ "$GPU" == "None" ]]; then
+	if [ "${DEBUG}" ]; then
+	    echo "* NO GPU"
+	fi
+	FREE_VRAM_GB=0
+	NGL=0
+	MAX_NGL_EST=0
+    else
+	# if gpu is already in use, estimate NGL max at int(free_vram_gb * 1.5)
+	FREE_VRAM_GB=$(nvidia-smi --query-gpu=memory.free --format=csv,nounits,noheader | awk '{print $1 / 1024}')
+	MAX_NGL_EST=$(awk -vfree_vram_gb=$FREE_VRAM_GB -vlayer_per_gb=$layer_per_gb "BEGIN{printf(\"%d\n\",int(free_vram_gb*layer_per_gb))}")
+	if [ "${DEBUG}" ]; then
+	    echo "* FREE_VRAM_GB=${FREE_VRAM_GB} MAX_NGL_EST=${MAX_NGL_EST}"
+	fi
+    fi
+}
+
+function cap_ngl {
+    if [ "${NGL}" -gt "${MAX_NGL_EST}" ]; then
+	if [ "${DEBUG}" ]; then
+	    echo "* Capping $NGL at $MAX_NGL_EST"
+	fi
+	NGL=$MAX_NGL_EST
+    fi
+}
+
 function dolphin_priority {
     case "${PRIORITY}" in
  	speed)
@@ -101,6 +132,7 @@ function dolphin_priority {
  	    exit 1
 	    ;;
     esac
+    cap_ngl
 }
 
 function mistral_priority {
@@ -122,6 +154,7 @@ function mistral_priority {
 	    exit 1
 	    ;;
     esac
+    cap_ngl
 }
 
 function codebooga_priority {
@@ -144,6 +177,7 @@ function codebooga_priority {
  	    exit 1
 	    ;;
     esac
+    cap_ngl
 }
 
 function dolphin_prompt {
@@ -155,11 +189,13 @@ ${INPUT}<|im_end|>
 <|im_start|>assistant"
 }
 
+# Fit into estimated VRAM cap
 case "${MODEL_TYPE}" in
     ## Model: dolphin mixtral 8x7b
     dolphin|mixtral)
  	MODEL=${HOME}/wip/llamafiles/models/dolphin-2.5-mixtral-8x7b.Q4_K_M.llamafile
  	MAX_CONTEXT_LENGTH=12288
+	gpu_check 1.2
 	dolphin_prompt
 	dolphin_priority
 	;;
@@ -170,6 +206,7 @@ case "${MODEL_TYPE}" in
 		    ${HOME}/wip/llamafiles/models/mistral-7b-instruct-v0.1-Q4_K_M-main.llamafile \
 		    ${HOME}/wip/llamafiles/models/mistral-7b-instruct-v0.2.Q4_K_M.llamafile \
 		    ${HOME}/wip/llamafiles/models/mistral-7b-instruct-v0.2.Q5_K_M.llamafile)
+	gpu_check 4
 	MAX_CONTEXT_LENGTH=7999
 	PROMPT=$(printf "%b" "[INST]${SYSTEM_MESSAGE}\n${QUESTION}\n${INPUT}[/INST]\n")
 	mistral_priority
@@ -182,6 +219,7 @@ case "${MODEL_TYPE}" in
 	MAX_CONTEXT_LENGTH=32768
  	PROMPT=$(printf "%b" "[INST]${SYSTEM_MESSAGE}\n${QUESTION}\n${INPUT}[/INST]\n")
  	SILENT_PROMPT=""	# not supported by codebooga
+	gpu_check 2
 	codebooga_priority
 	;;
 
@@ -190,13 +228,6 @@ case "${MODEL_TYPE}" in
 	exit 1
 	;;
 esac
-
-if ! GPU=$(command -v nvidia-detector) || [[ "$GPU" == "None" ]]; then
-    if [ "${DEBUG}" ]; then
-	echo "* NO GPU"
-    fi
-    NGL=0
-fi
 
 if [ $(($PROMPT_LENGTH_EST * 2)) -gt "${CONTEXT_LENGTH}" ]; then
     echo "* WARNING: Prompt len $PROMPT_LENGTH_EST and response estimated not to fit in context ${CONTEXT_LENGTH}"
@@ -207,7 +238,6 @@ if [ "$CONTEXT_LENGTH" -gt "$MAX_CONTEXT_LENGTH" ]; then
     echo "* Truncated context length to $CONTEXT_LENGTH"
 fi
 
-echo "Checking ${MODEL}"
 if [ ! -f $MODEL ]; then
     echo "Model not found: ${MODEL}"
     exit 1
@@ -223,4 +253,10 @@ if [ "${DEBUG}" ]; then
     set -x
 fi
 #set -x
+echo $NGL
 printf '%s' "${PROMPT}" | ${MODEL_RUNNER} ${MODEL} --temp ${TEMPERATURE} -c ${CONTEXT_LENGTH} -ngl "${NGL}" --batch-size ${BATCH_SIZE} --no-penalize-nl --repeat-penalty 1 -t 10 -f /dev/stdin $SILENT_PROMPT 2> "${ERROR_OUTPUT}"
+
+# TODO: CLI parameters vs ENV vs bundles of settings is a mess
+# Sort out --length/--ngl vs --speed/--length vs default
+# sort out -c vs --length
+# idea: calculate context length = MIN_CONTEXT_LENGTH <= (input length * 2) <= MAX_CONTEXT_LENGTH???
