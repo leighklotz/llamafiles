@@ -1,0 +1,38 @@
+mistral-7b-instruct-v0.2.Q3_K_S.llamafile 
+
+klotz@raspberrypi:~/dotfiles $ ~/wip/llamafiles/help.sh -m mistral raspberry pi 5 emacs installation
+I'm assuming you meant Raspberry Pi 5's Emacs installation since there isn't a Raspberry Pi 5 model yet. Here's a step-by-step guide to install Emacs on a Raspberry Pi using the terminal.
+
+1. Update your Raspberry Pi system:
+   Before installing Emacs, make sure your system is up-to-date. Open a terminal window and run the following commands:
+
+   ```
+   sudo apt update
+   sudo apt upgrade
+   ```
+
+<2. Install Emacs:
+   Emacs is available in the Raspbian package repository. Run the following command to install it:
+
+   ```
+   sudo apt install emacs
+   ```
+
+3. Verify the installation:
+   After installation, you can verify it by checking the Emacs version. Run the following command:
+
+   ```
+   emacs --version
+   ```
+
+   You should see the Emacs version number and other information.
+
+Now, you have Emacs installed on your Raspberry Pi. You can use it for editing text files, writing code, and more. To start Emacs, simply type `emacs` in the terminal. [end of text]
+
+llama_print_timings:        load time =    1164.81 ms
+llama_print_timings:      sample time =      18.41 ms /   265 runs   (    0.07 ms per token, 14392.01 tokens per second)
+llama_print_timings: prompt eval time =   18694.30 ms /    37 tokens (  505.25 ms per token,     1.98 tokens per second)
+llama_print_timings:        eval time =  187589.28 ms /   264 runs   (  710.57 ms per token,     1.41 tokens per second)
+llama_print_timings:       total time =  206575.93 ms
+Log end
+klotz@raspberrypi:~/dotfiles $ 

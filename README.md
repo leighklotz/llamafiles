@@ -15,10 +15,11 @@
 
 ## help.sh
 
-USAGE="[-m model-type] [--stdin] [--] QUESTION QUESTION QUESTION"
+USAGE="[-m model-type] [--stdin] [other options] [--] QUESTION QUESTION QUESTION"
 
 - `-m`: defaults if not specified; see source for model types
 - `--stdin`: reads stdin and interpolates into prompt; if input is a terminal, asks user for input
+- [other options] See source
 - `--`: unambiguously terminate args
 - `QUESTION`: word or words, can be quoted or not, can be multiline (but also see `--stdin`)
 
@@ -97,3 +98,9 @@ These go in `models/`:
 - `llava-v1.5-7b-q4-main.llamafile`
 - `llava-v1.5-7b-q4-server.llamafile`
 - `mistral-7b-instruct-v0.1-Q4_K_M-main.llamafile`
+
+## RPI5 and other small models
+- `rocket-3b.Q4_K_M.llamafile`
+- `mistral-7b-instruct-v0.2.Q3_K_S.llamafile`
+- `models/phi-2.Q6_K.llamafile`
+
