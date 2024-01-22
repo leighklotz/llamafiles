@@ -28,46 +28,61 @@ PROMPT_LENGTH_EST=$(((75+${#SYSTEM_MESSAGE}+${#QUESTION}+${#INPUT})/4))
 # If there are any args, require "--" or any non-hyphen word to terminate args and start question.
 # Assume the whole args is a question if there is no hyphen to start.
 if [[ "${1}" == "-"* ]]; then
-    for ((index=1; index<$#; index ++)); do
-        arg=${@:$index:1}
-        if [[ "${arg}" == "-m" ]]; then
-            ((index ++));
-            MODEL_TYPE="${@:$index:1}"
-        elif [[ "${arg}" == "--speed" ]]; then
-            PRIORITY="speed"
-        elif [[ "${arg}" == "--length" ]]; then
-            PRIORITY="length"
-        elif [[ "${arg}" == "--temperature" ]]; then
-            ((index ++));
-            TEMPERATURE="${@:$index:1}"
-        elif [[ "${arg}" == "--verbose" ]]; then
-            VERBOSE=1
-        elif [[ "${arg}" == "-c" ]]; then
-            ((index ++));
-            CONTEXT_LENGTH="${@:$index:1}"
-        elif [[ "${arg}" == "--ngl" ]]; then
-            ((index ++));
-            NGL="${@:$index:1}"
-        elif [[ "${arg}" == "--n-predict" ]]; then
-            ((index ++));
-            N_PREDICT="${@:$index:1}"
-        elif [[ "${arg}" == "--debug" ]]; then
-            ERROR_OUTPUT="/dev/stdout"
-            SILENT_PROMPT=""
-            DEBUG=1
-        elif [[ "${arg}" == "--stdin" ]]; then
-            DO_STDIN=1
-        elif [[ "${arg}" == "--" ]]; then
-            QUESTION=("${*:index + 1}")
-            break
-        elif [[ "${arg}" == "-"* ]]; then
-            echo "Unrecognized option at index ${index}: ${arg}"
-            exit 1
-        elif [[ "${arg}" != "-"* ]]; then
-            # consumes rest of line
-            QUESTION=("${*:index}")
-            break
-        fi
+    while [[ $# -gt 0 ]]; do
+	case $1 in
+	    -m)
+		shift
+		MODEL_TYPE="$1"
+		;;
+	    --speed)
+		PRIORITY="speed"
+		;;
+	    --length)
+		PRIORITY="length"
+		;;
+	    --temperature)
+		shift
+		TEMPERATURE="$1"
+		;;
+	    --verbose)
+		VERBOSE=1
+		;;
+	    -c|--context-length)
+		shift
+		CONTEXT_LENGTH="$1"
+		;;
+	    --ngl)
+		shift
+		NGL="$1"
+		;;
+	    --n-predict)
+		shift
+		N_PREDICT="$1"
+		;;
+	    --debug)
+		ERROR_OUTPUT="/dev/stdout"
+		SILENT_PROMPT=""
+		DEBUG=1
+		;;
+	    --stdin)
+		DO_STDIN=1
+		;;
+	    --)
+		shift
+		QUESTION=("$@")
+		break
+		;;
+	    -*)
+		echo "Unrecognized option: $1"
+		exit 1
+		;;
+	    *)
+		# consumes rest of line
+		QUESTION=("$*")
+		break
+		;;
+	esac
+	shift
     done
 else
     QUESTION="${*}"
@@ -312,25 +327,12 @@ fi
 PROMPT_LENGTH_EST=$((${#PROMPT}/4))
 #BATCH_SIZE=${BATCH_SIZE:-$(($CONTEXT_LENGTH / 2))}
 
-if [ "${N_PREDICT}" != "" ]; then
-   N_PREDICT="--n-predict ${N_PREDICT}"
-fi
-
-if [ "${NGL}" != "" ]; then
-   NGL="-ngl ${NGL}"
-fi
-
-if [ "${TEMPERATURE}" != "" ]; then
-   TEMPERATURE="--temp ${TEMPERATURE}"
-fi
-
-if [ "${CONTEXT_LENGTH}" != "" ]; then
- CONTEXT_LENGTH="-c ${CONTEXT_LENGTH}"
-fi
-
-if [ "${BATCH_SIZE}" != "" ]; then
- BATCH_SIZE="--batch_size ${BATCH_SIZE}"
-fi
+# Don't pass CLI args that aren't needed
+N_PREDICT="${N_PREDICT:+--n-predict $N_PREDICT}"
+NGL="${NGL:+-ngl $NGL}"
+TEMPERATURE="${TEMPERATURE:+--temp $TEMPERATURE}"
+CONTEXT_LENGTH="${CONTEXT_LENGTH:+-c $CONTEXT_LENGTH}"
+BATCH_SIZE="${BATCH_SIZE:+--batch_size $BATCH_SIZE}"
 
 # Set verbose and debug last
 if [ "${DEBUG}" ] || [ "${VERBOSE}" ]; then
