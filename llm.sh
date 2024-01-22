@@ -20,6 +20,7 @@ VERBOSE=${VERBOSE:-}
 MODEL_RUNNER="/usr/bin/env"
 DO_STDIN=""
 THREADS=$(grep '^cpu cores\s*:' /proc/cpuinfo | head -1 | awk '{print $4}' || sysctl -n hw.ncpu || echo "$NUMBER_OF_PROCESSORS")
+LOG_DISABLE="--log-disable"
 
 # memory allocation: assume 4 chars per token
 PROMPT_LENGTH_EST=$(((75+${#SYSTEM_MESSAGE}+${#QUESTION}+${#INPUT})/4))
@@ -135,7 +136,7 @@ function gpu_check {
 
 function cap_ngl {
     if [ "${NGL}" -gt "${MAX_NGL_EST}" ]; then
-        if [ "${DEBUG}" ]; then
+        if [ "${VERBOSE}" ]; then
             echo "* Capping $NGL at $MAX_NGL_EST"
         fi
         NGL=$MAX_NGL_EST
@@ -340,7 +341,7 @@ if [ "${DEBUG}" ] || [ "${VERBOSE}" ]; then
     set -x
 fi
 
-printf '%s' "${PROMPT}" | ${MODEL_RUNNER} ${MODEL} ${TEMPERATURE} ${CONTEXT_LENGTH} ${NGL} ${N_PREDICT} ${BATCH_SIZE} --no-penalize-nl --repeat-penalty 1 -t ${THREADS} -f /dev/stdin $SILENT_PROMPT 2> "${ERROR_OUTPUT}"
+printf '%s' "${PROMPT}" | ${MODEL_RUNNER} ${MODEL} ${TEMPERATURE} ${CONTEXT_LENGTH} ${NGL} ${N_PREDICT} ${BATCH_SIZE} --no-penalize-nl --repeat-penalty 1 -t ${THREADS} -f /dev/stdin $SILENT_PROMPT $LOG_DISABLE 2> "${ERROR_OUTPUT}"
 
 # TODO: CLI parameters vs ENV vs bundles of settings is a mess
 # Sort out --length/--ngl vs --speed/--length vs default
