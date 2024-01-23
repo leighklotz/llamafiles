@@ -20,7 +20,8 @@ DEBUG=""
 VERBOSE=${VERBOSE:-}
 MODEL_RUNNER="/usr/bin/env"
 DO_STDIN=""
-THREADS=$(grep '^cpu cores\s*:' /proc/cpuinfo | head -1 | awk '{print $4}' || sysctl -n hw.ncpu || echo "$NUMBER_OF_PROCESSORS")
+#THREADS=$(grep '^cpu cores\s*:' /proc/cpuinfo | head -1 | awk '{print $4}' || sysctl -n hw.ncpu || echo "$NUMBER_OF_PROCESSORS")
+THREADS=1
 LOG_DISABLE="--log-disable"
 
 # memory allocation: assume 4 chars per token
@@ -99,13 +100,13 @@ fi
 
 
 # Example usage:
-# Set the variable to the path of the first existing file in the list.
+# Set the variable to the path of the first existing executable in the list.
 # file_path=$(find_first_file /path/to/file1 /path/to/file2 /path/to/file3)
 function find_first_file() {
   local files=("$@")
   local file
   for file in "${files[@]}"; do
-    if [ -e "$file" ]; then
+    if [ -x "$file" ]; then
       echo "$file"
       return 0
     fi
