@@ -140,7 +140,6 @@ function gpu_check {
 function cap_ngl {
     if [ "$GPU" ]; then
 	NGL=$MAX_NGL_EST
-	echo "NGL=${NGL}"
 	if [ "${NGL}" != '' ] && [ "${NGL}" -gt "${MAX_NGL_EST}" ]; then
             if [ "${VERBOSE}" ]; then
 		echo "* Capping $NGL at $MAX_NGL_EST"
