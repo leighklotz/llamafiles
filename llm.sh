@@ -14,6 +14,7 @@ N_PREDICT=""
 SYSTEM_MESSAGE="${SYSTEM_MESSAGE-$(printf "%b" "Answer the following user question:\n")}"
 SILENT_PROMPT="--silent-prompt"
 NGL=""
+GPU=""
 PRIORITY="manual" # manual|speed|context
 DEBUG=""
 VERBOSE=${VERBOSE:-}
@@ -117,14 +118,16 @@ function gpu_check {
     if [ "${layer_per_gb}" == "" ]; then
         layer_per_gb=1
     fi
-    if ! GPU=$(command -v nvidia-detector) || [[ "$GPU" == "None" ]]; then
+    if ! gpu_detector=$(command -v nvidia-detector) || [[ "$($gpu_detector)" == "None" ]]; then
         if [ "${DEBUG}" ]; then
             echo "* NO GPU"
         fi
         FREE_VRAM_GB=0
-        NGL=0
         MAX_NGL_EST=0
+        NGL=""
+	GPU=""
     else
+	GPU=1
         # if gpu is already in use, estimate NGL max at int(free_vram_gb * 1.5)
         FREE_VRAM_GB=$(nvidia-smi --query-gpu=memory.free --format=csv,nounits,noheader | awk '{print $1 / 1024}')
         MAX_NGL_EST=$(awk -vfree_vram_gb=$FREE_VRAM_GB -vlayer_per_gb=$layer_per_gb "BEGIN{printf(\"%d\n\",int(free_vram_gb*layer_per_gb))}")
@@ -135,27 +138,31 @@ function gpu_check {
 }
 
 function cap_ngl {
-    if [ "${NGL}" -gt "${MAX_NGL_EST}" ]; then
-        if [ "${VERBOSE}" ]; then
-            echo "* Capping $NGL at $MAX_NGL_EST"
-        fi
-        NGL=$MAX_NGL_EST
+    if [ "$GPU" ]; then
+	NGL=$MAX_NGL_EST
+	echo "NGL=${NGL}"
+	if [ "${NGL}" != '' ] && [ "${NGL}" -gt "${MAX_NGL_EST}" ]; then
+            if [ "${VERBOSE}" ]; then
+		echo "* Capping $NGL at $MAX_NGL_EST"
+            fi
+            NGL=$MAX_NGL_EST
+	fi
     fi
 }
 
 function dolphin_priority {
     case "${PRIORITY}" in
          speed)
-            NGL=23
+             NGL=${NGL:=23}
              CONTEXT_LENGTH=2048
              ;;
          context)
-             NGL=8
+             NGL=${NGL:=8}
              CONTEXT_LENGTH=12288
              ;;
          manual)
              NGL=${NGL:=23}
-            CONTEXT_LENGTH=${CONTEXT_LENGTH:=2048}
+             CONTEXT_LENGTH=${CONTEXT_LENGTH:=2048}
              ;;
          *)
              echo "usage: unknown priority $PRIORITY"
@@ -168,11 +175,11 @@ function dolphin_priority {
 function mistral_priority {
     case "${PRIORITY}" in
         speed|context)
-            NGL=33
+            NGL=${NGL:=33}
             CONTEXT_LENGTH=2000
             ;;
         context)
-            NGL=33
+            NGL=${NGL:=33}
             CONTEXT_LENGTH=7999
             ;;
         manual)
@@ -184,17 +191,18 @@ function mistral_priority {
             exit 1
             ;;
     esac
+
     cap_ngl
 }
 
 function codebooga_priority {
     case "${PRIORITY}" in
          speed)
-             NGL=33
+             NGL=${NGL:=33}
              CONTEXT_LENGTH=2048
              ;;
          context)
-             NGL=25
+             NGL=${NGL:=25}
              CONTEXT_LENGTH=16383
              ;;
          manual)
@@ -207,6 +215,7 @@ function codebooga_priority {
              exit 1
             ;;
     esac
+
     cap_ngl
 }
 
@@ -221,7 +230,7 @@ function phi_priority {
         MAX_CONTEXT_LENGTH=2048
         CONTEXT_LENGTH=${CONTEXT_LENGTH:=2048}
         BATCH_SIZE=${BATCH_SIZE:-128}
-        NGL=${NGL:=0}
+        NGL=${NGL:-}
 }
 
 
@@ -327,6 +336,11 @@ fi
 
 PROMPT_LENGTH_EST=$((${#PROMPT}/4))
 #BATCH_SIZE=${BATCH_SIZE:-$(($CONTEXT_LENGTH / 2))}
+
+# If no GPU, force NGL off
+if [ ! ${GPU} ]; then
+    NGL=0
+fi
 
 # Don't pass CLI args that aren't needed
 N_PREDICT="${N_PREDICT:+--n-predict $N_PREDICT}"
