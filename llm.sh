@@ -342,7 +342,7 @@ CONTEXT_LENGTH="${CONTEXT_LENGTH:+-c $CONTEXT_LENGTH}"
 BATCH_SIZE="${BATCH_SIZE:+--batch_size $BATCH_SIZE}"
 
 # set MODEL_RUNNER
-if [ "${MODEL%.*}" != "llamafile" ]; then
+if [ "${MODEL##*.}" != "llamafile" ]; then
    MODEL_RUNNER="${HOME}/wip/llamafiles/bin/llamafile-main-0.2.1 -m "
 fi
 
