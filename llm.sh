@@ -28,7 +28,6 @@ if [ "${THREADS}" == "" ]; then
     THREADS=$(sysctl -n hw.ncpu || echo "${NUMBER_OF_PROCESSORS:-4}")
 fi
 THREADS="${THREADS:+-t $THREADS}"
-echo THREADS=$THREADS
 
 # memory allocation: assume 4 chars per token
 PROMPT_LENGTH_EST=$(((75+${#SYSTEM_MESSAGE}+${#QUESTION}+${#INPUT})/4))
