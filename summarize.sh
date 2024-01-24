@@ -1,70 +1,20 @@
 #!/bin/bash
 
-# args, "[-m model-type]
-if [[ "${1}" == "-m" ]]; then
-    shift; M=$1; shift;
+SCRIPT_DIR=$(dirname $(realpath "${BASH_SOURCE}"))
+
+URL="${!#}"			# LAST
+ARGS="${@:1:${#}-1}"		# BUTLAST
+
+if LYNX=$(command -v lynx); then
+   CMD="${LYNX} --dump"
+elif LINKS=$(command -v links); then
+   echo b
+   CMD="${LINKS} -codepage utf-8 -force-html -width 72 -dump"
 else
-    M="mistral"
+   echo "error: NOLINKS"
+   exit 1
 fi
 
-URL="${1}"
-#TEXT="$(links -codepage utf-8 -force-html -width 72 -dump ${URL})"
-TEXT="$(lynx --dump ${URL})"
-# truncate
-TEXT="${TEXT:0:8000}"
-SYSTEM_MESSAGE=$(printf "%b" "Summarize the following web page article and ignore website header at the start and look for the main article:\n")
+export SYSTEM_MESSAGE=$(printf "%b" "Summarize the following web page article and ignore website header at the start and look for the main article:\n#### Text of ${URL}\n###\n")
 
-case "${M}" in
-    ## Model: dolphin mxtral 8x7b
-    dolphin)
-	MODEL=/home/klotz/wip/llamafiles/dolphin-2.5-mixtral-8x7b.Q4_K_M.llamafile
-PROMPT="<|im_start|>system
-${SYSTEM_MESSAGE}<|im_end|>
-<|im_start|>user
-${TEXT}<|im_end|>
-<|im_start|>assistant"
-	NGL=25
-	SILENT="--silent-prompt"
-	;;
-
-    ## Model: mistral-7b-instruct
-    mistral)
-	MODEL=/home/klotz/wip/llamafiles/mistral-7b-instruct-v0.1-Q4_K_M-main.llamafile
-	PROMPT="[INST]${SYSTEM_MESSAGE}${TEXT}[/INST]"
-	NGL=33
-	SILENT="--silent-prompt"
-	;;
-
-    ## Model: oobabooga/text-generation-webui/models/codebooga-34b-v0.1.Q4_K_M.gguf
-    codebooga)
-	MODEL="/home/klotz/wip/llamafile-main-0.1 -m /home/klotz/wip//oobabooga/text-generation-webui/models/codebooga-34b-v0.1.Q4_K_M.gguf"
-	PROMPT="[INST]${SYSTEM_MESSAGE}${TEXT}[/INST]"
-	NGL=40
-	;;
-    ## Debug Model
-    debug)
-	MODEL="echo model"
-	PROMPT=$(printf "%b" "S=${SYSTEM_MESSAGE} Q=${TEXT}")
-	NGL=0
-	SILENT="--silent-prompt"
-	;;
-
-    ## fail
-    *)
-	echo "usage: $0 [-m model-type] question words"
-	exit 1
-	;;
-esac
-
-if ! GPU=$(command -v nvidia-detector) || [[ "$GPU" == "None" ]]; then
-    NGL=0
-fi
-
-## Run
-#  -n 1000 ???
-
-#echo "############"
-#echo "${PROMPT}"
-#echo "############"
-
-${MODEL} --temp 0 -c 8192 -ngl "${NGL}" -p "${PROMPT}" "${SILENT}" 2>/dev/null 
+${CMD} "${URL}" | ${SCRIPT_DIR}/llm.sh --stdin ${ARGS}

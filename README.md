@@ -5,6 +5,7 @@
 - cli.sh
 - llm.sh
 - help.sh
+- machelp.sh
 - image-name.sh
 - rename-pictures.sh [adapted from https://gist.github.com/jart/bd2f603aefe6ac8004e6b709223881c0]
 - server.sh
@@ -12,16 +13,18 @@
 
 # Models
 
+Download your own models.
 
 ## help.sh
 
-USAGE="[-m model-type] [--stdin] [other options] [--] QUESTION QUESTION QUESTION"
+USAGE="[-m|--model-type model-type] [--stdin] [--speed | --length] [--temperature temp] [--context-length|-c n] [--ngl n] [--n-predict n] [--debug] [--verbose] [--] QUESTION*"
 
-- `-m`: defaults if not specified; see source for model types
+- `-m`, `--model-type`: defaults if not specified; see source for model types
 - `--stdin`: reads stdin and interpolates into prompt; if input is a terminal, asks user for input
-- [other options] See source
 - `--`: unambiguously terminate args
 - `QUESTION`: word or words, can be quoted or not, can be multiline (but also see `--stdin`)
+- [other options]: See source
+- $ENV: see source
 
 ### Bash Coding Example
 ```bash
@@ -82,13 +85,13 @@ $ sudo lshw | help.sh -c 16384 -m codebooga --stdin -- 'Summarize the following 
 These go in `bin/`:
 
 https://github.com/Mozilla-Ocho/llamafile
-- `llamafile-0.1.zip`
-- `llamafile-llava-cli-0.1`
-- `llamafile-llava-quantize-0.1`
-- `llamafile-main-0.1`
-- `llamafile-quantize-0.1`
-- `llamafile-server-0.1`
-- `zipalign-0.1`
+- `llamafile-0.2.1.zip`
+- `llamafile-llava-cli-0.2.1`
+- `llamafile-llava-quantize-0.2.1`
+- `llamafile-main-0.2.1`
+- `llamafile-quantize-0.2.1`
+- `llamafile-server-0.2.1`
+- `zipalign-0.2.1`
 
 # Models and all-in-one
 You need to download these from various places on HF and llamafile
@@ -97,10 +100,13 @@ These go in `models/`:
 - `dolphin-2.5-mixtral-8x7b.Q4_K_M.llamafile`
 - `llava-v1.5-7b-q4-main.llamafile`
 - `llava-v1.5-7b-q4-server.llamafile`
-- `mistral-7b-instruct-v0.1-Q4_K_M-main.llamafile`
+- `mistral-7b-instruct-v0.2.Q4_K_M.llamafile`
 
 ## RPI5 and other small models
 - `rocket-3b.Q4_K_M.llamafile`
 - `mistral-7b-instruct-v0.2.Q3_K_S.llamafile`
+- `models/phi-2.Q5_K_M.llamafile`
 - `models/phi-2.Q6_K.llamafile`
 
+# Mac
+- `xattr -dr com.apple.quarantine models/* bin/*`
