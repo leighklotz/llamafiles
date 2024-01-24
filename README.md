@@ -103,10 +103,11 @@ These go in `models/`:
 - `mistral-7b-instruct-v0.2.Q4_K_M.llamafile`
 
 ## RPI5 and other small models
+- `mistral-7b-instruct-v0.2.Q3_K_M.llamafile`
+- `mixtral_7bx2_moe.Q3_K_M.gguf`
+- `phi-2.Q5_K_M.llamafile`
+- `phi-2.Q6_K.llamafile`
 - `rocket-3b.Q4_K_M.llamafile`
-- `mistral-7b-instruct-v0.2.Q3_K_S.llamafile`
-- `models/phi-2.Q5_K_M.llamafile`
-- `models/phi-2.Q6_K.llamafile`
 
 # Mac
 - `xattr -dr com.apple.quarantine models/* bin/*`
