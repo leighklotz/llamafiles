@@ -247,8 +247,11 @@ ${QUESTION}
 Output:")
     else
       PROMPT=$(printf "%b" "Instruct: ${QUESTION}
+User Input:
+-----------------
 ${INPUT}
-${QUESTION}
+-----------------
+End of User Input
 Output:")
     fi
 }
@@ -353,7 +356,7 @@ if [ "${DEBUG}" ] || [ "${VERBOSE}" ]; then
     set -x
 fi
 
-printf '%s' "${PROMPT}" | ${MODEL_RUNNER} ${MODEL} ${TEMPERATURE} ${CONTEXT_LENGTH} ${NGL} ${N_PREDICT} ${BATCH_SIZE} --no-penalize-nl --repeat-penalty 1 ${THREADS} -f /dev/stdin $SILENT_PROMPT $LOG_DISABLE 2> "${ERROR_OUTPUT}"
+printf '%s' "${PROMPT}" | ${MODEL_RUNNER} ${MODEL} ${LOG_DISABLE} ${TEMPERATURE} ${CONTEXT_LENGTH} ${NGL} ${N_PREDICT} ${BATCH_SIZE} --no-penalize-nl --repeat-penalty 1 ${THREADS} -f /dev/stdin $SILENT_PROMPT 2> "${ERROR_OUTPUT}"
 
 # TODO: CLI parameters vs ENV vs bundles of settings is a mess
 # Sort out --length/--ngl vs --speed/--length vs default
