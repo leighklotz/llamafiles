@@ -14,7 +14,7 @@ N_PREDICT=""
 SYSTEM_MESSAGE="${SYSTEM_MESSAGE-$(printf "%b" "Answer the following user question:\n")}"
 SILENT_PROMPT="--silent-prompt"
 NGL=""
-GPU=""
+GPU="--gpu anto"
 PRIORITY="manual" # manual|speed|context
 DEBUG=""
 VERBOSE=${VERBOSE:-}
@@ -115,20 +115,28 @@ function gpu_check {
         FREE_VRAM_GB=0
         MAX_NGL_EST=0
         NGL=""
-	GPU=""
+	GPU="--gpu none"
     else
-	GPU=1
         # if gpu is already in use, estimate NGL max at int(free_vram_gb * 1.5)
         FREE_VRAM_GB=$(nvidia-smi --query-gpu=memory.free --format=csv,nounits,noheader | awk '{print $1 / 1024}')
-        MAX_NGL_EST=$(awk -vfree_vram_gb=$FREE_VRAM_GB -vlayer_per_gb=$layer_per_gb "BEGIN{printf(\"%d\n\",int(free_vram_gb*layer_per_gb))}")
-        if [ "${DEBUG}" ]; then
-            echo "* FREE_VRAM_GB=${FREE_VRAM_GB} MAX_NGL_EST=${MAX_NGL_EST}"
-        fi
+	if (( $(echo "${FREE_VRAM_GB} < 2" |bc -l) )); then
+	    GPU="--gpu none"
+	    NGL_MAX_EST=0
+	    NGL=""
+	else
+	    GPU="--gpu nvidia"
+            MAX_NGL_EST=$(awk -vfree_vram_gb=$FREE_VRAM_GB -vlayer_per_gb=$layer_per_gb "BEGIN{printf(\"%d\n\",int(free_vram_gb*layer_per_gb))}")
+	fi
+    fi
+    if [ "${DEBUG}" ]; then
+	echo "* FREE_VRAM_GB=${FREE_VRAM_GB} MAX_NGL_EST=${MAX_NGL_EST} GPU=${GPU}"
     fi
 }
 
 function cap_ngl {
-    if [ "$GPU" ]; then
+    if [ "$GPU" == "" ]; then
+	GPU="--gpu none"
+    else
 	NGL=$MAX_NGL_EST
 	if [ "${NGL}" != '' ] && [ "${NGL}" -gt "${MAX_NGL_EST}" ]; then
             if [ "${VERBOSE}" ]; then
@@ -334,8 +342,9 @@ PROMPT_LENGTH_EST=$((${#PROMPT}/4))
 #BATCH_SIZE=${BATCH_SIZE:-$(($CONTEXT_LENGTH / 2))}
 
 # If no GPU, force NGL off
-if [ ! ${GPU} ]; then
+if [ "${GPU}" = '' ]; then
     NGL=0
+    GPU="--gpu none"
 fi
 
 # Don't pass CLI args that aren't needed
