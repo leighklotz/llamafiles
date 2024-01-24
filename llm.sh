@@ -21,7 +21,14 @@ VERBOSE=${VERBOSE:-}
 MODEL_RUNNER="/usr/bin/env"
 DO_STDIN=""
 LOG_DISABLE="--log-disable"
-THREADS=$( ( [ -f /proc/cpuinfo ] && grep -s '^cpu cores\s*:' /proc/cpuinfo | head -1 | awk '{print $4}' ) || sysctl -n hw.ncpu || echo "$NUMBER_OF_PROCESSORS" )
+
+# Get thread count
+THREADS=$( ( [ -f /proc/cpuinfo ] && grep '^cpu cores\s*:' /proc/cpuinfo | head -1 | awk '{print $4}' ))
+if [ "${THREADS}" == "" ]; then
+    THREADS=$(sysctl -n hw.ncpu || echo "${NUMBER_OF_PROCESSORS:-4}")
+fi
+THREADS="${THREADS:+-t $THREADS}"
+echo THREADS=$THREADS
 
 # memory allocation: assume 4 chars per token
 PROMPT_LENGTH_EST=$(((75+${#SYSTEM_MESSAGE}+${#QUESTION}+${#INPUT})/4))
@@ -251,7 +258,9 @@ Output:")
 case "${MODEL_TYPE}" in
     ## Model: dolphin mixtral 8x7b
     dolphin|mixtral)
-        MODEL=${HOME}/wip/llamafiles/models/dolphin-2.5-mixtral-8x7b.Q4_K_M.llamafile
+        MODEL=$(find_first_file \
+                ${HOME}/wip/llamafiles/models/dolphin-2.5-mixtral-8x7b.Q4_K_M.llamafile \
+	        ${HOME}/wip/llamafiles/models/mixtral_7bx2_moe.Q3_K_M.gguf) # not dolphin
         MAX_CONTEXT_LENGTH=12288
         gpu_check 1.2
         chatml_prompt
@@ -273,7 +282,6 @@ case "${MODEL_TYPE}" in
  
     ## Model: oobabooga/text-generation-webui/models/codebooga-34b-v0.1.Q4_K_M.gguf
     codebooga)
-        MODEL_RUNNER="${HOME}/wip/llamafiles/bin/llamafile-main-0.1 -m "
         MODEL="${HOME}/wip/oobabooga/text-generation-webui/models/codebooga-34b-v0.1.Q4_K_M.gguf"
         MAX_CONTEXT_LENGTH=32768
         SILENT_PROMPT=""        # not supported by codebooga
@@ -334,13 +342,18 @@ TEMPERATURE="${TEMPERATURE:+--temp $TEMPERATURE}"
 CONTEXT_LENGTH="${CONTEXT_LENGTH:+-c $CONTEXT_LENGTH}"
 BATCH_SIZE="${BATCH_SIZE:+--batch_size $BATCH_SIZE}"
 
+# set MODEL_RUNNER
+if [ "${MODEL%.*}" != "llamafile" ]; then
+   MODEL_RUNNER="${HOME}/wip/llamafiles/bin/llamafile-main-0.2.1 -m "
+fi
+
 # Set verbose and debug last
 if [ "${DEBUG}" ] || [ "${VERBOSE}" ]; then
     printf '* ngl=%s context_length=%s est_len=%s:\n' "${NGL}" "${CONTEXT_LENGTH}" "${PROMPT_LENGTH_EST}"
     set -x
 fi
 
-printf '%s' "${PROMPT}" | ${MODEL_RUNNER} ${MODEL} ${TEMPERATURE} ${CONTEXT_LENGTH} ${NGL} ${N_PREDICT} ${BATCH_SIZE} --no-penalize-nl --repeat-penalty 1 -t ${THREADS} -f /dev/stdin $SILENT_PROMPT $LOG_DISABLE 2> "${ERROR_OUTPUT}"
+printf '%s' "${PROMPT}" | ${MODEL_RUNNER} ${MODEL} ${TEMPERATURE} ${CONTEXT_LENGTH} ${NGL} ${N_PREDICT} ${BATCH_SIZE} --no-penalize-nl --repeat-penalty 1 ${THREADS} -f /dev/stdin $SILENT_PROMPT $LOG_DISABLE 2> "${ERROR_OUTPUT}"
 
 # TODO: CLI parameters vs ENV vs bundles of settings is a mess
 # Sort out --length/--ngl vs --speed/--length vs default
