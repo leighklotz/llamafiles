@@ -1,0 +1,3 @@
+bash-3.2$ ./summarize.sh -m rocket https://curta.org
+The web page "Curta.Org: Your Complete Curta Calculator Site" is a comprehensive site dedicated to the Curta calculator, a high precision calculating machine. The site offers various resources such as articles, models, manuals, algorithms, programming model, emulators, bulletin board, pictures, news, links, history, commerce, and collaboration. The site also warns against two scams involving fake demonstration models and Curta stamps from Liechtenstein. The copyright for the site is from 1999 to 2019, and it is Y2K compliant. The references section provides links to additional information about the Curta calculator.
+bash-3.2$
