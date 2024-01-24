@@ -54,7 +54,7 @@ if [[ "${1}" == "-"* ]]; then
 		DO_STDIN=1 ;;
 	    --)
 		# consumes rest of line
-		shift QUESTION=("$@")
+		shift; QUESTION=("$@")
 		break
 		;;
 	    -*)
