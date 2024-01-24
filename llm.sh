@@ -1,6 +1,6 @@
-#!/bin/bash -e
+#!/bin/bash
 
-USAGE="[-m model-type] [--stdin] [--] QUESTION QUESTION QUESTION"
+USAGE="[-m|--model-type model-type] [--stdin] [--speed | --length] [--temperature temp] [--context-length|-c n] [--ngl n] [--n-predict n] [--debug] [--verbose] [--] QUESTION*"
 
 # Use flags or environment variables below:
 MODEL_TYPE=${MODEL_TYPE:-mistral}
@@ -20,9 +20,8 @@ DEBUG=""
 VERBOSE=${VERBOSE:-}
 MODEL_RUNNER="/usr/bin/env"
 DO_STDIN=""
-#THREADS=$(grep '^cpu cores\s*:' /proc/cpuinfo | head -1 | awk '{print $4}' || sysctl -n hw.ncpu || echo "$NUMBER_OF_PROCESSORS")
-THREADS=1
 LOG_DISABLE="--log-disable"
+THREADS=$( ( [ -f /proc/cpuinfo ] && grep -s '^cpu cores\s*:' /proc/cpuinfo | head -1 | awk '{print $4}' ) || sysctl -n hw.ncpu || echo "$NUMBER_OF_PROCESSORS" )
 
 # memory allocation: assume 4 chars per token
 PROMPT_LENGTH_EST=$(((75+${#SYSTEM_MESSAGE}+${#QUESTION}+${#INPUT})/4))
@@ -33,46 +32,29 @@ PROMPT_LENGTH_EST=$(((75+${#SYSTEM_MESSAGE}+${#QUESTION}+${#INPUT})/4))
 if [[ "${1}" == "-"* ]]; then
     while [[ $# -gt 0 ]]; do
 	case $1 in
-	    -m)
-		shift
-		MODEL_TYPE="$1"
-		;;
+	    -m|--model-type)
+		shift; MODEL_TYPE="$1" ;;
 	    --speed)
-		PRIORITY="speed"
-		;;
+		PRIORITY="speed" ;;
 	    --length)
-		PRIORITY="length"
-		;;
+		PRIORITY="length" ;;
 	    --temperature)
-		shift
-		TEMPERATURE="$1"
-		;;
+		shift; TEMPERATURE="$1" ;;
 	    --verbose)
-		VERBOSE=1
-		;;
+		VERBOSE=1 ;;
 	    -c|--context-length)
-		shift
-		CONTEXT_LENGTH="$1"
-		;;
+		shift; CONTEXT_LENGTH="$1" ;;
 	    --ngl)
-		shift
-		NGL="$1"
-		;;
+		shift; NGL="$1" ;;
 	    --n-predict)
-		shift
-		N_PREDICT="$1"
-		;;
+		shift; N_PREDICT="$1" ;;
 	    --debug)
-		ERROR_OUTPUT="/dev/stdout"
-		SILENT_PROMPT=""
-		DEBUG=1
-		;;
+		ERROR_OUTPUT="/dev/stdout"; SILENT_PROMPT=""; DEBUG=1 ;;
 	    --stdin)
-		DO_STDIN=1
-		;;
+		DO_STDIN=1 ;;
 	    --)
-		shift
-		QUESTION=("$@")
+		# consumes rest of line
+		shift QUESTION=("$@")
 		break
 		;;
 	    -*)
@@ -111,6 +93,7 @@ function find_first_file() {
       return 0
     fi
   done
+  echo "* Cannot find executable model in $@" >> /dev/stderr
   return 1
 }
 
@@ -308,7 +291,9 @@ case "${MODEL_TYPE}" in
         ;;
 
     phi)
-        MODEL="${HOME}/wip/llamafiles/models/phi-2.Q6_K.llamafile"
+        MODEL=$(find_first_file \
+		    "${HOME}/wip/llamafiles/models/phi-2.Q6_K.llamafile" \
+		    "${HOME}/wip/llamafiles/models/phi-2.Q5_K_M.llamafile")
         gpu_check 4
         phi_prompt
         phi_priority
