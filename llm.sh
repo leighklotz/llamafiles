@@ -25,7 +25,7 @@ LOG_DISABLE="--log-disable"
 # Get thread count
 THREADS=$( ( [ -f /proc/cpuinfo ] && grep '^cpu cores\s*:' /proc/cpuinfo | head -1 | awk '{print $4}' ))
 if [ "${THREADS}" == "" ]; then
-    THREADS=$(sysctl -n hw.ncpu || echo "${NUMBER_OF_PROCESSORS:-4}")
+    THREADS=$(sysctl -n hw.ncpu 2>/dev/null || echo "${NUMBER_OF_PROCESSORS:-4}")
 fi
 THREADS="${THREADS:+-t $THREADS}"
 
@@ -272,6 +272,7 @@ case "${MODEL_TYPE}" in
                     ${HOME}/wip/llamafiles/models/mistral-7b-instruct-v0.2.Q4_K_M.llamafile \
                     ${HOME}/wip/llamafiles/models/mistral-7b-instruct-v0.1-Q4_K_M-main.llamafile \
                     ${HOME}/wip/llamafiles/models/mistral-7b-instruct-v0.2.Q5_K_M.llamafile \
+                    ${HOME}/wip/llamafiles/models/mistral-7b-instruct-v0.2.Q3_K_M.llamafile \
                     ${HOME}/wip/llamafiles/models/mistral-7b-instruct-v0.2.Q3_K_S.llamafile)
         gpu_check 4
         MAX_CONTEXT_LENGTH=7999

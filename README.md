@@ -2,14 +2,28 @@
 - using https://github.com/Mozilla-Ocho/llamafile and scripts from https://github.com/jart
 
 # Script Files
-- cli.sh
+## base
 - llm.sh
+- server.sh
+
+## user programs
 - help.sh
 - machelp.sh
+- summarize.sh
+
+## images
 - image-name.sh
 - rename-pictures.sh [adapted from https://gist.github.com/jart/bd2f603aefe6ac8004e6b709223881c0]
-- server.sh
-- summarize.sh
+- llava-cli.sh 
+
+
+
+
+
+## utilities
+- systype.sh
+- nvfree.sh
+
 
 # Models
 
