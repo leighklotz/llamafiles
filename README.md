@@ -28,7 +28,7 @@ USAGE="[-m|--model-type model-type] [--stdin] [--speed | --length] [--temperatur
 - `--`: unambiguously terminate args
 - `QUESTION`: word or words, can be quoted or not, can be multiline (but also see `--stdin`)
 - [other options]: See source
-- $ENV: see source
+- $ENV: see env.sh.examples or source of llm.sh
 
 ## Examples
 Below are a few. More are in [examples](examples).
