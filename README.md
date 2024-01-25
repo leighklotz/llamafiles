@@ -45,12 +45,12 @@ USAGE="[-m|--model-type model-type] [--stdin] [--speed | --length] [--temperatur
 Below are a few. More are in [examples](examples).
 
 ### Bash Coding Example
-```bash
+```
 $ help.sh -m codebooga -- "split bash argument array into left and right with double hyphen as the separator using special bash builtin functions or operators as needed "
 ```
 
 ### General Linux Example
-```bash
+```
 $ help.sh what is my ip address
 ```
 
@@ -58,12 +58,12 @@ $ help.sh what is my ip address
 
 This example takes a live JSON input and shows how to extract a slightly tricky value. As a bonus, the model gives the value of the field.
 
-```bash
+```
 $ ./llama.cpp/gguf-py/scripts/gguf-dump.py ./models/dolphin-2.7-mixtral-8x7b.Q4_K_M.gguf --no-tensors --json | help.sh -m dolphin --stdin -- 'give me a jq cli to get the value of the named `llama.context_length` (note the dot is part of the field name) in the following JSON:'
 
 To get the value of `llama.context_length` using jq, you can use the following command:
 
-	```bash
+	```
 	cat file.json | jq '.metadata["llama.context_length"].value'
 	```
 
@@ -72,7 +72,7 @@ $
 ```
 
 Proof it works:
-```bash
+```
 $ ./llama.cpp/gguf-py/scripts/gguf-dump.py ./models/dolphin-2.7-mixtral-8x7b.Q4_K_M.gguf --no-tensors --json | jq '.metadata["llama.context_length"].value'
     32768
 $
@@ -81,7 +81,7 @@ $
 ### LSHW Example
 
 The Codebooga llamafile I'm using doesn't yet support --silent-prompt so I elided the re-printed prompt manually.
-```bash
+```
 sudo lshw | wc 
     727    2411   31214
 $ sudo lshw | help.sh -c 16384 -m codebooga --stdin -- 'Summarize the following lshw output:\n\n'
@@ -100,7 +100,7 @@ $ sudo lshw | help.sh -c 16384 -m codebooga --stdin -- 'Summarize the following 
 ```
 
 ### Raspberry Pi 5 lspci with Rocket model
-```bash
+```
 klotz@rpi5:~ $ help.sh lspci
 LSPCI, or List PCI Devices, is a command used in Linux to display information about all the PCI devices connected to the system's motherboard. It provides details such as device vendor and product IDs, memory sizes, and supported devices. This command can be executed in the terminal of a Linux system with root privileges. For example, to list all PCI devices, you would type `lspci` in the terminal and press Enter. The output will display the information about each device.
 klotz@rpi5:~ $ lspci | help.sh --stdin "explain this lspci output"
