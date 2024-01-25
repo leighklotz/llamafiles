@@ -347,7 +347,7 @@ case "${MODEL_TYPE}" in
         ;;
 esac
 
-if [ $(($PROMPT_LENGTH_EST * 2)) -gt "${CONTEXT_LENGTH}" ]; then
+if [ $(($PROMPT_LENGTH_EST * 1.25)) -gt "${CONTEXT_LENGTH}" ]; then
     echo "* WARNING: Prompt len $PROMPT_LENGTH_EST and response estimated not to fit in context ${CONTEXT_LENGTH}"
 fi
 
