@@ -147,12 +147,13 @@ function cap_ngl {
 }
 
 function dolphin_priority {
+    MAX_CONTEXT_LENGTH=12288
     case "${PRIORITY}" in
          speed)
              NGL=${NGL:=23}
              CONTEXT_LENGTH=2048
              ;;
-         context)
+         length)
              NGL=${NGL:=8}
              CONTEXT_LENGTH=12288
              ;;
@@ -169,12 +170,13 @@ function dolphin_priority {
 }
 
 function mistral_priority {
+    MAX_CONTEXT_LENGTH=7999
     case "${PRIORITY}" in
-        speed|context)
+        speed|length)
             NGL=${NGL:=33}
             CONTEXT_LENGTH=2000
             ;;
-        context)
+        length)
             NGL=${NGL:=33}
             CONTEXT_LENGTH=7999
             ;;
@@ -192,12 +194,13 @@ function mistral_priority {
 }
 
 function codebooga_priority {
+    MAX_CONTEXT_LENGTH=32768
     case "${PRIORITY}" in
          speed)
              NGL=${NGL:=33}
              CONTEXT_LENGTH=2048
              ;;
-         context)
+         length)
              NGL=${NGL:=25}
              CONTEXT_LENGTH=16383
              ;;
@@ -216,17 +219,36 @@ function codebooga_priority {
 }
 
 function rocket_priority {
-        MAX_CONTEXT_LENGTH=2048
-        CONTEXT_LENGTH=${CONTEXT_LENGTH:=2048}
-        BATCH_SIZE=${BATCH_SIZE:-128}
-        NGL=${NGL:=0}
+    MAX_CONTEXT_LENGTH=4096
+    case "${PRIORITY}" in
+         speed)
+             NGL=${NGL:=33}
+             CONTEXT_LENGTH=2048
+             ;;
+         length)
+             NGL=${NGL:=25}
+             CONTEXT_LENGTH=4096
+             ;;
+         manual)
+            NGL=${NGL:=33}
+            CONTEXT_LENGTH=${CONTEXT_LENGTH:=2048}
+             ;;
+        *)
+             echo "Unknown -m ${MODEL_TYPE}"
+             echo "usage: $0 ${USAGE}"
+             exit 1
+            ;;
+    esac
+
+    cap_ngl
 }
 
 function phi_priority {
-        MAX_CONTEXT_LENGTH=2048
-        CONTEXT_LENGTH=${CONTEXT_LENGTH:=2048}
-        BATCH_SIZE=${BATCH_SIZE:-128}
-        NGL=${NGL:-}
+    MAX_CONTEXT_LENGTH=2048
+    CONTEXT_LENGTH=${CONTEXT_LENGTH:=2048}
+    BATCH_SIZE=${BATCH_SIZE:-128}
+    NGL=${NGL:-}
+    cap_ngl
 }
 
 
@@ -272,7 +294,6 @@ case "${MODEL_TYPE}" in
                 ${HOME}/wip/llamafiles/models/dolphin-2.5-mixtral-8x7b.Q4_K_M.llamafile \
 	        ${HOME}/wip/llamafiles/models/mixtral_7bx2_moe.Q3_K_M.gguf \
 		)
-        MAX_CONTEXT_LENGTH=12288
         gpu_check 1.2
         chatml_prompt
         dolphin_priority
@@ -287,7 +308,6 @@ case "${MODEL_TYPE}" in
                     ${HOME}/wip/llamafiles/models/mistral-7b-instruct-v0.2.Q3_K_M.llamafile \
                     ${HOME}/wip/llamafiles/models/mistral-7b-instruct-v0.2.Q3_K_S.llamafile)
         gpu_check 4
-        MAX_CONTEXT_LENGTH=7999
         llama_prompt
         mistral_priority
         ;;
@@ -295,7 +315,6 @@ case "${MODEL_TYPE}" in
     ## Model: oobabooga/text-generation-webui/models/codebooga-34b-v0.1.Q4_K_M.gguf
     codebooga)
         MODEL="${HOME}/wip/oobabooga/text-generation-webui/models/codebooga-34b-v0.1.Q4_K_M.gguf"
-        MAX_CONTEXT_LENGTH=32768
         SILENT_PROMPT=""        # not supported by codebooga
         gpu_check 2.1
         llama_prompt
