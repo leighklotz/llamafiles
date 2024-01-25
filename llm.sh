@@ -1,4 +1,4 @@
-#!/bin/bash
+!/bin/bash
 
 USAGE="[-m|--model-type model-type] [--stdin|--interactive|-i] [--speed | --length] [--temperature temp] [--context-length|-c n] [--ngl n] [--n-predict n] [--debug] [--verbose] [--] QUESTION*"
 
@@ -209,7 +209,31 @@ function codebooga_priority {
             CONTEXT_LENGTH=${CONTEXT_LENGTH:=2048}
              ;;
         *)
-             echo "Unknown -m ${MODEL_TYPE}"
+             echo "usage: unknown priority $PRIORITY"
+             exit 1
+            ;;
+    esac
+
+    cap_ngl
+}
+
+function deepseek_priority {
+    MAX_CONTEXT_LENGTH=32768
+    case "${PRIORITY}" in
+         speed)
+             NGL=${NGL:=33}
+             CONTEXT_LENGTH=2048
+             ;;
+         length)
+             NGL=${NGL:=25}
+             CONTEXT_LENGTH=16383
+             ;;
+         manual)
+            NGL=${NGL:=33}
+            CONTEXT_LENGTH=${CONTEXT_LENGTH:=2048}
+             ;;
+        *)
+             echo "usage: unknown priority $PRIORITY"
              echo "usage: $0 ${USAGE}"
              exit 1
             ;;
@@ -234,7 +258,7 @@ function rocket_priority {
             CONTEXT_LENGTH=${CONTEXT_LENGTH:=2048}
              ;;
         *)
-             echo "Unknown -m ${MODEL_TYPE}"
+             echo "usage: unknown priority $PRIORITY"
              echo "usage: $0 ${USAGE}"
              exit 1
             ;;
@@ -319,6 +343,15 @@ case "${MODEL_TYPE}" in
         gpu_check 2.1
         llama_prompt
         codebooga_priority
+        ;;
+
+    ## Model: deepseek-coder
+    deepseek|coder)
+        MODEL="${HOME}/wip/llamafiles/models/deepseek-coder-6.7b-instruct.Q4_K_M.gguf"
+        SILENT_PROMPT=""
+        gpu_check 2.1
+        chatml_prompt
+        deepseek_priority
         ;;
 
     rocket)
