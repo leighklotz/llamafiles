@@ -350,7 +350,7 @@ case "${MODEL_TYPE}" in
         MODEL="${HOME}/wip/llamafiles/models/deepseek-coder-6.7b-instruct.Q4_K_M.gguf"
         SILENT_PROMPT=""
         gpu_check 2.1
-        chatml_prompt
+	llama_prompt
         deepseek_priority
         ;;
 
