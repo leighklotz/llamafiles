@@ -20,9 +20,6 @@
 - systype.sh
 - nvfree.sh
 
-# Models
-Download your own models.
-
 ## help.sh
 USAGE="[-m|--model-type model-type] [--stdin] [--speed | --length] [--temperature temp] [--context-length|-c n] [--ngl n] [--n-predict n] [--debug] [--verbose] [--] QUESTION*"
 
@@ -107,8 +104,10 @@ I hope that helps! Let me know if you have any other questions.
 klotz@rpi5:~ $ 
 ```
 
+# Models
+Download your own models.
 
-# LLamafile binaries
+## LLamafile binaries
 These go in `bin/`:
 
 https://github.com/Mozilla-Ocho/llamafile
@@ -120,17 +119,17 @@ https://github.com/Mozilla-Ocho/llamafile
 - `llamafile-server-0.2.1`
 - `zipalign-0.2.1`
 
-# Models and all-in-one
+## Models and all-in-one
 You need to download these from https://huggingface.co/jartine and other places on HF.
 
-## Desktop and GPU models
+### Desktop and GPU models
 These go in `models/`:
 - `dolphin-2.5-mixtral-8x7b.Q4_K_M.llamafile`
 - `llava-v1.5-7b-q4-main.llamafile`
 - `llava-v1.5-7b-q4-server.llamafile`
 - `mistral-7b-instruct-v0.2.Q4_K_M.llamafile`
 
-## RPI5 and other small models
+### RPI5 and other small models
 These go in `models/`:
 - `mistral-7b-instruct-v0.2.Q3_K_M.llamafile`
 - `mixtral_7bx2_moe.Q3_K_M.gguf`
@@ -138,5 +137,5 @@ These go in `models/`:
 - `phi-2.Q6_K.llamafile`
 - `rocket-3b.Q4_K_M.llamafile`
 
-# Mac
+# Mac Specifics
 - `xattr -dr com.apple.quarantine models/* bin/*`
