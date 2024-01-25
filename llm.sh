@@ -1,6 +1,6 @@
 #!/bin/bash
 
-USAGE="[-m|--model-type model-type] [--stdin] [--speed | --length] [--temperature temp] [--context-length|-c n] [--ngl n] [--n-predict n] [--debug] [--verbose] [--] QUESTION*"
+USAGE="[-m|--model-type model-type] [--stdin|--interactive|-i] [--speed | --length] [--temperature temp] [--context-length|-c n] [--ngl n] [--n-predict n] [--debug] [--verbose] [--] QUESTION*"
 
 # Use flags or environment variables below:
 MODEL_TYPE=${MODEL_TYPE:-mistral}
@@ -9,17 +9,16 @@ QUESTION=${QUESTION:-}
 ERROR_OUTPUT="/dev/null"
 TEMPERATURE=${TEMPERATURE:-0.33}
 CONTEXT_LENGTH=${CONTEXT_LENGTH:=}
-#MAX_CONTEXT_LENGTH=${CONTEXT_LENGTH}
 N_PREDICT=""
 SYSTEM_MESSAGE="${SYSTEM_MESSAGE-$(printf "%b" "Answer the following user question:\n")}"
 SILENT_PROMPT="--silent-prompt"
 NGL=""
-GPU="--gpu anto"
+GPU="--gpu auto"
 PRIORITY="manual" # manual|speed|context
 DEBUG=""
 VERBOSE=${VERBOSE:-}
 MODEL_RUNNER="/usr/bin/env"
-DO_STDIN=""
+DO_STDIN="$(test -t 0 || echo $?)"
 LOG_DISABLE="--log-disable"
 
 # Get thread count
@@ -30,10 +29,6 @@ if [ "${THREADS}" == "" ]; then
     fi
 fi
 THREADS="${THREADS:+-t $THREADS}"
-
-# memory allocation: assume 4 chars per token
-PROMPT_LENGTH_EST=$(((75+${#SYSTEM_MESSAGE}+${#QUESTION}+${#INPUT})/4))
-# echo "PROMPT_LENGTH_EST=$PROMPT_LENGTH_EST"
 
 # If there are any args, require "--" or any non-hyphen word to terminate args and start question.
 # Assume the whole args is a question if there is no hyphen to start.
@@ -58,7 +53,7 @@ if [[ "${1}" == "-"* ]]; then
 		shift; N_PREDICT="$1" ;;
 	    --debug)
 		ERROR_OUTPUT="/dev/stdout"; SILENT_PROMPT=""; DEBUG=1 ;;
-	    --stdin)
+	    --stdin|--interactive|-i)
 		DO_STDIN=1 ;;
 	    --)
 		# consumes rest of line
@@ -88,16 +83,19 @@ if [ "$DO_STDIN" != "" ]; then
     INPUT=$(cat)
 fi
 
+# memory allocation: assume 4 chars per token
+PROMPT_LENGTH_EST=$(((75+${#SYSTEM_MESSAGE}+${#QUESTION}+${#INPUT})/4))
+[ $VERBOSE ] && echo "* PROMPT_LENGTH_EST=$PROMPT_LENGTH_EST"
 
-# Example usage:
-# Set the variable to the path of the first existing executable in the list.
+# Find the first existing executable in the list.
 # file_path=$(find_first_file /path/to/file1 /path/to/file2 /path/to/file3)
 function find_first_file() {
   local files=("$@")
   local file
   for file in "${files[@]}"; do
     if [ -x "$file" ]; then
-      echo "$file"
+      [ $VERBOSE ] && echo "* Model $file" >> /dev/stderr
+      echo "${file}"
       return 0
     fi
   done
@@ -141,9 +139,7 @@ function cap_ngl {
     else
 	NGL=$MAX_NGL_EST
 	if [ "${NGL}" != '' ] && [ "${NGL}" -gt "${MAX_NGL_EST}" ]; then
-            if [ "${VERBOSE}" ]; then
-		echo "* Capping $NGL at $MAX_NGL_EST"
-            fi
+            [ $VERBOSE ] && echo "* Capping $NGL at $MAX_NGL_EST"
             NGL=$MAX_NGL_EST
 	fi
     fi
@@ -272,7 +268,8 @@ case "${MODEL_TYPE}" in
     dolphin|mixtral)
         MODEL=$(find_first_file \
                 ${HOME}/wip/llamafiles/models/dolphin-2.5-mixtral-8x7b.Q4_K_M.llamafile \
-	        ${HOME}/wip/llamafiles/models/mixtral_7bx2_moe.Q3_K_M.gguf) # not dolphin
+	        ${HOME}/wip/llamafiles/models/mixtral_7bx2_moe.Q3_K_M.gguf \
+		)
         MAX_CONTEXT_LENGTH=12288
         gpu_check 1.2
         chatml_prompt
@@ -304,8 +301,10 @@ case "${MODEL_TYPE}" in
         ;;
 
     rocket)
-        MODEL="${HOME}/wip/llamafiles/models/rocket-3b.Q4_K_M.llamafile"
-        # PROMPT=$(printf "%b" "<|im_start|>system\n{system_message}<|im_end|>\n<|im_start|>user\n{prompt}<|im_end|>\n<|im_start|>assistant\n")
+        MODEL=$(find_first_file \
+		    "${HOME}/wip/llamafiles/models/rocket-3b.Q6_K.llamafile" \
+		    "${HOME}/wip/llamafiles/models/rocket-3b.Q4_K_M.llamafile" \
+	     )
         gpu_check 4
         chatml_prompt
         rocket_priority
@@ -314,7 +313,8 @@ case "${MODEL_TYPE}" in
     phi)
         MODEL=$(find_first_file \
 		    "${HOME}/wip/llamafiles/models/phi-2.Q6_K.llamafile" \
-		    "${HOME}/wip/llamafiles/models/phi-2.Q5_K_M.llamafile")
+		    "${HOME}/wip/llamafiles/models/phi-2.Q5_K_M.llamafile" \
+	     )
         gpu_check 4
         phi_prompt
         phi_priority

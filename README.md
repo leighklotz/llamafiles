@@ -21,10 +21,12 @@
 - nvfree.sh
 
 ## help.sh
-USAGE="[-m|--model-type model-type] [--stdin] [--speed | --length] [--temperature temp] [--context-length|-c n] [--ngl n] [--n-predict n] [--debug] [--verbose] [--] QUESTION*"
+USAGE="[-m|--model-type model-type] [--stdin|--interactive|-i] [--speed | --length] [--temperature temp] [--context-length|-c n] [--ngl n] [--n-predict n] [--debug] [--verbose] [--] QUESTION*"
+
+Uses question words and stdin, if any, to create the model prompt.
 
 - `-m`, `--model-type`: defaults if not specified; see source for model types
-- `--stdin`: reads stdin and interpolates into prompt; if input is a terminal, asks user for input
+- `--stdin|--interactive|-i`: if input is a terminal, asks user for input and interpolates stdin into prompt 
 - `--`: unambiguously terminate args
 - `QUESTION`: word or words, can be quoted or not, can be multiline (but also see `--stdin`)
 - [other options]: See source
