@@ -40,6 +40,10 @@ USAGE="[-m|--model-type model-type] [--stdin] [--speed | --length] [--temperatur
 - [other options]: See source
 - $ENV: see source
 
+## Examples
+
+Below are a few. More are in [examples](examples).
+
 ### Bash Coding Example
 ```bash
 $ help.sh -m codebooga -- "split bash argument array into left and right with double hyphen as the separator using special bash builtin functions or operators as needed "
@@ -94,6 +98,25 @@ $ sudo lshw | help.sh -c 16384 -m codebooga --stdin -- 'Summarize the following 
 	interface (Intel Ethernet Controller I225-V). The computer also has
 	USB ports, audio devices, and an SMBus controller.  [end of text]
 ```
+
+### Raspberry Pi 5 lspci with Rocket model
+```bash
+klotz@rpi5:~ $ help.sh lspci
+LSPCI, or List PCI Devices, is a command used in Linux to display information about all the PCI devices connected to the system's motherboard. It provides details such as device vendor and product IDs, memory sizes, and supported devices. This command can be executed in the terminal of a Linux system with root privileges. For example, to list all PCI devices, you would type `lspci` in the terminal and press Enter. The output will display the information about each device.
+klotz@rpi5:~ $ lspci | help.sh --stdin "explain this lspci output"
+Sure, I can help you understand the LSPCI (List PCI Devices) output you provided.
+
+LSPCI is a command in Linux that lists all PCI devices in the system. The output you provided is in a format that's easy to read but not very human-friendly. Here's a breakdown of what each line means:
+1. `0000:00:00.0 PCI bridge: Broadcom Inc. and subsidiaries Device 2712 (rev 21)`: This is a PCI bridge, which is a device that connects PCI buses together. The device ID '2712' is a vendor ID for Broadcom, and the revision '21' is the chipset revision.
+2. `0000:01:00.0 Non-Volatile memory controller: Realtek Semiconductor Co., Ltd. RTS5763DL NVMe SSD Controller (rev 01)`: This is an NVMe (Non-Volatile Memory Express) SSD controller from Realtek. The device ID '01' is the chipset revision.
+3. `0001:00:00.0 PCI bridge: Broadcom Inc. and subsidiaries Device 2712 (rev 21)`: This is another PCI bridge, connecting PCI buses. The device ID '2712' is the same as before, indicating it's from the same vendor.
+4. `0001:01:00.0 Ethernet controller: Device 1de4:0001`: This is an Ethernet controller from the device ID '1de4:0001'. The device ID '1de4' is a vendor ID for Intel, and the revision '1' is the chipset revision.
+So, in summary, your system has a Broadcom PCI bridge (Device 2712) and two Realtek NVMe SSD controllers (one at address 0000:01:00.0 and another at address 0001:00:00.0). It also has an Intel Ethernet controller (Device 1de4:0001).
+
+I hope that helps! Let me know if you have any other questions.
+klotz@rpi5:~ $ 
+```
+
 
 # LLamafile binaries
 These go in `bin/`:
