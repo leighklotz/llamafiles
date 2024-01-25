@@ -16,21 +16,14 @@
 - rename-pictures.sh [adapted from https://gist.github.com/jart/bd2f603aefe6ac8004e6b709223881c0]
 - llava-cli.sh 
 
-
-
-
-
 ## utilities
 - systype.sh
 - nvfree.sh
 
-
 # Models
-
 Download your own models.
 
 ## help.sh
-
 USAGE="[-m|--model-type model-type] [--stdin] [--speed | --length] [--temperature temp] [--context-length|-c n] [--ngl n] [--n-predict n] [--debug] [--verbose] [--] QUESTION*"
 
 - `-m`, `--model-type`: defaults if not specified; see source for model types
@@ -41,7 +34,6 @@ USAGE="[-m|--model-type model-type] [--stdin] [--speed | --length] [--temperatur
 - $ENV: see source
 
 ## Examples
-
 Below are a few. More are in [examples](examples).
 
 ### Bash Coding Example
@@ -55,7 +47,6 @@ $ help.sh what is my ip address
 ```
 
 ### JQ Example
-
 This example takes a live JSON input and shows how to extract a slightly tricky value. As a bonus, the model gives the value of the field.
 
 ```
@@ -79,7 +70,6 @@ $
 ```
 
 ### LSHW Example
-
 The Codebooga llamafile I'm using doesn't yet support --silent-prompt so I elided the re-printed prompt manually.
 ```
 sudo lshw | wc 
@@ -131,15 +121,17 @@ https://github.com/Mozilla-Ocho/llamafile
 - `zipalign-0.2.1`
 
 # Models and all-in-one
-You need to download these from various places on HF and llamafile
-These go in `models/`:
+You need to download these from https://huggingface.co/jartine and other places on HF.
 
+## Desktop and GPU models
+These go in `models/`:
 - `dolphin-2.5-mixtral-8x7b.Q4_K_M.llamafile`
 - `llava-v1.5-7b-q4-main.llamafile`
 - `llava-v1.5-7b-q4-server.llamafile`
 - `mistral-7b-instruct-v0.2.Q4_K_M.llamafile`
 
 ## RPI5 and other small models
+These go in `models/`:
 - `mistral-7b-instruct-v0.2.Q3_K_M.llamafile`
 - `mixtral_7bx2_moe.Q3_K_M.gguf`
 - `phi-2.Q5_K_M.llamafile`
