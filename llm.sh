@@ -172,9 +172,9 @@ function dolphin_priority {
 function mistral_priority {
     MAX_CONTEXT_LENGTH=7999
     case "${PRIORITY}" in
-        speed|length)
+        speed)
             NGL=${NGL:=33}
-            CONTEXT_LENGTH=2000
+            CONTEXT_LENGTH=2048
             ;;
         length)
             NGL=${NGL:=33}
