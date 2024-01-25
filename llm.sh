@@ -267,6 +267,7 @@ case "${MODEL_TYPE}" in
     ## Model: dolphin mixtral 8x7b
     dolphin|mixtral)
         MODEL=$(find_first_file \
+		${HOME}/wip/llamafiles/models/dolphin-2.7-mixtral-8x7b.Q4_K_M.gguf \
                 ${HOME}/wip/llamafiles/models/dolphin-2.5-mixtral-8x7b.Q4_K_M.llamafile \
 	        ${HOME}/wip/llamafiles/models/mixtral_7bx2_moe.Q3_K_M.gguf \
 		)
