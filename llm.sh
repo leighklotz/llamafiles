@@ -73,10 +73,7 @@ if [[ "${1}" == "-"* ]]; then
 	shift
     done
 else
-    echo NO ARGSNO ARGSNO ARGSNO ARGSNO ARGSNO ARGS
     QUESTION="${*}"
-    echo "QUESTION=$QUESTION"
-    exit 1
 fi
 
 
