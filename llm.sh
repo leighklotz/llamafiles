@@ -367,7 +367,7 @@ if [ "${DEBUG}" ] || [ "${VERBOSE}" ]; then
     set -x
 fi
 
-printf '%s' "${PROMPT}" | ${MODEL_RUNNER} ${MODEL} ${LOG_DISABLE} ${TEMPERATURE} ${CONTEXT_LENGTH} ${NGL} ${N_PREDICT} ${BATCH_SIZE} --no-penalize-nl --repeat-penalty 1 ${THREADS} -f /dev/stdin $SILENT_PROMPT --mlock 2> "${ERROR_OUTPUT}"
+printf '%s' "${PROMPT}" | ${MODEL_RUNNER} ${MODEL} ${LOG_DISABLE} ${TEMPERATURE} ${CONTEXT_LENGTH} ${NGL} ${N_PREDICT} ${BATCH_SIZE} --no-penalize-nl --repeat-penalty 1 ${THREADS} -f /dev/stdin $SILENT_PROMPT 2> "${ERROR_OUTPUT}"
 
 # TODO: CLI parameters vs ENV vs bundles of settings is a mess
 # Sort out --length/--ngl vs --speed/--length vs default
