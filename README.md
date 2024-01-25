@@ -19,6 +19,7 @@
 ## utilities
 - systype.sh
 - nvfree.sh
+- code.sh
 
 ## help.sh
 USAGE="[-m|--model-type model-type] [--stdin|--interactive|-i] [--speed | --length] [--temperature temp] [--context-length|-c n] [--ngl n] [--n-predict n] [--debug] [--verbose] [--] QUESTION*"
