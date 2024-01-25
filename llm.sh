@@ -364,7 +364,7 @@ fi
 
 # Set verbose and debug last
 if [ "${DEBUG}" ] || [ "${VERBOSE}" ]; then
-    printf '* ngl=%s context_length=%s est_len=%s:\n' "${NGL}" "${CONTEXT_LENGTH}" "${PROMPT_LENGTH_EST}"
+    printf '* Paramters: ngl=%s context_length=%s est_len=%s:\n' "${NGL}" "${CONTEXT_LENGTH}" "${PROMPT_LENGTH_EST}"
     set -x
 fi
 
