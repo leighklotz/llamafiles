@@ -88,6 +88,7 @@ $ sudo lshw | help.sh -c 16384 -m codebooga --stdin -- 'Summarize the following 
 
 ### Raspberry Pi 5 lspci with Rocket model
 ```
+klotz@rpi5:~ $ export MODEL=rocket
 klotz@rpi5:~ $ help.sh lspci
 LSPCI, or List PCI Devices, is a command used in Linux to display information about all the PCI devices connected to the system's motherboard. It provides details such as device vendor and product IDs, memory sizes, and supported devices. This command can be executed in the terminal of a Linux system with root privileges. For example, to list all PCI devices, you would type `lspci` in the terminal and press Enter. The output will display the information about each device.
 klotz@rpi5:~ $ lspci | help.sh --stdin "explain this lspci output"
