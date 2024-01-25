@@ -1,4 +1,4 @@
-!/bin/bash
+#!/bin/bash
 
 USAGE="[-m|--model-type model-type] [--stdin|--interactive|-i] [--speed | --length] [--temperature temp] [--context-length|-c n] [--ngl n] [--n-predict n] [--debug] [--verbose] [--] QUESTION*"
 
