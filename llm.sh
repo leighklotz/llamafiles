@@ -23,9 +23,11 @@ DO_STDIN=""
 LOG_DISABLE="--log-disable"
 
 # Get thread count
-THREADS=$( ( [ -f /proc/cpuinfo ] && grep '^cpu cores\s*:' /proc/cpuinfo | head -1 | awk '{print $4}' ))
 if [ "${THREADS}" == "" ]; then
-    THREADS=$(sysctl -n hw.ncpu 2>/dev/null || echo "${NUMBER_OF_PROCESSORS:-4}")
+    THREADS=$( ( [ -f /proc/cpuinfo ] && grep '^cpu cores\s*:' /proc/cpuinfo | head -1 | awk '{print $4}' ))
+    if [ "${THREADS}" == "" ]; then
+	THREADS=$(sysctl -n hw.ncpu 2>/dev/null || echo "${NUMBER_OF_PROCESSORS:-4}")
+    fi
 fi
 THREADS="${THREADS:+-t $THREADS}"
 
@@ -365,7 +367,7 @@ if [ "${DEBUG}" ] || [ "${VERBOSE}" ]; then
     set -x
 fi
 
-printf '%s' "${PROMPT}" | ${MODEL_RUNNER} ${MODEL} ${LOG_DISABLE} ${TEMPERATURE} ${CONTEXT_LENGTH} ${NGL} ${N_PREDICT} ${BATCH_SIZE} --no-penalize-nl --repeat-penalty 1 ${THREADS} -f /dev/stdin $SILENT_PROMPT 2> "${ERROR_OUTPUT}"
+printf '%s' "${PROMPT}" | ${MODEL_RUNNER} ${MODEL} ${LOG_DISABLE} ${TEMPERATURE} ${CONTEXT_LENGTH} ${NGL} ${N_PREDICT} ${BATCH_SIZE} --no-penalize-nl --repeat-penalty 1 ${THREADS} -f /dev/stdin $SILENT_PROMPT --mlock 2> "${ERROR_OUTPUT}"
 
 # TODO: CLI parameters vs ENV vs bundles of settings is a mess
 # Sort out --length/--ngl vs --speed/--length vs default
