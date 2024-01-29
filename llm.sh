@@ -21,6 +21,8 @@ MODEL_RUNNER="/usr/bin/env"
 DO_STDIN="$(test -t 0 || echo $?)"
 LOG_DISABLE="--log-disable"
 
+LLAMAFILE_MODEL_RUNNER="${HOME}/wip/llamafiles/bin/llamafile-0.6.1 -m "
+
 # Get thread count
 if [ "${THREADS}" == "" ]; then
     THREADS=$( ( [ -f /proc/cpuinfo ] && grep '^cpu cores\s*:' /proc/cpuinfo | head -1 | awk '{print $4}' ))
@@ -312,13 +314,14 @@ Output:")
 # Fit into estimated VRAM cap
 case "${MODEL_TYPE}" in
     ## Model: dolphin mixtral 8x7b
+    ## todo: some are not dolphin, only mixtral
     dolphin|mixtral)
         MODEL=$(find_first_file \
 		${HOME}/wip/llamafiles/models/dolphin-2.7-mixtral-8x7b.Q4_K_M.gguf \
-                ${HOME}/wip/llamafiles/models/dolphin-2.5-mixtral-8x7b.Q4_K_M.llamafile \
+		${HOME}/wip/llamafiles/models/mixtral-8x7b-instruct-v0.1.Q5_K_M.llamafile \
 	        ${HOME}/wip/llamafiles/models/mixtral_7bx2_moe.Q3_K_M.gguf \
 		)
-        gpu_check 1.2
+        gpu_check 1
         chatml_prompt
         dolphin_priority
         ;;
@@ -326,9 +329,10 @@ case "${MODEL_TYPE}" in
     ## Model: mistral-7b-instruct
     mistral)
         MODEL=$(find_first_file \
+                    ${HOME}/wip/llamafiles/models/mistral-7b-instruct-v0.2.Q5_K_M.llamafile \
+                    ${HOME}/wip/llamafiles/models/mistral-instruct-v0.2.Q5_K_M.llamafile \
                     ${HOME}/wip/llamafiles/models/mistral-7b-instruct-v0.2.Q4_K_M.llamafile \
                     ${HOME}/wip/llamafiles/models/mistral-7b-instruct-v0.1-Q4_K_M-main.llamafile \
-                    ${HOME}/wip/llamafiles/models/mistral-7b-instruct-v0.2.Q5_K_M.llamafile \
                     ${HOME}/wip/llamafiles/models/mistral-7b-instruct-v0.2.Q3_K_M.llamafile \
                     ${HOME}/wip/llamafiles/models/mistral-7b-instruct-v0.2.Q3_K_S.llamafile)
         gpu_check 4
@@ -357,6 +361,7 @@ case "${MODEL_TYPE}" in
     rocket)
         MODEL=$(find_first_file \
 		    "${HOME}/wip/llamafiles/models/rocket-3b.Q6_K.llamafile" \
+		    "${HOME}/wip/llamafiles/models/rocket-3b.Q5_K_M.llamafile" \
 		    "${HOME}/wip/llamafiles/models/rocket-3b.Q4_K_M.llamafile" \
 	     )
         gpu_check 4
@@ -412,7 +417,7 @@ BATCH_SIZE="${BATCH_SIZE:+--batch_size $BATCH_SIZE}"
 
 # set MODEL_RUNNER
 if [ "${MODEL##*.}" != "llamafile" ]; then
-   MODEL_RUNNER="${HOME}/wip/llamafiles/bin/llamafile-0.6.1 -m "
+   MODEL_RUNNER="${LLAMAFILE_MODEL_RUNNER}"
 fi
 
 # Set verbose and debug last
