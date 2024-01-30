@@ -21,7 +21,7 @@ MODEL_RUNNER="/usr/bin/env"
 DO_STDIN="$(test -t 0 || echo $?)"
 LOG_DISABLE="--log-disable"
 
-LLAMAFILE_MODEL_RUNNER="${HOME}/wip/llamafiles/bin/llamafile-0.6.1 -m "
+LLAMAFILE_MODEL_RUNNER="${HOME}/wip/llamafiles/bin/llamafile-0.6.2 -m "
 
 # Get thread count
 if [ "${THREADS}" == "" ]; then
