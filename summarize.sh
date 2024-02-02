@@ -6,9 +6,8 @@ URL="${!#}"			# LAST
 ARGS="${@:1:${#}-1}"		# BUTLAST
 
 if LYNX=$(command -v lynx); then
-   CMD="${LYNX} --dump"
+   CMD="${LYNX} --dump --nolist"
 elif LINKS=$(command -v links); then
-   echo b
    CMD="${LINKS} -codepage utf-8 -force-html -width 72 -dump"
 else
    echo "error: NOLINKS"

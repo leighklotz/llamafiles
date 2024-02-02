@@ -1,0 +1,29 @@
+
+klotz@core:~/wip/llamafiles/bin$ machelp.sh -m dolphin iterm2 use 24-bit color for emacs in terminal
+
+To use 24-bit color in iTerm2 for Emacs, you'll need to configure both iTerm2 and Emacs. Here's a step-by-step guide:
+
+1. **Configure iTerm2:**
+   - Open iTerm2 preferences.
+   - Go to the "Profiles" tab, then select your current profile.
+   - Go to the "Colors" tab.
+   - Under "Text and Fonts", change the "Color Mode" to "24-bit RGB".
+   - Click "OK" to save the changes.
+
+2. **Configure Emacs:**
+   - Open your `.emacs` file in a text editor.
+   - Add the following lines at the end of the file:
+
+```emacs
+(set-default-color-theme 'solarized-dark)
+(set-face-background-color 'default 244) ; Change this value to your desired background color in hexadecimal format.
+(set-face-background-color 'background 244) ; Change this value to your desired background color in hexadecimal format.
+```
+
+   - Save and close the file.
+
+3. **Restart Emacs:**
+   - Restart Emacs to apply the changes.
+
+Now, Emacs in iTerm2 should be using 24-bit color.
+klotz@core:~/wip/llamafiles/bin$ 
