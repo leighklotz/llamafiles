@@ -1,0 +1,23 @@
+klotz@rpi5:~ $ code bash systype | help.sh on this raspberry pi in what file do I find the setting GRUB_CMDLINE_LINUX
+To find the setting GRUB_CMDLINE_LINUX on a Raspberry Pi, you need to edit the grub configuration file. The location of this file depends on the Raspberry Pi model you have. For example, if you have a Raspberry Pi 4 or later, the file location would be `/etc/grub.d/10_linux`. 
+
+To edit this file, open it in a text editor with root privileges:
+
+```bash
+sudo nano /etc/grub.d/10_linux
+```
+
+Once you've opened the file, you can add or modify the line containing `GRUB_CMDLINE_LINUX` to include your desired settings. For example, to add "i915.modeset=1" to the kernel command line, you would write:
+
+```bash
+GRUB_CMDLINE_LINUX="i915.modeset=1"
+```
+
+Save and close the file when you're done. After saving, run `update-grub` to update the grub configuration:
+
+```bash
+sudo update-grub
+```
+
+This will update the grub configuration on the Raspberry Pi and apply the changes to the GRUB_CMDLINE_LINUX setting.
+klotz@rpi5:~ $ 

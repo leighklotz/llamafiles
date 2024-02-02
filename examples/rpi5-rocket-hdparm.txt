@@ -1,0 +1,36 @@
+klotz@rpi5:~/wip/llamafiles/examples $ (systype; code hdparm sudo hdparm -t --direct /dev/nvme0n1) | help.sh --verbose -m rocket are these good results for nvme drive on rpi5 with pcie_x1 gen=3
+* PROMPT_LENGTH_EST=180
+* Model /home/klotz/wip/llamafiles/models/rocket-3b.Q4_K_M.llamafile
+* Paramters: ngl=-ngl 0 context_length=-c 2048 est_len=181:
++ printf %s '<|im_start|>system
+Answer the following user question, or follow the user instruction, about Linux, Bash, Python, general programming, or even other subjects, if you know the answer:<|im_end|>
+<|im_start|>user
+are these good results for nvme drive on rpi5 with pcie_x1 gen=3
+# Description of this system:
+```bash
+$ uname -a
+Linux rpi5 6.1.0-rpi8-rpi-2712 #1 SMP PREEMPT Debian 1:6.1.73-1+rpt1 (2024-01-25) aarch64 GNU/Linux
+$ cat /etc/os-release
+PRETTY_NAME="Debian GNU/Linux 12 (bookworm)"
+NAME="Debian GNU/Linux"
+VERSION_ID="12"
+VERSION="12 (bookworm)"
+VERSION_CODENAME=bookworm
+ID=debian
+```
+```hdparm
+
+/dev/nvme0n1:
+ Timing O_DIRECT disk reads: 2272 MB in  3.00 seconds = 756.74 MB/sec
+```<|im_end|>
++ /usr/bin/env /home/klotz/wip/llamafiles/models/rocket-3b.Q4_K_M.llamafile --log-disable --temp 0.33 -c 2048 -ngl 0 --no-penalize-nl --repeat-penalty 1 -t 4 -f /dev/stdin --silent-prompt
+<|im_start|>assistant'
+Based on the provided information, it seems that you are using a Raspberry Pi 5 (rpi5) with an NVMe drive (nvme0n1) installed. The hdparm command output indicates that the disk is performing well with a read speed of 756.74 MB/sec.
+
+As for the question about NVMe drive performance on rpi5 with pcie_x1 gen=3, it's important to note that the Raspberry Pi 5 has a PCIe 4.0 x8 slot, which supports NVMe drives. However, the pcie_x1 gen=3 is a PCIe 1.x interface, which is significantly slower compared to PCIe 4.0.
+
+NVMe drives are optimized for high-speed data transfer and are designed to take full advantage of PCIe 4.0 interfaces. Therefore, it's unlikely that you would achieve the same high performance with a pcie_x1 gen=3 interface.
+
+However, it's worth noting that the Raspberry Pi 5 is a general-purpose computer, and it's possible to run a Linux distribution (such as Debian) on it. The provided uname and os-release outputs indicate that you are running Debian on your Raspberry Pi 5.
+
+In conclusion, while it's possible to use an NVMe drive on a Raspberry Pi 5, the performance may not be as high as it could be due to the slower pcie_x1 gen=3 interface. The provided hdparm output indicates thatthe NVMe drive is performing well, but it's important to consider the limitations of the pcie_x1 gen=3 interface when evaluating its performance.
