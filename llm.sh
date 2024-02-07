@@ -20,6 +20,7 @@ VERBOSE=${VERBOSE:-}
 MODEL_RUNNER="/usr/bin/env"
 DO_STDIN="$(test -t 0 || echo $?)"
 LOG_DISABLE="--log-disable"
+GRAMMAR_FILE=""
 
 LLAMAFILE_MODEL_RUNNER="${HOME}/wip/llamafiles/bin/llamafile-0.6.2 -m "
 
@@ -53,6 +54,8 @@ if [[ "${1}" == "-"* ]]; then
 		shift; NGL="$1" ;;
 	    --n-predict)
 		shift; N_PREDICT="$1" ;;
+	    --grammar-file)
+		shift; GRAMMAR_FILE="--grammar-file $1" ;;
 	    --debug)
 		ERROR_OUTPUT="/dev/stdout"; SILENT_PROMPT=""; DEBUG=1 ;;
 	    --stdin|--interactive|-i)
@@ -313,13 +316,19 @@ Output:")
 
 # Fit into estimated VRAM cap
 case "${MODEL_TYPE}" in
-    ## Model: dolphin mixtral 8x7b
-    ## todo: some are not dolphin, only mixtral
-    dolphin|mixtral)
+    mixtral)
         MODEL=$(find_first_file \
-		${HOME}/wip/llamafiles/models/dolphin-2.7-mixtral-8x7b.Q4_K_M.gguf \
 		${HOME}/wip/llamafiles/models/mixtral-8x7b-instruct-v0.1.Q5_K_M.llamafile \
 	        ${HOME}/wip/llamafiles/models/mixtral_7bx2_moe.Q3_K_M.gguf \
+		)
+        gpu_check 1
+        chatml_prompt
+        mixtral_priority
+        ;;
+
+    dolphn)
+        MODEL=$(find_first_file \
+		${HOME}/wip/llamafiles/models/dolphin-2.7-mixtral-8x7b.Q4_K_M.gguf \
 		)
         gpu_check 1
         chatml_prompt
@@ -426,7 +435,7 @@ if [ "${DEBUG}" ] || [ "${VERBOSE}" ]; then
     set -x
 fi
 
-printf '%s' "${PROMPT}" | ${MODEL_RUNNER} ${MODEL} ${LOG_DISABLE} ${TEMPERATURE} ${CONTEXT_LENGTH} ${NGL} ${N_PREDICT} ${BATCH_SIZE} --no-penalize-nl --repeat-penalty 1 ${THREADS} -f /dev/stdin $SILENT_PROMPT 2> "${ERROR_OUTPUT}"
+printf '%s' "${PROMPT}" | ${MODEL_RUNNER} ${MODEL} ${LOG_DISABLE} ${GRAMMAR_FILE} ${TEMPERATURE} ${CONTEXT_LENGTH} ${NGL} ${N_PREDICT} ${BATCH_SIZE} --no-penalize-nl --repeat-penalty 1 ${THREADS} -f /dev/stdin $SILENT_PROMPT 2> "${ERROR_OUTPUT}"
 
 # TODO: bash parsing of CLI parameters vs ENV vs bundles of settings is a mess
 # Sort out --length/--ngl vs --speed/--length vs default
