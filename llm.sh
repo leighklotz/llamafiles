@@ -395,7 +395,6 @@ case "${MODEL_TYPE}" in
     codebooga)
         MODEL=$(find_first_file \
 		    "${HOME}/wip/oobabooga/text-generation-webui/models/codebooga-34b-v0.1.Q4_K_M.gguf" \
-		    "{$HOME}/wip/llamafiles/models/deepseek-coder-6.7b-instruct.Q4_K_M.gguf"
 		)
         SILENT_PROMPT=""        # not supported by codebooga
         gpu_check 2.1
@@ -405,7 +404,9 @@ case "${MODEL_TYPE}" in
 
     ## Model: deepseek-coder
     deepseek|coder)
-        MODEL="${HOME}/wip/llamafiles/models/deepseek-coder-6.7b-instruct.Q4_K_M.gguf"
+        MODEL=$(find_first_file \
+		    "${HOME}/wip/llamafiles/models/deepseek-coder-6.7b-instruct.Q4_K_M.gguf" \
+	       )
         SILENT_PROMPT=""
         gpu_check 2.1
 	llama_prompt
