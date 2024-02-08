@@ -1,0 +1,8 @@
+$ man xxd | help.sh "I want to print the file contents with xxd, without the address column. Here is the man page."
+ To print the file contents with `xxd` without the address column, you can use the `-ps` or `-plain` option. This will display the hex dump in plain style without line numbers or column labels. Here's the example:
+
+```bash
+xxd -ps file > output.hex
+```
+
+This command will read the contents of `file` and write the hex dump in plain style to `output.hex`.

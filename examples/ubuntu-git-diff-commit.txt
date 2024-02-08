@@ -1,0 +1,17 @@
+$ git diff --staged | help.sh "write a git commit message for the following. cluster into functional changes"
+ Commit Message:
+
+Refactor script to find first existing executable or GGUF in the list using find_first_model function.
+
+Changes:
+- Replaced find_first_file function with find_first_model function.
+- Changed the logic in find_first_model function to check for executable files and GGUFs.
+
+Functional Changes:
+- Improved script flexibility by allowing the use of GGUFs in addition to executable files.
+- Simplified the code by merging the logic for finding executable files and GGUFs into a single function.
+klotz@tensor:~/wip/llamafiles$ git commit -m"GGUF improvements:
+> - Refactor script to find first existing executable or GGUF in the list using find_first_model function.
+> "
+[mixtral-dolphin-split de8d778] GGUF improvements: - Refactor script to find first existing executable or GGUF in the list using find_first_model function.
+ 1 file changed, 17 insertions(+), 11 deletions(-)

@@ -6,7 +6,7 @@ USAGE="[-m|--model-type model-type] [--stdin|--interactive|-i] [--speed | --leng
 MODEL_TYPE=${MODEL_TYPE:-mistral}
 INPUT=${INPUT:-}
 QUESTION=${QUESTION:-}
-ERROR_OUTPUT="/dev/null"
+ERROR_OUTPUT=$(mktemp /tmp/llm-sh-error-XXXXXX)
 TEMPERATURE=${TEMPERATURE:-0.33}
 CONTEXT_LENGTH=${CONTEXT_LENGTH:=}
 N_PREDICT=""
@@ -14,19 +14,22 @@ SYSTEM_MESSAGE="${SYSTEM_MESSAGE-$(printf "%b" "Answer the following user questi
 SILENT_PROMPT="--silent-prompt"
 NGL=""
 GPU="--gpu auto"
-PRIORITY="manual" # manual|speed|context
+PRIORITY="manual" # speed|length|manual
 DEBUG=""
 VERBOSE=${VERBOSE:-}
 MODEL_RUNNER="/usr/bin/env"
 DO_STDIN="$(test -t 0 || echo $?)"
 LOG_DISABLE="--log-disable"
+GRAMMAR_FILE=""
 
 LLAMAFILE_MODEL_RUNNER="${HOME}/wip/llamafiles/bin/llamafile-0.6.2 -m "
 
 # Get thread count
-if [ "${THREADS}" == "" ]; then
+if [ "${THREADS}" == "" ];
+then
     THREADS=$( ( [ -f /proc/cpuinfo ] && grep '^cpu cores\s*:' /proc/cpuinfo | head -1 | awk '{print $4}' ))
-    if [ "${THREADS}" == "" ]; then
+    if [ "${THREADS}" == "" ];
+    then
 	THREADS=$(sysctl -n hw.ncpu 2>/dev/null || echo "${NUMBER_OF_PROCESSORS:-4}")
     fi
 fi
@@ -34,7 +37,8 @@ THREADS="${THREADS:+-t $THREADS}"
 
 # If there are any args, require "--" or any non-hyphen word to terminate args and start question.
 # Assume the whole args is a question if there is no hyphen to start.
-if [[ "${1}" == "-"* ]]; then
+if [[ "${1}" == "-"* ]];
+then
     while [[ $# -gt 0 ]]; do
 	case $1 in
 	    -m|--model-type)
@@ -53,8 +57,12 @@ if [[ "${1}" == "-"* ]]; then
 		shift; NGL="$1" ;;
 	    --n-predict)
 		shift; N_PREDICT="$1" ;;
+	    --grammar-file)
+		shift; GRAMMAR_FILE="--grammar-file $1" ;;
 	    --debug)
 		ERROR_OUTPUT="/dev/stdout"; SILENT_PROMPT=""; DEBUG=1 ;;
+	    --noerror)
+		ERROR_OUTPUT="/dev/null" ;;
 	    --stdin|--interactive|-i)
 		DO_STDIN=1 ;;
 	    --)
@@ -78,9 +86,10 @@ else
     QUESTION="${*}"
 fi
 
-
-if [ "$DO_STDIN" != "" ]; then
-    if [ -t 0 ]; then
+if [ "$DO_STDIN" != "" ];
+then
+    if [ -t 0 ];
+    then
         echo "Give input followed by Ctrl-D:"
     fi
     INPUT=$(cat)
@@ -90,14 +99,16 @@ fi
 PROMPT_LENGTH_EST=$(((75+${#SYSTEM_MESSAGE}+${#QUESTION}+${#INPUT})/4))
 [ $VERBOSE ] && echo "* PROMPT_LENGTH_EST=$PROMPT_LENGTH_EST"
 
-# Find the first existing executable in the list.
-# file_path=$(find_first_file /path/to/file1 /path/to/file2 /path/to/file3)
-function find_first_file() {
+# Find the first existing executable or GGUF in the list.
+# file_path=$(find_first_model /path/to/file1 /path/to/file2 /path/to/file3)
+function find_first_model() {
   local files=("$@")
   local file
   for file in "${files[@]}"; do
-    if [ -x "$file" ]; then
-      [ $VERBOSE ] && echo "* Model $file" >> /dev/stderr
+    [ $VERBOSE ] && echo "* Checking Model $file" >> /dev/stderr
+    if [ -x "$file" ] || [ "${file##*.}" == "gguf" ] ;
+    then
+      [ $VERBOSE ] && echo "* Accepting Model $file" >> /dev/stderr
       echo "${file}"
       return 0
     fi
@@ -108,11 +119,14 @@ function find_first_file() {
 
 function gpu_check {
     local layer_per_gb=("$@")
-    if [ "${layer_per_gb}" == "" ]; then
+    if [ "${layer_per_gb}" == "" ];
+    then
         layer_per_gb=1
     fi
-    if ! gpu_detector=$(command -v nvidia-detector) || [[ "$($gpu_detector)" == "None" ]]; then
-        if [ "${DEBUG}" ]; then
+    if ! gpu_detector=$(command -v nvidia-detector) || [[ "$($gpu_detector)" == "None" ]];
+    then
+        if [ "${DEBUG}" ];
+	then
             echo "* NO GPU"
         fi
         FREE_VRAM_GB=0
@@ -122,7 +136,8 @@ function gpu_check {
     else
         # if gpu is already in use, estimate NGL max at int(free_vram_gb * 1.5)
         FREE_VRAM_GB=$(nvidia-smi --query-gpu=memory.free --format=csv,nounits,noheader | awk '{print $1 / 1024}')
-	if (( $(echo "${FREE_VRAM_GB} < 2" |bc -l) )); then
+	if (( $(echo "${FREE_VRAM_GB} < 2" |bc -l) ));
+	then
 	    GPU="--gpu none"
 	    NGL_MAX_EST=0
 	    NGL=""
@@ -131,21 +146,47 @@ function gpu_check {
             MAX_NGL_EST=$(awk -vfree_vram_gb=$FREE_VRAM_GB -vlayer_per_gb=$layer_per_gb "BEGIN{printf(\"%d\n\",int(free_vram_gb*layer_per_gb))}")
 	fi
     fi
-    if [ "${DEBUG}" ]; then
+    if [ "${DEBUG}" ];
+    then
 	echo "* FREE_VRAM_GB=${FREE_VRAM_GB} MAX_NGL_EST=${MAX_NGL_EST} GPU=${GPU}"
     fi
 }
 
 function cap_ngl {
-    if [ "$GPU" == "" ]; then
+    if [ "$GPU" == "" ];
+    then
 	GPU="--gpu none"
     else
-	NGL=$MAX_NGL_EST
-	if [ "${NGL}" != '' ] && [ "${NGL}" -gt "${MAX_NGL_EST}" ]; then
+	if [ "${NGL}" != '' ] && [ "${NGL}" -gt "${MAX_NGL_EST}" ];
+	then
             [ $VERBOSE ] && echo "* Capping $NGL at $MAX_NGL_EST"
             NGL=$MAX_NGL_EST
 	fi
     fi
+}
+
+function mixtral_priority {
+    # todo:
+    MAX_CONTEXT_LENGTH=12288
+    case "${PRIORITY}" in
+         speed)
+             NGL=${NGL:=23}
+             CONTEXT_LENGTH=2048
+             ;;
+         length)
+             NGL=${NGL:=1}
+             CONTEXT_LENGTH=12288
+             ;;
+         manual)
+             NGL=${NGL:=23}
+             CONTEXT_LENGTH=${CONTEXT_LENGTH:=4096}
+             ;;
+         *)
+             echo "usage: unknown priority $PRIORITY"
+             exit 1
+            ;;
+    esac
+    cap_ngl
 }
 
 function dolphin_priority {
@@ -296,7 +337,8 @@ ${INPUT}<|im_end|>
 function phi_prompt {
     # Instruct: {prompt}
     # Output:
-    if [ "${INPUT}" == "" ]; then
+    if [ "${INPUT}" == "" ];
+    then
       PROMPT=$(printf "%b" "Instruct: ${SYSTEM_MESSAGE}
 ${QUESTION}
 Output:")
@@ -313,15 +355,21 @@ Output:")
 
 # Fit into estimated VRAM cap
 case "${MODEL_TYPE}" in
-    ## Model: dolphin mixtral 8x7b
-    ## todo: some are not dolphin, only mixtral
-    dolphin|mixtral)
-        MODEL=$(find_first_file \
-		${HOME}/wip/llamafiles/models/dolphin-2.7-mixtral-8x7b.Q4_K_M.gguf \
-                ${HOME}/wip/llamafiles/models/dolphin-2.5-mixtral-8x7b.Q4_K_M.llamafile \
-		${HOME}/wip/llamafiles/models/mistral-7b-instruct-v0.2.Q4_K_M.llamafile \
+    # Mixtral
+    mixtral)
+        MODEL=$(find_first_model \
 		${HOME}/wip/llamafiles/models/mixtral-8x7b-instruct-v0.1.Q5_K_M.llamafile \
 	        ${HOME}/wip/llamafiles/models/mixtral_7bx2_moe.Q3_K_M.gguf \
+		)
+        gpu_check 1
+        chatml_prompt
+        mixtral_priority
+        ;;
+
+    # Dolphin of various sorts
+    dolphin)
+        MODEL=$(find_first_model \
+		${HOME}/wip/llamafiles/models/dolphin-2.7-mixtral-8x7b.Q4_K_M.gguf \
 		)
         gpu_check 1
         chatml_prompt
@@ -330,7 +378,7 @@ case "${MODEL_TYPE}" in
 
     ## Model: mistral-7b-instruct
     mistral)
-        MODEL=$(find_first_file \
+        MODEL=$(find_first_model \
                     ${HOME}/wip/llamafiles/models/mistral-7b-instruct-v0.2.Q5_K_M.llamafile \
                     ${HOME}/wip/llamafiles/models/mistral-instruct-v0.2.Q5_K_M.llamafile \
                     ${HOME}/wip/llamafiles/models/mistral-7b-instruct-v0.2.Q4_K_M.llamafile \
@@ -365,7 +413,7 @@ case "${MODEL_TYPE}" in
         ;;
 
     rocket)
-        MODEL=$(find_first_file \
+        MODEL=$(find_first_model \
 		    "${HOME}/wip/llamafiles/models/rocket-3b.Q6_K.llamafile" \
 		    "${HOME}/wip/llamafiles/models/rocket-3b.Q5_K_M.llamafile" \
 		    "${HOME}/wip/llamafiles/models/rocket-3b.Q4_K_M.llamafile" \
@@ -376,7 +424,7 @@ case "${MODEL_TYPE}" in
         ;;
 
     phi)
-        MODEL=$(find_first_file \
+        MODEL=$(find_first_model \
 		    "${HOME}/wip/llamafiles/models/phi-2.Q6_K.llamafile" \
 		    "${HOME}/wip/llamafiles/models/phi-2.Q5_K_M.llamafile" \
 	     )
@@ -391,16 +439,19 @@ case "${MODEL_TYPE}" in
         ;;
 esac
 
-if [ "${PROMPT_LENGTH_EST}" -gt "${CONTEXT_LENGTH}" ]; then
+if [ "${PROMPT_LENGTH_EST}" -gt "${CONTEXT_LENGTH}" ];
+then
     echo "* WARNING: Prompt len ${PROMPT_LENGTH_EST} estimated not to fit in context ${CONTEXT_LENGTH}"
 fi
 
-if [ "$CONTEXT_LENGTH" -gt "$MAX_CONTEXT_LENGTH" ]; then
+if [ "$CONTEXT_LENGTH" -gt "$MAX_CONTEXT_LENGTH" ];
+then
     CONTEXT_LENGTH="$MAX_CONTEXT_LENGTH"
     echo "* Truncated context length to $CONTEXT_LENGTH"
 fi
 
-if [ ! -f $MODEL ]; then
+if [ ! -f $MODEL ];
+then
     echo "Model not found: ${MODEL}"
     exit 1
 fi
@@ -409,7 +460,8 @@ PROMPT_LENGTH_EST=$((${#PROMPT}/4))
 #BATCH_SIZE=${BATCH_SIZE:-$(($CONTEXT_LENGTH / 2))}
 
 # If no GPU, force NGL off
-if [ "${GPU}" = '' ]; then
+if [ "${GPU}" = '' ];
+then
     NGL=0
     GPU="--gpu none"
 fi
@@ -421,20 +473,66 @@ TEMPERATURE="${TEMPERATURE:+--temp $TEMPERATURE}"
 CONTEXT_LENGTH="${CONTEXT_LENGTH:+-c $CONTEXT_LENGTH}"
 BATCH_SIZE="${BATCH_SIZE:+--batch_size $BATCH_SIZE}"
 
+if [ "${MODEL}" == "" ] ;
+then
+    echo "* FAIL: No model"
+    exit 2
+fi
+
 # set MODEL_RUNNER
-if [ "${MODEL##*.}" != "llamafile" ]; then
+if [ "${MODEL##*.}" != "llamafile" ];
+then
    MODEL_RUNNER="${LLAMAFILE_MODEL_RUNNER}"
 fi
 
 # Set verbose and debug last
-if [ "${DEBUG}" ] || [ "${VERBOSE}" ]; then
+if [ "${DEBUG}" ] || [ "${VERBOSE}" ];
+then
     printf '* Paramters: ngl=%s context_length=%s est_len=%s:\n' "${NGL}" "${CONTEXT_LENGTH}" "${PROMPT_LENGTH_EST}"
     set -x
 fi
 
-printf '%s' "${PROMPT}" | ${MODEL_RUNNER} ${MODEL} ${LOG_DISABLE} ${TEMPERATURE} ${CONTEXT_LENGTH} ${NGL} ${N_PREDICT} ${BATCH_SIZE} --no-penalize-nl --repeat-penalty 1 ${THREADS} -f /dev/stdin $SILENT_PROMPT 2> "${ERROR_OUTPUT}"
+# Perform inference
+printf '%s' "${PROMPT}" | ${MODEL_RUNNER} ${MODEL} ${LOG_DISABLE} ${GRAMMAR_FILE} ${TEMPERATURE} ${CONTEXT_LENGTH} ${NGL} ${N_PREDICT} ${BATCH_SIZE} --no-penalize-nl --repeat-penalty 1 ${THREADS} -f /dev/stdin $SILENT_PROMPT 2> "${ERROR_OUTPUT}"
+STATUS=$?
+
+# Try to inform user about errors
+if [ ! $STATUS ];
+then
+    echo "* FAIL"
+    if [[ ! "${ERROR_OUTPUT}" =~ "/dev/*" ]]; 
+    then
+	cat "${ERROR_OUTPUT}" >> /dev/stderr
+    fi
+fi
+
+if [[ ! "${ERROR_OUTPUT}" =~ "/dev/*" ]];
+then
+   rm "${ERROR_OUTPUT}"
+fi
+
+exit $STATUS
+
 
 # TODO: bash parsing of CLI parameters vs ENV vs bundles of settings is a mess
-# Sort out --length/--ngl vs --speed/--length vs default
+# CAMERA MODE:
+# by analogy to aperture priority, shutter priority, auto, or manual
+# context priority, speed priority, auto, or manual
+# CONTEXT PRIORITY MODE:
+# - could be used for input or output
+#   for input, assume some k * (prompt len + input len)
+#   for output, probably need an explicit declaration we want a long output, hard to detect otherwise
+# SPEED PRIORITY MODE:
+# - `--speed` `--ngl`
+# AUTO MODE:
+# - proposal: `--speed` unless cmd input is given, then do `-context`
+#   e.g. MIN_CONTEXT_LENGTH <= (input length * 2) <= MAX_CONTEXT_LENGTH???
+# MANUAL MODE:
+# - `--ngl` `--context-length`
+
+# sort out --length/--ngl vs --speed/--length vs default
+# re-examine cap_ngl and *_priority 
+
 # sort out -c vs --length
-# idea: calculate context length = MIN_CONTEXT_LENGTH <= (input length * 2) <= MAX_CONTEXT_LENGTH???
+
+# 
