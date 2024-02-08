@@ -93,14 +93,15 @@ fi
 PROMPT_LENGTH_EST=$(((75+${#SYSTEM_MESSAGE}+${#QUESTION}+${#INPUT})/4))
 [ $VERBOSE ] && echo "* PROMPT_LENGTH_EST=$PROMPT_LENGTH_EST"
 
-# Find the first existing executable in the list.
-# file_path=$(find_first_file /path/to/file1 /path/to/file2 /path/to/file3)
-function find_first_file() {
+# Find the first existing executable or GGUF in the list.
+# file_path=$(find_first_model /path/to/file1 /path/to/file2 /path/to/file3)
+function find_first_model() {
   local files=("$@")
   local file
   for file in "${files[@]}"; do
-    if [ -x "$file" ]; then
-      [ $VERBOSE ] && echo "* Model $file" >> /dev/stderr
+    [ $VERBOSE ] && echo "* Checking Model $file" >> /dev/stderr
+    if [ -x "$file" ] || [ "${file##*.}" == "gguf" ] ; then
+      [ $VERBOSE ] && echo "* Accepting Model $file" >> /dev/stderr
       echo "${file}"
       return 0
     fi
@@ -149,6 +150,11 @@ function cap_ngl {
             NGL=$MAX_NGL_EST
 	fi
     fi
+}
+
+function mixtral_priority {
+    # todo:
+    dolphin_priority
 }
 
 function dolphin_priority {
@@ -317,7 +323,7 @@ Output:")
 # Fit into estimated VRAM cap
 case "${MODEL_TYPE}" in
     mixtral)
-        MODEL=$(find_first_file \
+        MODEL=$(find_first_model \
 		${HOME}/wip/llamafiles/models/mixtral-8x7b-instruct-v0.1.Q5_K_M.llamafile \
 	        ${HOME}/wip/llamafiles/models/mixtral_7bx2_moe.Q3_K_M.gguf \
 		)
@@ -326,8 +332,8 @@ case "${MODEL_TYPE}" in
         mixtral_priority
         ;;
 
-    dolphn)
-        MODEL=$(find_first_file \
+    dolphin)
+        MODEL=$(find_first_model \
 		${HOME}/wip/llamafiles/models/dolphin-2.7-mixtral-8x7b.Q4_K_M.gguf \
 		)
         gpu_check 1
@@ -337,7 +343,7 @@ case "${MODEL_TYPE}" in
 
     ## Model: mistral-7b-instruct
     mistral)
-        MODEL=$(find_first_file \
+        MODEL=$(find_first_model \
                     ${HOME}/wip/llamafiles/models/mistral-7b-instruct-v0.2.Q5_K_M.llamafile \
                     ${HOME}/wip/llamafiles/models/mistral-instruct-v0.2.Q5_K_M.llamafile \
                     ${HOME}/wip/llamafiles/models/mistral-7b-instruct-v0.2.Q4_K_M.llamafile \
@@ -368,7 +374,7 @@ case "${MODEL_TYPE}" in
         ;;
 
     rocket)
-        MODEL=$(find_first_file \
+        MODEL=$(find_first_model \
 		    "${HOME}/wip/llamafiles/models/rocket-3b.Q6_K.llamafile" \
 		    "${HOME}/wip/llamafiles/models/rocket-3b.Q5_K_M.llamafile" \
 		    "${HOME}/wip/llamafiles/models/rocket-3b.Q4_K_M.llamafile" \
@@ -379,7 +385,7 @@ case "${MODEL_TYPE}" in
         ;;
 
     phi)
-        MODEL=$(find_first_file \
+        MODEL=$(find_first_model \
 		    "${HOME}/wip/llamafiles/models/phi-2.Q6_K.llamafile" \
 		    "${HOME}/wip/llamafiles/models/phi-2.Q5_K_M.llamafile" \
 	     )
