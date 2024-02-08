@@ -1,0 +1,3 @@
+!lynx https://skimfeed.com/
+
+Please group the news by topic area, provide a summary of each topic area, and then choose a few headlines (with links) from each. Remove sports. Remove entertainment.

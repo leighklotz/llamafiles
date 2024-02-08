@@ -195,7 +195,7 @@ function mistral_priority {
     cap_ngl
 }
 
-function codebooga_priority {
+function code_priority {
     MAX_CONTEXT_LENGTH=32768
     case "${PRIORITY}" in
          speed)
@@ -343,8 +343,12 @@ case "${MODEL_TYPE}" in
         ;;
  
     ## Model: oobabooga/text-generation-webui/models/codebooga-34b-v0.1.Q4_K_M.gguf
+    ## Model: {$HOME}/wip/llamafiles/models/deepseek-coder-6.7b-instruct.Q4_K_M.gguf
     codebooga)
-        MODEL="${HOME}/wip/oobabooga/text-generation-webui/models/codebooga-34b-v0.1.Q4_K_M.gguf"
+        MODEL=$(find_first_file \
+		    "${HOME}/wip/oobabooga/text-generation-webui/models/codebooga-34b-v0.1.Q4_K_M.gguf" \
+		    "{$HOME}/wip/llamafiles/models/deepseek-coder-6.7b-instruct.Q4_K_M.gguf"
+		)
         SILENT_PROMPT=""        # not supported by codebooga
         gpu_check 2.1
         llama_prompt
