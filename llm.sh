@@ -195,7 +195,7 @@ function mistral_priority {
     cap_ngl
 }
 
-function code_priority {
+function codebooga_priority {
     MAX_CONTEXT_LENGTH=32768
     case "${PRIORITY}" in
          speed)
