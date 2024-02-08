@@ -1,5 +1,6 @@
 # LLM Help CLI for Linux
-- using https://github.com/Mozilla-Ocho/llamafile and scripts from https://github.com/jart
+
+_ Using https://github.com/Mozilla-Ocho/llamafile and scripts from https://github.com/jart _
 
 This repository provides an LLM Help CLI for Linux and Mac systems to provide help, summarization, coding assistance, system information queries, image renaming, etc.
 
@@ -19,7 +20,9 @@ Uses question words and stdin, if any, to create the model prompt.
 
 Below are a few examples. More are in [examples](examples).
 
-### Bash Coding Example
+# Examples
+
+## Bash Coding Example
 ```
 $ help.sh -m codebooga -- "split bash argument array into left and right with double hyphen as the separator using special bash builtin functions or operators as needed "
 ```
@@ -44,15 +47,15 @@ To get the value of `llama.context_length` using jq, you can use the following c
 Replace `file.json` with the path to your JSON file. This command will output the value of `llama.context_length`, which is 32768 in this case.
 $  
 ```
+Here is proof that the JQ expression given above works:
 
-Proof it works:
 ```
 $ ./llama.cpp/gguf-py/scripts/gguf-dump.py ./models/dolphin-2.7-mixtral-8x7b.Q4_K_M.gguf --no-tensors --json | jq '.metadata["llama.context_length"].value'
     32768
 $
 ```
 
-### LSHW Example
+## LSHW Example
 The Codebooga llamafile I'm using doesn't yet support --silent-prompt so I elided the re-printed prompt manually.
 ```
 sudo lshw | wc 
@@ -72,7 +75,7 @@ $ sudo lshw | help.sh -c 16384 -m codebooga --stdin -- 'Summarize the following 
 	USB ports, audio devices, and an SMBus controller.  [end of text]
 ```
 
-### Raspberry Pi 5 lspci with Rocket model
+## Raspberry Pi 5 lspci with Rocket model
 ```
 klotz@rpi5:~ $ export MODEL=rocket
 klotz@rpi5:~ $ help.sh lspci
@@ -91,7 +94,7 @@ I hope that helps! Let me know if you have any other questions.
 klotz@rpi5:~ $ 
 ```
 
-# Models
+# Models and Binaries
 Download your own models.
 
 ## LLamafile binaries
@@ -109,14 +112,14 @@ https://github.com/Mozilla-Ocho/llamafile
 ## Models and all-in-one
 You need to download these from https://huggingface.co/jartine and other places on HF.
 
-### Desktop and GPU models
+## Desktop and GPU models
 These go in `models/`:
 - `dolphin-2.5-mixtral-8x7b.Q4_K_M.llamafile`
 - `llava-v1.5-7b-q4-main.llamafile`
 - `llava-v1.5-7b-q4-server.llamafile`
 - `mistral-7b-instruct-v0.2.Q4_K_M.llamafile`
 
-### RPI5 and other small models
+## RPI5 and other small models
 These go in `models/`:
 - `mistral-7b-instruct-v0.2.Q3_K_M.llamafile`
 - `mixtral_7bx2_moe.Q3_K_M.gguf`
@@ -127,20 +130,22 @@ These go in `models/`:
 
 # Scripts and Files
 ## base
-- llm.sh
+- llm.sh - the base script that others call
 
 ## user programs
-- help.sh
-- machelp.sh
-- summarize.sh
+- help.sh - CLI for Linux help
+- machelp.sh - CLI for Mac help
+- summarize.sh - CLI to summarize a hyperlink
 
 ## utilities
-- systype.sh
-- nvfree.sh
-- code.sh
+- systype.sh - Pipe to help.sh to provide context for distro-specific questions
+- nvfree.sh - check your GPU usage
+- code.sh [lang] [cmd]  - Pipe to help.sh to wrap output of cmd in a codeblock of type lang.
 
 ## images
-- image-name.sh
+These are less developed.
+
+- image-name.sh - Simply script using LLAVA to find image name
 - rename-pictures.sh [adapted from https://gist.github.com/jart/bd2f603aefe6ac8004e6b709223881c0]
 - llava-cli.sh 
 
