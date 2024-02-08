@@ -168,11 +168,11 @@ These go in `models/`:
 - `NUMBER_OF_PROCESSORS`: sets the number of processors.
 
 ## Program Flow
-1. If there are any arguments, `--` or any non-hyphen word will terminate the arguments and start the question. 
-1. If there are no hyphens to start, it assumes the whole arguments is a question.
+1. If there are any arguments, `--` or any non-hyphen word, terminate the arguments and start the question. 
+1. If there are no hyphens to start, assume the whole arguments is a question.
 1. If stdin has content, include it in a block.
-1. Alternativelty, if the standard input is a terminal and if so, prompts the user to give input followed by Ctrl-D.
-1. Calculate the prompt length estimate and sets the memory allocation for the prompt.
+1. Alternatively, if the standard input is a terminal and if so, prompt the user to give input followed by Ctrl-D.
+1. Calculate the prompt length estimate and set the memory allocation for the prompt.
 1. If there is a GPU, estimate the free VRAM and sets the maximum number of gradient layers accordingly.
 1. Context length and the number of gradient layers based on the priority mode (speed, length, or manual).
 1. Finally, perform inference using the specified model and parameters.
