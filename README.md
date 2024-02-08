@@ -4,22 +4,23 @@
 # Script Files
 ## base
 - llm.sh
-- server.sh
 
 ## user programs
 - help.sh
 - machelp.sh
 - summarize.sh
 
+## utilities
+- systype.sh
+- nvfree.sh
+- code.sh
+
 ## images
 - image-name.sh
 - rename-pictures.sh [adapted from https://gist.github.com/jart/bd2f603aefe6ac8004e6b709223881c0]
 - llava-cli.sh 
 
-## utilities
-- systype.sh
-- nvfree.sh
-- code.sh
+# How to use
 
 ## help.sh
 USAGE="[-m|--model-type model-type] [--stdin|--interactive|-i] [--speed | --length] [--temperature temp] [--context-length|-c n] [--ngl n] [--n-predict n] [--debug] [--verbose] [--] QUESTION*"
@@ -33,20 +34,19 @@ Uses question words and stdin, if any, to create the model prompt.
 - [other options]: See source
 - $ENV: see env.sh.examples or source of llm.sh
 
-## Examples
-Below are a few. More are in [examples](examples).
+Below are a few examples. More are in [examples](examples).
 
 ### Bash Coding Example
 ```
 $ help.sh -m codebooga -- "split bash argument array into left and right with double hyphen as the separator using special bash builtin functions or operators as needed "
 ```
 
-### General Linux Example
+## General Linux Example
 ```
 $ help.sh what is my ip address
 ```
 
-### JQ Example
+## JQ Example
 This example takes a live JSON input and shows how to extract a slightly tricky value. As a bonus, the model gives the value of the field.
 
 ```
@@ -141,5 +141,48 @@ These go in `models/`:
 - `phi-2.Q6_K.llamafile`
 - `rocket-3b.Q4_K_M.llamafile`
 
+# llm.sh flags and environment variables
+
+## Command Line Flags
+
+`llm.sh` accepts the following command line flags:
+
+- `-m` or `--model-type`: specifies the type of model to use. The available options are `mixtral`, `dolphin`, `mistral`, `codebooga`, `deepseek`, `rocket`, and `phi`.
+- `--speed`: sets the priority to speed.
+- `--length`: sets the priority to length.
+- `--temperature`: sets the temperature of the model.
+- `--verbose`: enables verbose mode.
+- `-c` or `--context-length`: sets the context length.
+- `--ngl`: sets the number of gradient layers.
+- `--n-predict`: sets the number of tokens to predict.
+- `--debug`: enables debug mode.
+- `--noerror`: disables error output.
+- `--stdin` or `--interactive` or `-i`: enables standard input mode.
+- `--`: terminates the arguments and starts the question.
+
+## Environment Variables
+
+`llm.sh` also uses the following environment variables:
+
+- `THREADS`: sets the number of threads.
+- `NUMBER_OF_PROCESSORS`: sets the number of processors.
+
+## Program Flow
+1. If there are any arguments, `--` or any non-hyphen word will terminate the arguments and start the question. 
+1. If there are no hyphens to start, it assumes the whole arguments is a question.
+1. If stdin has content, include it in a block.
+1. Alternativelty, if the standard input is a terminal and if so, prompts the user to give input followed by Ctrl-D.
+1. Calculate the prompt length estimate and sets the memory allocation for the prompt.
+1. If there is a GPU, estimate the free VRAM and sets the maximum number of gradient layers accordingly.
+1. Context length and the number of gradient layers based on the priority mode (speed, length, or manual).
+1. Finally, perform inference using the specified model and parameters.
+
 # Mac Specifics
+You will need to do this on MacOS:
 - `xattr -dr com.apple.quarantine models/* bin/*`
+
+# References
+- https://github.com/Mozilla-Ocho/llamafile 
+- https://github.com/jart
+- https://llm.datasette.io/
+- https://github.com/klotz/llamafiles
