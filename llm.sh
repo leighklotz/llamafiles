@@ -14,7 +14,7 @@ SYSTEM_MESSAGE="${SYSTEM_MESSAGE-$(printf "%b" "Answer the following user questi
 SILENT_PROMPT="--silent-prompt"
 NGL=""
 GPU="--gpu auto"
-PRIORITY="manual" # manual|speed|context
+PRIORITY="manual" # speed|length|manual
 DEBUG=""
 VERBOSE=${VERBOSE:-}
 MODEL_RUNNER="/usr/bin/env"
@@ -81,7 +81,6 @@ else
     QUESTION="${*}"
 fi
 
-
 if [ "$DO_STDIN" != "" ]; then
     if [ -t 0 ]; then
         echo "Give input followed by Ctrl-D:"
@@ -92,6 +91,9 @@ fi
 # memory allocation: assume 4 chars per token
 PROMPT_LENGTH_EST=$(((75+${#SYSTEM_MESSAGE}+${#QUESTION}+${#INPUT})/4))
 [ $VERBOSE ] && echo "* PROMPT_LENGTH_EST=$PROMPT_LENGTH_EST"
+
+exit 1
+
 
 # Find the first existing executable or GGUF in the list.
 # file_path=$(find_first_model /path/to/file1 /path/to/file2 /path/to/file3)
@@ -139,12 +141,10 @@ function gpu_check {
 	echo "* FREE_VRAM_GB=${FREE_VRAM_GB} MAX_NGL_EST=${MAX_NGL_EST} GPU=${GPU}"
     fi
 }
-
 function cap_ngl {
     if [ "$GPU" == "" ]; then
 	GPU="--gpu none"
     else
-	NGL=$MAX_NGL_EST
 	if [ "${NGL}" != '' ] && [ "${NGL}" -gt "${MAX_NGL_EST}" ]; then
             [ $VERBOSE ] && echo "* Capping $NGL at $MAX_NGL_EST"
             NGL=$MAX_NGL_EST
@@ -154,7 +154,28 @@ function cap_ngl {
 
 function mixtral_priority {
     # todo:
-    dolphin_priority
+    MAX_CONTEXT_LENGTH=12288
+    case "${PRIORITY}" in
+         speed)
+             NGL=${NGL:=23}
+             CONTEXT_LENGTH=2048
+             ;;
+         length)
+             NGL=${NGL:=1}
+             CONTEXT_LENGTH=12288
+             ;;
+         manual)
+             NGL=${NGL:=23}
+             CONTEXT_LENGTH=${CONTEXT_LENGTH:=4096}
+             ;;
+         *)
+             echo "usage: unknown priority $PRIORITY"
+             exit 1
+            ;;
+    esac
+    cap_ngl
+    echo "CONTEXT_LENGTH=$CONTEXT_LENGTH"
+    exit 3
 }
 
 function dolphin_priority {
@@ -441,9 +462,35 @@ if [ "${DEBUG}" ] || [ "${VERBOSE}" ]; then
     set -x
 fi
 
-printf '%s' "${PROMPT}" | ${MODEL_RUNNER} ${MODEL} ${LOG_DISABLE} ${GRAMMAR_FILE} ${TEMPERATURE} ${CONTEXT_LENGTH} ${NGL} ${N_PREDICT} ${BATCH_SIZE} --no-penalize-nl --repeat-penalty 1 ${THREADS} -f /dev/stdin $SILENT_PROMPT 2> "${ERROR_OUTPUT}"
+function infer {
+    echo "* INFERRING" > /dev/stderr
+    exit 2
+    printf '%s' "${PROMPT}" | ${MODEL_RUNNER} ${MODEL} ${LOG_DISABLE} ${GRAMMAR_FILE} ${TEMPERATURE} ${CONTEXT_LENGTH} ${NGL} ${N_PREDICT} ${BATCH_SIZE} --no-penalize-nl --repeat-penalty 1 ${THREADS} -f /dev/stdin $SILENT_PROMPT 2> "${ERROR_OUTPUT}"
+}
+
+if ! { error=$(infer 2>&1 >&3); } 3>&1; then
+    printf "fail %s" "$error"
+else
+    printf "success %s" "$error"
+fi
 
 # TODO: bash parsing of CLI parameters vs ENV vs bundles of settings is a mess
-# Sort out --length/--ngl vs --speed/--length vs default
+# CAMERA MODE:
+# by analogy to aperture priority, shutter priority, auto, or manual
+# context priority, speed priority, auto, or manual
+# CONTEXT PRIORITY MODE:
+# - could be used for input or output
+#   for input, assume some k * (prompt len + input len)
+#   for output, probably need an explicit declaration we want a long output, hard to detect otherwise
+# SPEED PRIORITY MODE:
+# - `--speed` `--ngl`
+# AUTO MODE:
+# - proposal: `--speed` unless cmd input is given, then do `-context`
+#   e.g. MIN_CONTEXT_LENGTH <= (input length * 2) <= MAX_CONTEXT_LENGTH???
+# MANUAL MODE:
+# - `--ngl` `--context-length`
+
+# sort out --length/--ngl vs --speed/--length vs default
+# re-examine cap_ngl and *_priority 
+
 # sort out -c vs --length
-# idea: calculate context length = MIN_CONTEXT_LENGTH <= (input length * 2) <= MAX_CONTEXT_LENGTH???
