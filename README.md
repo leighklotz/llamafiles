@@ -1,24 +1,7 @@
 # LLM Help CLI for Linux
 - using https://github.com/Mozilla-Ocho/llamafile and scripts from https://github.com/jart
 
-# Script Files
-## base
-- llm.sh
-
-## user programs
-- help.sh
-- machelp.sh
-- summarize.sh
-
-## utilities
-- systype.sh
-- nvfree.sh
-- code.sh
-
-## images
-- image-name.sh
-- rename-pictures.sh [adapted from https://gist.github.com/jart/bd2f603aefe6ac8004e6b709223881c0]
-- llava-cli.sh 
+This repository provides an LLM Help CLI for Linux and Mac systems to provide help, summarization, coding assistance, system information queries, image renaming, etc.
 
 # How to use
 
@@ -141,7 +124,27 @@ These go in `models/`:
 - `phi-2.Q6_K.llamafile`
 - `rocket-3b.Q4_K_M.llamafile`
 
-# llm.sh flags and environment variables
+
+# Scripts and Files
+## base
+- llm.sh
+
+## user programs
+- help.sh
+- machelp.sh
+- summarize.sh
+
+## utilities
+- systype.sh
+- nvfree.sh
+- code.sh
+
+## images
+- image-name.sh
+- rename-pictures.sh [adapted from https://gist.github.com/jart/bd2f603aefe6ac8004e6b709223881c0]
+- llava-cli.sh 
+
+# llm.sh Details
 
 ## Command Line Flags
 
