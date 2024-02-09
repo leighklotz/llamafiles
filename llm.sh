@@ -501,13 +501,13 @@ STATUS=$?
 if [ ! $STATUS ];
 then
     echo "* FAIL"
-    if [[ ! "${ERROR_OUTPUT}" =~ "/dev/*" ]]; 
+    if [[  "${ERROR_OUTPUT}" != "/dev/stderr" ]]; 
     then
 	cat "${ERROR_OUTPUT}" >> /dev/stderr
     fi
 fi
 
-if [[ ! "${ERROR_OUTPUT}" =~ "/dev/*" ]];
+if [[ -f "${ERROR_OUTPUT}" ]];
 then
    rm "${ERROR_OUTPUT}"
 fi
