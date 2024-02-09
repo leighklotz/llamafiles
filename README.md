@@ -1,10 +1,17 @@
 # LLM Help CLI for Linux
 
-_ Using https://github.com/Mozilla-Ocho/llamafile and scripts from https://github.com/jart _
+Using https://github.com/Mozilla-Ocho/llamafile and https://github.com/jart models and scripts
 
 This repository provides an LLM Help CLI for Linux and Mac systems to provide help, summarization, coding assistance, system information queries, image renaming, etc.
 
-# How to use
+## Usage examples
+```shell
+$ help.sh -- "Split bash argument array into left and right with double hyphen as the separator using special bash builtin functions or operators"
+$ help.sh what is my ip
+$ help.sh -m dolphin --stdin -- 'Give me a JQ cli to get the value of the field named `llama.context_length`'
+```
+
+More examples can be found in the [examples](https://github.com/leighklotz/llamafiles/tree/main/examples) directory.
 
 ## help.sh
 USAGE="[-m|--model-type model-type] [--stdin|--interactive|-i] [--speed | --length] [--temperature temp] [--context-length|-c n] [--ngl n] [--n-predict n] [--debug] [--verbose] [--] QUESTION*"
@@ -93,6 +100,8 @@ So, in summary, your system has a Broadcom PCI bridge (Device 2712) and two Real
 I hope that helps! Let me know if you have any other questions.
 klotz@rpi5:~ $ 
 ```
+
+More examples can be found in the [examples](https://github.com/leighklotz/llamafiles/tree/main/examples) directory.
 
 # Models and Binaries
 Download your own models.
