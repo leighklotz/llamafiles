@@ -9,6 +9,7 @@ This repository provides an LLM Help CLI for Linux and Mac systems to provide he
 $ help.sh -- "Split bash argument array into left and right with double hyphen as the separator using special bash builtin functions or operators"
 $ help.sh what is my ip
 $ help.sh -m dolphin --stdin -- 'Give me a JQ cli to get the value of the field named `llama.context_length`'
+$ man xxd | help.sh "print file contents with xxd without the address column"
 ```
 
 More examples can be found in the [examples](https://github.com/leighklotz/llamafiles/tree/main/examples) directory.
