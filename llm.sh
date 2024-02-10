@@ -6,8 +6,8 @@ USAGE="[-m|--model-type model-type] [--stdin|--interactive|-i] [--speed | --leng
 MODEL_TYPE=${MODEL_TYPE:-mistral}
 INPUT=${INPUT:-}
 QUESTION=${QUESTION:-}
-ERROR_OUTPUT=$(mktemp /tmp/llm-sh-error-XXXXXX)
-TEMPERATURE=${TEMPERATURE:-0.33}
+ERROR_OUTPUT="/dev/null"
+TEMPERATURE=${TEMPERATURE=}
 CONTEXT_LENGTH=${CONTEXT_LENGTH:=}
 N_PREDICT=""
 SYSTEM_MESSAGE="${SYSTEM_MESSAGE-$(printf "%b" "Answer the following user question:\n")}"
@@ -324,15 +324,30 @@ function llama_prompt {
 }
 
 function chatml_prompt {
-    PROMPT=$(printf "%b" "<|im_start|>system
-${SYSTEM_MESSAGE}<|im_end|>
+    if [ "${INPUT}" == '' ]; then
+	PROMPT=$(cat <<EOF
+<|im_start|>system${SYSTEM_MESSAGE}
+<|im_end|>
+<|im_start|>user
+{QUESTION}
+<|im_end|>
+<|im_start|>assistant 
+EOF
+		 )
+    else
+	PROMPT=$(cat <<EOF
+<|im_start|>system
+${SYSTEM_MESSAGE}
+<|im_end|>
 <|im_start|>user
 ${QUESTION}
-${INPUT}<|im_end|>
-<|im_start|>assistant
-")
+${INPUT}
+<|im_end|>
+<|im_start|>assistant 
+EOF
+	      )
+    fi
 }
-
 
 function phi_prompt {
     # Instruct: {prompt}
@@ -500,16 +515,7 @@ STATUS=$?
 # Try to inform user about errors
 if [ ! $STATUS ];
 then
-    echo "* FAIL"
-    if [[  "${ERROR_OUTPUT}" != "/dev/stderr" ]]; 
-    then
-	cat "${ERROR_OUTPUT}" >> /dev/stderr
-    fi
-fi
-
-if [[ -f "${ERROR_OUTPUT}" ]];
-then
-   rm "${ERROR_OUTPUT}"
+    echo "* FAIL $STATUS: maybe see ${ERROR_OUTPUT}" > /dev/stderr
 fi
 
 exit $STATUS
