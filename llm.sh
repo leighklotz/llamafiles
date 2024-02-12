@@ -509,6 +509,7 @@ then
 fi
 
 # Perform inference
+#set -x
 printf '%s' "${PROMPT}" | ${MODEL_RUNNER} ${MODEL} ${LOG_DISABLE} ${GRAMMAR_FILE} ${TEMPERATURE} ${CONTEXT_LENGTH} ${NGL} ${N_PREDICT} ${BATCH_SIZE} --no-penalize-nl --repeat-penalty 1 ${THREADS} -f /dev/stdin $SILENT_PROMPT 2> "${ERROR_OUTPUT}"
 STATUS=$?
 
