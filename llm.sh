@@ -30,7 +30,7 @@ then
     THREADS=$( ( [ -f /proc/cpuinfo ] && grep '^cpu cores\s*:' /proc/cpuinfo | head -1 | awk '{print $4}' ))
     if [ "${THREADS}" == "" ];
     then
-	THREADS=$(sysctl -n hw.ncpu 2>/dev/null || echo "${NUMBER_OF_PROCESSORS:-4}")
+        THREADS=$(sysctl -n hw.ncpu 2>/dev/null || echo "${NUMBER_OF_PROCESSORS:-4}")
     fi
 fi
 THREADS="${THREADS:+-t $THREADS}"
@@ -40,47 +40,47 @@ THREADS="${THREADS:+-t $THREADS}"
 if [[ "${1}" == "-"* ]];
 then
     while [[ $# -gt 0 ]]; do
-	case $1 in
-	    -m|--model-type)
-		shift; MODEL_TYPE="$1" ;;
-	    --speed)
-		PRIORITY="speed" ;;
-	    --length)
-		PRIORITY="length" ;;
-	    --temperature)
-		shift; TEMPERATURE="$1" ;;
-	    --verbose)
-		VERBOSE=1 ;;
-	    -c|--context-length)
-		shift; CONTEXT_LENGTH="$1" ;;
-	    --ngl)
-		shift; NGL="$1" ;;
-	    --n-predict)
-		shift; N_PREDICT="$1" ;;
-	    --grammar-file)
-		shift; GRAMMAR_FILE="--grammar-file $1" ;;
-	    --debug)
-		ERROR_OUTPUT="/dev/stdout"; SILENT_PROMPT=""; DEBUG=1 ;;
-	    --noerror)
-		ERROR_OUTPUT="/dev/null" ;;
-	    --stdin|--interactive|-i)
-		DO_STDIN=1 ;;
-	    --)
-		# consumes rest of line
-		shift; QUESTION=("$@")
-		break
-		;;
-	    -*)
-		echo "Unrecognized option: $1"
-		exit 1
-		;;
-	    *)
-		# consumes rest of line
-		QUESTION=("$*")
-		break
-		;;
-	esac
-	shift
+        case $1 in
+            -m|--model-type)
+                shift; MODEL_TYPE="$1" ;;
+            --speed)
+                PRIORITY="speed" ;;
+            --length)
+                PRIORITY="length" ;;
+            --temperature)
+                shift; TEMPERATURE="$1" ;;
+            --verbose)
+                VERBOSE=1 ;;
+            -c|--context-length)
+                shift; CONTEXT_LENGTH="$1" ;;
+            --ngl)
+                shift; NGL="$1" ;;
+            --n-predict)
+                shift; N_PREDICT="$1" ;;
+            --grammar-file)
+                shift; GRAMMAR_FILE="--grammar-file $1" ;;
+            --debug)
+                ERROR_OUTPUT="/dev/stdout"; SILENT_PROMPT=""; DEBUG=1 ;;
+            --noerror)
+                ERROR_OUTPUT="/dev/null" ;;
+            --stdin|--interactive|-i)
+                DO_STDIN=1 ;;
+            --)
+                # consumes rest of line
+                shift; QUESTION=("$@")
+                break
+                ;;
+            -*)
+                echo "Unrecognized option: $1"
+                exit 1
+                ;;
+            *)
+                # consumes rest of line
+                QUESTION=("$*")
+                break
+                ;;
+        esac
+        shift
     done
 else
     QUESTION="${*}"
@@ -126,42 +126,42 @@ function gpu_check {
     if ! gpu_detector=$(command -v nvidia-detector) || [[ "$($gpu_detector)" == "None" ]];
     then
         if [ "${DEBUG}" ];
-	then
+        then
             echo "* NO GPU"
         fi
         FREE_VRAM_GB=0
         MAX_NGL_EST=0
         NGL=""
-	GPU="--gpu none"
+        GPU="--gpu none"
     else
         # if gpu is already in use, estimate NGL max at int(free_vram_gb * 1.5)
         FREE_VRAM_GB=$(nvidia-smi --query-gpu=memory.free --format=csv,nounits,noheader | awk '{print $1 / 1024}')
-	if (( $(echo "${FREE_VRAM_GB} < 2" |bc -l) ));
-	then
-	    GPU="--gpu none"
-	    NGL_MAX_EST=0
-	    NGL=""
-	else
-	    GPU="--gpu nvidia"
+        if (( $(echo "${FREE_VRAM_GB} < 2" |bc -l) ));
+        then
+            GPU="--gpu none"
+            NGL_MAX_EST=0
+            NGL=""
+        else
+            GPU="--gpu nvidia"
             MAX_NGL_EST=$(awk -vfree_vram_gb=$FREE_VRAM_GB -vlayer_per_gb=$layer_per_gb "BEGIN{printf(\"%d\n\",int(free_vram_gb*layer_per_gb))}")
-	fi
+        fi
     fi
     if [ "${DEBUG}" ];
     then
-	echo "* FREE_VRAM_GB=${FREE_VRAM_GB} MAX_NGL_EST=${MAX_NGL_EST} GPU=${GPU}"
+        echo "* FREE_VRAM_GB=${FREE_VRAM_GB} MAX_NGL_EST=${MAX_NGL_EST} GPU=${GPU}"
     fi
 }
 
 function cap_ngl {
     if [ "$GPU" == "" ];
     then
-	GPU="--gpu none"
+        GPU="--gpu none"
     else
-	if [ "${NGL}" != '' ] && [ "${NGL}" -gt "${MAX_NGL_EST}" ];
-	then
+        if [ "${NGL}" != '' ] && [ "${NGL}" -gt "${MAX_NGL_EST}" ];
+        then
             [ $VERBOSE ] && echo "* Capping $NGL at $MAX_NGL_EST"
             NGL=$MAX_NGL_EST
-	fi
+        fi
     fi
 }
 
@@ -325,7 +325,7 @@ function llama_prompt {
 
 function chatml_prompt {
     if [ "${INPUT}" == '' ]; then
-	PROMPT=$(cat <<EOF
+        PROMPT=$(cat <<EOF
 <|im_start|>system${SYSTEM_MESSAGE}
 <|im_end|>
 <|im_start|>user
@@ -333,9 +333,9 @@ function chatml_prompt {
 <|im_end|>
 <|im_start|>assistant
 EOF
-	      )
+              )
     else
-	PROMPT=$(cat <<EOF
+        PROMPT=$(cat <<EOF
 <|im_start|>system
 ${SYSTEM_MESSAGE}
 <|im_end|>
@@ -345,7 +345,7 @@ ${INPUT}
 <|im_end|>
 <|im_start|>assistant
 EOF
-	      )
+              )
     fi
 }
 
@@ -374,9 +374,9 @@ case "${MODEL_TYPE}" in
     # Mixtral
     mixtral)
         MODEL=$(find_first_model \
-		${HOME}/wip/llamafiles/models/mixtral-8x7b-instruct-v0.1.Q5_K_M.llamafile \
-	        ${HOME}/wip/llamafiles/models/mixtral_7bx2_moe.Q3_K_M.gguf \
-		)
+                ${HOME}/wip/llamafiles/models/mixtral-8x7b-instruct-v0.1.Q5_K_M.llamafile \
+                ${HOME}/wip/llamafiles/models/mixtral_7bx2_moe.Q3_K_M.gguf \
+                )
         gpu_check 1
         chatml_prompt
         mixtral_priority
@@ -385,8 +385,8 @@ case "${MODEL_TYPE}" in
     # Dolphin of various sorts
     dolphin)
         MODEL=$(find_first_model \
-		${HOME}/wip/llamafiles/models/dolphin-2.7-mixtral-8x7b.Q4_K_M.gguf \
-		)
+                ${HOME}/wip/llamafiles/models/dolphin-2.7-mixtral-8x7b.Q4_K_M.gguf \
+                )
         gpu_check 1
         chatml_prompt
         dolphin_priority
@@ -410,8 +410,8 @@ case "${MODEL_TYPE}" in
     ## Model: {$HOME}/wip/llamafiles/models/deepseek-coder-6.7b-instruct.Q4_K_M.gguf
     codebooga)
         MODEL=$(find_first_model \
-		    "${HOME}/wip/oobabooga/text-generation-webui/models/codebooga-34b-v0.1.Q4_K_M.gguf" \
-		)
+                    "${HOME}/wip/oobabooga/text-generation-webui/models/codebooga-34b-v0.1.Q4_K_M.gguf" \
+                )
         SILENT_PROMPT=""        # not supported by codebooga
         gpu_check 2.1
         llama_prompt
@@ -421,20 +421,20 @@ case "${MODEL_TYPE}" in
     ## Model: deepseek-coder
     deepseek|coder)
         MODEL=$(find_first_model \
-		    "${HOME}/wip/llamafiles/models/deepseek-coder-6.7b-instruct.Q4_K_M.gguf" \
-	       )
+                    "${HOME}/wip/llamafiles/models/deepseek-coder-6.7b-instruct.Q4_K_M.gguf" \
+               )
         SILENT_PROMPT=""
         gpu_check 2.1
-	llama_prompt
+        llama_prompt
         deepseek_priority
         ;;
 
     rocket)
         MODEL=$(find_first_model \
-		    "${HOME}/wip/llamafiles/models/rocket-3b.Q6_K.llamafile" \
-		    "${HOME}/wip/llamafiles/models/rocket-3b.Q5_K_M.llamafile" \
-		    "${HOME}/wip/llamafiles/models/rocket-3b.Q4_K_M.llamafile" \
-	     )
+                    "${HOME}/wip/llamafiles/models/rocket-3b.Q6_K.llamafile" \
+                    "${HOME}/wip/llamafiles/models/rocket-3b.Q5_K_M.llamafile" \
+                    "${HOME}/wip/llamafiles/models/rocket-3b.Q4_K_M.llamafile" \
+             )
         gpu_check 4
         chatml_prompt
         rocket_priority
@@ -442,9 +442,9 @@ case "${MODEL_TYPE}" in
 
     phi)
         MODEL=$(find_first_model \
-		    "${HOME}/wip/llamafiles/models/phi-2.Q6_K.llamafile" \
-		    "${HOME}/wip/llamafiles/models/phi-2.Q5_K_M.llamafile" \
-	     )
+                    "${HOME}/wip/llamafiles/models/phi-2.Q6_K.llamafile" \
+                    "${HOME}/wip/llamafiles/models/phi-2.Q5_K_M.llamafile" \
+             )
         gpu_check 4
         phi_prompt
         phi_priority
