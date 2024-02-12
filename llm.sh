@@ -331,9 +331,9 @@ function chatml_prompt {
 <|im_start|>user
 {QUESTION}
 <|im_end|>
-<|im_start|>assistant 
+<|im_start|>assistant
 EOF
-		 )
+	      )
     else
 	PROMPT=$(cat <<EOF
 <|im_start|>system
@@ -348,6 +348,7 @@ EOF
 	      )
     fi
 }
+
 
 function phi_prompt {
     # Instruct: {prompt}
