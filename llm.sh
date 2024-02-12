@@ -343,7 +343,7 @@ ${SYSTEM_MESSAGE}
 ${QUESTION}
 ${INPUT}
 <|im_end|>
-<|im_start|>assistant 
+<|im_start|>assistant
 EOF
 	      )
     fi
