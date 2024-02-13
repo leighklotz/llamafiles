@@ -71,7 +71,7 @@ then
                 break
                 ;;
             -*)
-                echo "Unrecognized option: $1"
+                echo "Unrecognized option: $1" >> /dev/stderr
                 exit 1
                 ;;
             *)
@@ -182,7 +182,7 @@ function mixtral_priority {
              CONTEXT_LENGTH=${CONTEXT_LENGTH:=4096}
              ;;
          *)
-             echo "usage: unknown priority $PRIORITY"
+             echo "usage: unknown priority $PRIORITY" >> /dev/stderr
              exit 1
             ;;
     esac
@@ -205,7 +205,7 @@ function dolphin_priority {
              CONTEXT_LENGTH=${CONTEXT_LENGTH:=4096}
              ;;
          *)
-             echo "usage: unknown priority $PRIORITY"
+             echo "usage: unknown priority $PRIORITY" >> /dev/stderr
              exit 1
             ;;
     esac
@@ -228,7 +228,7 @@ function mistral_priority {
             CONTEXT_LENGTH=${CONTEXT_LENGTH:=4096}
             ;;
         *)
-            echo "usage: unknown priority $PRIORITY"
+            echo "usage: unknown priority $PRIORITY" >> /dev/stderr
             exit 1
             ;;
     esac
@@ -252,7 +252,7 @@ function codebooga_priority {
             CONTEXT_LENGTH=${CONTEXT_LENGTH:=2048}
              ;;
         *)
-             echo "usage: unknown priority $PRIORITY"
+             echo "usage: unknown priority $PRIORITY" >> /dev/stderr
              exit 1
             ;;
     esac
@@ -276,8 +276,8 @@ function deepseek_priority {
             CONTEXT_LENGTH=${CONTEXT_LENGTH:=2048}
              ;;
         *)
-             echo "usage: unknown priority $PRIORITY"
-             echo "usage: $0 ${USAGE}"
+             echo "usage: unknown priority $PRIORITY" >> /dev/stderr
+             echo "usage: $0 ${USAGE}" >> /dev/stderr
              exit 1
             ;;
     esac
@@ -301,8 +301,8 @@ function rocket_priority {
             CONTEXT_LENGTH=${CONTEXT_LENGTH:=2048}
              ;;
         *)
-             echo "usage: unknown priority $PRIORITY"
-             echo "usage: $0 ${USAGE}"
+             echo "usage: unknown priority $PRIORITY" >> /dev/stderr
+             echo "usage: $0 ${USAGE}" >> /dev/stderr
              exit 1
             ;;
     esac
@@ -314,7 +314,7 @@ function phi_priority {
     MAX_CONTEXT_LENGTH=2048
     CONTEXT_LENGTH=${CONTEXT_LENGTH:=2048}
     BATCH_SIZE=${BATCH_SIZE:-128}
-    NGL=${NGL:-}
+    NGL=${NGL:-33}
     cap_ngl
 }
 
@@ -455,7 +455,7 @@ case "${MODEL_TYPE}" in
         ;;
 
     *)
-        echo "unknown model type $MODEL_TYPE"
+        echo "unknown model type $MODEL_TYPE" >> /dev/stderr
         exit 1
         ;;
 esac
@@ -473,8 +473,8 @@ fi
 
 if [ ! -f $MODEL ];
 then
-    echo "Model not found: ${MODEL}"
-    exit 1
+    echo "Model not found: ${MODEL}" >> /dev/stderr
+    exit 2
 fi
 
 PROMPT_LENGTH_EST=$((${#PROMPT}/4))
@@ -496,7 +496,7 @@ BATCH_SIZE="${BATCH_SIZE:+--batch_size $BATCH_SIZE}"
 
 if [ "${MODEL}" == "" ];
 then
-    echo "* FAIL: No model"
+    echo "* FAIL: No model" >> /dev/stderr
     exit 2
 fi
 
@@ -509,7 +509,7 @@ fi
 # Set verbose and debug last
 if [ "${DEBUG}" ] || [ "${VERBOSE}" ];
 then
-    printf '* Paramters: ngl=%s context_length=%s est_len=%s:\n' "${NGL}" "${CONTEXT_LENGTH}" "${PROMPT_LENGTH_EST}"
+    printf '* Parameters: ngl=%s context_length=%s est_len=%s:\n' "${NGL}" "${CONTEXT_LENGTH}" "${PROMPT_LENGTH_EST}"
     set -x
 fi
 
@@ -519,7 +519,7 @@ printf '%s' "${PROMPT}" | ${MODEL_RUNNER} ${MODEL} ${LOG_DISABLE} ${GRAMMAR_FILE
 STATUS=$?
 
 # Try to inform user about errors
-if [ ! $STATUS ];
+if [ "$STATUS" != "0" ];
 then
     if [ "${ERROR_OUTPUT}" == "/dev/null" ];
     then
