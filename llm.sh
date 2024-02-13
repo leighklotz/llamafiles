@@ -106,7 +106,7 @@ function find_first_model() {
   local file
   for file in "${files[@]}"; do
     [ $VERBOSE ] && echo "* Checking Model $file" >> /dev/stderr
-    if [ -x "$file" ] || [ "${file##*.}" == "gguf" ] ;
+    if [ -x "$file" ] || [ "${file##*.}" == "gguf" ];
     then
       [ $VERBOSE ] && echo "* Accepting Model $file" >> /dev/stderr
       echo "${file}"
@@ -139,8 +139,8 @@ function gpu_check {
         if (( $(echo "${FREE_VRAM_GB} < 2" |bc -l) ));
         then
             GPU="--gpu none"
-            NGL_MAX_EST=0
-            NGL=""
+            MAX_NGL_EST=0
+            NGL=0
         else
             GPU="--gpu nvidia"
             MAX_NGL_EST=$(awk -vfree_vram_gb=$FREE_VRAM_GB -vlayer_per_gb=$layer_per_gb "BEGIN{printf(\"%d\n\",int(free_vram_gb*layer_per_gb))}")
@@ -157,7 +157,7 @@ function cap_ngl {
     then
         GPU="--gpu none"
     else
-        if [ "${NGL}" != '' ] && [ "${NGL}" -gt "${MAX_NGL_EST}" ];
+        if [ "${NGL}" != "" ] && [ "${NGL}" -gt "${MAX_NGL_EST}" ];
         then
             [ $VERBOSE ] && echo "* Capping $NGL at $MAX_NGL_EST"
             NGL=$MAX_NGL_EST
@@ -320,11 +320,15 @@ function phi_priority {
 
 
 function llama_prompt {
-    PROMPT=$(printf "%b" "[INST]${SYSTEM_MESSAGE}\n${QUESTION}\n${INPUT}[/INST]\n")
+    if [ "${INPUT}" == "" ]; then
+	PROMPT=$(printf "%b" "[INST]${SYSTEM_MESSAGE}\n${QUESTION}\n[/INST]\n")
+    else
+	PROMPT=$(printf "%b" "[INST]${SYSTEM_MESSAGE}\n${QUESTION}\n${INPUT}\n[/INST]\n")
+    fi
 }
 
 function chatml_prompt {
-    if [ "${INPUT}" == '' ]; then
+    if [ "${INPUT}" == "" ]; then
         PROMPT=$(cat <<EOF
 <|im_start|>system${SYSTEM_MESSAGE}
 <|im_end|>
@@ -477,7 +481,7 @@ PROMPT_LENGTH_EST=$((${#PROMPT}/4))
 #BATCH_SIZE=${BATCH_SIZE:-$(($CONTEXT_LENGTH / 2))}
 
 # If no GPU, force NGL off
-if [ "${GPU}" = '' ];
+if [ "${GPU}" = "" ];
 then
     NGL=0
     GPU="--gpu none"
@@ -490,7 +494,7 @@ TEMPERATURE="${TEMPERATURE:+--temp $TEMPERATURE}"
 CONTEXT_LENGTH="${CONTEXT_LENGTH:+-c $CONTEXT_LENGTH}"
 BATCH_SIZE="${BATCH_SIZE:+--batch_size $BATCH_SIZE}"
 
-if [ "${MODEL}" == "" ] ;
+if [ "${MODEL}" == "" ];
 then
     echo "* FAIL: No model"
     exit 2
@@ -517,7 +521,12 @@ STATUS=$?
 # Try to inform user about errors
 if [ ! $STATUS ];
 then
-    echo "* FAIL $STATUS: maybe see ${ERROR_OUTPUT}" > /dev/stderr
+    if [ "${ERROR_OUTPUT}" == "/dev/null" ];
+    then
+	echo "* FAIL $STATUS: re-run with --debug" > /dev/stderr
+    else
+	echo "* FAIL $STATUS: maybe see ${ERROR_OUTPUT}" > /dev/stderr
+    fi
 fi
 
 exit $STATUS
