@@ -7,7 +7,7 @@ SCRIPT_DIR=$(dirname $(readlink -f "${BASH_SOURCE}"))
 
 # Test Configuration
 MODEL_TYPES_FILE="${SCRIPT_DIR}/../models/model-types.txt"
-QUESTIONS_FILE=${SCRIPT_DIR}/help-txt.questions
+QUESTIONS_FILE=${SCRIPT_DIR}/questions-help.txt
 
 # Read  line  by line and store each line in an array
 declare -a questions
@@ -20,7 +20,7 @@ do
     echo "=== ${q} ==="
     for m in "${model_types[@]}"
     do
-	echo -n "${m} "
+	echo -n "--- ${m} ---"
 	time help.sh --speed -m "${m}" "${q}"
 	echo ""
     done
