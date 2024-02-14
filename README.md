@@ -176,14 +176,12 @@ These are less developed.
 - `--debug`: enables debug mode.
 - `--noerror`: disables error output.
 - `--stdin` or `--interactive` or `-i`: enables standard input mode.
+- `-e` or `--process-question-escapes`: expand \n and friends in the question; stdin is always literlal
 - `--`: terminates the arguments and starts the question.
 
 ## Environment Variables
 
-`llm.sh` also uses the following environment variables:
-
-- `THREADS`: sets the number of threads.
-- `NUMBER_OF_PROCESSORS`: sets the number of processors.
+See [env.sh.example](env.sh.example).
 
 ## Program Flow
 1. If there are any arguments, `--` or any non-hyphen word, terminate the arguments and start the question. 

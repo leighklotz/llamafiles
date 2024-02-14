@@ -2,27 +2,32 @@
 
 USAGE="[-m|--model-type model-type] [--stdin|--interactive|-i] [--speed | --length] [--temperature temp] [--context-length|-c n] [--ngl n] [--n-predict n] [--debug] [--verbose] [--] QUESTION*"
 
-# Use flags or environment variables below:
+# Use CLI flags, or environment variables below:
 MODEL_TYPE=${MODEL_TYPE:-mistral}
-INPUT=${INPUT:-}
-QUESTION=${QUESTION:-}
 ERROR_OUTPUT="/dev/null"
-TEMPERATURE=${TEMPERATURE=}
-CONTEXT_LENGTH=${CONTEXT_LENGTH:=}
-N_PREDICT=""
-SYSTEM_MESSAGE="${SYSTEM_MESSAGE-$(printf "%b" "Answer the following user question:\n")}"
+TEMPERATURE=${TEMPERATURE:-}
+CONTEXT_LENGTH=${CONTEXT_LENGTH:-}
+N_PREDICT="${N_PREDICT:-}"
+SYSTEM_MESSAGE="${SYSTEM_MESSAGE-"Answer the following user question:"}"
 SILENT_PROMPT="--silent-prompt"
-NGL=""
+NGL="${NGL:-}"
 GPU="--gpu auto"
-PRIORITY="manual" # speed|length|manual
-DEBUG=""
+PRIORITY="${PRIORITY:-manual}" # speed|length|manual
+DEBUG="${DEBUG:-}"
 VERBOSE=${VERBOSE:-}
-MODEL_RUNNER="/usr/bin/env"
-DO_STDIN="$(test -t 0 || echo $?)"
 LOG_DISABLE="--log-disable"
-GRAMMAR_FILE=""
+GRAMMAR_FILE="${GRAMMAR_FILE:-}"
+BATCH_SIZE="${BATCH_SIZE:-}"
 
+# Not settable via ENV
+MODEL_RUNNER="/usr/bin/env"
+PROCESS_QUESTION_ESCAPES=""
 LLAMAFILE_MODEL_RUNNER="${HOME}/wip/llamafiles/bin/llamafile-0.6.2 -m "
+
+# Read input
+INPUT=""
+QUESTION=""
+DO_STDIN="$(test -t 0 || echo $?)"
 
 # Get thread count
 if [ "${THREADS}" == "" ];
@@ -65,6 +70,8 @@ then
                 ERROR_OUTPUT="/dev/null" ;;
             --stdin|--interactive|-i)
                 DO_STDIN=1 ;;
+	    -e|--process-question-escapes)
+		PROCESS_QUESTION_ESCAPES=1 ;;
             --)
                 # consumes rest of line
                 shift; QUESTION=("$@")
@@ -84,6 +91,13 @@ then
     done
 else
     QUESTION="${*}"
+fi
+
+# Process escape sequences in QUESTION if requested.
+# STDIN never processes escapes.
+if [ "${PROCESS_QUESTION_ESCAPES}" ]; then
+    [ $VERBOSE ] && echo "* Processing escape sequences in QUESTION"
+    printf -v QUESTION "%b" "$QUESTION"
 fi
 
 if [ "$DO_STDIN" != "" ];
@@ -313,7 +327,7 @@ function rocket_priority {
 function phi_priority {
     MAX_CONTEXT_LENGTH=2048
     CONTEXT_LENGTH=${CONTEXT_LENGTH:=2048}
-    BATCH_SIZE=${BATCH_SIZE:-128}
+    BATCH_SIZE=${BATCH_SIZE:=128}
     NGL=${NGL:-33}
     cap_ngl
 }
@@ -321,19 +335,30 @@ function phi_priority {
 
 function llama_prompt {
     if [ "${INPUT}" == "" ]; then
-	PROMPT=$(printf "%b" "[INST]${SYSTEM_MESSAGE}\n${QUESTION}\n[/INST]\n")
+	PROMPT=$(cat <<EOF
+[INST]${SYSTEM_MESSAGE%$'\n'}
+${QUESTION%$'\n'}
+[INST]
+EOF
+		 )
     else
-	PROMPT=$(printf "%b" "[INST]${SYSTEM_MESSAGE}\n${QUESTION}\n${INPUT}\n[/INST]\n")
+	PROMPT=$(cat <<EOF
+[INST]${SYSTEM_MESSAGE%$'\n'}
+${QUESTION%$'\n'}
+${INPUT%$'\n'}
+[INST]
+EOF
+		 )
     fi
 }
 
 function chatml_prompt {
     if [ "${INPUT}" == "" ]; then
         PROMPT=$(cat <<EOF
-<|im_start|>system${SYSTEM_MESSAGE}
+<|im_start|>system${SYSTEM_MESSAGE%$'\n'}
 <|im_end|>
 <|im_start|>user
-${QUESTION}
+${QUESTION%$'\n'}
 <|im_end|>
 <|im_start|>assistant
 EOF
@@ -341,11 +366,11 @@ EOF
     else
         PROMPT=$(cat <<EOF
 <|im_start|>system
-${SYSTEM_MESSAGE}
+${SYSTEM_MESSAGE%$'\n'}
 <|im_end|>
 <|im_start|>user
-${QUESTION}
-${INPUT}
+${QUESTION%$'\n'}
+${INPUT%$'\n'}
 <|im_end|>
 <|im_start|>assistant
 EOF
@@ -359,17 +384,17 @@ function phi_prompt {
     # Output:
     if [ "${INPUT}" == "" ];
     then
-      PROMPT=$(printf "%b" "Instruct: ${SYSTEM_MESSAGE}
+      printf -v PROMPT "%s" "Instruct: ${SYSTEM_MESSAGE%$'\n'}
 ${QUESTION}
-Output:")
+Output:"
     else
-      PROMPT=$(printf "%b" "Instruct: ${QUESTION}
+      printf -v PROMPT "%s" "Instruct: ${QUESTION%$'\n'}
 User Input:
 -----------------
 ${INPUT}
 -----------------
 End of User Input
-Output:")
+Output:"
     fi
 }
 
