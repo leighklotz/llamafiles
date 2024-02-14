@@ -7,7 +7,7 @@ SCRIPT_DIR=$(dirname $(readlink -f "${BASH_SOURCE}"))
 
 # Test Configuration
 MODEL_TYPES_FILE="${SCRIPT_DIR}/../models/model-types.txt"
-QUESTIONS_FILE=${SCRIPT_DIR}/help-questions.txt
+QUESTIONS_FILE=${SCRIPT_DIR}/help-txt.questions
 
 # Read  line  by line and store each line in an array
 declare -a questions
