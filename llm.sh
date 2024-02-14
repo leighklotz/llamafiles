@@ -1,6 +1,6 @@
 #!/bin/bash
 
-USAGE="[-m|--model-type model-type] [--stdin|--interactive|-i] [--speed | --length] [--temperature temp] [--context-length|-c n] [--ngl n] [--n-predict n] [--debug] [--verbose] [--] QUESTION*"
+USAGE="[-m|--model-type model-type] [--stdin|--interactive|-i] [--speed | --length] [--temperature temp] [--context-length|-c n] [--ngl n] [--n-predict n] [--debug] [--verbose|-v] [--] QUESTION*"
 
 # Use CLI flags, or environment variables below:
 MODEL_TYPE=${MODEL_TYPE:-mistral}
@@ -55,7 +55,7 @@ then
                 PRIORITY="length" ;;
             --temperature)
                 shift; TEMPERATURE="$1" ;;
-            --verbose)
+            --verbose|-v)
                 VERBOSE=1 ;;
             -c|--context-length)
                 shift; CONTEXT_LENGTH="$1" ;;
@@ -336,20 +336,18 @@ function phi_priority {
 
 function llama_prompt {
     if [ "${INPUT}" == "" ]; then
-	PROMPT=$(cat <<EOF
-[INST]${SYSTEM_MESSAGE%$'\n'}
+	printf -v PROMPT "[INST]
+${SYSTEM_MESSAGE%$'\n'}
 ${QUESTION%$'\n'}
 [INST]
-EOF
-		 )
+"
     else
-	PROMPT=$(cat <<EOF
-[INST]${SYSTEM_MESSAGE%$'\n'}
+	printf -v PROMPT "[INST]
+${SYSTEM_MESSAGE%$'\n'}
 ${QUESTION%$'\n'}
 ${INPUT%$'\n'}
 [INST]
-EOF
-		 )
+"
     fi
 }
 
