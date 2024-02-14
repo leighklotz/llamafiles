@@ -23,6 +23,7 @@ BATCH_SIZE="${BATCH_SIZE:-}"
 MODEL_RUNNER="/usr/bin/env"
 PROCESS_QUESTION_ESCAPES=""
 LLAMAFILE_MODEL_RUNNER="${HOME}/wip/llamafiles/bin/llamafile-0.6.2 -m "
+CLI_MODE="--cli"
 
 # Read input
 INPUT=""
@@ -352,6 +353,38 @@ EOF
     fi
 }
 
+function alpaca_prompt {
+    alpaca_header="Below is an instruction that describes a task, paired with an input that provides further context. Write a response that appropriately completes the request."
+    if [ "${INPUT}" == "" ]; then
+	printf -v PROMPT "%s" "${alpaca_header}
+
+### Instruction:
+${SYSTEM_MESSAGE%$'\n'}
+
+### Input:
+${QUESTION%$'\n'}
+
+### Response:
+
+"
+    else
+	printf -v PROMPT "%b" "
+${alpaca_header}
+
+### Instruction:
+
+${SYSTEM_MESSAGE%$'\n'}
+${QUESTION%$'\n'}
+
+### Input:
+${INPUT%$'\n'}
+
+### Response:
+
+"
+    fi
+}
+
 function chatml_prompt {
     if [ "${INPUT}" == "" ]; then
         PROMPT=$(cat <<EOF
@@ -443,7 +476,7 @@ case "${MODEL_TYPE}" in
                 )
         SILENT_PROMPT=""        # not supported by codebooga
         gpu_check 2.1
-        llama_prompt
+        alpaca_prompt
         codebooga_priority
         ;;
 
@@ -540,7 +573,10 @@ fi
 
 # Perform inference
 #set -x
-printf '%s' "${PROMPT}" | ${MODEL_RUNNER} ${MODEL} ${LOG_DISABLE} ${GRAMMAR_FILE} ${TEMPERATURE} ${CONTEXT_LENGTH} ${NGL} ${N_PREDICT} ${BATCH_SIZE} --no-penalize-nl --repeat-penalty 1 ${THREADS} -f /dev/stdin $SILENT_PROMPT 2> "${ERROR_OUTPUT}"
+
+# printf '%s' "x${PROMPT}x"
+
+printf '%s' "${PROMPT}" | ${MODEL_RUNNER} ${MODEL} ${CLI_MODE} ${LOG_DISABLE} ${GRAMMAR_FILE} ${TEMPERATURE} ${CONTEXT_LENGTH} ${NGL} ${N_PREDICT} ${BATCH_SIZE} --no-penalize-nl --repeat-penalty 1 ${THREADS} -f /dev/stdin $SILENT_PROMPT 2> "${ERROR_OUTPUT}"
 STATUS=$?
 
 # Try to inform user about errors
