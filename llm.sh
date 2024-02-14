@@ -333,7 +333,7 @@ function chatml_prompt {
 <|im_start|>system${SYSTEM_MESSAGE}
 <|im_end|>
 <|im_start|>user
-{QUESTION}
+${QUESTION}
 <|im_end|>
 <|im_start|>assistant
 EOF
@@ -525,7 +525,7 @@ then
     then
 	echo "* FAIL $STATUS: re-run with --debug" > /dev/stderr
     else
-	echo "* FAIL $STATUS: maybe see ${ERROR_OUTPUT}" > /dev/stderr
+	echo "* FAIL $STATUS: errors went to ${ERROR_OUTPUT}" > /dev/stderr
     fi
 fi
 
