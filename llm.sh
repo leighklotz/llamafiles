@@ -22,7 +22,7 @@ BATCH_SIZE="${BATCH_SIZE:-}"
 # Not settable via ENV
 MODEL_RUNNER="/usr/bin/env"
 PROCESS_QUESTION_ESCAPES=""
-LLAMAFILE_MODEL_RUNNER="${HOME}/wip/llamafiles/bin/llamafile-0.6.2 -m "
+LLAMAFILE_MODEL_RUNNER="${HOME}/wip/llamafiles/lib/llamafile-0.6.2 -m "
 CLI_MODE="--cli"
 
 # Read input
