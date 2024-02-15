@@ -333,20 +333,19 @@ function phi_priority {
     cap_ngl
 }
 
-
 function llama_prompt {
     if [ "${INPUT}" == "" ]; then
 	printf -v PROMPT "[INST]
 ${SYSTEM_MESSAGE%$'\n'}
 ${QUESTION%$'\n'}
-[INST]
+[/INST]
 "
     else
 	printf -v PROMPT "[INST]
 ${SYSTEM_MESSAGE%$'\n'}
 ${QUESTION%$'\n'}
 ${INPUT%$'\n'}
-[INST]
+[/INST]
 "
     fi
 }

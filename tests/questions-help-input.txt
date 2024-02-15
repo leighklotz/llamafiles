@@ -1,0 +1,3 @@
+Based on the provided `git diff` output, compose a well-structured commit message. The first line should serve as a concise subject, while a blank line separates it from the extended description. The extended description should be presented as a list, with each change detail formatted as a bullet point.
+summarize
+Output a one-line `git commit -m` line that will commit these changes:

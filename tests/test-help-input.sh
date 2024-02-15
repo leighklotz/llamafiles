@@ -7,12 +7,13 @@ SCRIPT_DIR=$(dirname $(readlink -f "${BASH_SOURCE}"))
 
 # Test Configuration
 MODEL_TYPES_FILE="${SCRIPT_DIR}/model-types.txt"
-QUESTIONS_FILE=${SCRIPT_DIR}/questions-help.txt
+QUESTIONS_HELP_INPUT_FILE=${SCRIPT_DIR}/questions-help-input.txt
+GIT_DIFF_EXAMPLE=${SCRIPT_DIR}/git-diff-example.txt
 
 # Read  line  by line and store each line in an array
 declare -a questions
 declare -a model_types
-IFS=$'\n' read -d '' -ra questions < "${QUESTIONS_FILE}"
+IFS=$'\n' read -d '' -ra questions < "${QUESTIONS_HELP_INPUT_FILE}"
 IFS=$'\n' read -d '' -ra model_types < "${MODEL_TYPES_FILE}"
 
 for q in "${questions[@]}"
@@ -21,7 +22,7 @@ do
     for m in "${model_types[@]}"
     do
 	echo "--- ${m} ---"
-	time help.sh --speed -m "${m}" "${q}"
+	time code.sh git cat ${GIT_DIFF_EXAMPLE} | help.sh --speed -m ${m} "${q}"
 	if [ $? -ne 0 ]; then
 	    echo "FAIL: status=$?"
 	fi

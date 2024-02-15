@@ -1,0 +1,14 @@
+diff --git a/tests/test-help.sh b/tests/test-help.sh
+index 53aa9a6..a98faed 100755
+--- a/tests/test-help.sh
++++ b/tests/test-help.sh
+@@ -22,6 +22,9 @@ do
+     do
+ 	echo "--- ${m} ---"
+ 	time help.sh --speed -m "${m}" "${q}"
++	if [ $? -ne 0 ]; then
++	    echo "FAIL: status=$?"
++	fi
+ 	echo ""
+     done
+     echo ""
