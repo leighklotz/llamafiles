@@ -18,4 +18,4 @@ fi
 # uses current default model, e.g. $MODEL_TYPE
 printf '```git
 %s
-```' "${output}" | help.sh ${*} --grammar-file ~/wip/llamafiles/git-commit-grammar.gbnf "Output a one-line \`git commit -m\` line that will commit these${staged}changes:"
+```\n' "${output}" | help.sh ${*} --grammar-file ~/wip/llamafiles/git-commit-grammar.gbnf "Output a one-line \`git commit -m\` line that will commit these${staged}changes:"
