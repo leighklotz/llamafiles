@@ -1,5 +1,5 @@
 models
-bin
+lib
 private
 *.zip
 *.log
