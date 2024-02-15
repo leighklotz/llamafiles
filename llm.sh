@@ -208,7 +208,7 @@ function dolphin_priority {
     MAX_CONTEXT_LENGTH=12288
     case "${PRIORITY}" in
          speed)
-             NGL=${NGL:=32}
+             NGL=${NGL:=28}
              CONTEXT_LENGTH=2048
              ;;
          length)
@@ -384,30 +384,26 @@ ${QUESTION%$'\n'}
 
 function chatml_prompt {
     if [ "${INPUT}" == "" ]; then
-        PROMPT=$(cat <<EOF
-<|im_start|>system${SYSTEM_MESSAGE%$'\n'}
+        printf -v PROMPT "<|im_start|>system
+%s
 <|im_end|>
 <|im_start|>user
-${QUESTION%$'\n'}
+%s
 <|im_end|>
 <|im_start|>assistant
-EOF
-              )
+" "${SYSTEM_MESSAGE%$'\n'}" "${QUESTION%$'\n'}"
     else
-        PROMPT=$(cat <<EOF
-<|im_start|>system
-${SYSTEM_MESSAGE%$'\n'}
+        printf -v PROMPT "<|im_start|>system
+%s
 <|im_end|>
 <|im_start|>user
-${QUESTION%$'\n'}
-${INPUT%$'\n'}
+%s
+%s
 <|im_end|>
 <|im_start|>assistant
-EOF
-              )
+" "${SYSTEM_MESSAGE%$'\n'}" "${QUESTION%$'\n'}" "${INPUT%$'\n'}"
     fi
 }
-
 
 function phi_prompt {
     # Instruct: {prompt}
