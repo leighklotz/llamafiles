@@ -350,8 +350,10 @@ function llama_prompt {
 }
 
 function alpaca_prompt {
+
     alpaca_header="Below is an instruction that describes a task, paired with an input that provides further context. Write a response that appropriately completes the request."
     if [ "${INPUT}" == "" ]; then
+	##### NO INPUT CASE
 	printf -v PROMPT "%s" "${alpaca_header}
 
 ### Instruction:
@@ -363,13 +365,14 @@ ${QUESTION%$'\n'}
 ### Response:
 
 "
+	##### END NO INPUT CASE
     else
-	printf -v PROMPT "%b" "
+	##### INPUT CASE
+	printf -v PROMPT "
 %s
-
 ### Instruction:
-
 %s
+
 %s
 
 ### Input:
@@ -378,6 +381,7 @@ ${QUESTION%$'\n'}
 ### Response:
 
 " "${alpaca_header}" "${SYSTEM_MESSAGE%$'\n'}" "${QUESTION%$'\n'}" "${INPUT%$'\n'}"
+	##### END NO INPUT CASE
     fi
 }
 
