@@ -2,11 +2,12 @@
 
 staged=""
 
-output="$(git diff)"
+output="$(git diff --staged)"
+staged="staged"
 if [ "${output}" == '' ]; then
-    echo NO OUTPUT LOOKING FOR STAGED
-    output="$(git diff --staged)"
-    staged=" staged "
+    echo "No staged changes, looking for unstaged"
+    output="$(git diff)"
+    staged=" "
 fi
 
 if [ "${output}" == '' ]; then
@@ -14,4 +15,5 @@ if [ "${output}" == '' ]; then
     exit 1
 fi
 
+# uses current default model, e.g. $MODEL_TYPE
 code.sh git printf "%s" "${output}" | help.sh "Output a one-line \`git commit -m\` line that will commit these${staged}changes:"
