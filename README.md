@@ -108,9 +108,9 @@ More examples can be found in the [examples](https://github.com/leighklotz/llama
 Download your own models.
 
 ## LLamafile binaries
-These go in `bin/`:
+Get these files from (https://github.com/Mozilla-Ocho/llamafile)[(https://github.com/Mozilla-Ocho/llamafile].
+They go in `lib/`:
 
-https://github.com/Mozilla-Ocho/llamafile
 - `llamafile-0.2.1.zip`
 - `llamafile-llava-cli-0.2.1`
 - `llamafile-llava-quantize-0.2.1`
@@ -124,6 +124,7 @@ You need to download these from https://huggingface.co/jartine and other places 
 
 ## Desktop and GPU models
 These go in `models/`:
+
 - `dolphin-2.5-mixtral-8x7b.Q4_K_M.llamafile`
 - `llava-v1.5-7b-q4-main.llamafile`
 - `llava-v1.5-7b-q4-server.llamafile`
@@ -195,7 +196,7 @@ See [env.sh.example](env.sh.example).
 
 # Mac Specifics
 You will need to do this on MacOS:
-- `xattr -dr com.apple.quarantine models/* bin/*`
+- `xattr -dr com.apple.quarantine models/* lib/*`
 
 # References
 - https://github.com/Mozilla-Ocho/llamafile 

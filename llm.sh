@@ -336,17 +336,17 @@ function phi_priority {
 function llama_prompt {
     if [ "${INPUT}" == "" ]; then
 	printf -v PROMPT "[INST]
-${SYSTEM_MESSAGE%$'\n'}
-${QUESTION%$'\n'}
+%s
+%s
 [/INST]
-"
+" "${SYSTEM_MESSAGE%$'\n'}", "${QUESTION%$'\n'}"
     else
 	printf -v PROMPT "[INST]
 %s
 %s
 %s
 [/INST]
-" "${SYSTEM_MESSAGE%$'\n'}" ${QUESTION%$'\n'} ${INPUT%$'\n'}
+" "${SYSTEM_MESSAGE%$'\n'}", "${QUESTION%$'\n'}", "${INPUT%$'\n'}"
     fi
 }
 
@@ -366,19 +366,19 @@ ${QUESTION%$'\n'}
 "
     else
 	printf -v PROMPT "%b" "
-${alpaca_header}
+%s
 
 ### Instruction:
 
-${SYSTEM_MESSAGE%$'\n'}
-${QUESTION%$'\n'}
+%s
+%s
 
 ### Input:
-${INPUT%$'\n'}
+%s
 
 ### Response:
 
-"
+" "${alpaca_header}", "${SYSTEM_MESSAGE%$'\n'}", "${QUESTION%$'\n'}", "${INPUT%$'\n'}"
     fi
 }
 
@@ -415,16 +415,16 @@ function phi_prompt {
     if [ "${INPUT}" == "" ];
     then
       printf -v PROMPT "%s" "Instruct: ${SYSTEM_MESSAGE%$'\n'}
-${QUESTION}
-Output:"
+%s
+Output:" "${QUESTION}"
     else
-      printf -v PROMPT "%s" "Instruct: ${QUESTION%$'\n'}
+      printf -v PROMPT "%s" "Instruct: %s
 User Input:
 -----------------
-${INPUT}
+%s
 -----------------
 End of User Input
-Output:"
+Output:" "${QUESTION%$'\n'}" "${INPUT}"
     fi
 }
 
@@ -564,7 +564,7 @@ fi
 # Set verbose and debug last
 if [ "${DEBUG}" ] || [ "${VERBOSE}" ];
 then
-    printf '* Parameters: ngl=%s context_length=%s est_len=%s:\n' "${NGL}" "${CONTEXT_LENGTH}" "${PROMPT_LENGTH_EST}"
+    printf '* Parameters: ngl=%s context_length=%s est_len=%s:\n' "${NGL}", "${CONTEXT_LENGTH}", "${PROMPT_LENGTH_EST}"
     set -x
 fi
 
