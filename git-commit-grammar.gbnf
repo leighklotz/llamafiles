@@ -1,0 +1,2 @@
+root ::= (first-line)? ( "git commit -m\"" [^\"]+ "\"" )
+first-line ::= [^\n]+"\n"

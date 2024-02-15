@@ -342,11 +342,11 @@ ${QUESTION%$'\n'}
 "
     else
 	printf -v PROMPT "[INST]
-${SYSTEM_MESSAGE%$'\n'}
-${QUESTION%$'\n'}
-${INPUT%$'\n'}
+%s
+%s
+%s
 [/INST]
-"
+" "${SYSTEM_MESSAGE%$'\n'}" ${QUESTION%$'\n'} ${INPUT%$'\n'}
     fi
 }
 

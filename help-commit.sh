@@ -16,4 +16,6 @@ if [ "${output}" == '' ]; then
 fi
 
 # uses current default model, e.g. $MODEL_TYPE
-code.sh git printf "%s" "${output}" | help.sh "Output a one-line \`git commit -m\` line that will commit these${staged}changes:"
+printf '```git
+%s
+```' "${output}" | help.sh ${*} --grammar-file ~/wip/llamafiles/git-commit-grammar.gbnf "Output a one-line \`git commit -m\` line that will commit these${staged}changes:"
