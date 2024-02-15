@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-echo '```'"$1"
+printf '```%s\n' "${1}"
 shift
 ${*}
-echo '```'
+printf '```\n'
