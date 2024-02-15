@@ -208,7 +208,7 @@ function dolphin_priority {
     MAX_CONTEXT_LENGTH=12288
     case "${PRIORITY}" in
          speed)
-             NGL=${NGL:=23}
+             NGL=${NGL:=32}
              CONTEXT_LENGTH=2048
              ;;
          length)
@@ -446,7 +446,7 @@ case "${MODEL_TYPE}" in
         MODEL=$(find_first_model \
                 ${HOME}/wip/llamafiles/models/dolphin-2.7-mixtral-8x7b.Q4_K_M.gguf \
                 )
-        gpu_check 1
+        gpu_check 1.2
         chatml_prompt
         dolphin_priority
         ;;
@@ -570,9 +570,6 @@ fi
 
 # Perform inference
 #set -x
-
-# printf '%s' "x${PROMPT}x"
-
 printf '%s' "${PROMPT}" | ${MODEL_RUNNER} ${MODEL} ${CLI_MODE} ${LOG_DISABLE} ${GRAMMAR_FILE} ${TEMPERATURE} ${CONTEXT_LENGTH} ${NGL} ${N_PREDICT} ${BATCH_SIZE} --no-penalize-nl --repeat-penalty 1 ${THREADS} -f /dev/stdin $SILENT_PROMPT 2> "${ERROR_OUTPUT}"
 STATUS=$?
 
