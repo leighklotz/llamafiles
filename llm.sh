@@ -446,7 +446,7 @@ case "${MODEL_TYPE}" in
         MODEL=$(find_first_model \
                 ${HOME}/wip/llamafiles/models/dolphin-2.7-mixtral-8x7b.Q4_K_M.gguf \
                 )
-        gpu_check 1.2
+        gpu_check 1.3
         chatml_prompt
         dolphin_priority
         ;;
