@@ -181,7 +181,6 @@ function cap_ngl {
 }
 
 function mixtral_priority {
-    # todo:
     MAX_CONTEXT_LENGTH=12288
     case "${PRIORITY}" in
          speed)
@@ -339,14 +338,14 @@ function llama_prompt {
 %s
 %s
 [/INST]
-" "${SYSTEM_MESSAGE%$'\n'}", "${QUESTION%$'\n'}"
+" "${SYSTEM_MESSAGE%$'\n'}" "${QUESTION%$'\n'}"
     else
 	printf -v PROMPT "[INST]
 %s
 %s
 %s
 [/INST]
-" "${SYSTEM_MESSAGE%$'\n'}", "${QUESTION%$'\n'}", "${INPUT%$'\n'}"
+" "${SYSTEM_MESSAGE%$'\n'}" "${QUESTION%$'\n'}" "${INPUT%$'\n'}"
     fi
 }
 
@@ -378,7 +377,7 @@ ${QUESTION%$'\n'}
 
 ### Response:
 
-" "${alpaca_header}", "${SYSTEM_MESSAGE%$'\n'}", "${QUESTION%$'\n'}", "${INPUT%$'\n'}"
+" "${alpaca_header}" "${SYSTEM_MESSAGE%$'\n'}" "${QUESTION%$'\n'}" "${INPUT%$'\n'}"
     fi
 }
 
@@ -388,20 +387,15 @@ function chatml_prompt {
 %s
 <|im_end|>
 <|im_start|>user
-%s
-<|im_end|>
-<|im_start|>assistant
-" "${SYSTEM_MESSAGE%$'\n'}" "${QUESTION%$'\n'}"
+%s<|im_end|>
+<|im_start|>assistant" "${SYSTEM_MESSAGE%$'\n'}" "${QUESTION%$'\n'}"
     else
         printf -v PROMPT "<|im_start|>system
-%s
-<|im_end|>
+%s<|im_end|>
 <|im_start|>user
 %s
-%s
-<|im_end|>
-<|im_start|>assistant
-" "${SYSTEM_MESSAGE%$'\n'}" "${QUESTION%$'\n'}" "${INPUT%$'\n'}"
+%s<|im_end|>
+<|im_start|>assistant" "${SYSTEM_MESSAGE%$'\n'}" "${QUESTION%$'\n'}" "${INPUT%$'\n'}"
     fi
 }
 
@@ -560,7 +554,7 @@ fi
 # Set verbose and debug last
 if [ "${DEBUG}" ] || [ "${VERBOSE}" ];
 then
-    printf '* Parameters: ngl=%s context_length=%s est_len=%s:\n' "${NGL}", "${CONTEXT_LENGTH}", "${PROMPT_LENGTH_EST}"
+    printf '* Parameters: ngl=%s context_length=%s est_len=%s:\n' "${NGL}" "${CONTEXT_LENGTH}" "${PROMPT_LENGTH_EST}"
     set -x
 fi
 
@@ -583,6 +577,7 @@ fi
 exit $STATUS
 
 
+# TODO: add few-shot to supplement system message, since at least in chatml each goes in as an assistant turn
 # TODO: bash parsing of CLI parameters vs ENV vs bundles of settings is a mess
 # CAMERA MODE:
 # by analogy to aperture priority, shutter priority, auto, or manual
