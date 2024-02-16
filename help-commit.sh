@@ -2,31 +2,42 @@
 
 ONE_LINE=1
 
-output="$(git diff --staged)"
-staged=" staged "
+function get_results {
+    # set globals
+    staged=" $1 "
+    summary_command="git diff --compact-summary $staged"
+    summary_output="$($summary_command)"
+    diff_command="git diff $staged"
+    diff_output="$($diff_command)"
+}
 
-if [ "${output}" == '' ]; then
-    echo "No staged changes, looking for unstaged"
-    output="$(git diff)"
-    staged=" "
+get_results --staged
+
+if [ "${diff_output}" == '' ]; then
+    echo "No staged changes, looking for unstaged" >> /dev/stderr
+    get_results ""
 fi
 
-if [ "${output}" == '' ]; then
-    echo no changes seen
+if [ "${diff_output}" == '' ]; then
+    echo "No changes seen" >> /dev/stderr
     exit 1
 fi
 
 if [ "$ONE_LINE" ]; then
-    PROMPT="Output a single-line \`git commit -am\` line that will commit these${staged}changes:"
+    PROMPT="Based on the git diff and summary results, output a single-line \`git commit -am\` line that will commit these${staged}changes:"
     GRAMMAR_FILE_FLAG="--grammar-file /home/klotz/wip/llamafiles/git-commit-oneline-grammar.gbnf"
 else
-    PROMPT="Output a multi-line \`git commit -am\` line that will commit these${staged}changes:"
+    PROMPT="on the git diff and summary results, output a multi-line \`git commit -am\` line that will commit these${staged}changes:"
     GRAMMAR_FILE_FLAG="--grammar-file /home/klotz/wip/llamafiles/git-commit-multiline-grammar.gbnf"
 fi
 
 
 # uses current default model, e.g. $MODEL_TYPE
 #set -x
-printf '```git
+printf '```bash
+$ %s
 %s
-```\n' "${output}" | help.sh ${*} ${GRAMMAR_FILE_FLAG} "${PROMPT}"
+$ %s
+%s
+```\n' "${diff_command}" "${diff_output}" "${summary_command}" "${summary_output}" \
+        | help.sh ${*} ${GRAMMAR_FILE_FLAG} "${PROMPT}"
