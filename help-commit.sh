@@ -1,12 +1,18 @@
 #!/bin/bash
 
-ONE_LINE=1
+export MODEL_TYPE="${MODEL_TYPE:=mixtral}"
+
+if [ "$1" == "--oneline" ] || [ "$1" == "--multiline" ];
+then
+    MESSAGE_LINE=$(echo "$1" | sed -e 's/^--//')
+    shift
+else
+    MESSAGE_LINE=oneline
+fi
 
 function get_results {
     # set globals
     staged=" $1 "
-    summary_command="git diff --compact-summary $staged"
-    summary_output="$($summary_command)"
     diff_command="git diff $staged"
     diff_output="$($diff_command)"
 }
@@ -23,22 +29,20 @@ if [ "${diff_output}" == '' ]; then
     exit 1
 fi
 
-if [ "$ONE_LINE" ]; then
-    PROMPT="Based on the git diff and summary results, output a single-line \`git commit -am\` line that will commit these${staged}changes:"
-    GRAMMAR_FILE_FLAG="--grammar-file /home/klotz/wip/llamafiles/git-commit-oneline-grammar.gbnf"
-else
-    PROMPT="on the git diff and summary results, output a multi-line \`git commit -am\` line that will commit these${staged}changes:"
-    GRAMMAR_FILE_FLAG="--grammar-file /home/klotz/wip/llamafiles/git-commit-multiline-grammar.gbnf"
-fi
+PROMPT="Provide a commit message for the changes below with a ${MESSAGE_LINE} \`git commit -am\` command:\n"
+GRAMMAR_FILE_FLAG="--grammar-file /home/klotz/wip/llamafiles/git-commit-${MESSAGE_LINE}-grammar.gbnf"
 
+# remove triple-backquote from the diff output since we're enclosing the body in that
+diff_output_sanitized="$(printf "%s" "$diff_output" | sed -e 's/```/`_`_`/g')"
 
 # uses current default model, e.g. $MODEL_TYPE
 #set -x
-printf '```bash
+printf -v INPUT '```
 $ %s
 %s
-$ %s
-%s
-```\n' "${summary_command}" "${summary_output}" \
-        "${diff_command}" "${diff_output}" \
-        | help.sh ${*} ${GRAMMAR_FILE_FLAG} "${PROMPT}"
+```\n' \
+       "${diff_command}" "${diff_output_sanitized}"
+
+# printf "%s\n" "${INPUT}"
+
+printf "%s\n" "${INPUT}" | help.sh ${*} ${GRAMMAR_FILE_FLAG} "${PROMPT}"

@@ -1,2 +1,6 @@
-root ::= (first-line)? ( "git commit -am\""[^\"\n]+"\n"[^\"]+"\"" )
-first-line ::= [^\n]+"\n"
+root ::= (FIRST-LINE)? ( GIT-COMMAND-AM-QUOTE SUMMARY-LINE BULLET-LINE+ CLOSE-APOS )
+FIRST-LINE ::= ( [^\n]+ "\n" )
+GIT-COMMAND-AM-QUOTE ::= ( "git commit -am'" )
+SUMMARY-LINE ::= ( [^'\n]+ "\n" )
+BULLET-LINE ::= ( "-" [^']+ "\n" )
+CLOSE-APOS ::= ( "'" )
