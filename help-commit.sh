@@ -39,5 +39,6 @@ $ %s
 %s
 $ %s
 %s
-```\n' "${diff_command}" "${diff_output}" "${summary_command}" "${summary_output}" \
+```\n' "${summary_command}" "${summary_output}" \
+        "${diff_command}" "${diff_output}" \
         | help.sh ${*} ${GRAMMAR_FILE_FLAG} "${PROMPT}"

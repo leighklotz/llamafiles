@@ -17,4 +17,4 @@ fi
 export SYSTEM_MESSAGE=$(printf "%b" "Summarize the following web page article and ignore website header at the start and look for the main article:\n#### Text of ${URL}\n###\n")
 
 # somehow need to protect ${ARGS} better
-${CMD} "${URL}" | ${SCRIPT_DIR}/llm.sh ${ARGS}
+${CMD} "${URL}" | ${SCRIPT_DIR}/llm.sh --length ${ARGS}
