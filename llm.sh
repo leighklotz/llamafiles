@@ -428,7 +428,6 @@ case "${MODEL_TYPE}" in
     mixtral)
         MODEL=$(find_first_model \
                 ${HOME}/wip/llamafiles/models/mixtral-8x7b-instruct-v0.1.Q5_K_M.llamafile \
-                ${HOME}/wip/llamafiles/models/mixtral_7bx2_moe.Q3_K_M.gguf \
                 )
         gpu_check 1
         chatml_prompt
