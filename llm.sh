@@ -188,7 +188,7 @@ function mixtral_priority {
              CONTEXT_LENGTH=2048
              ;;
          length)
-             NGL=${NGL:=1}
+             NGL=${NGL:=22}
              CONTEXT_LENGTH=12288
              ;;
          manual)
