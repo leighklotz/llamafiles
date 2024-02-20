@@ -4,17 +4,22 @@ Using https://github.com/Mozilla-Ocho/llamafile and https://github.com/jart mode
 
 This repository provides an LLM Help CLI for Linux and Mac systems to provide help, summarization, coding assistance, system information queries, image renaming, etc. Similar to https://justine.lol/oneliners/
 
-## Usage examples
+## Brief Usage examples
+Below are brief examples to show you what these tools do.
+
 ```shell
 $ help.sh -- "Split bash argument array into left and right with double hyphen as the separator using special bash builtin functions or operators"
 $ help.sh what is my ip
 $ help.sh -m dolphin --stdin -- 'Give me a JQ cli to get the value of the field named `llama.context_length`'
 $ man xxd | help.sh "print file contents with xxd without the address column"
+$ help-commit.sh 
+$ code.sh jq cat foo.jq | help.sh '"Explain this:'
+$ code.sh xslt cat redir/target.xslt | help.sh explain
 ```
 
-More examples can be found in the [examples](https://github.com/leighklotz/llamafiles/tree/main/examples) directory.
+More examples can be found below, and even more in the [examples](https://github.com/leighklotz/llamafiles/tree/main/examples) directory.
 
-## help.sh
+## help.sh usage and examples
 USAGE="[-m|--model-type model-type] [--stdin|--interactive|-i] [--speed | --length] [--temperature temp] [--context-length|-c n] [--ngl n] [--n-predict n] [--debug] [--verbose] [--] QUESTION*"
 
 Uses question words and stdin, if any, to create the model prompt.
@@ -102,7 +107,7 @@ klotz@rpi5:~ $
 
 More examples can be found in the [examples](https://github.com/leighklotz/llamafiles/tree/main/examples) directory.
 
-## help-commit.sh
+## help-commit.sh usage and examples
 
 This script uses llm.sh to generate commit messages from the current directoryu.
 
@@ -119,13 +124,9 @@ help-commit.sh
 ```
 
 # llm_el for Emacs
-
 There are many LLM integrations for Emacs; mine is here: (llm_el/)[llm_el/].
 
-# Models and Binaries
-Download your own models. Todo: script to do this for you:
-
-## LLamafile binaries
+# LLamafile binaries
 Get these files from (https://github.com/Mozilla-Ocho/llamafile)[(https://github.com/Mozilla-Ocho/llamafile].
 They go in `lib/`:
 
@@ -137,8 +138,9 @@ They go in `lib/`:
 - `llamafile-server-0.2.1`
 - `zipalign-0.2.1`
 
-## Models and all-in-one
+# Models and all-in-one
 You need to download these from https://huggingface.co/jartine and other places on HF.
+todo: script to do this
 
 ## Desktop and GPU models
 These go in `models/`:
