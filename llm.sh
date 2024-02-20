@@ -597,27 +597,22 @@ fi
 
 exit $STATUS
 
-
+###
+### TODO
+###
 # TODO: add few-shot to supplement system message, since at least in chatml each goes in as an assistant turn
 # TODO: bash parsing of CLI parameters vs ENV vs bundles of settings is a mess
-# CAMERA MODE:
-# by analogy to aperture priority, shutter priority, auto, or manual
-# context priority, speed priority, auto, or manual
-# CONTEXT PRIORITY MODE:
-# - could be used for input or output
-#   for input, assume some k * (prompt len + input len)
-#   for output, probably need an explicit declaration we want a long output, hard to detect otherwise
-# SPEED PRIORITY MODE:
-# - `--speed` `--ngl`
-# AUTO MODE:
-# - proposal: `--speed` unless cmd input is given, then do `-context`
-#   e.g. MIN_CONTEXT_LENGTH <= (input length * 2) <= MAX_CONTEXT_LENGTH???
-# MANUAL MODE:
-# - `--ngl` `--context-length`
-
-# sort out --length/--ngl vs --speed/--length vs default
-# re-examine cap_ngl and *_priority 
-
-# sort out -c vs --length
-
-# 
+# TODO: calculate context and GPU layers based on input, output, existing memory, and user-preference
+#       by analogy to "CAMERA MODE" aperture priority, shutter priority, auto, or manual
+#       context priority, speed priority, auto, or manual
+#       CONTEXT PRIORITY MODE:
+#       - could be used for input or output
+#         for input, assume some k * (prompt len + input len)
+#         for output, probably need an explicit declaration we want a long output, hard to detect otherwise
+#       SPEED PRIORITY MODE:
+#       - `--speed` `--ngl`
+#       AUTO MODE:
+#       - proposal: `--speed` unless cmd input is given, then do `-context`
+#         e.g. MIN_CONTEXT_LENGTH <= (input length * 2) <= MAX_CONTEXT_LENGTH???
+#       MANUAL MODE:
+#       - `--ngl` `--context-length`
