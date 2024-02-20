@@ -1,0 +1,21 @@
+$ ./models/mixtral-8x7b-instruct-v0.1.Q5_K_M.llamafile --help | help.sh -m mixtral --ngl 22 --context-length 12288 "How can I use the prompt cache? Give examples."
+ The prompt cache is a feature in the `llamafile` tool that allows you to save and load the state of a prompt for faster startup. This can be useful if you're working with large prompts or if you want to quickly switch between different prompts.
+
+To use the prompt cache, you can specify a filename for the cache using the `--prompt-cache` flag. For example, the following command will start `llamafile` in CLI mode with a prompt, and save the prompt state to a file called `my_prompt_cache.bin`:
+
+```
+llamafile --prompt-cache my_prompt_cache.bin -m model.gguf -p "four score and"
+```
+
+You can then load the prompt state from the cache using the `--prompt-cache` flag and the `-r` (or `--reverse-prompt`) flag. For example, the following command will start `llamafile` in CLI mode and load the prompt state from the `my_prompt_cache.bin` file:
+
+```
+llamafile --prompt-cache my_prompt_cache.bin -m model.gguf -r "four score and"
+```
+
+You can also use the `--prompt-cache-all` flag to save the user input and generations to the cache as well. This can be useful if you want to save the entire conversation or a series of generations for later use.
+
+Note that the prompt cache is not supported with the `--interactive` or other interactive options.
+
+I hope this helps! Let me know if you have any other questions.
+$
