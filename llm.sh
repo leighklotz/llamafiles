@@ -18,11 +18,12 @@ VERBOSE=${VERBOSE:-}
 LOG_DISABLE="--log-disable"
 GRAMMAR_FILE="${GRAMMAR_FILE:-}"
 BATCH_SIZE="${BATCH_SIZE:-}"
+LLAMAFILE_MODEL_RUNNER="${LLAMAFILE_MODEL_RUNNER:-${HOME}/wip/llamafiles/lib/llamafile-0.6.2 -m }"
+FORCE_MODEL_RUNNER="${FORCE_MODEL_RUNNER:-}"
 
 # Not settable via ENV
-MODEL_RUNNER="/usr/bin/env"
 PROCESS_QUESTION_ESCAPES=""
-LLAMAFILE_MODEL_RUNNER="${HOME}/wip/llamafiles/lib/llamafile-0.6.2 -m "
+MODEL_RUNNER="/usr/bin/env"
 CLI_MODE="--cli"
 
 # Read input
@@ -351,18 +352,14 @@ function llama_prompt {
 
 function mixtral_prompt {
     if [ "${INPUT}" == "" ]; then
-	printf -v PROMPT "<s> [INST]
-%s
-%s
-[/INST]
-" "${SYSTEM_MESSAGE%$'\n'}" "${QUESTION%$'\n'}"
+	printf -v PROMPT "<s>[INST]%s
+%s[/INST]" \
+	       "${SYSTEM_MESSAGE%$'\n'}" "${QUESTION%$'\n'}"
     else
-	printf -v PROMPT "<s> [INST]
+	printf -v PROMPT "<s>[INST]%s
 %s
-%s
-%s
-[/INST]
-" "${SYSTEM_MESSAGE%$'\n'}" "${QUESTION%$'\n'}" "${INPUT%$'\n'}"
+%s[/INST]" \
+	       "${SYSTEM_MESSAGE%$'\n'}" "${QUESTION%$'\n'}" "${INPUT%$'\n'}"
     fi
 }
 
@@ -447,7 +444,6 @@ case "${MODEL_TYPE}" in
                 ${HOME}/wip/llamafiles/models/mixtral-8x7b-instruct-v0.1.Q5_K_M.llamafile \
                 )
         gpu_check 1
-        #chatml_prompt
 	mixtral_prompt
         mixtral_priority
         ;;
@@ -567,7 +563,7 @@ then
 fi
 
 # set MODEL_RUNNER
-if [ "${MODEL##*.}" != "llamafile" ];
+if [ "${MODEL##*.}" != "llamafile" ] || [ "${FORCE_MODEL_RUNNER}" ];
 then
    MODEL_RUNNER="${LLAMAFILE_MODEL_RUNNER}"
 fi
@@ -581,7 +577,8 @@ fi
 
 # Perform inference
 #set -x
-printf '%s' "${PROMPT}" | ${MODEL_RUNNER} ${MODEL} ${CLI_MODE} ${LOG_DISABLE} ${GRAMMAR_FILE} ${TEMPERATURE} ${CONTEXT_LENGTH} ${NGL} ${N_PREDICT} ${BATCH_SIZE} --no-penalize-nl --repeat-penalty 1 ${THREADS} -f /dev/stdin $SILENT_PROMPT 2> "${ERROR_OUTPUT}"
+printf '%s' "${PROMPT}" > /tmp/prompt.$$
+cat /tmp/prompt.$$ | ${MODEL_RUNNER} ${MODEL} ${CLI_MODE} ${LOG_DISABLE} ${GRAMMAR_FILE} ${TEMPERATURE} ${CONTEXT_LENGTH} ${NGL} ${N_PREDICT} ${BATCH_SIZE} --no-penalize-nl --repeat-penalty 1 ${THREADS} -f /dev/stdin $SILENT_PROMPT 2> "${ERROR_OUTPUT}"
 STATUS=$?
 
 # Try to inform user about errors
