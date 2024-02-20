@@ -1,4 +1,4 @@
- Title: Introducing the New llm.el Package for Emacs
+Introducing the New llm.el Package for Emacs
 ====================================================
 
 Are you looking for a powerful and flexible way to integrate a command-line language model (LLM) into your Emacs workflow? Look no further than the new `llm.el` package! This package provides a set of functions for interacting with an LLM from within Emacs, allowing you to easily incorporate its capabilities into your editing tasks.
