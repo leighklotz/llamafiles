@@ -1,0 +1,17 @@
+klotz@tensor:~/wip/llamafile$ help.sh -m mixtral "What's the difference between ISO 8601 and RFC 3339 Date Formats?"
+ ISO 8601 and RFC 3339 are both standardized date and time formats, and they are very similar, but there are some differences between them.
+
+ISO 8601 is an international standard covering the exchange of date and time-related data, produced by the International Organization for Standardization (ISO). It was issued in 1988 and last updated in 2019.
+
+RFC 3339 is a standard for the format of date and time in Internet Engineering Task Force (IETF) protocols, based on ISO 8601. It was issued in 2002 and last updated in 2011.
+
+The main differences between the two formats are:
+
+1. Timezone representation:
+	* In ISO 8601, the timezone can be represented using the format "YYYY-MM-DDTHH:mm:ssZ", where "Z" indicates Zulu time, which is equivalent to Coordinated Universal Time (UTC).
+	* In RFC 3339, the timezone can be represented using the format "YYYY-MM-DDTHH:mm:ss+HH:MM" or "YYYY-MM-DDTHH:mm:ss-HH:MM", where "HH:MM" indicates the timezone offset from UTC.
+2. Fractional seconds:
+	* In ISO 8601, fractional seconds can be represented using the format "YYYY-MM-DDTHH:mm:ss.sss", where "sss" indicates the fractional seconds with up to 3 digits.
+	* In RFC 3339, fractional seconds can be represented using the format "YYYY-MM-DDTHH:mm:ss.ssssss", where "ssssss" indicates the fractional seconds with up to 6 digits.
+
+In general, RFC 3339 is a subset of ISO 8601, which means that any RFC 3339 date and time string is also a valid ISO 8601 date and time string. However, the reverse is not true, as not all ISO 8601 date and time strings are valid RFC 3339 date and time strings.
