@@ -118,6 +118,10 @@ For example, to create an oneline commit message for staged changes, use the fol
 help-commit.sh
 ```
 
+# llm_el for Emacs
+
+There are many LLM integrations for Emacs; mine is here: (llm_el/)[llm_el/].
+
 # Models and Binaries
 Download your own models. Todo: script to do this for you:
 

@@ -1,0 +1,30 @@
+$ help.sh where does ubuntu 22 store screenshots
+ In Ubuntu 22.04, and previous versions, the default location for saving screenshots taken using the keyboard shortcut (Ctrl + PrtSc or PrtSc) is in the ~/Pictures/Screenshots/ directory. This behavior is set by the Gnome desktop environment, which Ubuntu uses by default.
+
+However, if you're taking screenshots using specific tools like the `screencapture` command in a terminal or other applications, the location might vary depending on the tool or script used.
+
+To change the default directory where screenshots are saved, you can modify the `org.gnome.desktop.interface.save-location-for-screenshots` key in your `~/.config/dconf/user.db` file or use the `dconf` command in a terminal. Be aware that modifying the file can result in data loss, and editing the file should be done with caution. Alternatively, you can use a file manager to create a new directory in the preferred location and then edit the key accordingly.
+
+To create a new directory, open your file manager, and right-click in the desired location, then select "Create New" -> "Folder." Name the folder "Screenshots" or your preferred name. After creating the folder, you can use a text editor like `nano` or `gedit` to modify the key:
+
+1. Open a terminal.
+2. Type `dconf edit-db` and press Enter.
+3. Navigate to the following path in the terminal:
+
+```
+/desktop/gnome/
+```
+
+4. Set the new path for screenshots by adding or modifying the following line:
+
+```
+organize-desktop-into-folders = false
+screenshot-directory = "/path/to/your/new/folder/"
+```
+
+Replace "/path/to/your/new/folder/" with the path to the "Screenshots" folder you created earlier.
+
+5. Save and exit the `dconf` editor.
+
+Now, when you take a screenshot using the keyboard shortcut, it will be saved in the specified directory.
+$
