@@ -1,6 +1,32 @@
 ;;;-*-EMACS-LISP-*-
 
-(defvar llm-rewrite-script-path "/home/klotz/.emacs.d/klotz/rewrite.sh")
+;;; This package provides LLM-based rewriting and summarization in
+;;; Emacs buffers using an external script `llm_el/rewrite.sh`.
+;;;
+;;; The main functions provided are:
+;;; 
+;;; 1. `llm-write`: Writes a new buffer based on the prompt and
+;;; current region, and the output of the `llm-rewrite-script-path`
+;;; command.
+;;; 
+;;; 2. `llm-summarize-buffer`: Creates a new buffer containing a
+;;; summary of the current buffer, with an optional user-provided
+;;; prefix argument as a prompt.
+;;; 
+;;; 3. `llm-rewrite`: Rewrites the current region with the output of
+;;; the `llm-rewrite-script-path` command based on the prompt and
+;;; current region.
+;;;
+;;; 4. `llm-region-internal`: Sends the buffer or current region as
+;;; the output of the `llm-rewrite-script-path` command based on the
+;;; prompt and current region. It can replace the region or use a
+;;; specified buffer, depending on the `output-buffer` and `replace-p`
+;;; parameters.
+;;; 
+;;; The package also provides a global keybinding `(kbd "M-s $")` to
+;;; invoke the `llm-summarize-buffer` function.
+
+(defvar llm-rewrite-script-path "~/wip/llamafiles/llm_el/rewrite.sh")
 (defvar llm-write-buffer-name   "*llm-write*")
 (defvar llm-rewrite-buffer-name "*llm-rewrite*")
 (defvar llm-summary-buffer-name "*llm-summary*")
