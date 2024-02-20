@@ -173,8 +173,7 @@ These go in `models/`:
 
 ## images
 These are less developed.
-
-- image-name.sh - Simply script using LLAVA to find image name
+- image-name.sh - Simple script using LLAVA to geneate image name
 - rename-pictures.sh [adapted from https://gist.github.com/jart/bd2f603aefe6ac8004e6b709223881c0]
 - llava-cli.sh 
 
@@ -197,6 +196,17 @@ These are less developed.
 - `--stdin` or `--interactive` or `-i`: enables standard input mode.
 - `-e` or `--process-question-escapes`: expand \n and friends in the question; stdin is always literlal
 - `--`: terminates the arguments and starts the question.
+
+In CLI prompt, be sure to use apostrophe quotes if your prompt contains backquotes, since double-quotes will allow bash to evaluate the result of the backquoted content.
+
+For example, this is good:
+```bash
+$ help.sh 'How can I use the `yes` command in bash?'
+```
+but this is bad:
+```bash
+$ help.sh "How can I use the `yes` command in bash?"
+```
 
 ## Environment Variables
 
