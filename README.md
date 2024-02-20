@@ -1,8 +1,8 @@
 # LLM Help CLI for Linux
 
-Using https://github.com/Mozilla-Ocho/llamafile and https://github.com/jart models and scripts
+Using https://github.com/Mozilla-Ocho/llamafile and https://github.com/jart models and scripts.
 
-This repository provides an LLM Help CLI for Linux and Mac systems to provide help, summarization, coding assistance, system information queries, image renaming, etc.
+This repository provides an LLM Help CLI for Linux and Mac systems to provide help, summarization, coding assistance, system information queries, image renaming, etc. Similar to https://justine.lol/oneliners/
 
 ## Usage examples
 ```shell
@@ -28,19 +28,17 @@ Uses question words and stdin, if any, to create the model prompt.
 
 Below are a few examples. More are in [examples](examples).
 
-# Examples
-
-## Bash Coding Example
+### help.sh Bash Coding Example
 ```
 $ help.sh -m codebooga -- "split bash argument array into left and right with double hyphen as the separator using special bash builtin functions or operators as needed "
 ```
 
-## General Linux Example
+### help.sh General Linux Example
 ```
 $ help.sh what is my ip address
 ```
 
-## JQ Example
+### help.sh JQ Example
 This example takes a live JSON input and shows how to extract a slightly tricky value. As a bonus, the model gives the value of the field.
 
 ```
@@ -63,7 +61,7 @@ $ ./llama.cpp/gguf-py/scripts/gguf-dump.py ./models/dolphin-2.7-mixtral-8x7b.Q4_
 $
 ```
 
-## LSHW Example
+### help.sh LSHW Example
 The Codebooga llamafile I'm using doesn't yet support --silent-prompt so I elided the re-printed prompt manually.
 ```
 sudo lshw | wc 
@@ -83,7 +81,7 @@ $ sudo lshw | help.sh -c 16384 -m codebooga --stdin -- 'Summarize the following 
 	USB ports, audio devices, and an SMBus controller.  [end of text]
 ```
 
-## Raspberry Pi 5 lspci with Rocket model
+### help.sh Raspberry Pi 5 lspci with Rocket model
 ```
 klotz@rpi5:~ $ export MODEL=rocket
 klotz@rpi5:~ $ help.sh lspci
@@ -104,8 +102,24 @@ klotz@rpi5:~ $
 
 More examples can be found in the [examples](https://github.com/leighklotz/llamafiles/tree/main/examples) directory.
 
+## help-commit.sh
+
+This script uses llm.sh to generate commit messages from the current directoryu.
+
+```bash
+$ help-commit.sh [--oneline|--multiline] [--staged] ... llm.sh options if any ...
+```
+
+You can choose to provide `--oneline` or `--multiline` flags to control the format of the commit message. Using `--oneline` (or default) will create a single line commit message, and `--multiline` will create a multi-line one. The script uses `git diff --staged` first, then `git diff`.
+
+For example, to create an oneline commit message for staged changes, use the following command:
+
+```bash
+help-commit.sh
+```
+
 # Models and Binaries
-Download your own models.
+Download your own models. Todo: script to do this for you:
 
 ## LLamafile binaries
 Get these files from (https://github.com/Mozilla-Ocho/llamafile)[(https://github.com/Mozilla-Ocho/llamafile].
@@ -138,7 +152,6 @@ These go in `models/`:
 - `phi-2.Q6_K.llamafile`
 - `rocket-3b.Q4_K_M.llamafile`
 
-
 # Scripts and Files
 ## base
 - llm.sh - the base script that others call
@@ -147,6 +160,7 @@ These go in `models/`:
 - help.sh - CLI for Linux help
 - machelp.sh - CLI for Mac help
 - summarize.sh - CLI to summarize a hyperlink
+- help-commit.sh - CLI to run `git diff` and produce a commit message
 
 ## utilities
 - systype.sh - Pipe to help.sh to provide context for distro-specific questions
@@ -203,3 +217,4 @@ You will need to do this on MacOS:
 - https://github.com/jart
 - https://llm.datasette.io/
 - https://github.com/klotz/llamafiles
+- https://justine.lol/oneliners/
