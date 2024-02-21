@@ -67,7 +67,7 @@ then
             --grammar-file)
                 shift; GRAMMAR_FILE="--grammar-file $1" ;;
             --debug)
-                ERROR_OUTPUT="/dev/stdout"; SILENT_PROMPT=""; DEBUG=1 ;;
+                ERROR_OUTPUT="/dev/stdout"; SILENT_PROMPT=""; DEBUG=1; LOG_DISABLE="" ;;
             --noerror)
                 ERROR_OUTPUT="/dev/null" ;;
             --stdin|--interactive|-i)
@@ -182,15 +182,15 @@ function cap_ngl {
 }
 
 function mixtral_priority {
-    MAX_CONTEXT_LENGTH=12288
+    MAX_CONTEXT_LENGTH=21000
     case "${PRIORITY}" in
          speed)
              NGL=${NGL:=23}
              CONTEXT_LENGTH=2048
              ;;
          length)
-             NGL=${NGL:=22}
-             CONTEXT_LENGTH=12288
+             NGL=${NGL:=20}
+             CONTEXT_LENGTH=${MAX_CONTEXT_LENGTH}
              ;;
          manual)
              NGL=${NGL:=23}
@@ -205,7 +205,7 @@ function mixtral_priority {
 }
 
 function dolphin_priority {
-    MAX_CONTEXT_LENGTH=12288
+    MAX_CONTEXT_LENGTH=32768
     case "${PRIORITY}" in
          speed)
              NGL=${NGL:=28}
@@ -213,7 +213,7 @@ function dolphin_priority {
              ;;
          length)
              NGL=${NGL:=8}
-             CONTEXT_LENGTH=12288
+             CONTEXT_LENGTH=${MAX_CONTEXT_LENGTH}
              ;;
          manual)
              NGL=${NGL:=23}
@@ -228,7 +228,7 @@ function dolphin_priority {
 }
 
 function mistral_priority {
-    MAX_CONTEXT_LENGTH=7999
+    MAX_CONTEXT_LENGTH=16384
     case "${PRIORITY}" in
         speed)
             NGL=${NGL:=33}
@@ -236,7 +236,7 @@ function mistral_priority {
             ;;
         length)
             NGL=${NGL:=33}
-            CONTEXT_LENGTH=7999
+            CONTEXT_LENGTH=${MAX_CONTEXT_LENGTH}
             ;;
         manual)
             NGL=${NGL:=33}

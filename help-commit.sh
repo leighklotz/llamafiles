@@ -45,5 +45,5 @@ $ %s
 
 # printf "%s\n" "${INPUT}"
 
-set -x
+#set -x
 printf "%s\n" "${INPUT}" | help.sh ${*} ${GRAMMAR_FILE_FLAG} -e -- "${PROMPT}"
