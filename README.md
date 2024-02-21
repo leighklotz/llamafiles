@@ -184,6 +184,8 @@ These are less developed.
 
 # llm.sh Details
 
+The help and summary scripts invoke `llm.sh`, but you can use it yourself directly as well.
+
 ## Command Line Flags
 
 `llm.sh` accepts the following command line flags:
