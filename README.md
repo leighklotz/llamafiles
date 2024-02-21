@@ -250,11 +250,15 @@ You will need to do this on MacOS:
 - `xattr -dr com.apple.quarantine models/* lib/*`
 
 # References
+## Used directly
 - https://github.com/Mozilla-Ocho/llamafile 
-- https://github.com/jart
-- https://llm.datasette.io/
 - https://github.com/klotz/llamafiles
+
+## Similar packages
+- https://github.com/rendezqueue/rendezllama
 - https://justine.lol/oneliners/
+- https://llm.datasette.io/
+- https://github.com/jart
 
 # TODO
 - prompt caching
