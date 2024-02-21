@@ -1,5 +1,5 @@
 # Files in scripts
-- [Bash Script: Running Code with Custom Formatting](code.sh): (code.sh)
+- [Scriot to: Wrapping Code with Custom Formatting](code.sh): (code.sh)
 - [Script to Download Llama Model using Wget in Bash](download-models.sh): (download-models.sh)
 - [Git Multiline Commit Grammar](git-commit-multiline-grammar.gbnf): (git-commit-multiline-grammar.gbnf)
 - [Git Oneline Commit Grammar File](git-commit-oneline-grammar.gbnf): (git-commit-oneline-grammar.gbnf)
@@ -12,6 +12,5 @@
 - [Script to Display Free NVIDIA GPU Memory in GiB](nvfree.sh): (nvfree.sh)
 - [Script to Rename Pictures: rename-pictures.sh](rename-pictures.sh): (rename-pictures.sh)
 - [Script for Running llava-v1.5-7b-q4 Server](server.sh): (server.sh)
-- [Script to Generate Bash GBNF File for Summarizing Directory Files](summarize-directory-files.sh): (summarize-directory-files.sh)
-- [Bash Script: Summarize - A Simple Bash Script to Get the Last URL from the Command Line](summarize.sh): (summarize.sh)
-- [Script to Display System Information: systype.sh](systype.sh): (systype.sh): (systype.sh)
+- [Script to Summarize Directory Files](summarize-directory-files.sh): (summarize-directory-files.sh)
+- [Script to Display System Information: systype.sh](systype.sh): (systype.sh)
