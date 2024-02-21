@@ -1,11 +1,9 @@
 klotz@tensor:~/wip/llamafiles$ git fetch
-Enter passphrase for key '/home/klotz/.ssh/id_leighklotz_core_github': 
 klotz@tensor:~/wip/llamafiles$ git status
 ## main...origin/main [ahead 1, behind 1]
 ?? foo.txt
 ?? klotz-documents-images-rename.txt
 klotz@tensor:~/wip/llamafiles$ git push
-Enter passphrase for key '/home/klotz/.ssh/id_leighklotz_core_github': 
 To github:leighklotz/llamafiles
  ! [rejected]        main -> main (non-fast-forward)
 error: failed to push some refs to 'github:leighklotz/llamafiles'
