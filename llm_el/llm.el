@@ -26,7 +26,7 @@
 ;;; The package also provides a global keybinding `(kbd "M-s $")` to
 ;;; invoke the `llm-summarize-buffer` function.
 
-(defvar llm-rewrite-script-path "~/wip/llamafiles/llm_el/rewrite.sh")
+(defvar llm-rewrite-script-path "~/wip/llamafiles/llm_el/scripts/rewrite.sh")
 (defvar llm-write-buffer-name   "*llm-write*")
 (defvar llm-rewrite-buffer-name "*llm-rewrite*")
 (defvar llm-summary-buffer-name "*llm-summary*")

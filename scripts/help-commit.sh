@@ -1,13 +1,14 @@
 #!/bin/bash
 
+SCRIPT_DIR=$(dirname $(realpath "${BASH_SOURCE}"))
+
 export MODEL_TYPE="${MODEL_TYPE:=mixtral}"
 
+MESSAGE_LINE=oneline
 if [ "$1" == "--oneline" ] || [ "$1" == "--multiline" ];
 then
     MESSAGE_LINE=$(echo "$1" | sed -e 's/^--//')
     shift
-else
-    MESSAGE_LINE=oneline
 fi
 
 function get_results {
@@ -30,7 +31,7 @@ if [ "${diff_output}" == '' ]; then
 fi
 
 PROMPT="Provide a commit message for the changes below with a ${MESSAGE_LINE} git commit message, in the form of a \`git commit\` command:\n"
-GRAMMAR_FILE_FLAG="--grammar-file /home/klotz/wip/llamafiles/git-commit-${MESSAGE_LINE}-grammar.gbnf"
+GRAMMAR_FILE_FLAG="--grammar-file ${SCRIPT_DIR}/git-commit-${MESSAGE_LINE}-grammar.gbnf"
 
 # remove triple-backquote from the diff output since we're enclosing the body in that
 diff_output_sanitized="$(printf "%s" "$diff_output" | sed -e 's/```/`_`_`/g')"

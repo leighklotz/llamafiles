@@ -1,7 +1,7 @@
 #!/bin/bash
 
 SCRIPT_DIR=$(dirname $(realpath "${BASH_SOURCE}"))
-LLM_SH="${HOME}/wip/llamafiles/llm.sh"
+LLM_SH="${SCRIPT_DIR}/../scripts/llm.sh"
 DEBUG=""
 PROMPT="${*}"
 

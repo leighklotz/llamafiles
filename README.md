@@ -159,6 +159,8 @@ These go in `models/`:
 - `rocket-3b.Q4_K_M.llamafile`
 
 # Scripts and Files
+These files are in [scripts/](scripts/). You might want to symlink some to your bin directory.
+
 ## base
 - llm.sh - the base script that others call
 

@@ -524,7 +524,8 @@ esac
 
 if [ "${PROMPT_LENGTH_EST}" -gt "${CONTEXT_LENGTH}" ];
 then
-    echo "* WARNING: Prompt len ${PROMPT_LENGTH_EST} estimated not to fit in context ${CONTEXT_LENGTH}"
+    echo "* ERROR: Prompt len ${PROMPT_LENGTH_EST} estimated not to fit in context ${CONTEXT_LENGTH}"
+    exit 2
 fi
 
 if [ "$CONTEXT_LENGTH" -gt "$MAX_CONTEXT_LENGTH" ];
@@ -536,7 +537,7 @@ fi
 if [ ! -f $MODEL ];
 then
     echo "Model not found: ${MODEL}" >> /dev/stderr
-    exit 2
+    exit 3
 fi
 
 PROMPT_LENGTH_EST=$((${#PROMPT}/4))
