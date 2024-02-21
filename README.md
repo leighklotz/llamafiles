@@ -253,7 +253,7 @@ You will need to do this on MacOS:
 - https://github.com/klotz/llamafiles
 - https://justine.lol/oneliners/
 
-# TOOD
+# TODO
 - prompt caching
 - quoting safety
 - OpenAI API, oobabooga/text-generation-webui API, etc
