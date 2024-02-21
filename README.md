@@ -169,6 +169,7 @@ These files are in [scripts/](scripts/). You might want to symlink some to your 
 - machelp.sh - CLI for Mac help
 - summarize.sh - CLI to summarize a hyperlink
 - help-commit.sh - CLI to run `git diff` and produce a commit message
+- summarize-directory-files.sh - summarize directory files as markdown
 
 ## utilities
 - systype.sh - Pipe to help.sh to provide context for distro-specific questions
