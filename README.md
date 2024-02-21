@@ -24,7 +24,7 @@ USAGE="[-m|--model-type model-type] [--stdin|--interactive|-i] [--speed | --leng
 
 Uses question words and stdin, if any, to create the model prompt.
 
-- `-m`, `--model-type`: defaults if not specified; see source for model types
+- `-m`, `--model-type`: defaults if not specified. Available options are: `mixtral`, `dolphin`, `mistral`, `codebooga`, `deepseek`, `rocket`, and `phi`.
 - `--stdin|--interactive|-i`: if input is a terminal, asks user for input and interpolates stdin into prompt 
 - `--`: unambiguously terminate args
 - `QUESTION`: word or words, can be quoted or not, can be multiline (but also see `--stdin`)
@@ -195,8 +195,8 @@ These are less developed.
 - `--n-predict`: sets the number of tokens to predict.
 - `--debug`: enables debug mode.
 - `--noerror`: disables error output.
-- `--stdin` or `--interactive` or `-i`: enables standard input mode.
-- `-e` or `--process-question-escapes`: expand \n and friends in the question; stdin is always literlal
+- `--stdin` or `--interactive` or `-i`: include stdin as input, after the question prompt
+- `-e` or `--process-question-escapes`: expand \n and friends in the question; stdin is always literal
 - `--`: terminates the arguments and starts the question.
 
 In CLI prompt, be sure to use apostrophe quotes if your prompt contains backquotes, since double-quotes will allow bash to evaluate the result of the backquoted content.
@@ -211,6 +211,22 @@ $ help.sh "How can I use the `yes` command in bash?"
 ```
 
 ## Environment Variables
+
+In addition to these command line flags, the script also checks for several environment variables to configure its behavior:
+
+- `MODEL_TYPE`: The default model type to use if none is specified via the `-m` or `--model-type` flag.
+- `TEMPERATURE`: The default temperature parameter for the model if none is specified via the `--temperature` flag.
+- `CONTEXT_LENGTH`: The default context length for the model if none is specified via the `--context-length` or `-c` flag.
+- `N_PREDICT`: The default number of tokens to predict if none is specified via the `--n-predict` flag.
+- `SYSTEM_MESSAGE`: The default system message to use if none is specified via the command line.
+- `MODEL_RUNNER`: The program used to run the model. Defaults to `/usr/bin/env` and automatically set to `llamafile...` if needed. See also `FORCE_MODEL_RUNNER`
+- `FORCE_MODEL_RUNNER`: Force usage of MODEL_RUNNER, for example to override `llamafile...` with llama.cpp set in in `MODEL_RUNNER`
+- `THREADS`: The number of threads to use for the model. Defaults to the number of CPU cores.
+- `NGL`: Number of GPU layers, same as `--ngl`
+- `PRIORITY`: speed|length|manual controlling balance of GPU memory and context length
+- `GRAMMAR_FILE`: Same as `--grammar-file`
+- `DEBUG`: same as --debug
+- `VERBOSE`: same as --verbose
 
 See [env.sh.example](env.sh.example).
 
