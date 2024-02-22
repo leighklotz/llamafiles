@@ -335,15 +335,32 @@ function phi_priority {
 
 function llama_prompt {
     if [ "${INPUT}" == "" ]; then
-	printf -v PROMPT "[INST]
-%s
-%s
+	printf -v PROMPT "<s>[INST]%s[/INST]</s>
+[INST]%s
+
 [/INST]
 " "${SYSTEM_MESSAGE%$'\n'}" "${QUESTION%$'\n'}"
     else
-	printf -v PROMPT "[INST]
+	printf -v PROMPT "<s>[INST]%s[INST]</s>
+[INST]%s
+
 %s
-%s
+[/INST]
+" "${SYSTEM_MESSAGE%$'\n'}" "${QUESTION%$'\n'}" "${INPUT%$'\n'}"
+    fi
+}
+
+
+function mistral_prompt {
+    if [ "${INPUT}" == "" ]; then
+	printf -v PROMPT "<s>[INST]%s[/INST]</s>
+[INST]%s
+[INST]
+" "${SYSTEM_MESSAGE%$'\n'}" "${QUESTION%$'\n'}"
+    else
+	printf -v PROMPT "<s>[INST]%s[/INST]</s>
+[INST]%s
+
 %s
 [/INST]
 " "${SYSTEM_MESSAGE%$'\n'}" "${QUESTION%$'\n'}" "${INPUT%$'\n'}"
@@ -352,13 +369,16 @@ function llama_prompt {
 
 function mixtral_prompt {
     if [ "${INPUT}" == "" ]; then
-	printf -v PROMPT "<s>[INST]%s
-%s[/INST]" \
+	printf -v PROMPT "<s>[INST]%s[/INST]</s>
+[INST]%s
+[/INST]" \
 	       "${SYSTEM_MESSAGE%$'\n'}" "${QUESTION%$'\n'}"
     else
-	printf -v PROMPT "<s>[INST]%s
+	printf -v PROMPT "<s>[INST]%s[/INST]</s>
+[INST]%s
+
 %s
-%s[/INST]" \
+[/INST]" \
 	       "${SYSTEM_MESSAGE%$'\n'}" "${QUESTION%$'\n'}" "${INPUT%$'\n'}"
     fi
 }
@@ -468,7 +488,7 @@ case "${MODEL_TYPE}" in
                     ${HOME}/wip/llamafiles/models/mistral-7b-instruct-v0.2.Q3_K_M.llamafile \
                     ${HOME}/wip/llamafiles/models/mistral-7b-instruct-v0.2.Q3_K_S.llamafile)
         gpu_check 4
-        llama_prompt
+        mistral_prompt
         mistral_priority
         ;;
  
