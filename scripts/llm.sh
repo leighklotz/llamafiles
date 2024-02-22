@@ -423,8 +423,7 @@ ${QUESTION%$'\n'}
 function chatml_prompt {
     if [ "${INPUT}" == "" ]; then
         printf -v PROMPT "<|im_start|>system
-%s
-<|im_end|>
+%s<|im_end|>
 <|im_start|>user
 %s<|im_end|>
 <|im_start|>assistant" "${SYSTEM_MESSAGE%$'\n'}" "${QUESTION%$'\n'}"
