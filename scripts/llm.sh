@@ -352,39 +352,19 @@ function llama_prompt {
     fi
 }
 
-# mistral prompt: <s>[INST] user content 1 [/INST]assistant response 1</s> [INST] user content 2 [/INST]assistant response 2</s> [INST] user content 3 [/INST]assistant response 3</s> 
 function mistral_prompt {
     if [ "${INPUT}" == "" ]; then
-	printf -v PROMPT "<s>[INST] %s
+	printf -v PROMPT "<s>[INST]%s
 
 %s[/INST]
 " "${SYSTEM_MESSAGE%$'\n'}" "${QUESTION%$'\n'}"
     else
-	printf -v PROMPT "<s>[INST] %s
+	printf -v PROMPT "<s>[INST]%s
 
 %s
 
 %s[/INST]
 " "${SYSTEM_MESSAGE%$'\n'}" "${QUESTION%$'\n'}" "${INPUT%$'\n'}"
-    fi
-}
-
-function mixtral_prompt {
-    if [ "${INPUT}" == "" ]; then
-	printf -v PROMPT "<s>[INST] %s
-%s
-[/INST]
-" \
-	       "${SYSTEM_MESSAGE%$'\n'}" "${QUESTION%$'\n'}"
-    else
-	printf -v PROMPT "<s>[INST] %s
-
-%s
-
-%s
-[/INST]
-" \
-	       "${SYSTEM_MESSAGE%$'\n'}" "${QUESTION%$'\n'}" "${INPUT%$'\n'}"
     fi
 }
 
@@ -463,7 +443,7 @@ case "${MODEL_TYPE}" in
                 ${HOME}/wip/llamafiles/models/mixtral-8x7b-instruct-v0.1.Q5_K_M.llamafile \
                 )
         gpu_check 1
-	mixtral_prompt
+	mistral_prompt
         mixtral_priority
         ;;
 
