@@ -228,6 +228,29 @@ function dolphin_priority {
     cap_ngl
 }
 
+function codebooga_priority {
+    MAX_CONTEXT_LENGTH=32768
+    case "${PRIORITY}" in
+         speed)
+             NGL=${NGL:=50}
+             CONTEXT_LENGTH=4096
+             ;;
+         length)
+             NGL=${NGL:=16}
+             CONTEXT_LENGTH=${MAX_CONTEXT_LENGTH}
+             ;;
+         manual)
+             NGL=${NGL:=23}
+             CONTEXT_LENGTH=${CONTEXT_LENGTH:=4096}
+             ;;
+         *)
+             echo "usage: unknown priority $PRIORITY" >> /dev/stderr
+             exit 1
+            ;;
+    esac
+    cap_ngl
+}
+
 function mistral_priority {
     MAX_CONTEXT_LENGTH=16384
     case "${PRIORITY}" in
@@ -252,29 +275,6 @@ function mistral_priority {
     cap_ngl
 }
 
-function codebooga_priority {
-    MAX_CONTEXT_LENGTH=32768
-    case "${PRIORITY}" in
-         speed)
-             NGL=${NGL:=33}
-             CONTEXT_LENGTH=2048
-             ;;
-         length)
-             NGL=${NGL:=25}
-             CONTEXT_LENGTH=16383
-             ;;
-         manual)
-            NGL=${NGL:=33}
-            CONTEXT_LENGTH=${CONTEXT_LENGTH:=2048}
-             ;;
-        *)
-             echo "usage: unknown priority $PRIORITY" >> /dev/stderr
-             exit 1
-            ;;
-    esac
-
-    cap_ngl
-}
 
 function deepseek_priority {
     MAX_CONTEXT_LENGTH=32768
@@ -351,60 +351,58 @@ function llama_prompt {
     fi
 }
 
-
+# mistral prompt: <s>[INST] user content 1 [/INST]assistant response 1</s> [INST] user content 2 [/INST]assistant response 2</s> [INST] user content 3 [/INST]assistant response 3</s> 
 function mistral_prompt {
     if [ "${INPUT}" == "" ]; then
-	printf -v PROMPT "<s>[INST]%s[/INST]</s>
-[INST]%s
-[INST]
+	printf -v PROMPT "<s>[INST] %s
+
+%s[/INST]
 " "${SYSTEM_MESSAGE%$'\n'}" "${QUESTION%$'\n'}"
     else
-	printf -v PROMPT "<s>[INST]%s[/INST]</s>
-[INST]%s
+	printf -v PROMPT "<s>[INST] %s
 
 %s
-[/INST]
+
+%s[/INST]
 " "${SYSTEM_MESSAGE%$'\n'}" "${QUESTION%$'\n'}" "${INPUT%$'\n'}"
     fi
 }
 
 function mixtral_prompt {
     if [ "${INPUT}" == "" ]; then
-	printf -v PROMPT "<s>[INST]%s[/INST]</s>
-[INST]%s
-[/INST]" \
+	printf -v PROMPT "<s>[INST] %s
+%s
+[/INST]
+" \
 	       "${SYSTEM_MESSAGE%$'\n'}" "${QUESTION%$'\n'}"
     else
-	printf -v PROMPT "<s>[INST]%s[/INST]</s>
-[INST]%s
+	printf -v PROMPT "<s>[INST] %s
 
 %s
-[/INST]" \
+
+%s
+[/INST]
+" \
 	       "${SYSTEM_MESSAGE%$'\n'}" "${QUESTION%$'\n'}" "${INPUT%$'\n'}"
     fi
 }
 
 function alpaca_prompt {
 
-    alpaca_header="Below is an instruction that describes a task, paired with an input that provides further context. Write a response that appropriately completes the request."
     if [ "${INPUT}" == "" ]; then
-	##### NO INPUT CASE
-	printf -v PROMPT "%s" "${alpaca_header}
+	printf -v PROMPT "%s" "Below is an instruction that describes a task. Write a response that appropriately completes the request.
 
 ### Instruction:
 ${SYSTEM_MESSAGE%$'\n'}
 
-### Input:
 ${QUESTION%$'\n'}
 
 ### Response:
 
 "
-	##### END NO INPUT CASE
     else
-	##### INPUT CASE
-	printf -v PROMPT "
-%s
+	printf -v PROMPT "Below is an instruction that describes a task, paired with an input that provides further context. Write a response that appropriately completes the request.
+
 ### Instruction:
 %s
 
@@ -415,7 +413,7 @@ ${QUESTION%$'\n'}
 
 ### Response:
 
-" "${alpaca_header}" "${SYSTEM_MESSAGE%$'\n'}" "${QUESTION%$'\n'}" "${INPUT%$'\n'}"
+" "${SYSTEM_MESSAGE%$'\n'}" "${QUESTION%$'\n'}" "${INPUT%$'\n'}"
 	##### END NO INPUT CASE
     fi
 }
@@ -499,7 +497,7 @@ case "${MODEL_TYPE}" in
                     "${HOME}/wip/oobabooga/text-generation-webui/models/codebooga-34b-v0.1.Q4_K_M.gguf" \
                 )
         SILENT_PROMPT=""        # not supported by codebooga
-        gpu_check 2.1
+        gpu_check 1
         alpaca_prompt
         codebooga_priority
         ;;
