@@ -3,7 +3,7 @@
 - [Script to Download Llama Model using Wget in Bash](download-models.sh): (download-models.sh)
 - [Git Multiline Commit Grammar](git-commit-multiline-grammar.gbnf): (git-commit-multiline-grammar.gbnf)
 - [Git Oneline Commit Grammar File](git-commit-oneline-grammar.gbnf): (git-commit-oneline-grammar.gbnf)
-- [Bash Script: Help Commit - Mixtral Model (help-commit.sh)](help-commit.sh): (help-commit.sh)
+- [Bash Script: Help Commit - Help on git diff (help-commit.sh)](help-commit.sh): (help-commit.sh)
 - [Bash Script: Help and Answer Prompt](help.sh): (help.sh)
 - [Script to Process an Image using LLava-V1.5 with Llamafiles](image-name.sh): (image-name.sh)
 - [LLAVA CLI Script](llava-cli.sh): (llava-cli.sh)
