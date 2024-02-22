@@ -11,6 +11,9 @@ then
     shift
 fi
 
+PROMPT="Provide ${MESSAGE_LINE} git commit message for the changes listed in the \`git diff\` below, in the form of a \`git commit\` command:\n"
+GRAMMAR_FILE_FLAG="--grammar-file ${SCRIPT_DIR}/git-commit-${MESSAGE_LINE}-grammar.gbnf"
+
 function get_results {
     # set globals
     staged=" $1 "
@@ -30,15 +33,12 @@ if [ "${diff_output}" == '' ]; then
     exit 1
 fi
 
-PROMPT="Provide a commit message for the changes below with a ${MESSAGE_LINE} git commit message, in the form of a \`git commit\` command:\n"
-GRAMMAR_FILE_FLAG="--grammar-file ${SCRIPT_DIR}/git-commit-${MESSAGE_LINE}-grammar.gbnf"
-
 # remove triple-backquote from the diff output since we're enclosing the body in that
 diff_output_sanitized="$(printf "%s" "$diff_output" | sed -e 's/```/`_`_`/g')"
 
 # uses current default model, e.g. $MODEL_TYPE
 #set -x
-printf -v INPUT '```
+printf -v INPUT '```sh
 $ %s
 %s
 ```\n' \
@@ -48,3 +48,5 @@ $ %s
 
 #set -x
 printf "%s\n" "${INPUT}" | help.sh ${*} ${GRAMMAR_FILE_FLAG} -e -- "${PROMPT}"
+
+# todo: allow specification of both `git diff` options and `llm.sh` options
