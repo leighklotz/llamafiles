@@ -2,14 +2,33 @@
 
 SCRIPT_DIR=$(dirname $(realpath "${BASH_SOURCE}"))
 
+HELP_SH_OPTIONS=""
+GIT_DIFF_OPTIONS=""
+MESSAGE_LINE="oneline"
 export MODEL_TYPE="${MODEL_TYPE:=mixtral}"
 
-MESSAGE_LINE=oneline
-if [ "$1" == "--oneline" ] || [ "$1" == "--multiline" ];
-then
-    MESSAGE_LINE=$(echo "$1" | sed -e 's/^--//')
-    shift
-fi
+function usage() {
+    echo "help-commit.sh [git diff options] -- [help.sh options]"
+}
+
+# help-commit.sh [git diff options] -- [help.sh options]
+while [[ $# -gt 0 ]]; do
+    case $1 in
+	--oneline|--multiline)
+	    MESSAGE_LINE=$(echo "$1" | sed -e 's/^--//')
+	    shift
+	    ;;
+        --)
+	    shift
+            HELP_SH_OPTIONS="${*}"
+            break
+            ;;
+	*)
+            GIT_DIFF_OPTIONS+="${1} "
+	    shift
+	    ;;
+    esac
+done
 
 PROMPT="Provide ${MESSAGE_LINE} git commit message for the changes listed in the \`git diff\` below, in the form of a \`git commit\` command:\n"
 GRAMMAR_FILE_FLAG="--grammar-file ${SCRIPT_DIR}/git-commit-${MESSAGE_LINE}-grammar.gbnf"
@@ -17,7 +36,7 @@ GRAMMAR_FILE_FLAG="--grammar-file ${SCRIPT_DIR}/git-commit-${MESSAGE_LINE}-gramm
 function get_results {
     # set globals
     staged=" $1 "
-    diff_command="git diff $staged"
+    diff_command="git diff $staged ${GIT_DIFF_OPTIONS}"
     diff_output="$($diff_command)"
 }
 
