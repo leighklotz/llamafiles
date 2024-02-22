@@ -20,6 +20,7 @@ GRAMMAR_FILE="${GRAMMAR_FILE:-}"
 BATCH_SIZE="${BATCH_SIZE:-}"
 LLAMAFILE_MODEL_RUNNER="${LLAMAFILE_MODEL_RUNNER:-${HOME}/wip/llamafiles/lib/llamafile-0.6.2 -m }"
 FORCE_MODEL_RUNNER="${FORCE_MODEL_RUNNER:-}"
+LLM_ADDITIONAL_ARGS="${LLM_ADDITIONAL_ARGS:-}"
 
 # Not settable via ENV
 PROCESS_QUESTION_ESCAPES=""
@@ -599,7 +600,7 @@ fi
 # Perform inference
 #set -x
 printf '%s' "${PROMPT}" > /tmp/prompt.$$
-cat /tmp/prompt.$$ | ${MODEL_RUNNER} ${MODEL} ${CLI_MODE} ${LOG_DISABLE} ${GRAMMAR_FILE} ${TEMPERATURE} ${CONTEXT_LENGTH} ${NGL} ${N_PREDICT} ${BATCH_SIZE} --no-penalize-nl --repeat-penalty 1 ${THREADS} -f /dev/stdin $SILENT_PROMPT 2> "${ERROR_OUTPUT}"
+cat /tmp/prompt.$$ | ${MODEL_RUNNER} ${MODEL} ${CLI_MODE} ${LOG_DISABLE} ${GRAMMAR_FILE} ${TEMPERATURE} ${CONTEXT_LENGTH} ${NGL} ${N_PREDICT} ${BATCH_SIZE} --no-penalize-nl --repeat-penalty 1 ${THREADS} -f /dev/stdin $SILENT_PROMPT ${LLM_ADDITIONAL_ARGS} 2> "${ERROR_OUTPUT}"
 STATUS=$?
 
 # Try to inform user about errors

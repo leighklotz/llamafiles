@@ -225,6 +225,7 @@ In addition to these command line flags, the script also checks for several envi
 - `N_PREDICT`: The default number of tokens to predict if none is specified via the `--n-predict` flag.
 - `SYSTEM_MESSAGE`: The default system message to use if none is specified via the command line.
 - `MODEL_RUNNER`: The program used to run the model. Defaults to `/usr/bin/env` and automatically set to `llamafile...` if needed. See also `FORCE_MODEL_RUNNER`
+- `LLM_ADDITIONAL_ARGS`: Value is interpolated into the call to LLM at the end of the CLI invocation..
 - `FORCE_MODEL_RUNNER`: Force usage of MODEL_RUNNER, for example to override `llamafile...` with llama.cpp set in in `MODEL_RUNNER`
 - `THREADS`: The number of threads to use for the model. Defaults to the number of CPU cores.
 - `NGL`: Number of GPU layers, same as `--ngl`
