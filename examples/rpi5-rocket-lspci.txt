@@ -1,6 +1,6 @@
 klotz@rpi5:~ $ help.sh lspci
 LSPCI, or List PCI Devices, is a command used in Linux to display information about all the PCI devices connected to the system's motherboard. It provides details such as device vendor and product IDs, memory sizes, and supported devices. This command can be executed in the terminal of a Linux system with root privileges. For example, to list all PCI devices, you would type `lspci` in the terminal and press Enter. The output will display the information about each device.
-klotz@rpi5:~ $ lspci | help.sh --stdin "explain this lspci output"
+klotz@rpi5:~ $ lspci | help.sh "explain this lspci output"
 Sure, I can help you understand the LSPCI (List PCI Devices) output you provided.
 
 LSPCI is a command in Linux that lists all PCI devices in the system. The output you provided is in a format that's easy to read but not very human-friendly. Here's a breakdown of what each line means:
