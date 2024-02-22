@@ -5,9 +5,9 @@
 ;;;
 ;;; The main functions provided are:
 ;;; 
-;;; 1. `llm-write`: Writes a new buffer based on the prompt and
-;;; current region, and the output of the `llm-rewrite-script-path`
-;;; command.
+;;; 1. `llm-ask`: Creates a new buffer containing a response to teh
+;;; question, based on the prompt and current region, and the output
+;;; of the `llm-rewrite-script-path` command.
 ;;; 
 ;;; 2. `llm-summarize-buffer`: Creates a new buffer containing a
 ;;; summary of the current buffer, with an optional user-provided
@@ -27,18 +27,17 @@
 ;;; invoke the `llm-summarize-buffer` function.
 
 (defvar llm-rewrite-script-path "~/wip/llamafiles/llm_el/rewrite.sh")
-(defvar llm-write-buffer-name   "*llm-write*")
+(defvar llm-ask-buffer-name   "*llm-ask*")
 (defvar llm-rewrite-buffer-name "*llm-rewrite*")
 (defvar llm-summary-buffer-name "*llm-summary*")
 
-
-(defun llm-write (prompt start end &optional output-buffer-name replace-p)
+(defun llm-ask (prompt start end &optional output-buffer-name replace-p)
   "Writes a new buffer based on the prompt and current region, and the output of the llm-rewrite-script-path command"
   (interactive "sRequest: \nr")
   (let ((system-prompt
 	 (format "Read this following text from major-mode=%s buffer and respond to this request:"
 		 (symbol-name major-mode))))
-    (llm-region-internal system-prompt prompt start end (or output-buffer-name llm-write-buffer-name) replace-p)))
+    (llm-region-internal system-prompt prompt start end (or output-buffer-name llm-ask-buffer-name) replace-p)))
 
 (defun llm-summarize-buffer (&optional user-prompt)
   "Creates a new buffer containing a summary of the current buffer, with prefix arg accepts a prompt."
@@ -47,7 +46,7 @@
 	   (read-string (format "Prompt (%s): " default-prompt)
 			nil nil
 			(format "%s\n" default-prompt)))))
-  (llm-write user-prompt (point-min) (point-max) llm-summary-buffer-name))
+  (llm-ask user-prompt (point-min) (point-max) llm-summary-buffer-name))
 
 
 (defun llm-region-internal (system-prompt user-prompt start end output-buffer replace-p)
