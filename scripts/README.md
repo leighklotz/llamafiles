@@ -1,5 +1,5 @@
 # Files in scripts
-- [Scriot to: Wrapping Code with Custom Formatting](code.sh): (code.sh)
+- [Scriot to: Wrapping Code with Custom Formatting](codeblock.sh): (codeblock.sh)
 - [Script to Download Llama Model using Wget in Bash](download-models.sh): (download-models.sh)
 - [Git Multiline Commit Grammar](git-commit-multiline-grammar.gbnf): (git-commit-multiline-grammar.gbnf)
 - [Git Oneline Commit Grammar File](git-commit-oneline-grammar.gbnf): (git-commit-oneline-grammar.gbnf)

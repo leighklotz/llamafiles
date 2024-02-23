@@ -13,8 +13,8 @@ $ help.sh what is my ip
 $ help.sh -m dolphin --stdin -- 'Give me a JQ cli to get the value of the field named `llama.context_length`'
 $ man xxd | help.sh "print file contents with xxd without the address column"
 $ help-commit.sh 
-$ code.sh jq cat foo.jq | help.sh '"Explain this:'
-$ code.sh xslt cat redir/target.xslt | help.sh explain
+$ codeblock.sh jq cat foo.jq | help.sh '"Explain this:'
+$ codeblock.sh xslt cat redir/target.xslt | help.sh explain
 ```
 
 More examples can be found below, and even more in the [examples](https://github.com/leighklotz/llamafiles/tree/main/examples) directory.
@@ -174,7 +174,7 @@ These files are in [scripts/](scripts/). You might want to symlink some to your 
 ## utilities
 - systype.sh - Pipe to help.sh to provide context for distro-specific questions
 - nvfree.sh - check your GPU usage
-- code.sh [lang] [cmd]  - Pipe to help.sh to wrap output of cmd in a codeblock of type lang.
+- codeblock.sh [lang] [cmd]  - Pipe to help.sh to wrap output of cmd in a codeblock of type lang.
 
 ## images
 These are less developed.
@@ -254,12 +254,13 @@ You will need to do this on MacOS:
 ## Used directly
 - https://github.com/Mozilla-Ocho/llamafile 
 - https://github.com/klotz/llamafiles
+- https://justine.lol/oneliners/
 
 ## Similar packages
 - https://github.com/rendezqueue/rendezllama
-- https://justine.lol/oneliners/
 - https://llm.datasette.io/
 - https://github.com/jart
+- https://github.com/llimllib/gpt-bash-cli
 
 # TODO
 - prompt caching

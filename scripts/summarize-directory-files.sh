@@ -17,7 +17,7 @@ do
     then
 	PROMPT="For the file named ${FN} whose first ${NLINES} lines are shown below, generate a title and output '[title](${FN})' markdown link with link text being a short title of the file."
 	echo -n "- "
-	${SCRIPT_DIR}/code.sh ${FN} head -${NLINES} ${FN} | \
+	${SCRIPT_DIR}/codeblock.sh ${FN} head -${NLINES} ${FN} | \
 	    ${SCRIPT_DIR}/help.sh ${*} --grammar-file ${GBNF_FILE} \
 	      -e -- "${PROMPT}"
     fi

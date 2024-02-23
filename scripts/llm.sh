@@ -32,89 +32,99 @@ INPUT=""
 QUESTION=""
 DO_STDIN="$(test -t 0 || echo $?)"
 
-# Get thread count
-if [ "${THREADS}" == "" ];
-then
-    THREADS=$( ( [ -f /proc/cpuinfo ] && grep '^cpu cores\s*:' /proc/cpuinfo | head -1 | awk '{print $4}' ))
+function set_threads() {
+    # Get thread count
     if [ "${THREADS}" == "" ];
     then
-        THREADS=$(sysctl -n hw.ncpu 2>/dev/null || echo "${NUMBER_OF_PROCESSORS:-4}")
+	THREADS=$( ( [ -f /proc/cpuinfo ] && grep '^cpu cores\s*:' /proc/cpuinfo | head -1 | awk '{print $4}' ))
+	if [ "${THREADS}" == "" ];
+	then
+            THREADS=$(sysctl -n hw.ncpu 2>/dev/null || echo "${NUMBER_OF_PROCESSORS:-4}")
+	fi
     fi
-fi
-THREADS="${THREADS:+-t $THREADS}"
+    THREADS="${THREADS:+-t $THREADS}"
+}
 
-# If there are any args, require "--" or any non-hyphen word to terminate args and start question.
-# Assume the whole args is a question if there is no hyphen to start.
-if [[ "${1}" == "-"* ]];
-then
-    while [[ $# -gt 0 ]]; do
-        case $1 in
-            -m|--model-type)
-                shift; MODEL_TYPE="$1" ;;
-            --speed)
-                PRIORITY="speed" ;;
-            --length)
-                PRIORITY="length" ;;
-            --temperature)
-                shift; TEMPERATURE="$1" ;;
-            --verbose|-v)
-                VERBOSE=1 ;;
-            -c|--context-length)
-                shift; CONTEXT_LENGTH="$1" ;;
-            --ngl)
-                shift; NGL="$1" ;;
-            --n-predict)
-                shift; N_PREDICT="$1" ;;
-            --grammar-file)
-                shift; GRAMMAR_FILE="--grammar-file $1" ;;
-            --debug)
-                ERROR_OUTPUT="/dev/stdout"; SILENT_PROMPT=""; DEBUG=1; LOG_DISABLE="" ;;
-            --noerror)
-                ERROR_OUTPUT="/dev/null" ;;
-            --stdin|--interactive|-i)
-                DO_STDIN=1 ;;
-	    -e|--process-question-escapes)
-		PROCESS_QUESTION_ESCAPES=1 ;;
-            --)
-                # consumes rest of line
-                shift; QUESTION=("$@")
-                break
-                ;;
-            -*)
-                echo "Unrecognized option: $1" >> /dev/stderr
-                exit 1
-                ;;
-            *)
-                # consumes rest of line
-                QUESTION=("$*")
-                break
-                ;;
-        esac
-        shift
-    done
-else
-    QUESTION="${*}"
-fi
-
-# Process escape sequences in QUESTION if requested.
-# STDIN never processes escapes.
-if [ "${PROCESS_QUESTION_ESCAPES}" ]; then
-    [ $VERBOSE ] && echo "* Processing escape sequences in QUESTION"
-    printf -v QUESTION "%b" "$QUESTION"
-fi
-
-if [ "$DO_STDIN" != "" ];
-then
-    if [ -t 0 ];
+function parse_args() {
+    # If there are any args, require "--" or any non-hyphen word to terminate args and start question.
+    # Assume the whole args is a question if there is no hyphen to start.
+    if [[ "${1}" == "-"* ]];
     then
-        echo "Give input followed by Ctrl-D:"
+	while [[ $# -gt 0 ]]; do
+            case $1 in
+		-m|--model-type)
+                    shift; MODEL_TYPE="$1" ;;
+		--speed)
+                    PRIORITY="speed" ;;
+		--length)
+                    PRIORITY="length" ;;
+		--temperature)
+                    shift; TEMPERATURE="$1" ;;
+		--verbose|-v)
+                    VERBOSE=1 ;;
+		-c|--context-length)
+                    shift; CONTEXT_LENGTH="$1" ;;
+		--ngl)
+                    shift; NGL="$1" ;;
+		--n-predict)
+                    shift; N_PREDICT="$1" ;;
+		--grammar-file)
+                    shift; GRAMMAR_FILE="--grammar-file $1" ;;
+		--debug)
+                    ERROR_OUTPUT="/dev/stdout"; SILENT_PROMPT=""; DEBUG=1; LOG_DISABLE="" ;;
+		--noerror)
+                    ERROR_OUTPUT="/dev/null" ;;
+		--stdin|--interactive|-i)
+                    DO_STDIN=1 ;;
+		-e|--process-question-escapes)
+		    PROCESS_QUESTION_ESCAPES=1 ;;
+		--)
+                    # consumes rest of line
+                    shift; QUESTION=("$@")
+                    break
+                    ;;
+		-*)
+                    echo "Unrecognized option: $1" >> /dev/stderr
+                    exit 1
+                    ;;
+		*)
+                    # consumes rest of line
+                    QUESTION=("$*")
+                    break
+                    ;;
+            esac
+            shift
+	done
+    else
+	QUESTION="${*}"
     fi
-    INPUT=$(cat)
-fi
+}
 
-# memory allocation: assume 4 chars per token
-PROMPT_LENGTH_EST=$(((75+${#SYSTEM_MESSAGE}+${#QUESTION}+${#INPUT})/4))
-[ $VERBOSE ] && echo "* PROMPT_LENGTH_EST=$PROMPT_LENGTH_EST"
+
+function process_question_escapes() {
+    # Process escape sequences in QUESTION if requested.
+    # STDIN never processes escapes.
+    if [ "${PROCESS_QUESTION_ESCAPES}" ]; then
+	[ $VERBOSE ] && echo "* Processing escape sequences in QUESTION"
+	printf -v QUESTION "%b" "$QUESTION"
+    fi
+}
+
+function do_stdin() {
+    if [ "$DO_STDIN" != "" ];
+    then
+	if [ -t 0 ];
+	then
+            echo "Give input followed by Ctrl-D:"
+	fi
+	INPUT=$(cat)
+    fi
+}
+
+set_threads
+parse_args "$@"
+process_question_escapes
+do_stdin
 
 # Find the first existing executable or GGUF in the list.
 # file_path=$(find_first_model /path/to/file1 /path/to/file2 /path/to/file3)
@@ -515,11 +525,25 @@ case "${MODEL_TYPE}" in
         phi_priority
         ;;
 
+    api)
+	# nothing to do here
+	;;
     *)
         echo "unknown model type $MODEL_TYPE" >> /dev/stderr
         exit 1
         ;;
 esac
+
+
+if [ "${MODEL}" == "" ] || ( [ "${MODEL}" != "api" ] && [ ! -f $MODEL ] );
+then
+    echo "Model not found: ${MODEL}" >> /dev/stderr
+    exit 3
+fi
+
+# memory allocation: assume 4 chars per token
+#PROMPT_LENGTH_EST=$(((75+${#SYSTEM_MESSAGE}+${#QUESTION}+${#INPUT})/4))
+PROMPT_LENGTH_EST=$((${#PROMPT}/4))
 
 if [ "${PROMPT_LENGTH_EST}" -gt "${CONTEXT_LENGTH}" ];
 then
@@ -533,13 +557,6 @@ then
     echo "* Truncated context length to $CONTEXT_LENGTH"
 fi
 
-if [ ! -f $MODEL ];
-then
-    echo "Model not found: ${MODEL}" >> /dev/stderr
-    exit 3
-fi
-
-PROMPT_LENGTH_EST=$((${#PROMPT}/4))
 #BATCH_SIZE=${BATCH_SIZE:-$(($CONTEXT_LENGTH / 2))}
 
 # If no GPU, force NGL off
@@ -556,14 +573,8 @@ TEMPERATURE="${TEMPERATURE:+--temp $TEMPERATURE}"
 CONTEXT_LENGTH="${CONTEXT_LENGTH:+-c $CONTEXT_LENGTH}"
 BATCH_SIZE="${BATCH_SIZE:+--batch_size $BATCH_SIZE}"
 
-if [ "${MODEL}" == "" ];
-then
-    echo "* FAIL: No model" >> /dev/stderr
-    exit 2
-fi
-
 # set MODEL_RUNNER
-if [ "${MODEL##*.}" != "llamafile" ] || [ "${FORCE_MODEL_RUNNER}" ];
+if [ "${MODEL##*.}" == "gguf" ] || [ "${FORCE_MODEL_RUNNER}" ];
 then
    MODEL_RUNNER="${LLAMAFILE_MODEL_RUNNER}"
 fi

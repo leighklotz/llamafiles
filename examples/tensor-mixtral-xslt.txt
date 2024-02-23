@@ -1,4 +1,4 @@
-$ code.sh xslt cat redir/target.xslt | help.sh explain
+$ codeblock.sh xslt cat redir/target.xslt | help.sh explain
  The provided code is written in XSLT (Extensible Stylesheet Language Transformations) rather than Linux, Bash, Python, or general programming languages. XSLT is a language for transforming XML documents into other formats such as HTML, XML, plain text, etc.
 
 In this XSLT script, the main task is to transform an XML document containing Apache configuration directives into plain text output, specifically setting up ProxyPass and Redirect rules. When the XSLT processor encounters the "maps" element, it will output "ProxyRequests off", and when it encounters "ProxyPass" or "Redirect" elements, it will output the corresponding rule in the format "ProxyPass <in> <out>" or "Redirect <type> <in> <out>" respectively. The input and output are the XML nodes matched by the templates.

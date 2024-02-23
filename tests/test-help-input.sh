@@ -22,7 +22,7 @@ do
     for m in "${model_types[@]}"
     do
 	echo "--- ${m} ---"
-	time code.sh git cat ${GIT_DIFF_EXAMPLE} | help.sh --speed -m ${m} "${q}"
+	time codeblock.sh git cat ${GIT_DIFF_EXAMPLE} | help.sh --speed -m ${m} "${q}"
 	if [ $? -ne 0 ]; then
 	    echo "FAIL: status=$?"
 	fi
