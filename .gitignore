@@ -1,4 +1,5 @@
-models
+*.gguf
+*.llamafile
 lib
 private
 *.zip

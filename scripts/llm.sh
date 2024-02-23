@@ -1,5 +1,7 @@
 #!/bin/bash
 
+SCRIPT_DIR=$(dirname $(realpath "${BASH_SOURCE}"))
+
 USAGE="[-m|--model-type model-type] [--stdin|--interactive|-i] [--speed | --length] [--temperature temp] [--context-length|-c n] [--ngl n] [--n-predict n] [--debug] [--verbose|-v] [--] QUESTION*"
 
 # Use CLI flags, or environment variables below:
@@ -18,7 +20,7 @@ VERBOSE=${VERBOSE:-}
 LOG_DISABLE="--log-disable"
 GRAMMAR_FILE="${GRAMMAR_FILE:-}"
 BATCH_SIZE="${BATCH_SIZE:-}"
-LLAMAFILE_MODEL_RUNNER="${LLAMAFILE_MODEL_RUNNER:-${HOME}/wip/llamafiles/lib/llamafile-0.6.2 -m }"
+LLAMAFILE_MODEL_RUNNER="${LLAMAFILE_MODEL_RUNNER:-"$(realpath ${SCRIPT_DIR}/../lib/llamafile-0.6.2) -m"}"
 FORCE_MODEL_RUNNER="${FORCE_MODEL_RUNNER:-}"
 LLM_ADDITIONAL_ARGS="${LLM_ADDITIONAL_ARGS:-}"
 
@@ -100,7 +102,6 @@ function parse_args() {
     fi
 }
 
-
 function process_question_escapes() {
     # Process escape sequences in QUESTION if requested.
     # STDIN never processes escapes.
@@ -120,11 +121,6 @@ function do_stdin() {
 	INPUT=$(cat)
     fi
 }
-
-set_threads
-parse_args "$@"
-process_question_escapes
-do_stdin
 
 # Find the first existing executable or GGUF in the list.
 # file_path=$(find_first_model /path/to/file1 /path/to/file2 /path/to/file3)
@@ -192,354 +188,62 @@ function cap_ngl {
     fi
 }
 
-function mixtral_priority {
-    MAX_CONTEXT_LENGTH=21000
-    case "${PRIORITY}" in
-         speed)
-             NGL=${NGL:=23}
-             CONTEXT_LENGTH=2048
-             ;;
-         length)
-             NGL=${NGL:=20}
-             CONTEXT_LENGTH=${MAX_CONTEXT_LENGTH}
-             ;;
-         manual)
-             NGL=${NGL:=23}
-             CONTEXT_LENGTH=${CONTEXT_LENGTH:=4096}
-             ;;
-         *)
-             echo "usage: unknown priority $PRIORITY" >> /dev/stderr
-             exit 1
-            ;;
-    esac
-    cap_ngl
+function load_model {
+    if [ "${MODEL_TYPE}" == "" ];
+    then
+	echo "Model not found: ${MODEL_TYPE}" >> /dev/stderr
+	exit 3
+    fi
+
+    # Construct the path to the functions file
+    MODELS_DIRECTORY="$(realpath "${SCRIPT_DIR}/../models")"
+    FUNCTIONS_PATH="$(realpath "${MODELS_DIRECTORY}/functions.sh")"
+    MODEL_FUNCTIONS_PATH="$(realpath "${MODELS_DIRECTORY}/${MODEL_TYPE}/functions.sh")"
+
+    # Check if the functions file exists
+    if [[ -f "${FUNCTIONS_PATH}" ]]; then
+	source "${FUNCTIONS_PATH}"
+    else
+	echo "* ERROR: Cannot find functions: ${FUNCTIONS_PATH}"
+	exit 3
+    fi
+
+    # Check if the model functions file exists
+    if [[ -f "${MODEL_FUNCTIONS_PATH}" ]]; then
+	source "${MODEL_FUNCTIONS_PATH}"
+    else
+	echo "* ERROR: Cannot find model functions for ${MODEL_TYPE}: ${MODEL_FUNCTIONS_PATH}"
+	exit 1
+    fi
+
 }
 
-function dolphin_priority {
-    MAX_CONTEXT_LENGTH=32768
-    case "${PRIORITY}" in
-         speed)
-             NGL=${NGL:=28}
-             CONTEXT_LENGTH=2048
-             ;;
-         length)
-             NGL=${NGL:=8}
-             CONTEXT_LENGTH=${MAX_CONTEXT_LENGTH}
-             ;;
-         manual)
-             NGL=${NGL:=23}
-             CONTEXT_LENGTH=${CONTEXT_LENGTH:=4096}
-             ;;
-         *)
-             echo "usage: unknown priority $PRIORITY" >> /dev/stderr
-             exit 1
-            ;;
-    esac
-    cap_ngl
-}
-
-function codebooga_priority {
-    MAX_CONTEXT_LENGTH=32768
-    case "${PRIORITY}" in
-         speed)
-             NGL=${NGL:=50}
-             CONTEXT_LENGTH=4096
-             ;;
-         length)
-             NGL=${NGL:=16}
-             CONTEXT_LENGTH=${MAX_CONTEXT_LENGTH}
-             ;;
-         manual)
-             NGL=${NGL:=23}
-             CONTEXT_LENGTH=${CONTEXT_LENGTH:=4096}
-             ;;
-         *)
-             echo "usage: unknown priority $PRIORITY" >> /dev/stderr
-             exit 1
-            ;;
-    esac
-    cap_ngl
-}
-
-function mistral_priority {
-    MAX_CONTEXT_LENGTH=16384
-    case "${PRIORITY}" in
-        speed)
-            NGL=${NGL:=33}
-            CONTEXT_LENGTH=2048
-            ;;
-        length)
-            NGL=${NGL:=33}
-            CONTEXT_LENGTH=${MAX_CONTEXT_LENGTH}
-            ;;
-        manual)
-            NGL=${NGL:=33}
-            CONTEXT_LENGTH=${CONTEXT_LENGTH:=4096}
-            ;;
-        *)
-            echo "usage: unknown priority $PRIORITY" >> /dev/stderr
+# todo: much work here
+function prepare_model {
+    case "${MODEL_TYPE}" in
+	mixtral) mixtral_model ;;
+	dolphin) dolphin_model ;;
+	mistral) mistral_model ;;
+	codebooga) codebooga_model ;;
+	deepseek|coder) deepseek_coder_model ;;
+	rocket) rocket_model ;;
+	phi) phi_model ;;
+	api)
+	# nothing to do here
+	;;
+	*)
+            echo "unknown model type $MODEL_TYPE" >> /dev/stderr
             exit 1
             ;;
     esac
-
-    cap_ngl
 }
 
-
-function deepseek_priority {
-    MAX_CONTEXT_LENGTH=32768
-    case "${PRIORITY}" in
-         speed)
-             NGL=${NGL:=33}
-             CONTEXT_LENGTH=2048
-             ;;
-         length)
-             NGL=${NGL:=25}
-             CONTEXT_LENGTH=16383
-             ;;
-         manual)
-            NGL=${NGL:=33}
-            CONTEXT_LENGTH=${CONTEXT_LENGTH:=2048}
-             ;;
-        *)
-             echo "usage: unknown priority $PRIORITY" >> /dev/stderr
-             echo "usage: $0 ${USAGE}" >> /dev/stderr
-             exit 1
-            ;;
-    esac
-
-    cap_ngl
-}
-
-function rocket_priority {
-    MAX_CONTEXT_LENGTH=4096
-    case "${PRIORITY}" in
-         speed)
-             NGL=${NGL:=33}
-             CONTEXT_LENGTH=2048
-             ;;
-         length)
-             NGL=${NGL:=25}
-             CONTEXT_LENGTH=4096
-             ;;
-         manual)
-            NGL=${NGL:=33}
-            CONTEXT_LENGTH=${CONTEXT_LENGTH:=2048}
-             ;;
-        *)
-             echo "usage: unknown priority $PRIORITY" >> /dev/stderr
-             echo "usage: $0 ${USAGE}" >> /dev/stderr
-             exit 1
-            ;;
-    esac
-
-    cap_ngl
-}
-
-function phi_priority {
-    MAX_CONTEXT_LENGTH=2048
-    CONTEXT_LENGTH=${CONTEXT_LENGTH:=2048}
-    BATCH_SIZE=${BATCH_SIZE:=128}
-    NGL=${NGL:-33}
-    cap_ngl
-}
-
-function llama_prompt {
-    if [ "${INPUT}" == "" ]; then
-	printf -v PROMPT "<s>[INST]%s
-%s
-
-[/INST]
-" "${SYSTEM_MESSAGE%$'\n'}" "${QUESTION%$'\n'}"
-    else
-	printf -v PROMPT "<s>[INST]%s
-
-%s
-
-%s
-[/INST]
-" "${SYSTEM_MESSAGE%$'\n'}" "${QUESTION%$'\n'}" "${INPUT%$'\n'}"
-    fi
-}
-
-function mistral_prompt {
-    if [ "${INPUT}" == "" ]; then
-	printf -v PROMPT "<s>[INST] %s
-
-%s [/INST]
-" "${SYSTEM_MESSAGE%$'\n'}" "${QUESTION%$'\n'}"
-    else
-	printf -v PROMPT "<s>[INST] %s
-
-%s
-
-%s [/INST]
-" "${SYSTEM_MESSAGE%$'\n'}" "${QUESTION%$'\n'}" "${INPUT%$'\n'}"
-    fi
-}
-
-function alpaca_prompt {
-
-    if [ "${INPUT}" == "" ]; then
-	printf -v PROMPT "%s" "Below is an instruction that describes a task. Write a response that appropriately completes the request.
-
-### Instruction:
-${SYSTEM_MESSAGE%$'\n'}
-
-${QUESTION%$'\n'}
-
-### Response:
-
-"
-    else
-	printf -v PROMPT "Below is an instruction that describes a task, paired with an input that provides further context. Write a response that appropriately completes the request.
-
-### Instruction:
-%s
-
-%s
-
-### Input:
-%s
-
-### Response:
-
-" "${SYSTEM_MESSAGE%$'\n'}" "${QUESTION%$'\n'}" "${INPUT%$'\n'}"
-	##### END NO INPUT CASE
-    fi
-}
-
-function chatml_prompt {
-    if [ "${INPUT}" == "" ]; then
-        printf -v PROMPT "<|im_start|>system
-%s<|im_end|>
-<|im_start|>user
-%s<|im_end|>
-<|im_start|>assistant" "${SYSTEM_MESSAGE%$'\n'}" "${QUESTION%$'\n'}"
-    else
-        printf -v PROMPT "<|im_start|>system
-%s<|im_end|>
-<|im_start|>user
-%s
-%s<|im_end|>
-<|im_start|>assistant" "${SYSTEM_MESSAGE%$'\n'}" "${QUESTION%$'\n'}" "${INPUT%$'\n'}"
-    fi
-}
-
-function phi_prompt {
-    # Instruct: {prompt}
-    # Output:
-    if [ "${INPUT}" == "" ];
-    then
-      printf -v PROMPT "%s" "Instruct: ${SYSTEM_MESSAGE%$'\n'}
-%s
-Output:" "${QUESTION}"
-    else
-      printf -v PROMPT "%s" "Instruct: %s
-User Input:
------------------
-%s
------------------
-End of User Input
-Output:" "${QUESTION%$'\n'}" "${INPUT}"
-    fi
-}
-
-# Fit into estimated VRAM cap
-case "${MODEL_TYPE}" in
-    # Mixtral
-    mixtral)
-        MODEL=$(find_first_model \
-                ${HOME}/wip/llamafiles/models/mixtral-8x7b-instruct-v0.1.Q5_K_M.llamafile \
-                )
-        gpu_check 1
-	mistral_prompt
-        mixtral_priority
-        ;;
-
-    # Dolphin of various sorts
-    dolphin)
-        MODEL=$(find_first_model \
-                ${HOME}/wip/llamafiles/models/dolphin-2.7-mixtral-8x7b.Q4_K_M.gguf \
-                )
-        gpu_check 1.3
-        chatml_prompt
-        dolphin_priority
-        ;;
-
-    ## Model: mistral-7b-instruct
-    mistral)
-        MODEL=$(find_first_model \
-                    ${HOME}/wip/llamafiles/models/mistral-7b-instruct-v0.2.Q5_K_M.llamafile \
-                    ${HOME}/wip/llamafiles/models/mistral-instruct-v0.2.Q5_K_M.llamafile \
-                    ${HOME}/wip/llamafiles/models/mistral-7b-instruct-v0.2.Q4_K_M.llamafile \
-                    ${HOME}/wip/llamafiles/models/mistral-7b-instruct-v0.1-Q4_K_M-main.llamafile \
-                    ${HOME}/wip/llamafiles/models/mistral-7b-instruct-v0.2.Q3_K_M.llamafile \
-                    ${HOME}/wip/llamafiles/models/mistral-7b-instruct-v0.2.Q3_K_S.llamafile)
-        gpu_check 4
-        mistral_prompt
-        mistral_priority
-        ;;
- 
-    ## Model: oobabooga/text-generation-webui/models/codebooga-34b-v0.1.Q4_K_M.gguf
-    ## Model: {$HOME}/wip/llamafiles/models/deepseek-coder-6.7b-instruct.Q4_K_M.gguf
-    codebooga)
-        MODEL=$(find_first_model \
-                    "${HOME}/wip/oobabooga/text-generation-webui/models/codebooga-34b-v0.1.Q4_K_M.gguf" \
-                )
-        SILENT_PROMPT=""        # not supported by codebooga
-        gpu_check 1
-        alpaca_prompt
-        codebooga_priority
-        ;;
-
-    ## Model: deepseek-coder
-    deepseek|coder)
-        MODEL=$(find_first_model \
-                    "${HOME}/wip/llamafiles/models/deepseek-coder-6.7b-instruct.Q4_K_M.gguf" \
-               )
-        SILENT_PROMPT=""
-        gpu_check 2.1
-        llama_prompt
-        deepseek_priority
-        ;;
-
-    rocket)
-        MODEL=$(find_first_model \
-                    "${HOME}/wip/llamafiles/models/rocket-3b.Q6_K.llamafile" \
-                    "${HOME}/wip/llamafiles/models/rocket-3b.Q5_K_M.llamafile" \
-                    "${HOME}/wip/llamafiles/models/rocket-3b.Q4_K_M.llamafile" \
-             )
-        gpu_check 4
-        chatml_prompt
-        rocket_priority
-        ;;
-
-    phi)
-        MODEL=$(find_first_model \
-                    "${HOME}/wip/llamafiles/models/phi-2.Q6_K.llamafile" \
-                    "${HOME}/wip/llamafiles/models/phi-2.Q5_K_M.llamafile" \
-             )
-        gpu_check 4
-        phi_prompt
-        phi_priority
-        ;;
-
-    api)
-	# nothing to do here
-	;;
-    *)
-        echo "unknown model type $MODEL_TYPE" >> /dev/stderr
-        exit 1
-        ;;
-esac
-
-
-if [ "${MODEL}" == "" ] || ( [ "${MODEL}" != "api" ] && [ ! -f $MODEL ] );
-then
-    echo "Model not found: ${MODEL}" >> /dev/stderr
-    exit 3
-fi
+set_threads
+parse_args "$@"
+load_model
+process_question_escapes
+do_stdin
+prepare_model
 
 # memory allocation: assume 4 chars per token
 #PROMPT_LENGTH_EST=$(((75+${#SYSTEM_MESSAGE}+${#QUESTION}+${#INPUT})/4))
@@ -587,7 +291,7 @@ then
 fi
 
 # Perform inference
-#set -x
+set -x
 printf '%s' "${PROMPT}" > /tmp/prompt.$$
 cat /tmp/prompt.$$ | ${MODEL_RUNNER} ${MODEL} ${CLI_MODE} ${LOG_DISABLE} ${GRAMMAR_FILE} ${TEMPERATURE} ${CONTEXT_LENGTH} ${NGL} ${N_PREDICT} ${BATCH_SIZE} --no-penalize-nl --repeat-penalty 1 ${THREADS} -f /dev/stdin $SILENT_PROMPT ${LLM_ADDITIONAL_ARGS} 2> "${ERROR_OUTPUT}"
 STATUS=$?
