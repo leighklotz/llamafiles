@@ -47,8 +47,8 @@ function mixtral_priority {
 
 function mixtral_model {
     MODEL=$(find_first_model \
-                ${MODELS_DIRECTORY}/mixtral/mixtral_7bx2_moe.Q3_K_M.gguf \
                 ${MODELS_DIRECTORY}/mixtral/mixtral-8x7b-instruct-v0.1.Q5_K_M.llamafile \
+                ${MODELS_DIRECTORY}/mixtral/mixtral_7bx2_moe.Q3_K_M.gguf \
          )
     gpu_check 1
     mixtral_prompt
