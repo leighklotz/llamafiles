@@ -7,21 +7,16 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
 fi
 
 function phi_prompt {
-    # Instruct: {prompt}
-    # Output:
     if [ "${INPUT}" == "" ];
     then
-      printf -v PROMPT "%s" "Instruct: ${SYSTEM_MESSAGE%$'\n'}
+      printf -v PROMPT "Instruct: %s
 %s
-Output:" "${QUESTION}"
+Output:" "${SYSTEM_MESSAGE%$'\n'}" "${QUESTION%$'\n'}"
     else
-      printf -v PROMPT "%s" "Instruct: %s
-User Input:
------------------
+      printf -v PROMPT "Instruct: %s
 %s
------------------
-End of User Input
-Output:" "${QUESTION%$'\n'}" "${INPUT}"
+
+Output:" "${SYSTEM_MESSAGE%$'\n'}" "${QUESTION%$'\n'}" "${INPUT%$'\n'}"
     fi
 }
 
