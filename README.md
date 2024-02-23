@@ -245,6 +245,7 @@ See [env.sh.example](env.sh.example).
 ## Program Flow
 1. If there are any arguments, `--` or any non-hyphen word, terminate the arguments and start the question. 
 1. If there are no hyphens to start, assume the whole arguments is a question.
+1. Parse the model argument and load the model definition
 1. If stdin has content, include it in a block.
 1. Alternatively, if the standard input is a terminal and if so, prompt the user to give input followed by Ctrl-D.
 1. Calculate the prompt length estimate and set the memory allocation for the prompt.
