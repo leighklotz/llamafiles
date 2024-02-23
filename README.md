@@ -47,7 +47,7 @@ $ help.sh what is my ip address
 This example takes a live JSON input and shows how to extract a slightly tricky value. As a bonus, the model gives the value of the field.
 
 ```
-$ ./llama.cpp/gguf-py/scripts/gguf-dump.py ./models/dolphin-2.7-mixtral-8x7b.Q4_K_M.gguf --no-tensors --json | help.sh -m dolphin --stdin -- 'give me a jq cli to get the value of the named `llama.context_length` (note the dot is part of the field name) in the following JSON:'
+$ ./llama.cpp/gguf-py/scripts/gguf-dump.py ./models/dolphin/dolphin-2.7-mixtral-8x7b.Q4_K_M.gguf --no-tensors --json | help.sh -m dolphin --stdin -- 'give me a jq cli to get the value of the named `llama.context_length` (note the dot is part of the field name) in the following JSON:'
 
 To get the value of `llama.context_length` using jq, you can use the following command:
 
@@ -61,7 +61,7 @@ $
 Here is proof that the JQ expression given above works:
 
 ```
-$ ./llama.cpp/gguf-py/scripts/gguf-dump.py ./models/dolphin-2.7-mixtral-8x7b.Q4_K_M.gguf --no-tensors --json | jq '.metadata["llama.context_length"].value'
+$ ./llama.cpp/gguf-py/scripts/gguf-dump.py ./models/dolphin/dolphin-2.7-mixtral-8x7b.Q4_K_M.gguf --no-tensors --json | jq '.metadata["llama.context_length"].value'
     32768
 $
 ```
@@ -112,7 +112,7 @@ More examples can be found in the [examples](https://github.com/leighklotz/llama
 This script uses llm.sh to generate commit messages from the current directoryu.
 
 ```bash
-$ help-commit.sh [--oneline|--multiline] [--staged] ... llm.sh options if any ...
+$ help-commit.sh [--oneline|--multiline] [--staged] [git diff options] [-- llm.sh options]
 ```
 
 You can choose to provide `--oneline` or `--multiline` flags to control the format of the commit message. Using `--oneline` (or default) will create a single line commit message, and `--multiline` will create a multi-line one. The script uses `git diff --staged` first, then `git diff`.
@@ -120,7 +120,13 @@ You can choose to provide `--oneline` or `--multiline` flags to control the form
 For example, to create an oneline commit message for staged changes, use the following command:
 
 ```bash
-help-commit.sh
+help-commit.sh --staged
+```
+
+To create multi-line commit message using the mixtral model with a long context, do this:
+
+```bash
+help-commit.sh -- -m mixtral --length
 ```
 
 # llm_el for Emacs
@@ -143,20 +149,19 @@ You need to download these from https://huggingface.co/jartine and other places 
 todo: script to do this
 
 ## Desktop and GPU models
-These go in `models/`:
+Each model-type directory has one or more `.gguf` or `.llamafile` models and a `function.sh` file.
 
-- `dolphin-2.5-mixtral-8x7b.Q4_K_M.llamafile`
-- `llava-v1.5-7b-q4-main.llamafile`
-- `llava-v1.5-7b-q4-server.llamafile`
-- `mistral-7b-instruct-v0.2.Q4_K_M.llamafile`
+These go in `models/*`:
+- dolphin: `dolphin-2.5-mixtral-8x7b.Q4_K_M.llamafile`
+- llava: `llava-v1.5-7b-q4-main.llamafile`, `llava-v1.5-7b-q4-server.llamafile`
+- mistral: `mistral-7b-instruct-v0.2.Q4_K_M.llamafile`
 
 ## RPI5 and other small models
-These go in `models/`:
-- `mistral-7b-instruct-v0.2.Q3_K_M.llamafile`
-- `mixtral_7bx2_moe.Q3_K_M.gguf`
-- `phi-2.Q5_K_M.llamafile`
-- `phi-2.Q6_K.llamafile`
-- `rocket-3b.Q4_K_M.llamafile`
+These go in `models/*`:
+- mistral: `mistral-7b-instruct-v0.2.Q3_K_M.llamafile`
+- mixtral: `mixtral_7bx2_moe.Q3_K_M.gguf`
+- phi: `phi-2.Q5_K_M.llamafile`, `phi-2.Q6_K.llamafile`
+- rocket: `rocket-3b.Q4_K_M.llamafile`
 
 # Scripts and Files
 These files are in [scripts/](scripts/). You might want to symlink some to your bin directory.
@@ -171,7 +176,7 @@ These files are in [scripts/](scripts/). You might want to symlink some to your 
 - help-commit.sh - CLI to run `git diff` and produce a commit message
 - summarize-directory-files.sh - summarize directory files as markdown
 
-## utilities
+## user utilities
 - systype.sh - Pipe to help.sh to provide context for distro-specific questions
 - nvfree.sh - check your GPU usage
 - codeblock.sh [lang] [cmd]  - Pipe to help.sh to wrap output of cmd in a codeblock of type lang.
@@ -182,12 +187,13 @@ These are less developed.
 - rename-pictures.sh [adapted from https://gist.github.com/jart/bd2f603aefe6ac8004e6b709223881c0]
 - llava-cli.sh 
 
-# llm.sh Details
+## internals
+- create-chat-templates.py: wip to statically create models/*/functions.sh prompt processing
 
+# llm.sh Details
 The help and summary scripts invoke `llm.sh`, but you can use it yourself directly as well.
 
 ## Command Line Flags
-
 `llm.sh` accepts the following command line flags:
 
 - `-m` or `--model-type`: specifies the type of model to use. The available options are `mixtral`, `dolphin`, `mistral`, `codebooga`, `deepseek`, `rocket`, and `phi`.
@@ -248,7 +254,7 @@ See [env.sh.example](env.sh.example).
 
 # Mac Specifics
 You will need to do this on MacOS:
-- `xattr -dr com.apple.quarantine models/* lib/*`
+- `xattr -dr com.apple.quarantine models/*/*.llamafile lib/*`
 
 # References
 ## Used directly

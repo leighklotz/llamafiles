@@ -9,7 +9,7 @@
     (message "No line with odd number of quote characters found")))
 
 
-(defun find-odd-apostropnes ()
+(defun find-odd-apostrophes ()
   "Go to the end of the next line in the buffer that has an odd number of apostrophe characters."
   (interactive)
   (while (and (not (eobp))
