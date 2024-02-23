@@ -364,16 +364,16 @@ function llama_prompt {
 
 function mistral_prompt {
     if [ "${INPUT}" == "" ]; then
-	printf -v PROMPT "<s>[INST]%s
+	printf -v PROMPT "<s>[INST] %s
 
-%s[/INST]
+%s [/INST]
 " "${SYSTEM_MESSAGE%$'\n'}" "${QUESTION%$'\n'}"
     else
-	printf -v PROMPT "<s>[INST]%s
+	printf -v PROMPT "<s>[INST] %s
 
 %s
 
-%s[/INST]
+%s [/INST]
 " "${SYSTEM_MESSAGE%$'\n'}" "${QUESTION%$'\n'}" "${INPUT%$'\n'}"
     fi
 }
