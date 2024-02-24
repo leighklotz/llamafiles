@@ -10,14 +10,14 @@ Below are brief examples to show you what these tools do.
 ```shell
 $ help.sh -- "Split bash argument array into left and right with double hyphen as the separator using special bash builtin functions or operators"
 $ help.sh what is my ip
-$ help.sh -m dolphin --stdin -- 'Give me a JQ cli to get the value of the field named `llama.context_length`'
+$ help.sh -m dolphin 'Give me a JQ cli to get the value of the field named `llama.context_length`'
 $ man xxd | help.sh "print file contents with xxd without the address column"
 $ help-commit.sh 
 $ codeblock.sh jq cat foo.jq | help.sh '"Explain this:'
 $ codeblock.sh xslt cat redir/target.xslt | help.sh explain
 ```
 
-More examples can be found below, and even more in the [examples](https://github.com/leighklotz/llamafiles/tree/main/examples) directory.
+More examples can be found below and in the [examples](https://github.com/leighklotz/llamafiles/tree/main/examples) directory.
 
 ## help.sh usage and examples
 USAGE="[-m|--model-type model-type] [--stdin|--interactive|-i] [--speed | --length] [--temperature temp] [--context-length|-c n] [--ngl n] [--n-predict n] [--debug] [--verbose] [--] QUESTION*"
@@ -47,7 +47,8 @@ $ help.sh what is my ip address
 This example takes a live JSON input and shows how to extract a slightly tricky value. As a bonus, the model gives the value of the field.
 
 ```
-$ ./llama.cpp/gguf-py/scripts/gguf-dump.py ./models/dolphin/dolphin-2.7-mixtral-8x7b.Q4_K_M.gguf --no-tensors --json | help.sh -m dolphin --stdin -- 'give me a jq cli to get the value of the named `llama.context_length` (note the dot is part of the field name) in the following JSON:'
+$ ./llama.cpp/gguf-py/scripts/gguf-dump.py ./models/dolphin/dolphin-2.7-mixtral-8x7b.Q4_K_M.gguf --no-tensors --json | \
+   help.sh -m dolphin 'give me a jq cli to get the value of the named `llama.context_length` (note the dot is part of the field name) in the following JSON:'
 
 To get the value of `llama.context_length` using jq, you can use the following command:
 
@@ -80,7 +81,7 @@ $ sudo lshw | help.sh -c 16384 -m codebooga --stdin -- 'Summarize the following 
 	graphics cards. It has a Samsung SSD 970 EVO 1TB and a Samsung SSD 990
 	PRO 4TB as storage devices, and an ASUS ROG MAXIMUS XII APEX
 	motherboard with Intel Comet Lake chipset. The system is running
-	Ubuntu Linux with kernel version 6.2.0-39-generic, and has a wireless
+	Ubuntu Linux with kernel version 6.2.0-39-generic has a wireless
 	network interface (Intel Comet Lake PCH CNVi WiFi) and an Ethernet
 	interface (Intel Ethernet Controller I225-V). The computer also has
 	USB ports, audio devices, and an SMBus controller.  [end of text]
@@ -105,11 +106,11 @@ I hope that helps! Let me know if you have any other questions.
 klotz@rpi5:~ $ 
 ```
 
-More examples can be found in the [examples](https://github.com/leighklotz/llamafiles/tree/main/examples) directory.
+More examples are in the [examples](https://github.com/leighklotz/llamafiles/tree/main/examples) directory.
 
 ## help-commit.sh usage and examples
 
-This script uses llm.sh to generate commit messages from the current directoryu.
+This script uses llm.sh to generate commit messages from the current directory.
 
 ```bash
 $ help-commit.sh [--oneline|--multiline] [--staged] [git diff options] [-- llm.sh options]
