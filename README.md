@@ -269,6 +269,7 @@ You will need to do this on MacOS:
 - https://llm.datasette.io/
 - https://github.com/jart
 - https://github.com/llimllib/gpt-bash-cli
+- https://github.com/yusufcanb/tlm
 
 # TODO
 - prompt caching
