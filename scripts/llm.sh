@@ -222,6 +222,7 @@ function load_model {
 function prepare_model {
     case "${MODEL_TYPE}" in
 	mixtral) mixtral_model ;;
+	nous-hermes) nous_hermes_model ;;
 	dolphin) dolphin_model ;;
 	mistral) mistral_model ;;
 	codebooga) codebooga_model ;;
