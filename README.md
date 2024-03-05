@@ -180,7 +180,8 @@ These files are in [scripts/](scripts/). You might want to symlink some to your 
 ## user utilities
 - systype.sh - Pipe to help.sh to provide context for distro-specific questions
 - nvfree.sh - check your GPU usage
-- codeblock.sh [lang] [cmd]  - Pipe to help.sh to wrap output of cmd in a codeblock of type lang.
+- codeblock.sh [lang] [cmd] - Pipe to help.sh to wrap output of cmd in a codeblock of type lang.
+- bashblock.sh [cmd] - Pipe to help.sh to wrap output of cmd in a bash-like template.
 
 ## images
 These are less developed.
@@ -197,7 +198,8 @@ The help and summary scripts invoke `llm.sh`, but you can use it yourself direct
 ## Command Line Flags
 `llm.sh` accepts the following command line flags:
 
-- `-m` or `--model-type`: specifies the type of model to use. The available options are `mixtral`, `dolphin`, `mistral`, `codebooga`, `deepseek`, `rocket`, and `phi`.
+- `-m` or `--model-type`: specifies the type of model to use. The available options are `mixtral`, `dolphin`, `mistral`, `codebooga`, `deepseek`, `
+rocket`, and `phi`.
 - `--speed`: sets the priority to speed.
 - `--length`: sets the priority to length.
 - `--temperature`: sets the temperature of the model.
