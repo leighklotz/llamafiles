@@ -2,7 +2,7 @@
 
 SCRIPT_DIR=$(dirname $(realpath "${BASH_SOURCE}"))
 
-USAGE="[-m|--model-type model-type] [--stdin|--interactive|-i] [--speed | --length] [--temperature temp] [--context-length|-c n] [--ngl n] [--n-predict n] [--debug] [--verbose|-v] [--] QUESTION*"
+USAGE="[-m|--model-type model-type] [--stdin|--interactive|-i] [--speed | --length] [--temperature temp] [--context-length|-c n] [--ngl n] [--n-predict n] [--debug] [--verbose|-v][--] QUESTION*"
 
 # Use CLI flags, or environment variables below:
 MODEL_TYPE=${MODEL_TYPE:-mistral}
@@ -13,7 +13,7 @@ N_PREDICT="${N_PREDICT:-}"
 SYSTEM_MESSAGE="${SYSTEM_MESSAGE-"Answer the following user question:"}"
 SILENT_PROMPT="--silent-prompt"
 NGL="${NGL:-}"
-GPU="--gpu auto"
+GPU="${GPU:-auto}"		# auto|none|nvidia|...
 PRIORITY="${PRIORITY:-manual}" # speed|length|manual
 DEBUG="${DEBUG:-}"
 VERBOSE=${VERBOSE:-}
@@ -33,6 +33,10 @@ CLI_MODE="--cli"
 INPUT=""
 QUESTION=""
 DO_STDIN="$(test -t 0 || echo $?)"
+
+# prompt machinery
+KEEP_PROMPT_TEMP_FILE="${KEEP_PROMPT_TEMP_FILE:-ALL}" # "NONE"|"ERROR"|"ALL"
+PROMPT_TEMP_FILE="/tmp/prompt.$$"
 
 function set_threads() {
     # Get thread count
@@ -142,11 +146,12 @@ function find_first_model() {
 
 function gpu_check {
     local layer_per_gb=("$@")
+
     if [ "${layer_per_gb}" == "" ];
     then
         layer_per_gb=1
     fi
-    if ! gpu_detector=$(command -v nvidia-detector) || [[ "$($gpu_detector)" == "None" ]];
+    if [ "${GPU}" == "none" ] || ! gpu_detector=$(command -v nvidia-detector) || [[ "$($gpu_detector)" == "None" ]];
     then
         if [ "${DEBUG}" ];
         then
@@ -154,21 +159,22 @@ function gpu_check {
         fi
         FREE_VRAM_GB=0
         MAX_NGL_EST=0
-        NGL=""
-        GPU="--gpu none"
+        NGL=0
+        GPU="none"
     else
         # if gpu is already in use, estimate NGL max at int(free_vram_gb * 1.5)
         FREE_VRAM_GB=$(nvidia-smi --query-gpu=memory.free --format=csv,nounits,noheader | awk '{print $1 / 1024}')
         if (( $(echo "${FREE_VRAM_GB} < 2" |bc -l) ));
         then
-            GPU="--gpu none"
+            GPU="none"
             MAX_NGL_EST=0
             NGL=0
         else
-            GPU="--gpu nvidia"
+            GPU="nvidia"
             MAX_NGL_EST=$(awk -vfree_vram_gb=$FREE_VRAM_GB -vlayer_per_gb=$layer_per_gb "BEGIN{printf(\"%d\n\",int(free_vram_gb*layer_per_gb))}")
         fi
     fi
+
     if [ "${DEBUG}" ];
     then
         echo "* FREE_VRAM_GB=${FREE_VRAM_GB} MAX_NGL_EST=${MAX_NGL_EST} GPU=${GPU}"
@@ -176,15 +182,10 @@ function gpu_check {
 }
 
 function cap_ngl {
-    if [ "$GPU" == "" ];
+    if [ "$GPU" != "none" ] && [ "${NGL}" != "" ] && [ "${NGL}" -gt "${MAX_NGL_EST}" ];
     then
-        GPU="--gpu none"
-    else
-        if [ "${NGL}" != "" ] && [ "${NGL}" -gt "${MAX_NGL_EST}" ];
-        then
-            [ $VERBOSE ] && echo "* Capping $NGL at $MAX_NGL_EST"
-            NGL=$MAX_NGL_EST
-        fi
+        [ $VERBOSE ] && echo "* Capping $NGL at $MAX_NGL_EST"
+        NGL=$MAX_NGL_EST
     fi
 }
 
@@ -239,75 +240,122 @@ function prepare_model {
     esac
 }
 
+function check_context_length {
+    # memory allocation: assume 4 chars per token
+    #PROMPT_LENGTH_EST=$(((75+${#SYSTEM_MESSAGE}+${#QUESTION}+${#INPUT})/4))
+    PROMPT_LENGTH_EST=$((${#PROMPT}/4))
+
+    if [ "${PROMPT_LENGTH_EST}" -gt "${CONTEXT_LENGTH}" ];
+    then
+	echo "* ERROR: Prompt len ${PROMPT_LENGTH_EST} estimated not to fit in context ${CONTEXT_LENGTH}"
+	exit 2
+    fi
+
+    if [ "$CONTEXT_LENGTH" -gt "$MAX_CONTEXT_LENGTH" ];
+    then
+	CONTEXT_LENGTH="$MAX_CONTEXT_LENGTH"
+	echo "* Truncated context length to $CONTEXT_LENGTH"
+    fi
+
+    #BATCH_SIZE=${BATCH_SIZE:-$(($CONTEXT_LENGTH / 2))}
+}
+
+function set_cli_options {
+    # Calculate $LLM_SH command line options
+    # Use bash :+ syntax to avoid setting prefixes on empty values
+    N_PREDICT="${N_PREDICT:+--n-predict $N_PREDICT}"
+    TEMPERATURE="${TEMPERATURE:+--temp $TEMPERATURE}"
+    CONTEXT_LENGTH="${CONTEXT_LENGTH:+-c $CONTEXT_LENGTH}"
+    BATCH_SIZE="${BATCH_SIZE:+--batch_size $BATCH_SIZE}"
+    NGL="${NGL:+-ngl $NGL}"
+    GPU="${GPU:+--gpu $GPU}"
+}
+
+function set_model_runner {
+    # set MODEL_RUNNER
+    if [ "${MODEL##*.}" == "gguf" ] || [ "${FORCE_MODEL_RUNNER}" ];
+    then
+	MODEL_RUNNER="${LLAMAFILE_MODEL_RUNNER}"
+    fi
+}
+
+function set_verbose_debug {
+    # Set verbose and debug last
+    if [ "${DEBUG}" ] || [ "${VERBOSE}" ];
+    then
+	printf '* Parameters: ngl=%s context_length=%s est_len=%s:\n' "${NGL}" "${CONTEXT_LENGTH}" "${PROMPT_LENGTH_EST}"
+	set -x
+    fi
+}
+
+function perform_inference {
+    # Perform inference and return status
+    # set -x
+    printf '%s' "${PROMPT}" > "${PROMPT_TEMP_FILE}"
+    cat "${PROMPT_TEMP_FILE}" | ${MODEL_RUNNER} ${MODEL} ${CLI_MODE} ${LOG_DISABLE} ${GRAMMAR_FILE} ${TEMPERATURE} ${CONTEXT_LENGTH} ${NGL} ${N_PREDICT} ${BATCH_SIZE} --no-penalize-nl --repeat-penalty 1 ${THREADS} -f /dev/stdin $SILENT_PROMPT ${LLM_ADDITIONAL_ARGS} 2> "${ERROR_OUTPUT}"
+    return $?
+}
+
+# Try to inform user about errors
+function report_success_or_fail {
+    status=$1
+
+    if [ $status -ne 0 ];
+    then
+	if [ "${ERROR_OUTPUT}" == "/dev/null" ];
+	then
+	    echo "* FAIL STATUS=$status: re-run with --debug" > /dev/stderr
+	else
+	    echo "* FAIL STATUS=$status: errors went to ${ERROR_OUTPUT}" > /dev/stderr
+	fi
+    fi
+
+    return $STATUS
+}
+
+function handle_temp_files {
+    status=$1
+
+    if [ -f "${PROMPT_TEMP_FILE}" ];
+    then
+	case "$KEEP_PROMPT_TEMP_FILE" in
+	    ALL)
+		true
+		;;
+	    ERROR|ERRORS)
+		if [ $status -ne 0 ];
+		then
+		    echo "* PROMPT=${PROMPT_TEMP_FILE}" > /dev/stderr
+		else
+		    rm "${PROMPT_TEMP_FILE}"
+		fi
+		;;
+	    NONE)
+		rm "${PROMPT_TEMP_FILE}"
+		;;
+	esac
+    else
+	if [ "$KEEP_PROMPT_TEMP_FILE" == "" ] && [ -f "${PROMPT_TEMP_FILE}" ]; 
+	then
+	    rm "${PROMPT_TEMP_FILE}"
+	fi
+    fi
+}
+
 set_threads
 parse_args "$@"
 load_model
 process_question_escapes
 do_stdin
 prepare_model
-
-# memory allocation: assume 4 chars per token
-#PROMPT_LENGTH_EST=$(((75+${#SYSTEM_MESSAGE}+${#QUESTION}+${#INPUT})/4))
-PROMPT_LENGTH_EST=$((${#PROMPT}/4))
-
-if [ "${PROMPT_LENGTH_EST}" -gt "${CONTEXT_LENGTH}" ];
-then
-    echo "* ERROR: Prompt len ${PROMPT_LENGTH_EST} estimated not to fit in context ${CONTEXT_LENGTH}"
-    exit 2
-fi
-
-if [ "$CONTEXT_LENGTH" -gt "$MAX_CONTEXT_LENGTH" ];
-then
-    CONTEXT_LENGTH="$MAX_CONTEXT_LENGTH"
-    echo "* Truncated context length to $CONTEXT_LENGTH"
-fi
-
-#BATCH_SIZE=${BATCH_SIZE:-$(($CONTEXT_LENGTH / 2))}
-
-# If no GPU, force NGL off
-if [ "${GPU}" = "" ];
-then
-    NGL=0
-    GPU="--gpu none"
-fi
-
-# Don't pass CLI args that aren't needed
-N_PREDICT="${N_PREDICT:+--n-predict $N_PREDICT}"
-NGL="${NGL:+-ngl $NGL}"
-TEMPERATURE="${TEMPERATURE:+--temp $TEMPERATURE}"
-CONTEXT_LENGTH="${CONTEXT_LENGTH:+-c $CONTEXT_LENGTH}"
-BATCH_SIZE="${BATCH_SIZE:+--batch_size $BATCH_SIZE}"
-
-# set MODEL_RUNNER
-if [ "${MODEL##*.}" == "gguf" ] || [ "${FORCE_MODEL_RUNNER}" ];
-then
-   MODEL_RUNNER="${LLAMAFILE_MODEL_RUNNER}"
-fi
-
-# Set verbose and debug last
-if [ "${DEBUG}" ] || [ "${VERBOSE}" ];
-then
-    printf '* Parameters: ngl=%s context_length=%s est_len=%s:\n' "${NGL}" "${CONTEXT_LENGTH}" "${PROMPT_LENGTH_EST}"
-    set -x
-fi
-
-# Perform inference
-#set -x
-printf '%s' "${PROMPT}" > /tmp/prompt.$$
-cat /tmp/prompt.$$ | ${MODEL_RUNNER} ${MODEL} ${CLI_MODE} ${LOG_DISABLE} ${GRAMMAR_FILE} ${TEMPERATURE} ${CONTEXT_LENGTH} ${NGL} ${N_PREDICT} ${BATCH_SIZE} --no-penalize-nl --repeat-penalty 1 ${THREADS} -f /dev/stdin $SILENT_PROMPT ${LLM_ADDITIONAL_ARGS} 2> "${ERROR_OUTPUT}"
+check_context_length
+set_cli_options
+set_model_runner
+set_verbose_debug
+perform_inference
 STATUS=$?
-
-# Try to inform user about errors
-if [ "$STATUS" != "0" ];
-then
-    if [ "${ERROR_OUTPUT}" == "/dev/null" ];
-    then
-	echo "* FAIL $STATUS: re-run with --debug" > /dev/stderr
-    else
-	echo "* FAIL $STATUS: errors went to ${ERROR_OUTPUT}" > /dev/stderr
-    fi
-fi
-
+report_success_or_fail $STATUS
+handle_temp_files $STATUS
 exit $STATUS
 
 ###

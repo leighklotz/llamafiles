@@ -238,10 +238,12 @@ In addition to these command line flags, the script also checks for several envi
 - `FORCE_MODEL_RUNNER`: Force usage of MODEL_RUNNER, for example to override `llamafile...` with llama.cpp set in in `MODEL_RUNNER`
 - `THREADS`: The number of threads to use for the model. Defaults to the number of CPU cores.
 - `NGL`: Number of GPU layers, same as `--ngl`
+- `GPU`: auto, none, nvidia, ...
 - `PRIORITY`: speed|length|manual controlling balance of GPU memory and context length
 - `GRAMMAR_FILE`: Same as `--grammar-file`
 - `DEBUG`: same as --debug
 - `VERBOSE`: same as --verbose
+- `KEEP_PROMPT_TEMP_FILE`: in what case to keep the prompt text file: NONE, ERROR, or ALL
 
 See [env.sh.example](env.sh.example).
 
