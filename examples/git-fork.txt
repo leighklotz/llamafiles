@@ -1,0 +1,25 @@
+$ bashblock git remote -v | help.sh "rename origin to old-origin and add a new origin that is git@github:leighklotz/llamafile"
+ To rename the existing origin to "old-origin" and add a new origin with the URL `git@github.com:leighklotz/llamafile`, you can use the following commands in your terminal:
+
+```bash
+# Rename existing origin to old-origin
+$ git remote rename origin old-origin
+
+# Add new origin with the given URL
+$ git remote add origin git@github.com:leighklotz/llamafile
+
+# Verify the new remote has been added and the old origin has been renamed
+$ git remote -v
+```
+
+After executing these commands, the output of `git remote -v` should look like:
+
+```bash
+origin	git@github.com:leighklotz/llamafile.git (fetch)
+origin	git@github.com:leighklotz/llamafile.git (push)
+old-origin	https://github.com/Mozilla-Ocho/llamafile.git (fetch)
+old-origin	https://github.com/Mozilla-Ocho/llamafile.git (push)
+```
+
+This indicates that you have successfully renamed the existing origin to `old-origin` and added a new origin with the given URL.
+$
