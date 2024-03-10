@@ -288,18 +288,22 @@ function set_verbose_debug {
     fi
 }
 
+function fixup_input {
+    # workaround for https://github.com/Mozilla-Ocho/llamafile/issues/288
+    sed -e 's/<img src="/<img  src="/g'
+}
+
 function perform_inference {
     # Perform inference and return status
     # set -x
     printf '%s' "${PROMPT}" > "${PROMPT_TEMP_FILE}"
-    cat "${PROMPT_TEMP_FILE}" | ${MODEL_RUNNER} ${MODEL} ${CLI_MODE} ${LOG_DISABLE} ${GRAMMAR_FILE} ${TEMPERATURE} ${CONTEXT_LENGTH} ${NGL} ${N_PREDICT} ${BATCH_SIZE} --no-penalize-nl --repeat-penalty 1 ${THREADS} -f /dev/stdin $SILENT_PROMPT ${LLM_ADDITIONAL_ARGS} 2> "${ERROR_OUTPUT}"
+    cat "${PROMPT_TEMP_FILE}" | fixup_input | ${MODEL_RUNNER} ${MODEL} ${CLI_MODE} ${LOG_DISABLE} ${GPU} ${NGL} ${GRAMMAR_FILE} ${TEMPERATURE} ${CONTEXT_LENGTH} ${N_PREDICT} ${BATCH_SIZE} --no-penalize-nl --repeat-penalty 1 ${THREADS} -f /dev/stdin $SILENT_PROMPT ${LLM_ADDITIONAL_ARGS} 2> "${ERROR_OUTPUT}"
     return $?
 }
 
 # Try to inform user about errors
 function report_success_or_fail {
     status=$1
-
     if [ $status -ne 0 ];
     then
 	if [ "${ERROR_OUTPUT}" == "/dev/null" ];
@@ -309,13 +313,11 @@ function report_success_or_fail {
 	    echo "* FAIL STATUS=$status: errors went to ${ERROR_OUTPUT}" > /dev/stderr
 	fi
     fi
-
     return $STATUS
 }
 
 function handle_temp_files {
     status=$1
-
     if [ -f "${PROMPT_TEMP_FILE}" ];
     then
 	case "$KEEP_PROMPT_TEMP_FILE" in
