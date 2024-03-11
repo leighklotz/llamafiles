@@ -6,6 +6,25 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     exit 1
 fi
 
+# Find the first existing executable or GGUF in the list.
+# file_path=$(find_first_model /path/to/file1 /path/to/file2 /path/to/file3)
+function find_first_model() {
+  local files=("$@")
+  local file
+  for file in "${files[@]}"; do
+    [ $VERBOSE ] && echo "* Checking Model $file" >> /dev/stderr
+    if [ -x "$file" ] || [ "${file##*.}" == "gguf" ];
+    then
+      [ $VERBOSE ] && echo "* Accepting Model $file" >> /dev/stderr
+      echo "${file}"
+      return 0
+    fi
+  done
+  echo "* Cannot find executable model in $@" >> /dev/stderr
+  return 1
+}
+
+# Prompt Markup
 function alpaca_prompt {
 
     if [ "${INPUT}" == "" ]; then
