@@ -7,15 +7,21 @@ This repository provides an LLM Help CLI for Linux and Mac systems to provide he
 ## Brief Usage examples
 Below are brief examples to show you what these tools do.
 
+Install links to the scripts you want to use in your home bin directory. In the example below, symlink names have been shortened.
+
 ```shell
 $ help.sh -- "Split bash argument array into left and right with double hyphen as the separator using special bash builtin functions or operators"
 $ help.sh what is my ip
 $ help.sh -m dolphin 'Give me a JQ cli to get the value of the field named `llama.context_length`'
+$ ask dolphin ...
 $ man xxd | help.sh "print file contents with xxd without the address column"
-$ help-commit.sh 
-$ codeblock.sh jq cat foo.jq | help.sh '"Explain this:'
-$ codeblock.sh xslt cat redir/target.xslt | help.sh explain
+$ help-commit 
+$ codeblock jq cat foo.jq | help.sh '"Explain this:'
+$ codeblock xslt cat redir/target.xslt | help.sh explain
+
 ```
+
+
 
 More examples can be found below and in the [examples](https://github.com/leighklotz/llamafiles/tree/main/examples) directory.
 
@@ -113,7 +119,7 @@ More examples are in the [examples](https://github.com/leighklotz/llamafiles/tre
 This script uses llm.sh to generate commit messages from the current directory.
 
 ```bash
-$ help-commit.sh [--oneline|--multiline] [--staged] [git diff options] [-- llm.sh options]
+$ help-commit [--oneline|--multiline] [--staged] [git diff options] [-- llm.sh options]
 ```
 
 You can choose to provide `--oneline` or `--multiline` flags to control the format of the commit message. Using `--oneline` (or default) will create a single line commit message, and `--multiline` will create a multi-line one. The script uses `git diff --staged` first, then `git diff`.
@@ -121,13 +127,13 @@ You can choose to provide `--oneline` or `--multiline` flags to control the form
 For example, to create an oneline commit message for staged changes, use the following command:
 
 ```bash
-help-commit.sh --staged
+help-commit --staged
 ```
 
 To create multi-line commit message using the mixtral model with a long context, do this:
 
 ```bash
-help-commit.sh -- -m mixtral --length
+help-commit -- -m mixtral --length
 ```
 
 # llm_el for Emacs
@@ -171,7 +177,8 @@ These files are in [scripts/](scripts/). You might want to symlink some to your 
 - llm.sh - the base script that others call
 
 ## user programs
-- help.sh - CLI for Linux help
+- help.sh - CLI for Linux help - cann't be shortened to 'help' in bash
+- ask.sh - like 'help.sh -m $1' - can be shortened to 'ask' in bash
 - machelp.sh - CLI for Mac help
 - summarize.sh - CLI to summarize a hyperlink
 - help-commit.sh - CLI to run `git diff` and produce a commit message

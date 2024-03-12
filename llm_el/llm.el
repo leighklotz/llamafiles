@@ -53,6 +53,13 @@
   (interactive "sSummarize Buffer Prompt: \n")
   (llm-region-internal "summarize" llm-default-model-type (symbol-name major-mode) user-prompt (point-min) (point-max) llm-summary-buffer-name nil))
 
+(defun llm-insert (prompt start end)
+  "Insert inferred text based on the prompt and current region in the current buffer."
+  (interactive "sPrompt: \nr")
+  (let ((model-type llm-default-model-type)
+	(llm-write-buffer-name  t))	;insert into current buffer
+    (llm-region-internal "write" model-type (symbol-name major-mode) prompt start end llm-write-buffer-name nil)))
+
 (defun llm-write (prompt start end)
   "Writes a new buffer based on the prompt and current region, and the output of the llm-rewrite-script-path command"
   (interactive "sPrompt: \nr")
