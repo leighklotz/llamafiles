@@ -193,7 +193,7 @@ These files are in [scripts/](scripts/). You might want to symlink some to your 
 ## images
 These are less developed.
 - image-name.sh - Simple script using LLAVA to geneate image name
-- rename-pictures.sh [adapted from https://gist.github.com/jart/bd2f603aefe6ac8004e6b709223881c0]
+- rename-pictures.sh [adapted from https://gist.github.com/jart/bd2f603aefe6ac8004e6b709223881c0 and included here under Apache 2.0 license]
 - llava-cli.sh 
 
 ## internals
