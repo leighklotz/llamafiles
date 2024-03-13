@@ -28,6 +28,7 @@ LLM_ADDITIONAL_ARGS="${LLM_ADDITIONAL_ARGS:-}"
 PROCESS_QUESTION_ESCAPES=""
 MODEL_RUNNER="/usr/bin/env"
 CLI_MODE="--cli"
+RAW_FLAG=""
 
 # Read input
 INPUT=""
@@ -82,6 +83,9 @@ function parse_args() {
                     ERROR_OUTPUT="/dev/null" ;;
 		--stdin|--interactive|-i)
                     DO_STDIN=1 ;;
+		--raw-input)
+		    RAW_FLAG="--raw-input"
+		    ;;
 		-e|--process-question-escapes)
 		    PROCESS_QUESTION_ESCAPES=1 ;;
 		--)
@@ -220,6 +224,12 @@ function prepare_model {
             exit 1
             ;;
     esac
+
+    # if --raw-input is specified, use stdin as the only text to send to the model
+    if [ "${RAW_FLAG}" != "" ]; then
+	PROMPT="${INPUT}"
+	SYSTEM_MESSAGE=""
+    fi
 }
 
 function check_context_length {

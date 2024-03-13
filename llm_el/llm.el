@@ -60,6 +60,14 @@
 	(llm-write-buffer-name  t))	;insert into current buffer
     (llm-region-internal "write" model-type (symbol-name major-mode) prompt start end llm-write-buffer-name nil)))
 
+(defun llm-complete (start end)
+  "Insert some inferred text based on current region to point in the current buffer. "
+  ;; todo: ignores end and uses (point); should have good default behavior and get bounds better.
+  (interactive "r")
+  (let ((model-type llm-default-model-type)
+	(n-predict 32))			;fixme ctrl-u arg?
+    (llm-complete-internal model-type start end n-predict)))
+
 (defun llm-write (prompt start end)
   "Writes a new buffer based on the prompt and current region, and the output of the llm-rewrite-script-path command"
   (interactive "sPrompt: \nr")
@@ -91,6 +99,24 @@ See [shell-command-on-region] for interpretation of output-buffer-name."
     (message "llm-region-internal[%s,%s] command=%s output-buffer-name=%s replace-p=%s" start end command output-buffer-name replace-p)
     (let ((max-mini-window-height 0.0))
       (shell-command-on-region start end command output-buffer-name replace-p llm-error-buffer-name display-error-buffer region-noncontiguous-p))))
+
+(defun llm-complete-internal (model-type start end n-predict)
+  ;; Send the buffer or selected region as a CLI input to 'llm.sh'
+  (let ((command (format "%s %s %s %d"
+			 llm-rewrite-script-path
+			 (shell-quote-argument "complete")
+			 (shell-quote-argument model-type)
+			 n-predict))
+	(display-error-buffer t)
+	(region-noncontiguous-p nil))
+    (message "%s" command)
+    (let ((max-mini-window-height 0.0)
+	  (old-text (buffer-substring start end))
+	  (new-end))
+      ;; todo: better prompting, put point at end, leave in place for repeated application, temperature, etc
+      (shell-command-on-region start end command nil t llm-error-buffer-name display-error-buffer region-noncontiguous-p)
+      (goto-char start)
+      (insert old-text))))
 
 ;;;
 ;;; my keybindings, should move out

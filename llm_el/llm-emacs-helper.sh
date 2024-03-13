@@ -10,28 +10,50 @@ DEBUG=""
 # e.g. cat foo.sh | ./llm-emacs-helper.sh ask mixtral bash make this arg parsing better
 USE_CASE=$1; shift
 MODEL_TYPE=$1; shift
-MAJOR_MODE=$1; shift
-PROMPT="${*}"
+
+MAJOR_MODE=""
+PROMPT=""
+RAW_FLAG=""
+N_PREDICT=""
 
 case "$USE_CASE" in
     rewrite)
-	printf -v SYSTEM_MESSAGE "Re-write the following text from major-mode=%s buffer according to user instructions:\n" "${MAJOR_MODE}"
+	# args: major_mode prompt*
+	MAJOR_MODE=$1; shift; PROMPT="${*}"
+	printf -v SYSTEM_MESSAGE "Re-write the following text from a major-mode=%s buffer according to user instructions:\n" "${MAJOR_MODE}"
 	;;
     
     ask)
-	printf -v SYSTEM_MESSAGE "Answer the user question about this the following text from major-mode=%s buffer:\n" "${MAJOR_MODE}"
+	# args: major_mode prompt*
+	MAJOR_MODE=$1; shift; PROMPT="${*}"
+	printf -v SYSTEM_MESSAGE "Answer the user question about this the following text from a major-mode=%s buffer:\n" "${MAJOR_MODE}"
 	;;
 
     write)
-	printf -v SYSTEM_MESSAGE "Write a response according to user instructions and the following text from major-mode=%s buffer:\n" "${MAJOR_MODE}"
+	# args: major_mode prompt*
+	MAJOR_MODE=$1; shift; PROMPT="${*}"
+	printf -v SYSTEM_MESSAGE "Write a response according to user instructions and the following text from a major-mode=%s buffer:\n" "${MAJOR_MODE}"
 	;;
 
     summarize)
-	printf -v SYSTEM_MESSAGE "Summarize the following text from major-mode=%s buffer:" "${MAJOR_MODE}"
+	# args: major_mode prompt*
+	MAJOR_MODE=$1; shift; PROMPT="${*}"
+	printf -v SYSTEM_MESSAGE "Summarize the following text from a major-mode=%s buffer:" "${MAJOR_MODE}"
+	;;
+
+    complete)
+	# args: n_predict
+	N_PREDICT=$1; shift
+	printf -v SYSTEM_MESSAGE ""
+	printf -v PROMPT ""
+	RAW_FLAG="--raw-input"
+	N_PREDICT="--n-predict ${N_PREDICT}"
 	;;
 
     *)
-	printf -v SYSTEM_MESSAGE "Read this following text from major-mode=%s buffer and respond to this request:" "${MAJOR_MODE}"
+	# args: major_mode prompt*
+	MAJOR_MODE=$1; shift; PROMPT="${*}"
+	printf -v SYSTEM_MESSAGE "Read this following text from a major-mode=%s buffer and respond to this request:" "${MAJOR_MODE}"
 	;;
 esac
 
@@ -43,6 +65,7 @@ cat >> "${TEMPFILE}"
 # estimate context length
 context_length=$(( $(wc -c < "${TEMPFILE}") / 3 ))
 context_length=$((context_length < 2048 ? 2048 : context_length > 32768 ? 32768 : context_length))
+#set -x
 
-cat "${TEMPFILE}" | ${LLM_SH} -m ${MODEL_TYPE} ${DEBUG} --context-length "${context_length}" --stdin "${PROMPT}" || (cat "${TEMPFILE}"; exit 1)
+cat "${TEMPFILE}" | ${LLM_SH} -m ${MODEL_TYPE} ${DEBUG} --context-length "${context_length}" --stdin ${RAW_FLAG} ${N_PREDICT} "${PROMPT}" || (cat "${TEMPFILE}"; exit 1)
 rm "${TEMPFILE}"
