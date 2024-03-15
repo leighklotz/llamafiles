@@ -79,6 +79,11 @@
   (interactive "sRewrite Prompt: \nr")
   (llm-region-internal "rewrite" llm-default-model-type (symbol-name major-mode) user-prompt start end nil t))
 
+(defun llm-todo (user-prompt start end)
+  "Rewrites the current region to process 'todo' items with the output of the llm-rewrite-script-path command based on the prompt and current region"
+  (interactive "sRewrite Prompt: \nr")
+  (llm-region-internal "todo" llm-default-model-type (symbol-name major-mode) user-prompt start end nil t))
+
 ;;; Interface to rewrite.sh
 (defun llm-region-internal (use-case model-type major-mode-name user-prompt start end output-buffer-name replace-p)
   "Send the buffer or current region as the output of the llm-rewrite-script-path command based on the prompt and current region and either replaces the region or uses a specified buffer, based on output-buffer-name and replace-p.

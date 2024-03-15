@@ -23,6 +23,12 @@ case "$USE_CASE" in
 	printf -v SYSTEM_MESSAGE "Re-write the following text from a major-mode=%s buffer according to user instructions:\n" "${MAJOR_MODE}"
 	;;
     
+    todo)
+	# args: major_mode prompt*
+	MAJOR_MODE=$1; shift; PROMPT="${*}"
+	printf -v SYSTEM_MESSAGE "Re-write the following text from a major-mode=%s buffer to address the 'todo' items, following user instructions:\n" "${MAJOR_MODE}"
+	;;
+    
     ask)
 	# args: major_mode prompt*
 	MAJOR_MODE=$1; shift; PROMPT="${*}"
