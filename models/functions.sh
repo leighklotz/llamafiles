@@ -13,7 +13,7 @@ function find_first_model() {
   local file
   for file in "${files[@]}"; do
     [ $VERBOSE ] && echo "* Checking Model $file" >> /dev/stderr
-    if [ -x "$file" ] || [ "${file##*.}" == "gguf" ];
+    if [ -f "$file" ] && ( [ -x "$file" ] || [ "${file##*.}" == "gguf" ] );
     then
       [ $VERBOSE ] && echo "* Accepting Model $file" >> /dev/stderr
       echo "${file}"
