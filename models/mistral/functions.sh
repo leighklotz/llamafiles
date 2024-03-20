@@ -51,6 +51,7 @@ function mistral_model {
                 ${MODELS_DIRECTORY}/mistral/mistral-7b-instruct-v0.2.Q5_K_M.llamafile \
                 ${MODELS_DIRECTORY}/mistral/mistral-7b-instruct-v0.2.Q5_K_M.gguf \
                 ${MODELS_DIRECTORY}/mistral/mistral-7b-instruct-v0.2.Q4_K_M.llamafile \
+                ${MODELS_DIRECTORY}/mistral/mistral-7b-instruct-v0.2.Q4_K_M.gguf \
                 ${MODELS_DIRECTORY}/mistral/mistral-7b-instruct-v0.1-Q4_K_M-main.llamafile \
                 ${MODELS_DIRECTORY}/mistral/mistral-7b-instruct-v0.2.Q3_K_M.llamafile \
                 ${MODELS_DIRECTORY}/mistral/mistral-7b-instruct-v0.2.Q3_K_S.llamafile)
