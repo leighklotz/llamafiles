@@ -6,7 +6,7 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     exit 1
 fi
 
-function deepseek_priority {
+function deepseek_coder_priority {
     MAX_CONTEXT_LENGTH=32768
     case "${PRIORITY}" in
          speed)
@@ -31,13 +31,13 @@ function deepseek_priority {
     cap_ngl
 }
 
-## Model: {$HOME}/wip/llamafiles/models/deepseek-coder-6.7b-instruct.Q4_K_M.gguf
 function deepseek_coder_model {
     MODEL=$(find_first_model \
+                "${MODELS_DIRECTORY}/deepseek-coder/deepseek-coder-33b-instruct.Q5_K_M.gguf" \
                 "${MODELS_DIRECTORY}/deepseek-coder/deepseek-coder-6.7b-instruct.Q4_K_M.gguf" \
          )
     SILENT_PROMPT=""
     gpu_check 2.1
     llama_prompt
-    deepseek_priority
+    deepseek_coder_priority
 }

@@ -206,6 +206,7 @@ function load_model {
 }
 
 # todo: much work here
+# for example, why not just call these all the same name?
 function prepare_model {
     case "${MODEL_TYPE}" in
 	mixtral) mixtral_model ;;
@@ -213,7 +214,8 @@ function prepare_model {
 	dolphin) dolphin_model ;;
 	mistral) mistral_model ;;
 	codebooga) codebooga_model ;;
-	deepseek|coder) deepseek_coder_model ;;
+	cerebrum) cerebrum_model ;;
+	deepseek-coder) deepseek_coder_model ;;
 	rocket) rocket_model ;;
 	phi) phi_model ;;
 	api)
