@@ -14,8 +14,8 @@ function usage() {
 # help-commit.sh [git diff options] -- [help.sh options]
 while [[ $# -gt 0 ]]; do
     case $1 in
-	--oneline|--multiline)
-	    MESSAGE_LINE=$(echo "$1" | sed -e 's/^--//')
+	--oneline|--multiline|--one-line|--multi-line)
+	    MESSAGE_LINE=$(echo "$1" | sed -e 's/-//g')
 	    shift
 	    ;;
         --)
