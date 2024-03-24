@@ -218,9 +218,7 @@ function prepare_model {
 	deepseek-coder) deepseek_coder_model ;;
 	rocket) rocket_model ;;
 	phi) phi_model ;;
-	api)
-	# nothing to do here
-	;;
+	via-api) via_api_model ;;
 	*)
             echo "unknown model type $MODEL_TYPE" >> /dev/stderr
             exit 1
@@ -238,6 +236,11 @@ function check_context_length {
     # memory allocation: assume 4 chars per token
     #PROMPT_LENGTH_EST=$(((75+${#SYSTEM_MESSAGE}+${#QUESTION}+${#INPUT})/4))
     PROMPT_LENGTH_EST=$((${#PROMPT}/4))
+
+    if [ "$MODEL_TYPE" == "via-api" ];
+    then
+	return;
+    fi
 
     if [ "${PROMPT_LENGTH_EST}" -gt "${CONTEXT_LENGTH}" ];
     then
@@ -287,8 +290,9 @@ function fixup_input {
     sed -e 's/<img src="/<img  src="/g'
 }
 
-function perform_inference {
-    # Perform inference and return status
+function cli_perform_inference {
+    # Use llamafile or similar CLI runner to perform inference
+    # return status
     # set -x
     printf '%s' "${PROMPT}" > "${PROMPT_TEMP_FILE}"
     cat "${PROMPT_TEMP_FILE}" | fixup_input | ${MODEL_RUNNER} ${MODEL} ${CLI_MODE} ${LOG_DISABLE} ${GPU} ${NGL} ${GRAMMAR_FILE} ${TEMPERATURE} ${CONTEXT_LENGTH} ${N_PREDICT} ${BATCH_SIZE} --no-penalize-nl --repeat-penalty 1 ${THREADS} -f /dev/stdin $SILENT_PROMPT ${LLM_ADDITIONAL_ARGS} 2> "${ERROR_OUTPUT}"
@@ -348,7 +352,12 @@ check_context_length
 set_cli_options
 set_model_runner
 set_verbose_debug
-perform_inference
+if [ "$MODEL_TYPE" == "via-api" ];
+then
+    via_api_perform_inference "instruct" "${SYSTEM_MESSAGE}" "${PROMPT}"
+else
+    cli_perform_inference
+fi
 STATUS=$?
 report_success_or_fail $STATUS
 handle_temp_files $STATUS
