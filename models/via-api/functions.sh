@@ -33,6 +33,7 @@ function via_api_perform_inference() {
     local mode="$1" system_message="$2" question="$3"
     #set -x
     data=$(jq -n --arg mode "${mode}" --arg system_message "${system_message}" --arg question "${question}" '{
+    temperature: 0.1,
     messages: [
       {
 	role: "system",
