@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 
 VIA_API_ENDPOINT='http://localhost:5000/v1/chat/completions'
 
@@ -12,6 +12,7 @@ LLM_LIB_DIR=$(realpath "${SCRIPT_DIR}/../lib")
 LLM_MODELS_DIR=$(realpath "${SCRIPT_DIR}/../models")
 MODEL_FILE="mixtral/mixtral-8x7b-instruct-v0.1.Q5_K_M.llamafile"
 PIDFILE="/tmp/via-api.pid"
+EXTRA_ARGS="${EXTRA_ARGS:-}"
 
 function via_api_prompt {
     if [ "${INPUT}" == "" ]; then
@@ -50,26 +51,7 @@ function via_api_perform_inference() {
   printf "%s\n" "${output}"
 }
 
-function via_api_check_server {
-    # Check if the process is already running
-    if [ -f $PIDFILE ]; then
-	PID=$(cat $PIDFILE)
-	if ps -p $PID > /dev/null; then
-            # echo "Process already running with PID $PID"
-            return 0
-	else
-            # echo "PID $PID is not running"
-            rm $PIDFILE || (s=$?; echo "$0: failed to remove $PIDFILE ($s)"; exit $s;)
-	fi
-    fi
-
-    # echo "* starting server for ${MODEL_FILE}"
-    ${LLM_LIB_DIR}/llamafile-0.6.2 --server -m ${LLM_MODELS_DIR}/${MODEL_FILE} --nobrowser --host 127.0.0.1 --gpu auto -ngl 24 --port 5000 &
-    echo $! > $PIDFILE
-    return 0
-}
 
 function via_api_model {
-    via_api_check_server
     via_api_prompt
 }
