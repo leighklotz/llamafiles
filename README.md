@@ -2,7 +2,7 @@
 
 Using https://github.com/Mozilla-Ocho/llamafile and https://github.com/jart models and scripts.
 
-This repository provides an LLM Help CLI for Linux and Mac systems to provide help, summarization, coding assistance, system information queries, image renaming, etc. Similar to https://justine.lol/oneliners/
+This repository provides an LLM Help CLI for Linux and Mac systems to provide help, summarization, coding assistance, system information queries, image renaming, etc. Similar to https://justine.lol/oneliners/ and other resources.
 
 ## Brief Usage examples
 Below are brief examples to show you what these tools do.
@@ -20,8 +20,6 @@ $ codeblock jq cat foo.jq | help.sh '"Explain this:'
 $ codeblock xslt cat redir/target.xslt | help.sh explain
 
 ```
-
-
 
 More examples can be found below and in the [examples](https://github.com/leighklotz/llamafiles/tree/main/examples) directory.
 
