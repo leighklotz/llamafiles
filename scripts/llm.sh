@@ -13,7 +13,7 @@ N_PREDICT="${N_PREDICT:-}"
 SYSTEM_MESSAGE="${SYSTEM_MESSAGE-"Answer the following user question:"}"
 SILENT_PROMPT="--silent-prompt"
 NGL="${NGL:-}"
-GPU="${GPU:-auto}"		# auto|none|nvidia|...
+GPU="${GPU:-auto}"		# auto|nvidia|omit
 PRIORITY="${PRIORITY:-manual}" # speed|length|manual
 DEBUG="${DEBUG:-}"
 VERBOSE=${VERBOSE:-}
@@ -146,13 +146,13 @@ function gpu_check {
         FREE_VRAM_GB=0
         MAX_NGL_EST=0
         NGL=0
-        GPU="none"
+        GPU=""
     else
         # if gpu is already in use, estimate NGL max at int(free_vram_gb * 1.5)
         FREE_VRAM_GB=$(nvidia-smi --query-gpu=memory.free --format=csv,nounits,noheader | awk '{print $1 / 1024}')
         if (( $(echo "${FREE_VRAM_GB} < 2" |bc -l) ));
         then
-            GPU="none"
+            GPU=""
             MAX_NGL_EST=0
             NGL=0
         else
@@ -168,7 +168,7 @@ function gpu_check {
 }
 
 function cap_ngl {
-    if [ "$GPU" != "none" ] && [ "${NGL}" != "" ] && [ "${NGL}" -gt "${MAX_NGL_EST}" ];
+    if [ "$GPU" != "none" ] && [ "$GPU" != "" ] && [ "${NGL}" != "" ] && [ "${NGL}" -gt "${MAX_NGL_EST}" ];
     then
         [ $VERBOSE ] && echo "* Capping $NGL at $MAX_NGL_EST"
         NGL=$MAX_NGL_EST
