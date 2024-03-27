@@ -292,7 +292,6 @@ function fixup_input {
 
 function cli_perform_inference {
     # Use llamafile or similar CLI runner to perform inference
-    # return status
     # set -x
     printf '%s' "${PROMPT}" > "${PROMPT_TEMP_FILE}"
     if [ "${GRAMMAR_FILE}" != '' ]; then
