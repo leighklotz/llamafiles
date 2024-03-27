@@ -76,7 +76,7 @@ function parse_args() {
 		--n-predict)
                     shift; N_PREDICT="$1" ;;
 		--grammar-file)
-                    shift; GRAMMAR_FILE="--grammar-file $1" ;;
+                    shift; GRAMMAR_FILE="$1" ;;
 		--debug)
                     ERROR_OUTPUT="/dev/stdout"; SILENT_PROMPT=""; DEBUG=1; LOG_DISABLE="" ;;
 		--noerror)
@@ -295,6 +295,9 @@ function cli_perform_inference {
     # return status
     # set -x
     printf '%s' "${PROMPT}" > "${PROMPT_TEMP_FILE}"
+    if [ "${GRAMMAR_FILE}" != '' ]; then
+	GRAMMAR_FILE="--grammar-file ${GRAMMAR_FILE}"
+    fi
     cat "${PROMPT_TEMP_FILE}" | fixup_input | ${MODEL_RUNNER} ${MODEL} ${CLI_MODE} ${LOG_DISABLE} ${GPU} ${NGL} ${GRAMMAR_FILE} ${TEMPERATURE} ${CONTEXT_LENGTH} ${N_PREDICT} ${BATCH_SIZE} --no-penalize-nl --repeat-penalty 1 ${THREADS} -f /dev/stdin $SILENT_PROMPT ${LLM_ADDITIONAL_ARGS} 2> "${ERROR_OUTPUT}"
     return $?
 }
@@ -349,12 +352,20 @@ process_question_escapes
 do_stdin
 prepare_model
 check_context_length
-set_cli_options
+if [ "$MODEL_TYPE" != "via-api" ];
+then
+   # fixme
+   set_cli_options
+fi
 set_model_runner
 set_verbose_debug
 if [ "$MODEL_TYPE" == "via-api" ];
 then
-    via_api_perform_inference "instruct" "${SYSTEM_MESSAGE}" "${PROMPT}"
+    repeat_penalty="1"
+    penalize_nl="false"
+    via_api_perform_inference "instruct" "${SYSTEM_MESSAGE}" "${PROMPT}" "${GRAMMAR_FILE}" "${TEMPERATURE}" "${repeat_penalty}" "${penalize_nl}"
+    # fixme add these parameters if they make sense
+    # ${TEMPERATURE} ${N_PREDICT} ${BATCH_SIZE} ${LLM_ADDITIONAL_ARGS}
 else
     cli_perform_inference
 fi
