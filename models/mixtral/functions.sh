@@ -9,14 +9,11 @@ fi
 function mixtral_prompt {
     if [ "${INPUT}" == "" ]; then
 	printf -v PROMPT "<s>[INST] %s
-
 %s [/INST]
 " "${SYSTEM_MESSAGE%$'\n'}" "${QUESTION%$'\n'}"
     else
 	printf -v PROMPT "<s>[INST] %s
-
 %s
-
 %s [/INST]
 " "${SYSTEM_MESSAGE%$'\n'}" "${QUESTION%$'\n'}" "${INPUT%$'\n'}"
     fi
@@ -47,10 +44,11 @@ function mixtral_priority {
 
 function mixtral_model {
     MODEL=$(find_first_model \
+                ${MODELS_DIRECTORY}/mixtral/mixtral-8x7b-instruct-v0.1.Q5_K_M.gguf \
                 ${MODELS_DIRECTORY}/mixtral/mixtral-8x7b-instruct-v0.1.Q5_K_M.llamafile \
                 ${MODELS_DIRECTORY}/mixtral/mixtral_7bx2_moe.Q3_K_M.gguf \
          )
-    gpu_check 1
+    gpu_check 1.5
     mixtral_prompt
     mixtral_priority
 }

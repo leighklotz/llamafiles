@@ -32,7 +32,6 @@ function alpaca_prompt {
 
 ### Instruction:
 ${SYSTEM_MESSAGE%$'\n'}
-
 ${QUESTION%$'\n'}
 
 ### Response:
@@ -43,14 +42,12 @@ ${QUESTION%$'\n'}
 
 ### Instruction:
 %s
-
 %s
 
 ### Input:
 %s
 
 ### Response:
-
 " "${SYSTEM_MESSAGE%$'\n'}" "${QUESTION%$'\n'}" "${INPUT%$'\n'}"
 	##### END NO INPUT CASE
     fi
@@ -58,16 +55,12 @@ ${QUESTION%$'\n'}
 
 function llama_prompt {
     if [ "${INPUT}" == "" ]; then
-	printf -v PROMPT "<s>[INST]%s
-%s
-
-[/INST]
+	printf -v PROMPT "<s> [INST] %s
+%s [/INST]
 " "${SYSTEM_MESSAGE%$'\n'}" "${QUESTION%$'\n'}"
     else
 	printf -v PROMPT "<s>[INST]%s
-
 %s
-
 %s
 [/INST]
 " "${SYSTEM_MESSAGE%$'\n'}" "${QUESTION%$'\n'}" "${INPUT%$'\n'}"
@@ -75,31 +68,26 @@ function llama_prompt {
 }
 
 function alpaca_prompt {
-
     if [ "${INPUT}" == "" ]; then
 	printf -v PROMPT "%s" "Below is an instruction that describes a task. Write a response that appropriately completes the request.
 
 ### Instruction:
 ${SYSTEM_MESSAGE%$'\n'}
-
 ${QUESTION%$'\n'}
 
 ### Response:
-
 "
     else
 	printf -v PROMPT "Below is an instruction that describes a task, paired with an input that provides further context. Write a response that appropriately completes the request.
 
 ### Instruction:
 %s
-
 %s
 
 ### Input:
 %s
 
 ### Response:
-
 " "${SYSTEM_MESSAGE%$'\n'}" "${QUESTION%$'\n'}" "${INPUT%$'\n'}"
 	##### END NO INPUT CASE
     fi

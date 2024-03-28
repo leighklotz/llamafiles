@@ -33,14 +33,11 @@ function mistral_priority {
 function mistral_prompt {
     if [ "${INPUT}" == "" ]; then
 	printf -v PROMPT "<s>[INST] %s
-
 %s [/INST]
 " "${SYSTEM_MESSAGE%$'\n'}" "${QUESTION%$'\n'}"
     else
 	printf -v PROMPT "<s>[INST] %s
-
 %s
-
 %s [/INST]
 " "${SYSTEM_MESSAGE%$'\n'}" "${QUESTION%$'\n'}" "${INPUT%$'\n'}"
     fi
@@ -48,6 +45,7 @@ function mistral_prompt {
 
 function mistral_model {
     MODEL=$(find_first_model \
+                ${MODELS_DIRECTORY}/mistral/mistral-7b-instruct-v0.2.Q6_K.gguf \
                 ${MODELS_DIRECTORY}/mistral/mistral-7b-instruct-v0.2.Q5_K_M.llamafile \
                 ${MODELS_DIRECTORY}/mistral/mistral-7b-instruct-v0.2.Q5_K_M.gguf \
                 ${MODELS_DIRECTORY}/mistral/mistral-7b-instruct-v0.2.Q4_K_M.llamafile \

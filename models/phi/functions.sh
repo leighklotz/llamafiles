@@ -15,8 +15,9 @@ Output:" "${SYSTEM_MESSAGE%$'\n'}" "${QUESTION%$'\n'}"
     else
       printf -v PROMPT "Instruct: %s
 %s
-
-Output:" "${SYSTEM_MESSAGE%$'\n'}" "${QUESTION%$'\n'}" "${INPUT%$'\n'}"
+%s
+Output:
+" "${SYSTEM_MESSAGE%$'\n'}" "${QUESTION%$'\n'}" "${INPUT%$'\n'}"
     fi
 }
 

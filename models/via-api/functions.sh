@@ -14,6 +14,47 @@ MODEL_FILE="mixtral/mixtral-8x7b-instruct-v0.1.Q5_K_M.llamafile"
 PIDFILE="/tmp/via-api.pid"
 EXTRA_ARGS="${EXTRA_ARGS:-}"
 
+# fixme: some models support the system role API and some do not.
+# todo: query ooba API to find the model behind the api,
+# and add put a new function to each model/*/*functions.sh
+# to determinue USE_SYSTEM_ROLE properly for each model type.
+# workaround: for now use `export USE_SYSTEM_ROLE=1` if you need it.
+USE_SYSTEM_ROLE="${USE_SYSTEM_ROLE:-}"
+# mixtral-7b-instruct-v0.1: no
+# dolphin-2.6-mistral-7b-dpo: yes
+# dolphin-2.7-mixtral: yes
+# nous-hermes-2-mixtral-8x7b-dpo: 
+
+SYSTEM_ROLE_TEMPLATE='{
+    messages: [
+      {
+	role: "system",
+	content: $system_message
+      },
+      {
+	role: "user",
+	content: $question
+      }
+    ],
+    mode: $mode,
+    temperature: $temperature,
+    repetition_penalty: $repetition_penalty,
+    penalize_nl: $penalize_nl,
+}'
+
+NO_SYSTEM_ROLE_TEMPLATE='{
+    messages: [
+      {
+	role: "user",
+	content: $question
+      }
+    ],
+    mode: $mode,
+    temperature: $temperature,
+    repetition_penalty: $repetition_penalty,
+    penalize_nl: $penalize_nl,
+}'
+
 function via_api_prompt {
     if [ "${INPUT}" == "" ]; then
 	printf -v PROMPT "%s" "${QUESTION%$'\n'}"
@@ -45,9 +86,29 @@ function via_api_perform_inference() {
     then
 	grammar_file="/dev/null"
     fi
+
+    # fixme: not all models support the system role in the API, and there's no way to tell afaik
+    # workaround: if $USE_SYSTEM_ROLE is non-empty, prepend system_message to question
+    if [ "${USE_SYSTEM_ROLE}" == "" ];
+    then
+	TEMPLATE="${NO_SYSTEM_ROLE_TEMPLATE}"
+	question=$(printf "%s\n%s" "${system_message}" "${question}")
+	system_mesage="xxx unused"
+    else
+	TEMPLATE="${SYSTEM_ROLE_TEMPLATE}"
+    fi
+
     #set -x
+    # remove leading and trailing whitespace for system_message and question
+    # prepare system message and question
+    system_message=${system_message##[[:space:]]}
+    system_message=${system_message%%[[:space:]]}
+    system_message_file=$(mktemp); printf "%s\n" "${system_message%$'\n'}" >> "${system_message_file}"
+
+    question=${question##[[:space:]]}
+    question=${question%%[[:space:]]}
     question_file=$(mktemp); printf "%s" "${question}" >> "${question_file}"
-    system_message_file=$(mktemp); printf "%s" "${system_message}" >> "${system_message_file}"
+
     data=$(jq --raw-input --raw-output  --compact-output -n \
 	      --arg mode "${mode}" \
 	      --arg temperature "${temperature}" \
@@ -56,32 +117,23 @@ function via_api_perform_inference() {
 	      --rawfile system_message "${system_message_file}" \
 	      --rawfile question "${question_file}" \
 	      --rawfile grammar_string "${grammar_file}" \
-'{
-    messages: [
-      {
-	role: "system",
-	content: $system_message
-      },
-      {
-	role: "user",
-	content: $question
-      }
-    ],
-    mode: $mode,
-    temperature: $temperature,
-    repetition_penalty: $repetition_penalty,
-    penalize_nl: $penalize_nl,
-}' \
+	      "${TEMPLATE}" \
 	| jq 'del(.[] | select(. == ""))' \
 	) || (s=$?; echo "* $0 FAIL: $s"; exit $s)
+
     #set -x
     if [ "${VERBOSE}" ]; then
-	printf "%s\n" "${data}"
+	echo "USE_SYSTEM_ROLE='$USE_SYSTEM_ROLE'"
+	printf "%s\n" "${data}" | jq --indent 1 >> /dev/stderr
     fi
+
+    # Invoke the HTTP API endpoint via
     result=$(printf "%s" "${data}" | curl -s "${VIA_API_ENDPOINT}" -H 'Content-Type: application/json' -d @-)
     output="$(printf "%s" "${result}" | jq --raw-output '.choices[].message.content')"
+
     rm -f "${question_file}" || echo "* WARN: unable to remove ${question_file}" >> /dev/stderr
     rm -f "${system_message_file}" || echo "* WARN: unable to remove ${system_message_file}" >> /dev/stderr
+
     printf "%s\n" "${output}" | via_api_mistral_output_fixup
 }
 
