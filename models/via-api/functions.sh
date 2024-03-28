@@ -1,6 +1,7 @@
 #!/bin/bash -x
 
-VIA_API_ENDPOINT='http://localhost:5000/v1/chat/completions'
+VIA_API_CHAT_COMPLETIONS_ENDPOINT='http://localhost:5000/v1/chat/completions'
+VIA_API_MODEL_INFO_ENDPOINT='http://localhost:5000/v1/internal/model/info'
 
 # Check if the script is being sourced or directly executed
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
@@ -128,7 +129,7 @@ function via_api_perform_inference() {
     fi
 
     # Invoke the HTTP API endpoint via
-    result=$(printf "%s" "${data}" | curl -s "${VIA_API_ENDPOINT}" -H 'Content-Type: application/json' -d @-)
+    result=$(printf "%s" "${data}" | curl -s "${VIA_API_CHAT_COMPLETIONS_ENDPOINT}" -H 'Content-Type: application/json' -d @-)
     output="$(printf "%s" "${result}" | jq --raw-output '.choices[].message.content')"
 
     rm -f "${question_file}" || echo "* WARN: unable to remove ${question_file}" >> /dev/stderr
@@ -139,4 +140,11 @@ function via_api_perform_inference() {
 
 function via_api_model {
     via_api_prompt
+}
+
+function get_model_name {
+    # curl prints
+    # `{"model_name":"LoneStriker_dolphin-2.7-mixtral-8x7b-3.75bpw-h6-exl2","lora_names":[]}`
+    # todo:  this correct
+    curl -s "${VIA_API_MODEL_INFO_ENDPOINT}" | jq -r .model_name
 }
