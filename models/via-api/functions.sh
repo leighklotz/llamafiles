@@ -41,6 +41,7 @@ SYSTEM_ROLE_TEMPLATE='{
     temperature: $temperature,
     repetition_penalty: $repetition_penalty,
     penalize_nl: $penalize_nl,
+    grammar_string: $grammar_string
 }'
 
 NO_SYSTEM_ROLE_TEMPLATE='{
@@ -54,6 +55,7 @@ NO_SYSTEM_ROLE_TEMPLATE='{
     temperature: $temperature,
     repetition_penalty: $repetition_penalty,
     penalize_nl: $penalize_nl,
+    grammar_string: $grammar_string
 }'
 
 function via_api_prompt {
