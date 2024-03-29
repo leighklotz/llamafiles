@@ -360,11 +360,12 @@ set_model_runner
 set_verbose_debug
 if [ "$MODEL_TYPE" == "via-api" ];
 then
+    # fixme: accept these
     repeat_penalty="1"
     penalize_nl="false"
     via_api_perform_inference "instruct" "${SYSTEM_MESSAGE}" "${PROMPT}" "${GRAMMAR_FILE}" "${TEMPERATURE}" "${repeat_penalty}" "${penalize_nl}"
-    # fixme add these parameters if they make sense
-    # ${TEMPERATURE} ${N_PREDICT} ${BATCH_SIZE} ${LLM_ADDITIONAL_ARGS}
+    # fixme: add these parameters if they make sense
+    # ${N_PREDICT} ${BATCH_SIZE} ${LLM_ADDITIONAL_ARGS}
 else
     cli_perform_inference
 fi
