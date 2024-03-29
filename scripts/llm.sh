@@ -263,7 +263,7 @@ function set_cli_options {
     N_PREDICT="${N_PREDICT:+--n-predict $N_PREDICT}"
     TEMPERATURE="${TEMPERATURE:+--temp $TEMPERATURE}"
     CONTEXT_LENGTH="${CONTEXT_LENGTH:+-c $CONTEXT_LENGTH}"
-    BATCH_SIZE="${BATCH_SIZE:+--batch_size $BATCH_SIZE}"
+    BATCH_SIZE="${BATCH_SIZE:+--batch-size $BATCH_SIZE}"
     NGL="${NGL:+-ngl $NGL}"
     GPU="${GPU:+--gpu $GPU}"
 }
