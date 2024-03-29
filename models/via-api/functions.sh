@@ -2,6 +2,7 @@
 
 VIA_API_CHAT_COMPLETIONS_ENDPOINT='http://localhost:5000/v1/chat/completions'
 VIA_API_MODEL_INFO_ENDPOINT='http://localhost:5000/v1/internal/model/info'
+VIA_API_MODEL_LIST_ENDPOINT='http://localhost:5000/v1/internal/model/list'
 
 # Check if the script is being sourced or directly executed
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
@@ -149,4 +150,9 @@ function get_model_name {
     # `{"model_name":"LoneStriker_dolphin-2.7-mixtral-8x7b-3.75bpw-h6-exl2","lora_names":[]}`
     # todo:  this correct
     curl -s "${VIA_API_MODEL_INFO_ENDPOINT}" | jq -r .model_name
+}
+
+function list_models {
+    set -x
+    curl "${VIA_API_MODEL_LIST_ENDPOINT}" | jq -r '.model_names[]'
 }
