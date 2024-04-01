@@ -14,7 +14,7 @@ LLM_LIB_DIR=$(realpath "${SCRIPT_DIR}/../lib")
 LLM_MODELS_DIR=$(realpath "${SCRIPT_DIR}/../models")
 MODEL_FILE="mixtral/mixtral-8x7b-instruct-v0.1.Q5_K_M.llamafile"
 PIDFILE="/tmp/via-api.pid"
-EXTRA_ARGS="${EXTRA_ARGS:-}"
+SEED="${SEED:--1}"
 
 # fixme: some models support the system role API and some do not.
 # todo: query ooba API to find the model behind the api,
@@ -42,7 +42,8 @@ SYSTEM_ROLE_TEMPLATE='{
     temperature: $temperature,
     repetition_penalty: $repetition_penalty,
     penalize_nl: $penalize_nl,
-    grammar_string: $grammar_string
+    grammar_string: $grammar_string,
+    seed: $seed
 }'
 
 NO_SYSTEM_ROLE_TEMPLATE='{
@@ -56,7 +57,8 @@ NO_SYSTEM_ROLE_TEMPLATE='{
     temperature: $temperature,
     repetition_penalty: $repetition_penalty,
     penalize_nl: $penalize_nl,
-    grammar_string: $grammar_string
+    grammar_string: $grammar_string,
+    seed: $seed
 }'
 
 function via_api_prompt {
@@ -118,6 +120,7 @@ function via_api_perform_inference() {
 	      --arg temperature "${temperature}" \
 	      --arg repetition_penalty "${repetition_penalty}" \
 	      --arg penalize_nl "${penalize_nl}" \
+	      --arg seed "${SEED}" \
 	      --rawfile system_message "${system_message_file}" \
 	      --rawfile question "${question_file}" \
 	      --rawfile grammar_string "${grammar_file}" \

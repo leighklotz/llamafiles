@@ -33,6 +33,6 @@ esac
 
 export SYSTEM_MESSAGE=$(printf "%b" "${SYSTEM_MESSAGE}")
 
-${LYNX} "${URL}" | ${SCRIPT_DIR}/llm.sh --length "${ARGS}" "# Text of <${URL}>"
+${LYNX} "${URL}" | ${SCRIPT_DIR}/llm.sh --length ${ARGS} "# Text of <${URL}>"
 
 # todo: need to protect ${ARGS} better
