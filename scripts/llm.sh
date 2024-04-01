@@ -91,7 +91,7 @@ function parse_args() {
 		    PROCESS_QUESTION_ESCAPES=1 ;;
 		--)
                     # consumes rest of line
-                    shift; QUESTION=("$@")
+                    shift; QUESTION=("$*")
                     break
                     ;;
 		-*)
@@ -100,7 +100,7 @@ function parse_args() {
                     ;;
 		*)
                     # consumes rest of line
-                    QUESTION=("$@")
+                    QUESTION=("$*")
                     break
                     ;;
             esac
