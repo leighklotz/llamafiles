@@ -19,15 +19,16 @@ else
     exit 1
 fi
 
-case $(basename "${0%.*}") in
-    summarize.sh|summarize)
+binary_name="$(basename "${0}")"
+case "${binary_name%.*}" in
+    summarize)
 	SYSTEM_MESSAGE="Summarize the following web page article and ignore website header at the start and look for the main article."
 	;;
-    scuttle.sh|scuttle)
+    scuttle)
 	SYSTEM_MESSAGE='Give title, brief summary as bullet points, and tags of the retrieved web page and convert your output to a URL in the following format using `+` for space: `<https://scuttle.klotz.me/bookmarks/klotz?action=add&address=URL&title=TITLE+WORDS+&description=SUMMARY+TEXT&tags=tag1,tag+two,tag3>`'
 	;;
     *)
-	echo "$0: unrecognized binary name"
+	echo "$binary_name: unrecognized binary name"
 	exit 1
 esac
 
