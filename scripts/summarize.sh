@@ -11,16 +11,28 @@ if [ -z "$URL" ]; then
 fi
 
 if command -v lynx &> /dev/null; then
-    CMD="lynx --dump --nolist"
+    LYNX="lynx --dump --nolist"
 elif command -v links &> /dev/null; then
-    CMD="links -codepage utf-8 -force-html -width 72 -dump"
+    LYNX="links -codepage utf-8 -force-html -width 72 -dump"
 else
     echo "error: NOLINKS"
     exit 1
 fi
 
-export SYSTEM_MESSAGE=$(printf "%b" "Summarize the following web page article and ignore website header at the start and look for the main article:\n#### Text of ${URL}\n###\n")
+case $(basename "${0%.*}") in
+    summarize.sh|summarize)
+	SYSTEM_MESSAGE="Summarize the following web page article and ignore website header at the start and look for the main article."
+	;;
+    scuttle.sh|scuttle)
+	SYSTEM_MESSAGE='Give title, brief summary as bullet points, and tags of the retrieved web page and convert your output to a URL in the following format using `+` for space: `<https://scuttle.klotz.me/bookmarks/klotz?action=add&address=URL&title=TITLE+WORDS+&description=SUMMARY+TEXT&tags=tag1,tag+two,tag3>`'
+	;;
+    *)
+	echo "$0: unrecognized binary name"
+	exit 1
+esac
 
-# somehow need to protect ${ARGS} better
-${CMD} "${URL}" | ${SCRIPT_DIR}/llm.sh --length "${ARGS}"
+export SYSTEM_MESSAGE=$(printf "%b" "${SYSTEM_MESSAGE}")
 
+${LYNX} "${URL}" | ${SCRIPT_DIR}/llm.sh --length "${ARGS}" "# Text of <${URL}>"
+
+# todo: need to protect ${ARGS} better
