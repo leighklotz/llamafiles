@@ -44,9 +44,7 @@ function post_process {
 	;;
 	scuttle)
 	    # <https://scuttle.klotz.me/bookmarks/klotz?action=add&address=https://example.com&title=Example+Website+&description=This+is+an+example+website&tags=example,website,canonical+page>
-	    jq --arg space "%20" --arg plus "+" -r '.tags |= join(",") | "https://scuttle.klotz.me/bookmarks/klotz?action=add&address=\(.link|@uri|gsub($space; $plus))&description=\(.description|@uri|gsub($space; $plus))&title=\(.title|@uri|gsub($space; $plus))&tags=\(.tags|@uri|gsub($space; $plus))"'
-
-
+	    jq --arg xspace "%20" --arg plus "+" --arg xcomma "%2[cC]" --arg comma "," -r '.tags |= join(",") | "https://scuttle.klotz.me/bookmarks/klotz?action=add&address=\(.link|@uri|gsub($xspace; $plus)|gsub($xcomma; $comma))&description=\(.description|@uri|gsub($xspace; $plus)|gsub($xcomma; $comma))&title=\(.title|@uri|gsub($xspace; $plus)|gsub($xcomma; $comma))&tags=\(.tags|@uri|gsub($xspace; $plus)|gsub($xcomma; $comma))"'
 	;;
 	*)
 	    echo "* $0: unknown post_process" >> /dev/stderr
