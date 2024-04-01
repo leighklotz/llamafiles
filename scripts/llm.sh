@@ -100,7 +100,7 @@ function parse_args() {
                     ;;
 		*)
                     # consumes rest of line
-                    QUESTION=("$*")
+                    QUESTION=("$@")
                     break
                     ;;
             esac
