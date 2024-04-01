@@ -2,11 +2,11 @@
 
 SCRIPT_DIR=$(dirname $(realpath "${BASH_SOURCE}"))
 
-URL=${1:-}			# LAST
+LINK=${1:-}			# LAST
 ARGS=${@:2}			# BUTLAST
 
-if [ -z "$URL" ]; then
-    echo "Usage: $(basename $0) <URL> [llm.sh options]"
+if [ -z "$LINK" ]; then
+    echo "Usage: $(basename $0) <LINK> [llm.sh options]"
     exit 1
 fi
 
@@ -25,7 +25,8 @@ case "${binary_name%.*}" in
 	SYSTEM_MESSAGE="Summarize the following web page article and ignore website header at the start and look for the main article."
 	;;
     scuttle)
-	SYSTEM_MESSAGE='Give title, brief summary as bullet points, and tags of the retrieved web page and convert your output to a URL in the following format using `+` for space: `<https://scuttle.klotz.me/bookmarks/klotz?action=add&address=URL&title=TITLE+WORDS+&description=SUMMARY+TEXT&tags=tag1,tag+two,tag3>`'
+	SYSTEM_MESSAGE='Give title, brief summary as bullet points, and tags of the retrieved web page and convert your output to a URL in the following format, using `+` for space: `<https://scuttle.klotz.me/bookmarks/klotz?action=add&address=LINK&title=TITLE+WORDS+&description=SUMMARY+TEXT&tags=tag1,tag+two,tag3>`'
+	#SYSTEM_MESSAGE='Output a URL in the following format, using `+` for space: `<https://scuttle.klotz.me/bookmarks/klotz?action=add&address=LINK&title=TITLE+WORDS+&description=SUMMARY+TEXT&tags=tag1,tag+two,tag3>`'
 	;;
     *)
 	echo "$binary_name: unrecognized binary name"
@@ -34,6 +35,6 @@ esac
 
 export SYSTEM_MESSAGE=$(printf "%b" "${SYSTEM_MESSAGE}")
 
-${LYNX} "${URL}" | ${SCRIPT_DIR}/llm.sh --length ${ARGS} "# Text of <${URL}>"
+${LYNX} "${LINK}" | ${SCRIPT_DIR}/llm.sh --length ${ARGS} "# Text of link <${LINK}>"
 
 # todo: need to protect ${ARGS} better
