@@ -5,34 +5,43 @@ function log_verbose {
     local message="$1"
     if [ "${VERBOSE}" != '' ];
        then
-	   printf "* %s: %s\n" "${prog}" "${message}" >> /dev/stderr
+	   printf "* %s: %s\n" "${prog}" "${message}" > /dev/stderr
+    fi
+}
+
+function log_debug {
+    local prog="$(basename "$0")"
+    local message="$1"
+    if [ "${DEBUG}" != '' ];
+       then
+	   printf "* %s: %s\n" "${prog}" "${message}" > /dev/stderr
     fi
 }
 
 function log_info {
     local prog="$(basename "$0")"
     local message="$1"
-    printf "* %s: %s\n" "${prog}" "${message}" >> /dev/stderr
+    printf "* %s: %s\n" "${prog}" "${message}" > /dev/stderr
 }
 
 function log_warn {
     local prog="$(basename "$0")"
     local code=$1
     local message="$2"
-    printf "* WARN %s (%s): %s\n" "${prog}" "${code}" "${message}" >> /dev/stderr
+    printf "* WARN %s (%s): %s\n" "${prog}" "${code}" "${message}" > /dev/stderr
 }
 
 function log_error {
     local prog="$(basename "$0")"
     local message="$1"
-    printf "* ERROR %s: %s\n" "${prog}" "${message}" >> /dev/stderr
+    printf "* ERROR %s: %s\n" "${prog}" "${message}" > /dev/stderr
 }
 
 function log_and_exit {
     local prog="$(basename "$0")"
     local code=$1
     local message="$2"
-    printf "* ERROR %s (%s): %s\n" "${prog}" "${code}" "${message}" >> /dev/stderr
+    printf "* ERROR %s (%s): %s\n" "${prog}" "${code}" "${message}" > /dev/stderr
     exit $code
 }
 
