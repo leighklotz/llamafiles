@@ -46,19 +46,19 @@
   "Writes a new buffer based on the prompt and current region, and the output of the llm-rewrite-script-path command"
   (interactive "sQuestion: \nr")
   (let ((model-type llm-default-model-type))
-    (llm-region-internal "ask" model-type (symbol-name major-mode) prompt start end llm-ask-buffer-name nil)))
+    (llm-region-internal "ask" model-type (llm-mode-text-type) prompt start end llm-ask-buffer-name nil)))
 
 (defun llm-summarize-buffer (user-prompt)
   "Creates a new buffer containing a summary of the current buffer, with a user prompt."
   (interactive "sSummarize Buffer Prompt: \n")
-  (llm-region-internal "summarize" llm-default-model-type (symbol-name major-mode) user-prompt (point-min) (point-max) llm-summary-buffer-name nil))
+  (llm-region-internal "summarize" llm-default-model-type (llm-mode-text-type) user-prompt (point-min) (point-max) llm-summary-buffer-name nil))
 
 (defun llm-insert (prompt start end)
   "Insert inferred text based on the prompt and current region in the current buffer."
   (interactive "sPrompt: \nr")
   (let ((model-type llm-default-model-type)
 	(llm-write-buffer-name  t))	;insert into current buffer
-    (llm-region-internal "write" model-type (symbol-name major-mode) prompt start end llm-write-buffer-name nil)))
+    (llm-region-internal "write" model-type (llm-mode-text-type) prompt start end llm-write-buffer-name nil)))
 
 (defun llm-complete (start end)
   "Insert some inferred text based on current region to point in the current buffer. "
@@ -72,17 +72,17 @@
   "Writes a new buffer based on the prompt and current region, and the output of the llm-rewrite-script-path command"
   (interactive "sPrompt: \nr")
   (let ((model-type llm-default-model-type))
-    (llm-region-internal "write" model-type (symbol-name major-mode) prompt start end llm-write-buffer-name nil)))
+    (llm-region-internal "write" model-type (llm-mode-text-type) prompt start end llm-write-buffer-name nil)))
 
 (defun llm-rewrite (user-prompt start end)
   "Rewrites the current region with the output of the llm-rewrite-script-path command based on the prompt and current region"
   (interactive "sRewrite Prompt: \nr")
-  (llm-region-internal "rewrite" llm-default-model-type (symbol-name major-mode) user-prompt start end nil t))
+  (llm-region-internal "rewrite" llm-default-model-type (llm-mode-text-type) user-prompt start end nil t))
 
 (defun llm-todo (user-prompt start end)
   "Rewrites the current region to process 'todo' items with the output of the llm-rewrite-script-path command based on the prompt and current region"
   (interactive "sRewrite Prompt: \nr")
-  (llm-region-internal "todo" llm-default-model-type (symbol-name major-mode) user-prompt start end nil t))
+  (llm-region-internal "todo" llm-default-model-type (llm-mode-text-type) user-prompt start end nil t))
 
 ;;; Interface to rewrite.sh
 (defun llm-region-internal (use-case model-type major-mode-name user-prompt start end output-buffer-name replace-p)
@@ -122,6 +122,9 @@ See [shell-command-on-region] for interpretation of output-buffer-name."
       (shell-command-on-region start end command nil t llm-error-buffer-name display-error-buffer region-noncontiguous-p)
       (goto-char start)
       (insert old-text))))
+
+(defun llm-mode-text-type ()
+  (symbol-name major-mode))
 
 ;;;
 ;;; my keybindings, should move out

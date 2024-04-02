@@ -20,31 +20,31 @@ case "$USE_CASE" in
     rewrite)
 	# args: major_mode prompt*
 	MAJOR_MODE=$1; shift; PROMPT="${*}"
-	printf -v SYSTEM_MESSAGE "Re-write the following text from a major-mode=%s buffer according to user instructions:\n" "${MAJOR_MODE}"
+	printf -v SYSTEM_MESSAGE "Re-write the following %s according to user instructions:\n" "${MAJOR_MODE}"
 	;;
     
     todo)
 	# args: major_mode prompt*
 	MAJOR_MODE=$1; shift; PROMPT="${*}"
-	printf -v SYSTEM_MESSAGE "Re-write the following text from a major-mode=%s buffer to address the 'todo' items, following user instructions:\n" "${MAJOR_MODE}"
+	printf -v SYSTEM_MESSAGE "Re-write the following %s to address the 'todo' items, following user instructions:\n" "${MAJOR_MODE}"
 	;;
     
     ask)
 	# args: major_mode prompt*
 	MAJOR_MODE=$1; shift; PROMPT="${*}"
-	printf -v SYSTEM_MESSAGE "Answer the user question about this the following text from a major-mode=%s buffer:\n" "${MAJOR_MODE}"
+	printf -v SYSTEM_MESSAGE "Answer the user question about this the following %s:\n" "${MAJOR_MODE}"
 	;;
 
     write)
 	# args: major_mode prompt*
 	MAJOR_MODE=$1; shift; PROMPT="${*}"
-	printf -v SYSTEM_MESSAGE "Write a response according to user instructions and the following text from a major-mode=%s buffer:\n" "${MAJOR_MODE}"
+	printf -v SYSTEM_MESSAGE "Write a response according to user instructions and the following %s:\n" "${MAJOR_MODE}"
 	;;
 
     summarize)
 	# args: major_mode prompt*
 	MAJOR_MODE=$1; shift; PROMPT="${*}"
-	printf -v SYSTEM_MESSAGE "Summarize the following text from a major-mode=%s buffer:" "${MAJOR_MODE}"
+	printf -v SYSTEM_MESSAGE "Summarize the following %s:" "${MAJOR_MODE}"
 	;;
 
     complete)
@@ -59,7 +59,7 @@ case "$USE_CASE" in
     *)
 	# args: major_mode prompt*
 	MAJOR_MODE=$1; shift; PROMPT="${*}"
-	printf -v SYSTEM_MESSAGE "Read this following text from a major-mode=%s buffer and respond to this request:" "${MAJOR_MODE}"
+	printf -v SYSTEM_MESSAGE "Read this following %s and respond to this request:" "${MAJOR_MODE}"
 	;;
 esac
 
