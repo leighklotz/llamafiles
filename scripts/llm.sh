@@ -277,7 +277,10 @@ function set_verbose_debug {
     # Set verbose and debug last
     if [ "${DEBUG}" ] || [ "${VERBOSE}" ];
     then
-	printf '* Parameters: ngl=%s context_length=%s est_len=%s:\n' "${NGL}" "${CONTEXT_LENGTH}" "${PROMPT_LENGTH_EST}"
+	log_info 'Parameters: ngl=%s context_length=%s est_len=%s:\n' "${NGL}" "${CONTEXT_LENGTH}" "${PROMPT_LENGTH_EST}"
+    fi
+    if [ "${DEBUG}" ];
+    then
 	set -x
     fi
 }
