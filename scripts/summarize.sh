@@ -24,11 +24,11 @@ fi
 binary_name="$(basename "${0}")"
 case "${binary_name%.*}" in
     summarize)
-	SYSTEM_MESSAGE="Summarize the following web page article and ignore website header at the start and look for the main article."
+	SYSTEM_MESSAGE='Summarize the following web page article and ignore website header at the start and look for the main article.'
 	post_process=summarize
 	;;
     scuttle)
-	SYSTEM_MESSAGE="Summarize the following web page article at the specified link address address and give link, title, description, and tags as JSON."
+	SYSTEM_MESSAGE='Summarize the following web page article at the specified link address address and give link, title, description, and keywords as JSON with keys `link`, `title`, `description`, and `keywords`.`'
 	post_process=scuttle
 	;;
     *)
@@ -44,7 +44,7 @@ function post_process {
 	;;
 	scuttle)
 	    # <https://scuttle.klotz.me/bookmarks/klotz?action=add&address=https://example.com&title=Example+Website+&description=This+is+an+example+website&tags=example,website,canonical+page>
-	    jq --arg xspace "%20" --arg plus "+" --arg xcomma "%2[cC]" --arg comma "," -r '.tags |= join(",") | "https://scuttle.klotz.me/bookmarks/klotz?action=add&address=\(.link|@uri|gsub($xspace; $plus)|gsub($xcomma; $comma))&description=\(.description|@uri|gsub($xspace; $plus)|gsub($xcomma; $comma))&title=\(.title|@uri|gsub($xspace; $plus)|gsub($xcomma; $comma))&tags=\(.tags|@uri|gsub($xspace; $plus)|gsub($xcomma; $comma))"'
+	    jq --arg xspace "%20" --arg plus "+" --arg xcomma "%2[cC]" --arg comma "," -r '.keywords |= join(",") | "https://scuttle.klotz.me/bookmarks/klotz?action=add&address=\(.link|@uri|gsub($xspace; $plus)|gsub($xcomma; $comma))&description=\(.description|@uri|gsub($xspace; $plus)|gsub($xcomma; $comma))&title=\(.title|@uri|gsub($xspace; $plus)|gsub($xcomma; $comma))&tags=\(.keywords|@uri|gsub($xspace; $plus)|gsub($xcomma; $comma))"'
 	;;
 	*)
 	    echo "* $0: unknown post_process" >> /dev/stderr
@@ -52,6 +52,6 @@ function post_process {
     esac
 }
 
-${LYNX} "${LINK}" | ${SCRIPT_DIR}/llm.sh --length ${ARGS} "# Text of link <${LINK}>" | post_process
+${LYNX} "${LINK}" | ${SCRIPT_DIR}/llm.sh --length ${ARGS} "# Text of link ${LINK}" | post_process
 
 # todo: need to protect ${ARGS} better
