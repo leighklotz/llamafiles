@@ -46,16 +46,16 @@ FUNCTIONS_PATH="$(realpath "${MODELS_DIRECTORY}/functions.sh")"
 if [[ -f "${FUNCTIONS_PATH}" ]]; then
     source "${FUNCTIONS_PATH}"
 else
-    echo "* ERROR: Cannot find functions: ${FUNCTIONS_PATH}"
+    echo "* ERROR: Cannot find functions: ${FUNCTIONS_PATH}" > /dev/stderr
     exit 3
 fi
 
 function set_threads() {
     # Get thread count
-    if [ "${THREADS}" == "" ];
+    if [ -z "${THREADS}" ];
     then
 	THREADS=$( ( [ -f /proc/cpuinfo ] && grep '^cpu cores\s*:' /proc/cpuinfo | head -1 | awk '{print $4}' ))
-	if [ "${THREADS}" == "" ];
+	if [ -z "${THREADS}" ];
 	then
             THREADS=$(sysctl -n hw.ncpu 2>/dev/null || echo "${NUMBER_OF_PROCESSORS:-4}")
 	fi
@@ -124,13 +124,13 @@ function process_question_escapes() {
     # Process escape sequences in QUESTION if requested.
     # STDIN never processes escapes.
     if [ "${PROCESS_QUESTION_ESCAPES}" ]; then
-	[ $VERBOSE ] && echo "* Processing escape sequences in QUESTION"
+	log_verbose "Processing escape sequences in QUESTION"
 	printf -v QUESTION "%b" "$QUESTION"
     fi
 }
 
 function do_stdin() {
-    if [ "$DO_STDIN" != "" ];
+    if [ -n "$DO_STDIN" ];
     then
 	if [ -t 0 ];
 	then
@@ -143,7 +143,7 @@ function do_stdin() {
 function gpu_check {
     local layer_per_gb=("$@")
 
-    if [ "${layer_per_gb}" == "" ];
+    if [ -z "${layer_per_gb}" ];
     then
         layer_per_gb=1
     fi
@@ -151,7 +151,7 @@ function gpu_check {
     then
         if [ "${DEBUG}" ];
         then
-            echo "* NO GPU"
+            log_debug "NO GPU"
         fi
         FREE_VRAM_GB=0
         MAX_NGL_EST=0
@@ -173,23 +173,22 @@ function gpu_check {
 
     if [ "${DEBUG}" ];
     then
-        echo "* FREE_VRAM_GB=${FREE_VRAM_GB} MAX_NGL_EST=${MAX_NGL_EST} GPU=${GPU}"
+        log_debug "FREE_VRAM_GB=${FREE_VRAM_GB} MAX_NGL_EST=${MAX_NGL_EST} GPU=${GPU}"
     fi
 }
 
 function cap_ngl {
-    if [ "$GPU" != "none" ] && [ "$GPU" != "" ] && [ "${NGL}" != "" ] && [ "${NGL}" -gt "${MAX_NGL_EST}" ];
+    if [ "$GPU" != "none" ] && [ -n "$GPU" ] && [ -n "${NGL}" ] && [ "${NGL}" -gt "${MAX_NGL_EST}" ];
     then
-        [ $VERBOSE ] && echo "* Capping $NGL at $MAX_NGL_EST"
+        log_verbose "* Capping $NGL at $MAX_NGL_EST"
         NGL=$MAX_NGL_EST
     fi
 }
 
 function load_model {
-    if [ "${MODEL_TYPE}" == "" ];
+    if [ -z "${MODEL_TYPE}" ];
     then
-	echo "Model not found: ${MODEL_TYPE}" >> /dev/stderr
-	exit 3
+	log_error_and_exit 3 "Model not found: ${MODEL_TYPE}"
     fi
 
     # Construct the path to the functions file
@@ -199,8 +198,7 @@ function load_model {
     if [[ -f "${MODEL_FUNCTIONS_PATH}" ]]; then
 	source "${MODEL_FUNCTIONS_PATH}"
     else
-	echo "* ERROR: Cannot find model functions for ${MODEL_TYPE}: ${MODEL_FUNCTIONS_PATH}"
-	exit 1
+	log_error_and_exit 1 "Cannot find model functions for ${MODEL_TYPE}: ${MODEL_FUNCTIONS_PATH}"
     fi
 
 }
@@ -226,7 +224,7 @@ function prepare_model {
     esac
 
     # if --raw-input is specified, use stdin as the only text to send to the model
-    if [ "${RAW_FLAG}" != "" ]; then
+    if [ -n "${RAW_FLAG}" ]; then
 	PROMPT="${INPUT}"
 	SYSTEM_MESSAGE=""
     fi
@@ -244,14 +242,13 @@ function check_context_length {
 
     if [ "${PROMPT_LENGTH_EST}" -gt "${CONTEXT_LENGTH}" ];
     then
-	echo "* ERROR: Prompt len ${PROMPT_LENGTH_EST} estimated not to fit in context ${CONTEXT_LENGTH}"
-	exit 2
+	log_error_and_exit 2 "* ERROR: Prompt len ${PROMPT_LENGTH_EST} estimated not to fit in context ${CONTEXT_LENGTH}"
     fi
 
     if [ "$CONTEXT_LENGTH" -gt "$MAX_CONTEXT_LENGTH" ];
     then
 	CONTEXT_LENGTH="$MAX_CONTEXT_LENGTH"
-	echo "* Truncated context length to $CONTEXT_LENGTH"
+	log_warn "Truncated context length to $CONTEXT_LENGTH"
     fi
 
     #BATCH_SIZE=${BATCH_SIZE:-$(($CONTEXT_LENGTH / 2))}
@@ -308,9 +305,9 @@ function report_success_or_fail {
     then
 	if [ "${ERROR_OUTPUT}" == "/dev/null" ];
 	then
-	    echo "* FAIL STATUS=$status: re-run with --debug" > /dev/stderr
+	    log_error "FAIL STATUS=$status: re-run with --debug"
 	else
-	    echo "* FAIL STATUS=$status: errors went to ${ERROR_OUTPUT}" > /dev/stderr
+	    log_error "FAIL STATUS=$status: errors went to ${ERROR_OUTPUT}" > /dev/stderr
 	fi
     fi
     return $STATUS
@@ -327,7 +324,7 @@ function handle_temp_files {
 	    ERROR|ERRORS)
 		if [ $status -ne 0 ];
 		then
-		    echo "* PROMPT=${PROMPT_TEMP_FILE}" > /dev/stderr
+		    log_error "PROMPT=${PROMPT_TEMP_FILE}"
 		else
 		    rm "${PROMPT_TEMP_FILE}"
 		fi
@@ -337,7 +334,7 @@ function handle_temp_files {
 		;;
 	esac
     else
-	if [ "$KEEP_PROMPT_TEMP_FILE" == "" ] && [ -f "${PROMPT_TEMP_FILE}" ]; 
+	if [ -z "$KEEP_PROMPT_TEMP_FILE" ] && [ -f "${PROMPT_TEMP_FILE}" ]; 
 	then
 	    rm "${PROMPT_TEMP_FILE}"
 	fi
@@ -363,13 +360,18 @@ then
     # fixme: accept these
     repeat_penalty="1"
     penalize_nl="false"
-    via_api_perform_inference "instruct" "${SYSTEM_MESSAGE}" "${PROMPT}" "${GRAMMAR_FILE}" "${TEMPERATURE}" "${repeat_penalty}" "${penalize_nl}"
-    # fixme: add these parameters if they make sense
-    # ${N_PREDICT} ${BATCH_SIZE} ${LLM_ADDITIONAL_ARGS}
+    model_mode="instruct"
+    # set -x
+    via_api_perform_inference "${model_mode}" "${SYSTEM_MESSAGE}" "${PROMPT}" "${GRAMMAR_FILE}" "${TEMPERATURE}" "${repeat_penalty}" "${penalize_nl}"
+    STATUS=$?
+    # fixme: these parameters are set in model loading and cannot be accomodated here
+    # ${N_PREDICT} ${BATCH_SIZE}
+    # fixme: what do do about this parameter for API-bound fields?
+    # ${LLM_ADDITIONAL_ARGS}
 else
     cli_perform_inference
+    STATUS=$?
 fi
-STATUS=$?
 report_success_or_fail $STATUS
 handle_temp_files $STATUS
 exit $STATUS
