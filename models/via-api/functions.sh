@@ -156,5 +156,5 @@ function get_model_name {
 }
 
 function list_models {
-    curl --s "${VIA_API_MODEL_LIST_ENDPOINT}" | jq -r '.model_names[]'
+    curl -s "${VIA_API_MODEL_LIST_ENDPOINT}" | jq -r '.model_names[]'
 }
