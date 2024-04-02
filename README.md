@@ -275,6 +275,9 @@ You will need to do this on MacOS:
 - https://justine.lol/oneliners/
 
 ## Similar packages
+Many of these are better than this package. Please try them out.
+
+- https://github.com/simonw/llm-cmd
 - https://github.com/rendezqueue/rendezllama
 - https://llm.datasette.io/
 - https://github.com/jart
