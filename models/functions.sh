@@ -56,15 +56,15 @@ function find_first_model() {
   local files=("$@")
   local file
   for file in "${files[@]}"; do
-    log_verbose "* Checking Model $file"
+    log_verbose "Checking Model $file"
     if [ -f "$file" ] && ( [ -x "$file" ] || [ "${file##*.}" == "gguf" ] );
     then
-      log_verbose "* Accepting Model $file"
+      log_verbose "Accepting Model $file"
       echo "${file}"
       return 0
     fi
   done
-  log_error "* Cannot find executable model in $@"
+  log_error "Cannot find executable model in $@"
   return 1
 }
 
