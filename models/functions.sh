@@ -1,9 +1,29 @@
 #!/bin/bash
 
+function log_info {
+    local prog="$(basename "$0")"
+    local message="$1"
+    printf "* %s: %s\n" "${prog}" "${message}" >> /dev/stderr
+}
+
+function log_warn {
+    local prog="$(basename "$0")"
+    local code=$1
+    local message="$2"
+    printf "* WARN %s (%s): %s\n" "${prog}" "${code}" "${message}" >> /dev/stderr
+}
+
+function log_and_exit {
+    local prog="$(basename "$0")"
+    local code=$1
+    local message="$2"
+    printf "* ERROR %s (%s): %s\n" "${prog}" "${code}" "${message}" >> /dev/stderr
+    exit $code
+}
+
 # Check if the script is being sourced or directly executed
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-    echo "This script '${BASH_SOURCE[0]}' is intended to be sourced, not executed directly."
-    exit 1
+    log_and_exit 1 "This script is intended to be sourced, not executed directly."
 fi
 
 # Find the first existing executable or GGUF in the list.

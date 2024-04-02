@@ -125,9 +125,8 @@ function via_api_perform_inference() {
 	      --rawfile question "${question_file}" \
 	      --rawfile grammar_string "${grammar_file}" \
 	      "${TEMPLATE}" \
-	| jq 'del(.[] | select(. == ""))' \
-	) || (s=$?; echo "* $0 FAIL: $s"; exit $s)
-
+	| jq 'del(.[] | select(. == ""))' || (log_and_exit $? "jq parsing failed") \
+	)
     #set -x
     if [ "${VERBOSE}" ]; then
 	echo "USE_SYSTEM_ROLE='$USE_SYSTEM_ROLE'"
@@ -135,16 +134,21 @@ function via_api_perform_inference() {
     fi
 
     # Invoke the HTTP API endpoint via
-    result=$(printf "%s" "${data}" | curl -s "${VIA_API_CHAT_COMPLETIONS_ENDPOINT}" -H 'Content-Type: application/json' -d @-)
-    output="$(printf "%s" "${result}" | jq --raw-output '.choices[].message.content')"
-
+    result=$(printf "%s" "${data}" | curl -s "${VIA_API_CHAT_COMPLETIONS_ENDPOINT}" -H 'Content-Type: application/json' -d @- || log_and_exit $? "via-api cannot curl")
+    output="$(printf "%s" "${result}" | jq --raw-output '.choices[].message.content' || log_and_exit $? "via-api cannot parse output")"
     rm -f "${question_file}" || echo "* WARN: unable to remove ${question_file}" >> /dev/stderr
-    rm -f "${system_message_file}" || echo "* WARN: unable to remove ${system_message_file}" >> /dev/stderr
+    rm -f "${system_message_file}" || log_warn $? "* WARN: unable to remove ${system_message_file}"
 
     printf "%s\n" "${output}" | via_api_mistral_output_fixup
+
 }
 
 function via_api_model {
+    model_name="$(get_model_name)"
+    if [ "$model_name" == "None" ];
+    then
+	log_and_exit 2 "No model loaded via-api"
+    fi
     via_api_prompt
 }
 
