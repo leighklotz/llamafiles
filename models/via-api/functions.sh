@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 
 VIA_API_CHAT_COMPLETIONS_ENDPOINT='http://localhost:5000/v1/chat/completions'
 VIA_API_MODEL_INFO_ENDPOINT='http://localhost:5000/v1/internal/model/info'
@@ -96,7 +96,7 @@ function via_api_perform_inference() {
 
     # fixme: not all models support the system role in the API, and there's no way to tell afaik
     # workaround: if $USE_SYSTEM_ROLE is non-empty, prepend system_message to question
-    if [ "${USE_SYSTEM_ROLE}" == "" ];
+    if [ -z "${USE_SYSTEM_ROLE}" ];
     then
 	TEMPLATE="${NO_SYSTEM_ROLE_TEMPLATE}"
 	question=$(printf "%s\n%s" "${system_message}" "${question}")
