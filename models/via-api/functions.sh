@@ -3,6 +3,7 @@
 VIA_API_CHAT_COMPLETIONS_ENDPOINT='http://localhost:5000/v1/chat/completions'
 VIA_API_MODEL_INFO_ENDPOINT='http://localhost:5000/v1/internal/model/info'
 VIA_API_MODEL_LIST_ENDPOINT='http://localhost:5000/v1/internal/model/list'
+VIA_API_LOAD_MODEL_ENDPOINT='http://localhost:5000/v1/internal/model/load'
 
 # Check if the script is being sourced or directly executed
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
@@ -134,13 +135,22 @@ function via_api_perform_inference() {
     fi
 
     # Invoke the HTTP API endpoint via
-    result=$(printf "%s" "${data}" | curl -s "${VIA_API_CHAT_COMPLETIONS_ENDPOINT}" -H 'Content-Type: application/json' -d @- || log_and_exit $? "via-api cannot curl")
-    output="$(printf "%s" "${result}" | jq --raw-output '.choices[].message.content' || log_and_exit $? "via-api cannot parse output")"
+    result=$(printf "%s" "${data}" | curl -s "${VIA_API_CHAT_COMPLETIONS_ENDPOINT}" -H 'Content-Type: application/json' -d @-)
+    s=$?
+    if [ "$s" != 0 ];
+    then
+	log_warn $s "via-api perform inference cannot curl"
+    fi
+    output="$(printf "%s" "${result}" | jq --raw-output '.choices[].message.content')"
+    s=$?
+    if [ "$s" != 0 ];
+    then
+	log_warn $s "via-api perform inference cannot parse output"
+    fi
     rm -f "${question_file}" || echo "* WARN: unable to remove ${question_file}" >> /dev/stderr
     rm -f "${system_message_file}" || log_warn $? "* WARN: unable to remove ${system_message_file}"
-
     printf "%s\n" "${output}" | via_api_mistral_output_fixup
-
+    return $s
 }
 
 function via_api_model {
@@ -161,4 +171,11 @@ function get_model_name {
 
 function list_models {
     curl -s "${VIA_API_MODEL_LIST_ENDPOINT}" | jq -r '.model_names[]'
+}
+
+function load_model {
+    local model_path="$1"
+    printf -v data '{ "model_name": "%s", "settings": {}, "args": {} }' "${model_path}"
+    result=$(printf "%s" "${data}" | curl -s "${VIA_API_LOAD_MODEL_ENDPOINT}" -H 'Content-Type: application/json' -d @- || log_and_exit $? "via-api load_model cannot curl: ${RESULT}")
+    printf "%s\n" "$result"
 }

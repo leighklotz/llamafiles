@@ -5,7 +5,7 @@ SCRIPT_DIR=$(dirname $(realpath "${BASH_SOURCE}"))
 MODEL_TYPE="${MODEL_TYPE:-via-api}"
 
 function usage {
-    echo "usage: $0 [--get-model-name] [--list-models]"
+    echo "usage: $0 [--get-model-name] [--list-models] [--load-model model-name]"
     echo "       $1"
     exit 1
 }
@@ -41,10 +41,13 @@ function setup {
 
 # fixme: better arg handling
 function main {
-    local flag="$1"
+    local flag="$1"; shift
     case "$flag" in
 	--get-model-name)
 	    get_model_name
+	    ;;
+	--load-model)
+	    load_model "$1"
 	    ;;
 	--list-models)
 	    list_models

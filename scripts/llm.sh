@@ -40,6 +40,16 @@ DO_STDIN="$(test -t 0 || echo $?)"
 KEEP_PROMPT_TEMP_FILE="${KEEP_PROMPT_TEMP_FILE:-ALL}" # "NONE"|"ERROR"|"ALL"
 PROMPT_TEMP_FILE="/tmp/prompt.$$"
 
+# Load functions
+MODELS_DIRECTORY="$(realpath "${SCRIPT_DIR}/../models")"
+FUNCTIONS_PATH="$(realpath "${MODELS_DIRECTORY}/functions.sh")"
+if [[ -f "${FUNCTIONS_PATH}" ]]; then
+    source "${FUNCTIONS_PATH}"
+else
+    echo "* ERROR: Cannot find functions: ${FUNCTIONS_PATH}"
+    exit 3
+fi
+
 function set_threads() {
     # Get thread count
     if [ "${THREADS}" == "" ];
@@ -95,8 +105,7 @@ function parse_args() {
                     break
                     ;;
 		-*)
-                    echo "Unrecognized option: $1" >> /dev/stderr
-                    exit 1
+                    log_and_exit 1 "Unrecognized option: $1"
                     ;;
 		*)
                     # consumes rest of line
@@ -184,17 +193,7 @@ function load_model {
     fi
 
     # Construct the path to the functions file
-    MODELS_DIRECTORY="$(realpath "${SCRIPT_DIR}/../models")"
-    FUNCTIONS_PATH="$(realpath "${MODELS_DIRECTORY}/functions.sh")"
     MODEL_FUNCTIONS_PATH="$(realpath "${MODELS_DIRECTORY}/${MODEL_TYPE}/functions.sh")"
-
-    # Check if the functions file exists
-    if [[ -f "${FUNCTIONS_PATH}" ]]; then
-	source "${FUNCTIONS_PATH}"
-    else
-	echo "* ERROR: Cannot find functions: ${FUNCTIONS_PATH}"
-	exit 3
-    fi
 
     # Check if the model functions file exists
     if [[ -f "${MODEL_FUNCTIONS_PATH}" ]]; then

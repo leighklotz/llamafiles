@@ -1,5 +1,14 @@
 #!/bin/bash
 
+function log_verbose {
+    local prog="$(basename "$0")"
+    local message="$1"
+    if [ "${VERBOSE}" != '' ];
+       then
+	   printf "* %s: %s\n" "${prog}" "${message}" >> /dev/stderr
+    fi
+}
+
 function log_info {
     local prog="$(basename "$0")"
     local message="$1"
@@ -11,6 +20,12 @@ function log_warn {
     local code=$1
     local message="$2"
     printf "* WARN %s (%s): %s\n" "${prog}" "${code}" "${message}" >> /dev/stderr
+}
+
+function log_error {
+    local prog="$(basename "$0")"
+    local message="$1"
+    printf "* ERROR %s: %s\n" "${prog}" "${message}" >> /dev/stderr
 }
 
 function log_and_exit {
@@ -32,15 +47,15 @@ function find_first_model() {
   local files=("$@")
   local file
   for file in "${files[@]}"; do
-    [ $VERBOSE ] && echo "* Checking Model $file" >> /dev/stderr
+    log_verbose "* Checking Model $file"
     if [ -f "$file" ] && ( [ -x "$file" ] || [ "${file##*.}" == "gguf" ] );
     then
-      [ $VERBOSE ] && echo "* Accepting Model $file" >> /dev/stderr
+      log_verbose "* Accepting Model $file"
       echo "${file}"
       return 0
     fi
   done
-  echo "* Cannot find executable model in $@" >> /dev/stderr
+  log_error "* Cannot find executable model in $@"
   return 1
 }
 
