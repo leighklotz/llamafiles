@@ -4,6 +4,7 @@ VIA_API_CHAT_COMPLETIONS_ENDPOINT='http://localhost:5000/v1/chat/completions'
 VIA_API_MODEL_INFO_ENDPOINT='http://localhost:5000/v1/internal/model/info'
 VIA_API_MODEL_LIST_ENDPOINT='http://localhost:5000/v1/internal/model/list'
 VIA_API_LOAD_MODEL_ENDPOINT='http://localhost:5000/v1/internal/model/load'
+VIA_API_UNLOAD_MODEL_ENDPOINT='http://localhost:5000/v1/internal/model/unload'
 
 # Check if the script is being sourced or directly executed
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
@@ -176,6 +177,11 @@ function list_models {
 function load_model {
     local model_path="$1"
     printf -v data '{ "model_name": "%s", "settings": {}, "args": {} }' "${model_path}"
-    result=$(printf "%s" "${data}" | curl -s "${VIA_API_LOAD_MODEL_ENDPOINT}" -H 'Content-Type: application/json' -d @- || log_and_exit $? "via-api load_model cannot curl: ${RESULT}")
+    result=$(printf "%s" "${data}" | curl -s "${VIA_API_LOAD_MODEL_ENDPOINT}" -H 'Content-Type: application/json' -d @- || log_and_exit $? "via-api load_model cannot curl")
+    printf "%s\n" "$result"
+}
+
+function unload_model {
+    result=$(printf "%s" "${data}" | curl -s "${VIA_API_UNLOAD_MODEL_ENDPOINT}" -d '' || log_and_exit $? "via-api unload_model cannot curl")
     printf "%s\n" "$result"
 }
