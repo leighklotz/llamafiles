@@ -1,10 +1,11 @@
 #!/bin/bash
 
-VIA_API_CHAT_COMPLETIONS_ENDPOINT='http://localhost:5000/v1/chat/completions'
-VIA_API_MODEL_INFO_ENDPOINT='http://localhost:5000/v1/internal/model/info'
-VIA_API_MODEL_LIST_ENDPOINT='http://localhost:5000/v1/internal/model/list'
-VIA_API_LOAD_MODEL_ENDPOINT='http://localhost:5000/v1/internal/model/load'
-VIA_API_UNLOAD_MODEL_ENDPOINT='http://localhost:5000/v1/internal/model/unload'
+VIA_API_CHAT_BASE="${VIA_API_CHAT_BASE:-http://localhost:5000}"
+VIA_API_CHAT_COMPLETIONS_ENDPOINT="${VIA_API_CHAT_BASE}/v1/chat/completions"
+VIA_API_MODEL_INFO_ENDPOINT="${VIA_API_CHAT_BASE}/v1/internal/model/info"
+VIA_API_MODEL_LIST_ENDPOINT="${VIA_API_CHAT_BASE}/v1/internal/model/list"
+VIA_API_LOAD_MODEL_ENDPOINT="${VIA_API_CHAT_BASE}/v1/internal/model/load"
+VIA_API_UNLOAD_MODEL_ENDPOINT="${VIA_API_CHAT_BASE}/v1/internal/model/unload"
 
 # Check if the script is being sourced or directly executed
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
