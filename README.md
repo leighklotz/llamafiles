@@ -253,6 +253,14 @@ In addition to these command line flags, the script also checks for several envi
 
 See [env.sh.example](env.sh.example).
 
+## Open API Usage
+You can skip using a local `GGUF` or `llamafile` executable and use an Open API compatible LLM server.
+
+Do this by setting `MODEL_TYPE` environment variable or CLI flag `--model-type` to `'via-api'`.  If the server is not local, set the environment variable `VIA_API_CHAT_BASE`, which defaults to `http://localhost:5000`.
+
+## Text Generation WebUI API Server
+You can run an Open API HTTP server on port 5000 with text-generation-webui (see #References). Additionally, the [scripts/via-api.sh](via-api.sh) CLI tool provides access to server-specific commands such as model loading and unloading.
+
 ## Program Flow
 1. If there are any arguments, `--` or any non-hyphen word, terminate the arguments and start the question. 
 1. If there are no hyphens to start, assume the whole arguments is a question.
@@ -283,7 +291,10 @@ Many of these are better than this package. Please try them out.
 - https://github.com/llimllib/gpt-bash-cli
 - https://github.com/yusufcanb/tlm
 
+## Compatible Tools
+- https://github.com/oobabooga/text-generation-webui
+
 # TODO
 - prompt caching
 - quoting safety
-- OpenAI API, oobabooga/text-generation-webui API, etc
+
