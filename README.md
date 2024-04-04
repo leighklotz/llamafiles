@@ -274,7 +274,10 @@ You can run an Open API HTTP server on port 5000 with text-generation-webui (see
 
 # Mac Specifics
 You will need to do this on MacOS:
-- `xattr -dr com.apple.quarantine models/*/*.llamafile lib/*`
+```
+$ cd ~/wip/llamafiles
+$ xattr -dr com.apple.quarantine models/*.llamafile models/*/*.llamafile lib/*
+``
 
 # References
 ## Used directly

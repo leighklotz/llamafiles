@@ -28,8 +28,9 @@
 # TODO:
 # - Use remote or local model transparently
 
-LLAVA_MODEL=~klotz/wip/llamafiles/llava-v1.5-7b-q4-main.llamafile
-# MISTRAL_MODEL=~klotz/wip/llamafiles/mistral-7b-instruct-v0.2.Q5_K_M.llamafile
+LLAVA_MODEL=~klotz/wip/llamafiles/models/llava-v1.5-7b-q4.llamafile
+MMPROJ=~klotz/wip/llamafiles/models/llava-v1.5-7b-mmproj-Q4_0.gguf
+# MISTRAL_MODEL=~klotz/wip/llamafiles/models/mistral/mistral-7b-instruct-v0.2.Q5_K_M.llamafile
 NGL=35
 
 abort() {
@@ -68,6 +69,8 @@ isgood() {
 
 pickname() {
   "$LLAVA" \
+      --mmproj "$MMPROJ" \
+      --cli \
       --image "$1" --temp 0.3 -ngl $NGL \
       --grammar 'root ::= [a-zA-Z]+ (" " [a-zA-Z]+)+' -n 10 \
       -p '### User: A good title for this image is...
@@ -131,12 +134,12 @@ for arg; do
         if newname=$(pickname "$png"); then
           rm -f "$png"
         else
-          printf '%s\n' "$path: warning: llava llm failed" >&2
+          printf '# %s\n' "$path: warning: llava llm failed" >&2
           rm -f "$png"
           continue
         fi
       else
-        printf '%s\n' "skipping $path (not an image)" >&2
+        printf '# %s\n' "skipping $path (not an image)" >&2
         continue
       fi
     fi
@@ -169,11 +172,7 @@ for arg; do
     fi
 
     # rename the file
-    printf 'mv %q %q\n' "$path" "$newname"
-#    if ! mv -n "$path" "$newname"; then
-#      printf "fatal error: failed to rename file %q:\n' "$newname" >&2
-#      abort
-#    fi
+    printf 'mv "%s" "%s"\n' "$path" "$newname"
   done
 done
 IFS=$OIFS
