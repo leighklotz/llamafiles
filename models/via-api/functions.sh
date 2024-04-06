@@ -124,7 +124,7 @@ function via_api_perform_inference() {
 
     data=$(jq --raw-input --raw-output  --compact-output -n \
 	      --arg mode "${mode}" \
-	      --arg temperature "${temperature}" \
+	      --argjson temperature "${temperature}" \
 	      --argjson repetition_penalty "${repetition_penalty}" \
 	      --argjson penalize_nl "${penalize_nl}" \
 	      --arg preset "${preset}" \
