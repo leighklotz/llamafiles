@@ -125,16 +125,17 @@ function via_api_perform_inference() {
     data=$(jq --raw-input --raw-output  --compact-output -n \
 	      --arg mode "${mode}" \
 	      --arg temperature "${temperature}" \
-	      --arg repetition_penalty "${repetition_penalty}" \
-	      --arg penalize_nl "${penalize_nl}" \
+	      --argjson repetition_penalty "${repetition_penalty}" \
+	      --argjson penalize_nl "${penalize_nl}" \
 	      --arg preset "${preset}" \
-	      --arg seed "${SEED}" \
+	      --argjson seed "${SEED}" \
 	      --rawfile system_message "${system_message_file}" \
 	      --rawfile question "${question_file}" \
 	      --rawfile grammar_string "${grammar_file}" \
 	      "${TEMPLATE}" \
 	| jq 'del(.[] | select(. == ""))' || (log_and_exit $? "jq parsing failed") \
 	)
+    #printf "* data=%s\n" "${data}"
     #set -x
     if [ "${VERBOSE}" ]; then
 	echo "USE_SYSTEM_ROLE='$USE_SYSTEM_ROLE'"
