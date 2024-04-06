@@ -42,10 +42,13 @@ SYSTEM_ROLE_TEMPLATE='{
       }
     ],
     mode: $mode,
+    top_p: 0.9,
+    top_k: 20,
     temperature: $temperature,
     repetition_penalty: $repetition_penalty,
     penalize_nl: $penalize_nl,
     grammar_string: $grammar_string,
+    preset: $preset,
     seed: $seed
 }'
 
@@ -61,6 +64,7 @@ NO_SYSTEM_ROLE_TEMPLATE='{
     repetition_penalty: $repetition_penalty,
     penalize_nl: $penalize_nl,
     grammar_string: $grammar_string,
+    preset: $preset,
     seed: $seed
 }'
 
@@ -89,7 +93,7 @@ function via_api_mistral_output_fixup {
 # todo: so many files and strings back and forth
 function via_api_perform_inference() {
     local mode="$1" system_message="$2" question="$3" grammar_file="$4"
-    local temperature="$5" repetition_penalty="$6" penalize_nl="$7"
+    local preset="$5" temperature="$6" repetition_penalty="$7" penalize_nl="$8"
     
     if [ "$grammar_file" == "" ];
     then
@@ -123,6 +127,7 @@ function via_api_perform_inference() {
 	      --arg temperature "${temperature}" \
 	      --arg repetition_penalty "${repetition_penalty}" \
 	      --arg penalize_nl "${penalize_nl}" \
+	      --arg preset "${preset}" \
 	      --arg seed "${SEED}" \
 	      --rawfile system_message "${system_message_file}" \
 	      --rawfile question "${question_file}" \

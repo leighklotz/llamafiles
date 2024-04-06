@@ -2,7 +2,7 @@
 
 SCRIPT_DIR=$(dirname $(realpath "${BASH_SOURCE}"))
 
-USAGE="[-m|--model-type model-type] [--stdin|--interactive|-i] [--speed | --length] [--temperature temp] [--context-length|-c n] [--ngl n] [--n-predict n] [--debug] [--verbose|-v][--] QUESTION*"
+USAGE="[-m|--model-type model-type] [--stdin|--interactive|-i] [--speed | --length] [--temperature temp] [--context-length|-c n] [--ngl n] [--n-predict n] [--debug] [--verbose|-v] [--grammar-file file.gbnf] [--preset name] [--] QUESTION*"
 
 # Use CLI flags, or environment variables below:
 MODEL_TYPE=${MODEL_TYPE:-mistral}
@@ -19,6 +19,7 @@ DEBUG="${DEBUG:-}"
 VERBOSE=${VERBOSE:-}
 LOG_DISABLE="--log-disable"
 GRAMMAR_FILE="${GRAMMAR_FILE:-}"
+PRESET="${PRESET:-}"
 BATCH_SIZE="${BATCH_SIZE:-}"
 SEED="${SEED:--1}"
 LLAMAFILE_MODEL_RUNNER="${LLAMAFILE_MODEL_RUNNER:-"$(realpath ${SCRIPT_DIR}/../lib/llamafile-0.6.2) -m"}"
@@ -88,6 +89,8 @@ function parse_args() {
                     shift; N_PREDICT="$1" ;;
 		--grammar-file)
                     shift; GRAMMAR_FILE="$1" ;;
+		--preset)
+                    shift; PRESET="$1" ;;
 		--debug)
                     ERROR_OUTPUT="/dev/stdout"; SILENT_PROMPT=""; DEBUG=1; LOG_DISABLE="" ;;
 		--noerror)
@@ -290,6 +293,7 @@ function fixup_input {
     sed -e 's/<img src="/<img  src="/g'
 }
 
+# todo: move this to a backends directory hierarchy
 function cli_perform_inference {
     # Use llamafile or similar CLI runner to perform inference
     # set -x
@@ -297,7 +301,10 @@ function cli_perform_inference {
     if [ "${GRAMMAR_FILE}" != '' ]; then
 	GRAMMAR_FILE="--grammar-file ${GRAMMAR_FILE}"
     fi
-    cat "${PROMPT_TEMP_FILE}" | fixup_input | ${MODEL_RUNNER} ${MODEL} ${CLI_MODE} ${LOG_DISABLE} ${GPU} ${NGL} ${GRAMMAR_FILE} ${TEMPERATURE} ${CONTEXT_LENGTH} ${N_PREDICT} ${BATCH_SIZE} --no-penalize-nl --repeat-penalty 1 ${THREADS} -f /dev/stdin $SILENT_PROMPT --seed "${SEED}" ${LLM_ADDITIONAL_ARGS} 2> "${ERROR_OUTPUT}"
+    if [ "${PRESET}" != '' ]; then
+	PRESET="--preset ${PRESET}"
+    fi
+    cat "${PROMPT_TEMP_FILE}" | fixup_input | ${MODEL_RUNNER} ${MODEL} ${CLI_MODE} ${LOG_DISABLE} ${GPU} ${NGL} ${GRAMMAR_FILE} ${PRESET} ${TEMPERATURE} ${CONTEXT_LENGTH} ${N_PREDICT} ${BATCH_SIZE} --no-penalize-nl --repeat-penalty 1 ${THREADS} -f /dev/stdin $SILENT_PROMPT --seed "${SEED}" ${LLM_ADDITIONAL_ARGS} 2> "${ERROR_OUTPUT}"
     return $?
 }
 
@@ -365,7 +372,7 @@ then
     penalize_nl="false"
     model_mode="instruct"
     # set -x
-    via_api_perform_inference "${model_mode}" "${SYSTEM_MESSAGE}" "${PROMPT}" "${GRAMMAR_FILE}" "${TEMPERATURE}" "${repeat_penalty}" "${penalize_nl}"
+    via_api_perform_inference "${model_mode}" "${SYSTEM_MESSAGE}" "${PROMPT}" "${GRAMMAR_FILE}" "${PRESET}" "${TEMPERATURE}" "${repeat_penalty}" "${penalize_nl}"
     STATUS=$?
     # fixme: these parameters are set in model loading and cannot be accomodated here
     # ${N_PREDICT} ${BATCH_SIZE}
