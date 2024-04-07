@@ -4,7 +4,8 @@ SCRIPT_DIR=$(dirname $(realpath "${BASH_SOURCE}"))
 
 USAGE="[-m|--model-type model-type] [--stdin|--interactive|-i] [--speed | --length] [--temperature temp] [--context-length|-c n] [--ngl n] [--n-predict n] [--debug] [--verbose|-v] [--grammar-file file.gbnf] [--preset name] [--] QUESTION*"
 
-[ -f "${SCRIPTS_DIR}/env.sh" ] &&   source "${SCRIPTS_DIR}/env.sh"
+# Get site variables from env.sh, if present
+[ -f "${SCRIPTS_DIR}/env.sh" ] && source "${SCRIPTS_DIR}/env.sh"
 
 # Use CLI flags, or environment variables below:
 MODEL_TYPE=${MODEL_TYPE:-mistral}
