@@ -5,7 +5,7 @@ SCRIPT_DIR=$(dirname $(realpath "${BASH_SOURCE}"))
 USAGE="[-m|--model-type model-type] [--stdin|--interactive|-i] [--speed | --length] [--temperature temp] [--context-length|-c n] [--ngl n] [--n-predict n] [--debug] [--verbose|-v] [--grammar-file file.gbnf] [--preset name] [--] QUESTION*"
 
 # Get site variables from env.sh, if present
-[ -f "${SCRIPTS_DIR}/env.sh" ] && source "${SCRIPTS_DIR}/env.sh"
+[ -f "${SCRIPT_DIR}/env.sh" ] && source "${SCRIPT_DIR}/env.sh"
 
 # Use CLI flags, or environment variables below:
 MODEL_TYPE=${MODEL_TYPE:-mistral}
@@ -14,7 +14,7 @@ TEMPERATURE=${TEMPERATURE:-}
 CONTEXT_LENGTH=${CONTEXT_LENGTH:-}
 N_PREDICT="${N_PREDICT:-}"
 SYSTEM_MESSAGE="${SYSTEM_MESSAGE-"Answer the following user question:"}"
-SILENT_PROMPT="--silent-prompt"
+SILENT_PROMPT="--silent-prompt --no-display-prompt"
 NGL="${NGL:-}"
 GPU="${GPU:-auto}"		# auto|nvidia|omit
 PRIORITY="${PRIORITY:-manual}" # speed|length|manual
