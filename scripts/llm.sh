@@ -4,6 +4,8 @@ SCRIPT_DIR=$(dirname $(realpath "${BASH_SOURCE}"))
 
 USAGE="[-m|--model-type model-type] [--stdin|--interactive|-i] [--speed | --length] [--temperature temp] [--context-length|-c n] [--ngl n] [--n-predict n] [--debug] [--verbose|-v] [--grammar-file file.gbnf] [--preset name] [--] QUESTION*"
 
+[ -f "${SCRIPTS_DIR}/env.sh" ] &&   source "${SCRIPTS_DIR}/env.sh"
+
 # Use CLI flags, or environment variables below:
 MODEL_TYPE=${MODEL_TYPE:-mistral}
 ERROR_OUTPUT="/dev/null"
@@ -228,9 +230,14 @@ function prepare_model {
 
     # if --raw-input is specified, use stdin as the only text to send to the model
     if [ -n "${RAW_FLAG}" ]; then
+
+
 	PROMPT="${INPUT}"
 	SYSTEM_MESSAGE=""
     fi
+
+
+
 }
 
 function check_context_length {
@@ -355,6 +362,7 @@ set_threads
 parse_args "$@"
 load_model
 process_question_escapes
+
 do_stdin
 prepare_model
 check_context_length

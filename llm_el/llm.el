@@ -34,8 +34,29 @@
 ;;;   - A shell script called 'llm-emacs-helper.sh' that contains the command(s) you want
 ;;;     to run on the buffer or region content.
 
-(defvar llm-rewrite-script-path "~/wip/llamafiles/llm_el/llm-emacs-helper.sh")
-(defvar llm-default-model-type  "mistral")
+(defcustom llm-rewrite-script-path
+  "~/wip/llamafiles/llm_el/llm-emacs-helper.sh"
+  "Path to the LLM rewrite script."
+  :type 'string
+  :group 'llm)
+
+(defcustom llm-default-model-type
+  ;; one of: cerebrum codebooga deepseek-coder dolphin functions.sh llava mistral mixtral models.jsonl nous-hermes phi rocket via-api
+  "mistral" 
+  "Default model type for LLM."
+  :type '(choice
+           (const :tag "cerebrum" cerebrum)
+           (const :tag "codebooga" codebooga)
+           (const :tag "deepseek-coder" deepseek-coder)
+           (const :tag "dolphin" dolphin)
+           (const :tag "mistral" mistral)
+           (const :tag "mixtral" mixtral)
+           (const :tag "nous-hermes" nous-hermes)
+           (const :tag "phi" phi)
+           (const :tag "rocket" rocket)
+           (const :tag "via-api" via-api))
+  :group 'llm)
+
 (defvar llm-ask-buffer-name     "*llm-ask*")
 (defvar llm-write-buffer-name   "*llm-write*")
 (defvar llm-summary-buffer-name "*llm-summary*")
@@ -89,7 +110,6 @@
   "Send the buffer or current region as the output of the llm-rewrite-script-path command based on the prompt and current region and either replaces the region or uses a specified buffer, based on output-buffer-name and replace-p.
 See [shell-command-on-region] for interpretation of output-buffer-name."
   ;; Send the buffer or selected region as a CLI input to 'llm.sh'
-  (message "llm-region-internal output-buffer-name=%s replace-p=%s" output-buffer-name replace-p)
   (let ((start (or start (point-min)))
 	(end (or end (point-max)))
 	(command (format "%s %s %s %s %s"
@@ -101,9 +121,10 @@ See [shell-command-on-region] for interpretation of output-buffer-name."
 	(display-error-buffer t)
 	(region-noncontiguous-p nil))
     ;; many args, make sure to call properly
-    (message "llm-region-internal[%s,%s] command=%s output-buffer-name=%s replace-p=%s" start end command output-buffer-name replace-p)
+    (message "llm-region-internal %s %s[%s,%s] replace-p=%s output-buffer-name=%s" (buffer-name) start end  command replace-p output-buffer-name)
     (let ((max-mini-window-height 0.0))
       (shell-command-on-region start end command output-buffer-name replace-p llm-error-buffer-name display-error-buffer region-noncontiguous-p))))
+
 
 (defun llm-complete-internal (model-type start end n-predict)
   ;; Send the buffer or selected region as a CLI input to 'llm.sh'
@@ -131,5 +152,7 @@ See [shell-command-on-region] for interpretation of output-buffer-name."
 ;;; 
 
 (global-set-key (kbd "M-s $") 'llm-summarize-buffer)
+(global-set-key (kbd "M-s r") 'llm-rewrite)
+
 
 (provide 'llm)
