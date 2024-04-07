@@ -170,6 +170,7 @@ These go in `models/*`:
 
 # Scripts and Files
 These files are in [scripts/](scripts/). You might want to symlink some to your bin directory.
+You can also copy [scripts/env.sh.example](scripts/env.sh.example) to `scripts/env.sh` and edit it to set default values.
 
 ## base
 - llm.sh - the base script that others call
