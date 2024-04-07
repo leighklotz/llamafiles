@@ -1,5 +1,5 @@
 # Files in scripts
-- [Scriot to: Wrapping Code with Custom Formatting](codeblock.sh): (codeblock.sh)
+- [Script to: Wrapping Code with Custom Formatting](codeblock.sh): (codeblock.sh)
 - [Script to Download Llama Model using Wget in Bash](download-models.sh): (download-models.sh)
 - [Git Multiline Commit Grammar](git-commit-multiline-grammar.gbnf): (git-commit-multiline-grammar.gbnf)
 - [Git Oneline Commit Grammar File](git-commit-oneline-grammar.gbnf): (git-commit-oneline-grammar.gbnf)
@@ -14,3 +14,4 @@
 - [Script for Running llava-v1.5-7b-q4 Server](server.sh): (server.sh)
 - [Script to Summarize Directory Files](summarize-directory-files.sh): (summarize-directory-files.sh)
 - [Script to Display System Information: systype.sh](systype.sh): (systype.sh)
+- [Environment vars example: env.sh.example](env.sh.example): (env.sh.example)
