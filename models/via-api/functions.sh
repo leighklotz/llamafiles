@@ -17,7 +17,7 @@ LLM_LIB_DIR=$(realpath "${SCRIPT_DIR}/../lib")
 LLM_MODELS_DIR=$(realpath "${SCRIPT_DIR}/../models")
 MODEL_FILE="mixtral/mixtral-8x7b-instruct-v0.1.Q5_K_M.llamafile"
 PIDFILE="/tmp/via-api.pid"
-SEED="${SEED:--1}"
+SEED="${SEED:-NaN}"
 
 # fixme: some models support the system role API and some do not.
 # todo: query ooba API to find the model behind the api,
@@ -122,17 +122,21 @@ function via_api_perform_inference() {
     question=${question%%[[:space:]]}
     question_file=$(mktemp); printf "%s" "${question}" >> "${question_file}"
 
+    # hack: Drop empty string, and null parameters. NaN seems th show as null.
+    #       sadly seed must be a number
+    temperature=${temperature:-NaN} 
     data=$(jq --raw-input --raw-output  --compact-output -n \
 	      --arg mode "${mode}" \
 	      --argjson temperature "${temperature}" \
 	      --argjson repetition_penalty "${repetition_penalty}" \
 	      --argjson penalize_nl "${penalize_nl}" \
 	      --arg preset "${preset}" \
-	      --argjson seed "${SEED}" \
+	      --argjson seed ${SEED} \
 	      --rawfile system_message "${system_message_file}" \
 	      --rawfile question "${question_file}" \
 	      --rawfile grammar_string "${grammar_file}" \
 	      "${TEMPLATE}" \
+	| jq 'del(.[] | select(. == null))' || (log_and_exit $? "jq parsing failed") \
 	| jq 'del(.[] | select(. == ""))' || (log_and_exit $? "jq parsing failed") \
 	)
     #printf "* data=%s\n" "${data}"
