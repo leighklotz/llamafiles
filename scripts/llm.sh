@@ -14,7 +14,6 @@ TEMPERATURE=${TEMPERATURE:-}
 CONTEXT_LENGTH=${CONTEXT_LENGTH:-}
 N_PREDICT="${N_PREDICT:-}"
 SYSTEM_MESSAGE="${SYSTEM_MESSAGE-"Answer the following user question:"}"
-SILENT_PROMPT="--silent-prompt --no-display-prompt"
 NGL="${NGL:-}"
 GPU="${GPU:-auto}"		# auto|nvidia|omit
 PRIORITY="${PRIORITY:-manual}" # speed|length|manual
@@ -34,6 +33,10 @@ PROCESS_QUESTION_ESCAPES=""
 MODEL_RUNNER="/usr/bin/env"
 CLI_MODE="--cli"
 RAW_FLAG=""
+
+# Old versions of llamafile sometimes need -silent-prompt or --no-display-prompt
+# edit this, or use FORCE_MODEL_RUNNER and a newer MODEL_RUNNER .
+SILENT_PROMPT="--silent-prompt --no-display-prompt"
 
 # Read input
 INPUT=""
