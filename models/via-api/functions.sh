@@ -95,9 +95,14 @@ function via_api_perform_inference() {
     local mode="$1" system_message="$2" question="$3" grammar_file="$4"
     local preset="$5" temperature="$6" repetition_penalty="$7" penalize_nl="$8"
     
-    if [ "$grammar_file" == "" ];
+    if [ -z "$grammar_file" ];
     then
 	grammar_file="/dev/null"
+    fi
+
+    if [ -z "$temperature" ];
+    then
+	temperature=null
     fi
 
     # fixme: not all models support the system role in the API, and there's no way to tell afaik
@@ -136,8 +141,8 @@ function via_api_perform_inference() {
 	      --rawfile question "${question_file}" \
 	      --rawfile grammar_string "${grammar_file}" \
 	      "${TEMPLATE}" \
-	| jq 'del(.[] | select(. == null))' || (log_and_exit $? "jq parsing failed") \
-	| jq 'del(.[] | select(. == ""))' || (log_and_exit $? "jq parsing failed") \
+	| jq 'del(.[] | select(. == ""))' || (log_and_exit $? "jq template failed: eliding empty string values") \
+	| jq 'del(.[] | select(. == null))' || (log_and_exit $? "jq template failed: eliding null values") \
 	)
     #printf "* data=%s\n" "${data}"
     #set -x
