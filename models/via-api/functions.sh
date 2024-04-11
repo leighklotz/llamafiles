@@ -141,17 +141,16 @@ function via_api_perform_inference() {
 	      --rawfile question "${question_file}" \
 	      --rawfile grammar_string "${grammar_file}" \
 	      "${TEMPLATE}" \
-	| jq 'del(.[] | select(. == ""))' || (log_and_exit $? "jq template failed: eliding empty string values") \
-	| jq 'del(.[] | select(. == null))' || (log_and_exit $? "jq template failed: eliding null values") \
+	| jq 'del(.[] | select(. == ""))' \
+	| jq 'del(.[] | select(. == null))' 
 	)
-    #printf "* data=%s\n" "${data}"
-    #set -x
     if [ "${VERBOSE}" ]; then
 	echo "USE_SYSTEM_ROLE='$USE_SYSTEM_ROLE'"
 	printf "%s\n" "${data}" | jq --indent 1 >> /dev/stderr
     fi
 
-    # Invoke the HTTP API endpoint via
+    # Invoke via the HTTP API endpoint 
+    #set -x
     result=$(printf "%s" "${data}" | curl -s "${VIA_API_CHAT_COMPLETIONS_ENDPOINT}" -H 'Content-Type: application/json' -d @-)
     s=$?
     if [ "$s" != 0 ];
