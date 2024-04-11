@@ -66,7 +66,7 @@
 (defun llm-ask (prompt start end)
   "Writes a new buffer based on the prompt and current region, and the output of the llm-rewrite-script-path command"
   (interactive "sQuestion: \nr")
-  (let ((model-type llm-default-model-type))
+  (let ((model-type (format "%s" llm-default-model-type)))
     (llm-region-internal "ask" model-type (llm-mode-text-type) prompt start end llm-ask-buffer-name nil)))
 
 (defun llm-summarize-buffer (user-prompt)
