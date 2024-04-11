@@ -24,7 +24,7 @@ $ codeblock xslt cat redir/target.xslt | help.sh explain
 More examples can be found below and in the [examples](https://github.com/leighklotz/llamafiles/tree/main/examples) directory.
 
 ## help.sh usage and examples
-USAGE="[-m|--model-type model-type] [--stdin|--interactive|-i] [--speed | --length] [--temperature temp] [--context-length|-c n] [--ngl n] [--n-predict n] [--debug] [--verbose] [--] QUESTION*"
+USAGE="[-m|--model-type model-type] [--stdin|--interactive|-i] [--fast | --long] [--temperature temp] [--context-length|-c n] [--ngl n] [--n-predict n] [--debug] [--verbose] [--] QUESTION*"
 
 Uses question words and stdin, if any, to create the model prompt.
 
@@ -131,7 +131,7 @@ help-commit --staged
 To create multi-line commit message using the mixtral model with a long context, do this:
 
 ```bash
-help-commit -- -m mixtral --length
+help-commit -- -m mixtral --long
 ```
 
 # llm_el for Emacs
@@ -206,8 +206,8 @@ The help and summary scripts invoke `llm.sh`, but you can use it yourself direct
 
 - `-m` or `--model-type`: specifies the type of model to use. The available options are `mixtral`, `dolphin`, `mistral`, `codebooga`, `deepseek`, `
 rocket`, and `phi`.
-- `--speed`: sets the priority to speed.
-- `--length`: sets the priority to length.
+- `--fast`: sets the priority to speed (more GGUF GPU layers, less context)
+- `--long`: sets the priority to length (max context, fewer GGUF GPU layers)
 - `--temperature`: sets the temperature of the model.
 - `--verbose`: enables verbose mode.
 - `-c` or `--context-length`: sets the context length.

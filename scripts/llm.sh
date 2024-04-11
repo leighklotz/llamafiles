@@ -2,7 +2,7 @@
 
 SCRIPT_DIR=$(dirname $(realpath "${BASH_SOURCE}"))
 
-USAGE="[-m|--model-type model-type] [--stdin|--interactive|-i] [--speed | --length] [--temperature temp] [--context-length|-c n] [--ngl n] [--n-predict n] [--debug] [--verbose|-v] [--grammar-file file.gbnf] [--preset name] [--] QUESTION*"
+USAGE="[-m|--model-type model-type] [--stdin|--interactive|-i] [--fast | --long] [--temperature temp] [--context-length|-c n] [--ngl n] [--n-predict n] [--debug] [--verbose|-v] [--grammar-file file.gbnf] [--preset name] [--] QUESTION*"
 
 # Get site variables from env.sh, if present
 [ -f "${SCRIPT_DIR}/env.sh" ] && source "${SCRIPT_DIR}/env.sh"
@@ -79,9 +79,9 @@ function parse_args() {
             case $1 in
 		-m|--model-type)
                     shift; MODEL_TYPE="$1" ;;
-		--speed)
+		--fast)
                     PRIORITY="speed" ;;
-		--length)
+		--long)
                     PRIORITY="length" ;;
 		--temperature)
                     shift; TEMPERATURE="$1" ;;
@@ -382,9 +382,9 @@ then
     # fixme: accept these
     repeat_penalty="1"
     penalize_nl="false"
-    model_mode="instruct"
+    MODEL_MODE="${MODEL_MODE:instruct}"
     # set -x
-    via_api_perform_inference "${model_mode}" "${SYSTEM_MESSAGE}" "${PROMPT}" "${GRAMMAR_FILE}" "${PRESET}" "${TEMPERATURE}" "${repeat_penalty}" "${penalize_nl}"
+    via_api_perform_inference "${MODEL_MODE}" "${SYSTEM_MESSAGE}" "${PROMPT}" "${GRAMMAR_FILE}" "${PRESET}" "${TEMPERATURE}" "${repeat_penalty}" "${penalize_nl}"
     STATUS=$?
     # fixme: these parameters are set in model loading and cannot be accomodated here
     # ${N_PREDICT} ${BATCH_SIZE}
@@ -411,9 +411,9 @@ exit $STATUS
 #         for input, assume some k * (prompt len + input len)
 #         for output, probably need an explicit declaration we want a long output, hard to detect otherwise
 #       SPEED PRIORITY MODE:
-#       - `--speed` `--ngl`
+#       - `--fast` `--ngl`
 #       AUTO MODE:
-#       - proposal: `--speed` unless cmd input is given, then do `-context`
+#       - proposal: `--fast` unless cmd input is given, then do `-context`
 #         e.g. MIN_CONTEXT_LENGTH <= (input length * 2) <= MAX_CONTEXT_LENGTH???
 #       MANUAL MODE:
 #       - `--ngl` `--context-length`
