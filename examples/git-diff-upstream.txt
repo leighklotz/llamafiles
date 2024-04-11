@@ -1,0 +1,52 @@
+klotz@tensor:~/wip/oobabooga/text-generation-webui$ git diff cbd65ba7..bd71a504 | help.sh --length -m mixtral explain the update
+ This is a series of updates in a number of Python files and a requirements file related to a machine learning or artificial intelligence project. I'll try to summarize the most significant changes:
+
+1. `html_generator.py`: In this file, the way an image is saved has been changed. Earlier, the image was saved in RGB format, but now it's being saved in RGBA format. This could affect the transparency of the images.
+
+Code snippet before:
+```python
+img.convert('RGB').save(output_file, format='PNG')
+```
+Code snippet after:
+```python
+img.convert('RGBA').save(output_file, format='PNG')
+```
+2. `models_settings.py`: There are changes in how metadata is loaded and handled for various models. Specific keys are now being checked for different metadata fields, allowing for more specific configuration options. Also, there's a small change in how Transformers metadata is handled.
+
+Code snippet before:
+```python
+if 'max_position_embeddings' in metadata:
+    model_settings['max_seq_len'] = metadata['max_position_embeddings']
+if 'max_seq_len' in metadata:
+    model_settings['max_seq_len'] = metadata['max_seq_len']
+```
+Code snippet after:
+```python
+if 'max_position_embeddings' in metadata or 'model_max_length' in metadata:
+    model_settings['max_seq_len'] = metadata.get('max_position_embeddings', metadata['model_max_length'])
+if 'max_seq_len' in metadata:
+    model_settings['max_seq_len'] = metadata['max_seq_len']
+```
+3. `ui_model_menu.py`: A new conditional block has been added to determine the output folder based on the repository ID and whether it's a LORA or llama-cpp model. This will help in better organizing the downloaded models.
+
+Code snippet before:
+```python
+output_folder = downloader.get_output_folder(model, branch, is_lora, is_llamacpp=is_llamacpp)
+```
+Code snippet after:
+```python
+if output_folder == Path("models"):
+    output_folder = Path(shared.args.model_dir)
+elif output_folder == Path("loras"):
+    output_folder = Path(shared.args.lora_dir)
+
+output_folder = downloader.get_output_folder(model, branch, is_lora, is_llamacpp=is_llamacpp)
+```
+4. `requirements.txt` and other similar files: The version of `gradio` has been updated from `4.25.*` to `4.26.*`. This could bring new features, improvements, and bug fixes from the Gradio library. Additionally, there are updates to the `llama-cpp-python-cuBLAS-wheels` library, reflecting possible performance improvements or compatibility changes.
+
+To apply these updates, you should replace the corresponding sections in your files with the new code and run:
+```bash
+pip install -r requirements.txt --upgrade
+```
+This will update the required packages to their latest versions. Always make sure to backup your code and test the updates in a development environment before applying them to a production system.
+
