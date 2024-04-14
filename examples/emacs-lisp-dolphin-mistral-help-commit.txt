@@ -1,0 +1,38 @@
+klotz@tensor:~/wip/llamafiles$ git diff
+diff --git a/llm_el/llm.el b/llm_el/llm.el
+index c9e5a4e..b8d12a0 100644
+--- a/llm_el/llm.el
++++ b/llm_el/llm.el
+@@ -45,16 +45,16 @@
+   "mistral" 
+   "Default model type for LLM."
+   :type '(choice
+-           (const :tag "cerebrum" cerebrum)
+-           (const :tag "codebooga" codebooga)
+-           (const :tag "deepseek-coder" deepseek-coder)
+-           (const :tag "dolphin" dolphin)
+-           (const :tag "mistral" mistral)
+-           (const :tag "mixtral" mixtral)
+-           (const :tag "nous-hermes" nous-hermes)
+-           (const :tag "phi" phi)
+-           (const :tag "rocket" rocket)
+-           (const :tag "via-api" via-api))
++           (const :tag "cerebrum" "cerebrum")
++           (const :tag "codebooga" "codebooga")
++           (const :tag "deepseek-coder" "deepseek-coder")
++           (const :tag "dolphin" "dolphin")
++           (const :tag "mistral" "mistral")
++           (const :tag "mixtral" "mixtral")
++           (const :tag "nous-hermes" "nous-hermes")
++           (const :tag "phi" "phi")
++           (const :tag "rocket" "rocket")
++           (const :tag "via-api" "via-api"))
+   :group 'llm)
+ 
+ (defvar llm-ask-buffer-name     "*llm-ask*")
+klotz@tensor:~/wip/llamafiles$ help-commit
+No staged changes, looking for unstaged
+```sh
+git commit -am'Updated LLM model types to use string values instead of symbols'
+'
+klotz@tensor:~/wip/llamafiles$ 
