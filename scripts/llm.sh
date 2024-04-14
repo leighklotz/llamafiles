@@ -9,7 +9,6 @@ USAGE="[-m|--model-type model-type] [--stdin|--interactive|-i] [--fast | --long]
 
 # Use CLI flags, or environment variables below:
 MODEL_TYPE=${MODEL_TYPE:-mistral}
-ERROR_OUTPUT="/dev/null"
 TEMPERATURE=${TEMPERATURE:-}
 CONTEXT_LENGTH=${CONTEXT_LENGTH:-}
 N_PREDICT="${N_PREDICT:-}"
@@ -33,6 +32,7 @@ PROCESS_QUESTION_ESCAPES=""
 MODEL_RUNNER="/usr/bin/env"
 CLI_MODE="--cli"
 RAW_FLAG=""
+ERROR_OUTPUT="/dev/null"
 
 # Old versions of llamafile sometimes need -silent-prompt or --no-display-prompt
 # edit this, or use FORCE_MODEL_RUNNER and a newer MODEL_RUNNER .
