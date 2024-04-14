@@ -181,7 +181,6 @@ function via_api_model {
 function get_model_name {
     # curl prints
     # `{"model_name":"LoneStriker_dolphin-2.7-mixtral-8x7b-3.75bpw-h6-exl2","lora_names":[]}`
-    # todo:  this correct
     curl -s "${VIA_API_MODEL_INFO_ENDPOINT}" | jq -r .model_name
 }
 
