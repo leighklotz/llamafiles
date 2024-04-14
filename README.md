@@ -13,26 +13,26 @@ $ help.sh what can you do
 >Here are a few things you can do with various technologies:
 >
 >- Linux:
->  - Operate a Linux-based operating system for desktop, server, or containerized applications.
->  - Customize and manage system settings and hardware.
->  - Install and maintain software packages and applications.
->  - Configure networking, security, and performance.
+>    - Operate a Linux-based operating system for desktop, server, or containerized applications.
+>    - Customize and manage system settings and hardware.
+>    - Install and maintain software packages and applications.
+>    - Configure networking, security, and performance.
 >
 >- Bash:
->  - Create and run shell scripts to automate tasks or simply shorten repetitive commands.
->  - Customize the command-line interface (CLI) shell experience with scripts, shortcuts, and personalized configurations.
->  - Navigate directories, manage files and permissions, and handle data manipulation from the command line.
+>    - Create and run shell scripts to automate tasks or simply shorten repetitive commands.
+>    - Customize the command-line interface (CLI) shell experience with scripts, shortcuts, and personalized configurations.
+>    - Navigate directories, manage files and permissions, and handle data manipulation from the command line.
 >
 >- Python:
->  - Implement and run Python scripts for rapid application development in various fields such as web development, data analysis, machine learning, and automated tasks.
->  - Leverage Python's extensive libraries like NumPy, Pandas, Matplotlib, Django, Flask, etc. for specific tasks.
->  - Develop applications or interact with existing ones through APIs, scripts, or GUI interfaces.
+>    - Implement and run Python scripts for rapid application development in various fields such as web development, data analysis, machine learning, and automated tasks.
+>    - Leverage Python's extensive libraries like NumPy, Pandas, Matplotlib, Django, Flask, etc. for specific tasks.
+>    - Develop applications or interact with existing ones through APIs, scripts, or GUI interfaces.
 >
 >- General programming:
->  - Design, write, test, and debug code using various programming languages and tools.
->  - Collaborate with other developers on projects, communicate technical concepts, and contribute to open-source communities.
->  - Learn, understand, and apply programming patterns, best practices, and algorithms to solve real-world problems.
->  - Stay updated with the latest technologies, frameworks, and trends in the software industry.
+>    - Design, write, test, and debug code using various programming languages and tools.
+>    - Collaborate with other developers on projects, communicate technical concepts, and contribute to open-source communities.
+>    - Learn, understand, and apply programming patterns, best practices, and algorithms to solve real-world problems.
+>    - Stay updated with the latest technologies, frameworks, and trends in the software industry.
 
 
 ## Brief Usage examples
