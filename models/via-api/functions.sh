@@ -20,15 +20,19 @@ PIDFILE="/tmp/via-api.pid"
 SEED="${SEED:-NaN}"
 
 # fixme: some models support the system role API and some do not.
+# looks like MODEL_MODE must be "instruct" to use
+# system-message; otherwise it's a mix of context, characters,
+# and presets, best avoided for now.
+#
 # todo: query ooba API to find the model behind the api,
 # and add put a new function to each model/*/*functions.sh
 # to determinue USE_SYSTEM_ROLE properly for each model type.
+#
 # workaround: for now use `export USE_SYSTEM_ROLE=1` if you need it.
-USE_SYSTEM_ROLE="${USE_SYSTEM_ROLE:-}"
 # mixtral-7b-instruct-v0.1: no
 # dolphin-2.6-mistral-7b-dpo: yes
 # dolphin-2.7-mixtral: yes
-# nous-hermes-2-mixtral-8x7b-dpo: 
+USE_SYSTEM_ROLE="${USE_SYSTEM_ROLE:-}"
 
 SYSTEM_ROLE_TEMPLATE='{
     messages: [
