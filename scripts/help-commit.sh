@@ -15,7 +15,7 @@ function usage() {
 while [[ $# -gt 0 ]]; do
     case $1 in
 	--oneline|--multiline|--one-line|--multi-line)
-	    MESSAGE_LINE=$(echo "$1" | sed -e 's/-//g')
+	    MESSAGE_LINE=$(echo "$1" | sed -e 's/-/ /g')
 	    shift
 	    ;;
         --)
@@ -30,7 +30,7 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-PROMPT="Provide ${MESSAGE_LINE} git commit message for the changes listed in the \`git diff\` below, in the form of a \`git commit\` command:\n"
+PROMPT='Explain the following git diff as a ${MESSAGE_LINE} git commit message, expressed in the form of a \`git commit\` command.\n'
 GRAMMAR_FILE_FLAG="--grammar-file ${SCRIPT_DIR}/git-commit-${MESSAGE_LINE}-grammar.gbnf"
 
 function get_results {
