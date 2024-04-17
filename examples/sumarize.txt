@@ -1,0 +1,5 @@
+$ summarize https://graflex.org
+Graflex.org is a website dedicated to promoting the use and preservation of Graflex Speed Graphics and other classic and large-format cameras. The website provides information, articles, and resources for those interested in Speed Graphic, Graflex Reflex, and large-format cameras. It offers shortcuts, user experiences, Speed Graphic FAQ, information on other cameras, search functionality, a HelpBoard, Graflex Historic Quarterly, Graflex Journal Quarterly, and a View Cameras section. The website also features articles, technical information, related web sites, news, and assistance for those who are first-time visitors or need help.
+$ via-api --get-model-name
+openchat-3.5-1210.Q6_K.gguf
+$
