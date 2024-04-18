@@ -15,7 +15,7 @@ function usage() {
 while [[ $# -gt 0 ]]; do
     case $1 in
 	--oneline|--multiline|--one-line|--multi-line)
-	    MESSAGE_LINE=$(echo "$1" | sed -e 's/-/ /g')
+	    MESSAGE_LINE=$(echo "$1" | sed -E -e 's/-//g')
 	    shift
 	    ;;
         --)
