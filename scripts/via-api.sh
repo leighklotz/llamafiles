@@ -13,7 +13,8 @@ function usage {
 
 if [ "${MODEL_TYPE}" != 'via-api' ];
 then
-   usage "\$MODEL_TYPE=$MODEL_TYPE is not 'via-api'"
+    echo "* WARN: MODEL_TYPE=$MODEL_TYPE is not 'via-api', forcing"
+    MODEL_TYPE="via-api"
 fi
 
 # fixme: dup code from llm.sh
