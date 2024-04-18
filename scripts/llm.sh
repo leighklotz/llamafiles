@@ -73,6 +73,7 @@ function set_threads() {
 function parse_args() {
     # If there are any args, require "--" or any non-hyphen word to terminate args and start question.
     # Assume the whole args is a question if there is no hyphen to start.
+    # There may be no question, if all is contained in SYSTEM_MESSAGE and STDIN.
     if [[ "${1}" == "-"* ]];
     then
 	while [[ $# -gt 0 ]]; do
@@ -310,7 +311,7 @@ function cli_perform_inference {
     if [ "${PRESET}" != '' ]; then
 	PRESET="--preset ${PRESET}"
     fi
-    cat "${PROMPT_TEMP_FILE}" | fixup_input | ${MODEL_RUNNER} ${MODEL} ${CLI_MODE} ${LOG_DISABLE} ${GPU} ${NGL} ${GRAMMAR_FILE} ${PRESET} ${TEMPERATURE} ${CONTEXT_LENGTH} ${N_PREDICT} ${BATCH_SIZE} --no-penalize-nl --repeat-penalty 1 ${THREADS} -f /dev/stdin $SILENT_PROMPT --seed "${SEED}" ${LLM_ADDITIONAL_ARGS} 2> "${ERROR_OUTPUT}"
+    cat "${PROMPT_TEMP_FILE}" | fixup_input | ${MODEL_RUNNER} ${MODEL} ${CLI_MODE} ${LOG_DISABLE} ${GPU} ${NGL} ${GRAMMAR_FILE} ${PRESET} ${TEMPERATURE} ${CONTEXT_LENGTH} ${N_PREDICT} ${BATCH_SIZE} --no-penalize-nl --repeat-penalty 1 ${THREADS} -f /dev/stdin ${SILENT_PROMPT} --seed "${SEED}" ${LLM_ADDITIONAL_ARGS} 2> "${ERROR_OUTPUT}"
     return $?
 }
 
@@ -357,11 +358,12 @@ function handle_temp_files {
     fi
 }
 
+
+
 set_threads
 parse_args "$@"
 load_model
 process_question_escapes
-
 do_stdin
 prepare_model
 check_context_length
@@ -372,6 +374,7 @@ then
 fi
 set_model_runner
 set_verbose_debug
+
 if [ "$MODEL_TYPE" == "via-api" ];
 then
     # fixme: accept these
