@@ -137,20 +137,38 @@ ${QUESTION%$'\n'}
     fi
 }
 
-function chatml_prompt {
-    if [ "${INPUT}" == "" ]; then
-        printf -v PROMPT "<|im_start|>system
-%s<|im_end|>
-<|im_start|>user
-%s<|im_end|>
-<|im_start|>assistant" "${SYSTEM_MESSAGE%$'\n'}" "${QUESTION%$'\n'}"
-    else
-        printf -v PROMPT "<|im_start|>system
-%s<|im_end|>
-<|im_start|>user
-%s
-%s<|im_end|>
-<|im_start|>assistant" "${SYSTEM_MESSAGE%$'\n'}" "${QUESTION%$'\n'}" "${INPUT%$'\n'}"
-    fi
-}
+# function chatml_prompt {
+#     local system_message="${SYSTEM_MESSAGE%$'\n'}"
+#     local question="${QUESTION%$'\n'}"
+#     local input="${INPUT%$'\n'}"
+#     PROMPT=""
+#     [ -n "${system_message}" ] && printf -v PROMPT '<|im_start|>system\n%s<|im_end|>' "${system_message}"
+#     [ -n "${question}" ] && printf -v PROMPT '%s<|im_start|>user\n%s\n' "${PROMPT}" "${question}"
+#     [ -n "${input}" ] && printf -v PROMPT '%s\n%s\n' "${PROMPT}" "${input}"
+#     printf -v PROMPT '%s<|im_end|>\n' "${PROMPT}"
+#     printf -v PROMPT '%s<|im_start|>assistant\n' "${PROMPT}"
+# }
 
+function chatml_prompt {
+    local system_message="${SYSTEM_MESSAGE%$'\n'}"
+    local question="${QUESTION%$'\n'}"
+    local input="${INPUT%$'\n'}"
+    PROMPT=""
+
+    if [ -n "${USE_SYSTEM_ROLE}" ];
+    then
+	printf -v PROMPT '%s<|im_start|>system\n%s<|im_end|>\n' "${PROMPT}" "${system_message}"
+    else
+	# fixme: we just use two 'user' messages with no 'assistant' message
+	#        it might be better to prepend system message to the question+input, ending with newline
+	printf -v PROMPT '%s<|im_start|>user\n%s<|im_end|>\n' "${PROMPT}" "${system_message}"
+    fi
+
+    if [ -n "${input}" ];
+    then
+	printf -v PROMPT '%s<|im_start|>user\n%s\n%s<|im_end|>\n' "${PROMPT}" "${question}" "${input}"
+    else
+	printf -v PROMPT '%s<|im_start|>user\n%s<|im_end|>\n' "${PROMPT}" "${question}"
+    fi
+    printf -v PROMPT '%s<|im_start|>assistant' "${PROMPT}"
+}
