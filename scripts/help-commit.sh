@@ -30,7 +30,9 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-PROMPT='Explain the following git diff as a ${MESSAGE_LINE} git commit message, expressed in the form of a \`git commit\` command.\n'
+m="$(printf "%b" "You are an expert in Linux, Bash, Python, general programming, and related topics.\n")"
+export SYSTEM_MESSAGE="${SYSTEM_MESSAGE:-${m}}"
+printf -v PROMPT 'Explain the following git diff as a %s git commit message, expressed in the form of a \`git commit\` command.\n' "${MESSAGE_LINE}"
 GRAMMAR_FILE_FLAG="--grammar-file ${SCRIPT_DIR}/git-commit-${MESSAGE_LINE}-grammar.gbnf"
 
 function get_results {
