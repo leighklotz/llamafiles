@@ -234,14 +234,9 @@ function prepare_model {
 
     # if --raw-input is specified, use stdin as the only text to send to the model
     if [ -n "${RAW_FLAG}" ]; then
-
-
 	PROMPT="${INPUT}"
 	SYSTEM_MESSAGE=""
     fi
-
-
-
 }
 
 function check_context_length {
