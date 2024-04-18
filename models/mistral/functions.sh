@@ -31,16 +31,14 @@ function mistral_priority {
 }
 
 function mistral_prompt {
-    if [ "${INPUT}" == "" ]; then
-	printf -v PROMPT "<s>[INST]%s
-%s [/INST]
-" "${SYSTEM_MESSAGE%$'\n'}" "${QUESTION%$'\n'}"
-    else
-	printf -v PROMPT "<s>[INST]%s
-%s
-%s [/INST]
-" "${SYSTEM_MESSAGE%$'\n'}" "${QUESTION%$'\n'}" "${INPUT%$'\n'}"
-    fi
+    PROMPT="<s>[INST]"
+    local system_message="${SYSTEM_MESSAGE%$'\n'}"
+    local input="${INPUT%$'\n'}"
+    local question="${QUESTION%$'\n'}"
+    [ -n "${system_message}" ] && printf -v PROMPT "%s%s" "${PROMPT}" "${system_message}"
+    [ -n "${question}" ] &&       printf -v PROMPT "%s\n%s" "${PROMPT}" "${question}"
+    [ -n "${input}" ] &&          printf -v PROMPT "%s\n%s" "${PROMPT}" "${input}"
+                                  printf -v PROMPT "%s[/INST]" "${PROMPT}"
 }
 
 function mistral_model {
