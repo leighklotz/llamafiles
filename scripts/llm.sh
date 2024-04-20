@@ -305,10 +305,10 @@ function cli_perform_inference {
     # Use llamafile or similar CLI runner to perform inference
     # set -x
     printf '%s' "${PROMPT}" > "${PROMPT_TEMP_FILE}"
-    if [ "${GRAMMAR_FILE}" != '' ]; then
+    if [ -n "${GRAMMAR_FILE}" ]; then
 	GRAMMAR_FILE="--grammar-file ${GRAMMAR_FILE}"
     fi
-    if [ "${PRESET}" != '' ]; then
+    if [ -n "${PRESET}" ]; then
 	PRESET="--preset ${PRESET}"
     fi
     cat "${PROMPT_TEMP_FILE}" | fixup_input | ${MODEL_RUNNER} ${MODEL} ${CLI_MODE} ${LOG_DISABLE} ${GPU} ${NGL} ${GRAMMAR_FILE} ${PRESET} ${TEMPERATURE} ${CONTEXT_LENGTH} ${N_PREDICT} ${BATCH_SIZE} --no-penalize-nl --repeat-penalty 1 ${THREADS} -f /dev/stdin ${SILENT_PROMPT} --seed "${SEED}" ${LLM_ADDITIONAL_ARGS} 2> "${ERROR_OUTPUT}"
