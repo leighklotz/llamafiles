@@ -5,12 +5,21 @@ SCRIPT_DIR=$(dirname $(realpath "${BASH_SOURCE}"))
 HELP_SH_OPTIONS=""
 GIT_DIFF_OPTIONS=""
 MESSAGE_LINE="oneline"
+
+# Set main parameters
 export MODEL_TYPE="${MODEL_TYPE:=mixtral}"
+default_system_message="$(printf "%b" "You are an expert in Linux, Bash, Python, general programming, and related topics.\n")"
+export SYSTEM_MESSAGE="${SYSTEM_MESSAGE:-${default_system_message}}"
+printf -v PROMPT 'A good %s `git commit` message for the following `git diff` output would be:' "${MESSAGE_LINE}"
+GRAMMAR_FILE_FLAG="--grammar-file ${SCRIPT_DIR}/git-commit-${MESSAGE_LINE}-grammar.gbnf"
 
 function usage() {
     p=$(basename "$0")
-    echo "$p: [git diff options] -- [help.sh options]"
-    echo "- change model with \`$p -- -m model\` or \`export \$MODEL_TYPE=$MODEL_TYPE\`"
+    echo "$p: [--oneline|--multiline] [git diff options] -- [help.sh options]"
+    echo '- optionally specify --oneline or --multiline first, for commit message style'
+    echo '- any next arguments until `--` are given to `git diff`'
+    echo '- all after a `--` is given to `help.sh`'
+    echo "- to change model, use \`$p -- -m $MODEL_TYPE\` or \`export \$MODEL_TYPE=$MODEL_TYPE\`"
     #set -x
 }
 
@@ -37,16 +46,7 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-# Set SYSTEM_MESSAGE, PROMPT and GRAMMAR_FILE
-default_system_message="$(printf "%b" "You are an expert in Linux, Bash, Python, general programming, and related topics.\n")"
-export SYSTEM_MESSAGE="${SYSTEM_MESSAGE:-${default_system_message}}"
-
-printf -v PROMPT 'Explain the following git diff as a %s git commit message, expressed in the form of a \`git commit\` command.\n' "${MESSAGE_LINE}"
-
-GRAMMAR_FILE_FLAG="--grammar-file ${SCRIPT_DIR}/git-commit-${MESSAGE_LINE}-grammar.gbnf"
-
 # Pipeline to connect 'git diff' with 'help.sh' below.
-
 function get_results {
     # set globals
     local options=" $1 "
@@ -69,16 +69,10 @@ fi
 # remove triple-backquote from the diff output since we're enclosing the body in that
 diff_output_sanitized="$(printf "%s" "$DIFF_OUTPUT" | sed -e 's/```/`_`_`/g')"
 
-#set -x
-printf -v INPUT '```sh
+TEMPLATE='```sh
 $ %s
 %s
-```\n' \
-       "${DIFF_COMMAND}" "${diff_output_sanitized}"
+```\n'
+printf -v INPUT "${TEMPLATE}" "${DIFF_COMMAND}" "${diff_output_sanitized}"
 
-# printf "%s\n" "${INPUT}"
-
-#set -x
 printf "%s\n" "${INPUT}" | help.sh ${*} ${GRAMMAR_FILE_FLAG} -e -- "${PROMPT}"
-
-# todo: allow specification of both `git diff` options and `llm.sh` options
