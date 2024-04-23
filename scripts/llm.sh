@@ -2,7 +2,7 @@
 
 SCRIPT_DIR=$(dirname $(realpath "${BASH_SOURCE}"))
 
-USAGE="[-m|--model-type model-type] [--stdin|--interactive|-i] [--fast | --long] [--temperature temp] [--context-length|-c n] [--ngl n] [--n-predict n] [--debug] [--verbose|-v] [--grammar-file file.gbnf] [--preset name] [--] QUESTION*"
+USAGE="[-m|--model-type model-type] [--stdin|--interactive|-i] [--fast | --long] [--temperature temp] [--context-length|-c n] [--ngl n] [--n-predict n] [--debug] [--verbose|-v] [--grammar-file file.gbnf] [--] QUESTION*"
 
 # Get site variables from env.sh, if present
 [ -f "${SCRIPT_DIR}/env.sh" ] && source "${SCRIPT_DIR}/env.sh"
@@ -20,7 +20,6 @@ DEBUG="${DEBUG:-}"
 VERBOSE=${VERBOSE:-}
 LOG_DISABLE="--log-disable"
 GRAMMAR_FILE="${GRAMMAR_FILE:-}"
-PRESET="${PRESET:-}"
 BATCH_SIZE="${BATCH_SIZE:-}"
 SEED="${SEED:--1}"
 LLAMAFILE_MODEL_RUNNER="${LLAMAFILE_MODEL_RUNNER:-"$(realpath ${SCRIPT_DIR}/../lib/llamafile-0.6.2) -m"}"
@@ -99,8 +98,6 @@ function parse_args() {
                     shift; N_PREDICT="$1" ;;
 		--grammar-file)
                     shift; GRAMMAR_FILE="$1" ;;
-		--preset)
-                    shift; PRESET="$1" ;;
 		--debug)
                     ERROR_OUTPUT="/dev/stdout"; SILENT_PROMPT=""; DEBUG=1; LOG_DISABLE="" ;;
 		--noerror)
@@ -311,10 +308,7 @@ function cli_perform_inference {
     if [ -n "${GRAMMAR_FILE}" ]; then
 	GRAMMAR_FILE="--grammar-file ${GRAMMAR_FILE}"
     fi
-    if [ -n "${PRESET}" ]; then
-	PRESET="--preset ${PRESET}"
-    fi
-    cat "${PROMPT_TEMP_FILE}" | fixup_input | ${MODEL_RUNNER} ${MODEL} ${CLI_MODE} ${LOG_DISABLE} ${GPU} ${NGL} ${GRAMMAR_FILE} ${PRESET} ${TEMPERATURE} ${CONTEXT_LENGTH} ${N_PREDICT} ${BATCH_SIZE} ${NO_PENALIZE_NL}--repeat-penalty 1 ${THREADS} -f /dev/stdin ${SILENT_PROMPT} --seed "${SEED}" ${LLM_ADDITIONAL_ARGS} 2> "${ERROR_OUTPUT}"
+    cat "${PROMPT_TEMP_FILE}" | fixup_input | ${MODEL_RUNNER} ${MODEL} ${CLI_MODE} ${LOG_DISABLE} ${GPU} ${NGL} ${GRAMMAR_FILE} ${TEMPERATURE} ${CONTEXT_LENGTH} ${N_PREDICT} ${BATCH_SIZE} ${NO_PENALIZE_NL}--repeat-penalty 1 ${THREADS} -f /dev/stdin ${SILENT_PROMPT} --seed "${SEED}" ${LLM_ADDITIONAL_ARGS} 2> "${ERROR_OUTPUT}"
     return $?
 }
 
@@ -385,7 +379,7 @@ then
     penalize_nl="false"
     MODEL_MODE="${MODEL_MODE:instruct}"
     # set -x
-    via_api_perform_inference "${MODEL_MODE}" "${SYSTEM_MESSAGE}" "${PROMPT}" "${GRAMMAR_FILE}" "${PRESET}" "${TEMPERATURE}" "${repeat_penalty}" "${penalize_nl}"
+    via_api_perform_inference "${MODEL_MODE}" "${SYSTEM_MESSAGE}" "${PROMPT}" "${GRAMMAR_FILE}" "${TEMPERATURE}" "${repeat_penalty}" "${penalize_nl}"
     STATUS=$?
     # fixme: these parameters are set in model loading and cannot be accomodated here
     # ${N_PREDICT} ${BATCH_SIZE}
