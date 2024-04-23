@@ -1,7 +1,8 @@
-root ::= (FIRST-LINE)? ( GIT-COMMIT-AM APOS SUMMARY-LINE NEWLINE (BULLET-LINE | NEWLINE)+ APOS ) $
-FIRST-LINE ::= ( [^\n]+ NEWLINE )
-GIT-COMMIT-AM ::= ( "git commit -am" )
-SUMMARY-LINE ::= ( [^\n]+ )
-NEWLINE ::= ( "\n" )
-BULLET-LINE ::= ( "- " [^\n]+ )
-APOS ::= ( "'" )
+root ::= (FIRST-LINE)? GIT-COMMIT-AM APOS SUMMARY-LINE NEWLINE BULLET-LINES APOS NEWLINE
+FIRST-LINE ::= [^\n]+ NEWLINE
+GIT-COMMIT-AM ::= "git commit -am"
+SUMMARY-LINE ::= [^\n]+
+NEWLINE ::= "\n"
+BULLET-LINE ::= "- " [^\n]+
+BULLET-LINES ::= (BULLET-LINE | NEWLINE)+
+APOS ::= "'"
