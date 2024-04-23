@@ -6,6 +6,7 @@ VIA_API_MODEL_INFO_ENDPOINT="${VIA_API_CHAT_BASE}/v1/internal/model/info"
 VIA_API_MODEL_LIST_ENDPOINT="${VIA_API_CHAT_BASE}/v1/internal/model/list"
 VIA_API_LOAD_MODEL_ENDPOINT="${VIA_API_CHAT_BASE}/v1/internal/model/load"
 VIA_API_UNLOAD_MODEL_ENDPOINT="${VIA_API_CHAT_BASE}/v1/internal/model/unload"
+VIA_API_INHIBIT_GRAMMAR="${VIA_API_INHIBIT_GRAMMAR:-}"
 
 # Check if the script is being sourced or directly executed
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
@@ -99,7 +100,7 @@ function via_api_perform_inference() {
     local mode="$1" system_message="$2" question="$3" grammar_file="$4"
     local preset="$5" temperature="$6" repetition_penalty="$7" penalize_nl="$8"
     
-    if [ -z "$grammar_file" ];
+    if [ -z "$grammar_file" ] || [ -n "${VIA_API_INHIBIT_GRAMMAR}" ];
     then
 	grammar_file="/dev/null"
     fi
