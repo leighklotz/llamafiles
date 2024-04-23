@@ -20,7 +20,7 @@ function lnf {
 	echo "fail: lnf src=$src dst=$dst"
 	exit 1
     fi
-    if [ ! -e "${dst}/" ]; then
+    if [ ! -e "${dst}" ]; then
 	echo "* ln -s ${src} ${dst}"
 	ln -s "${src}" "${dst}"
     else
