@@ -6,13 +6,6 @@ HELP_SH_OPTIONS=""
 GIT_DIFF_OPTIONS=""
 MESSAGE_LINE="oneline"
 
-# Set main parameters
-export MODEL_TYPE="${MODEL_TYPE:=mixtral}"
-default_system_message="$(printf "%b" "You are an expert in Linux, Bash, Python, general programming, and related topics.\n")"
-export SYSTEM_MESSAGE="${SYSTEM_MESSAGE:-${default_system_message}}"
-printf -v PROMPT 'A good %s `git commit` message for the following `git diff` output would be:' "${MESSAGE_LINE}"
-GRAMMAR_FILE_FLAG="--grammar-file ${SCRIPT_DIR}/git-commit-${MESSAGE_LINE}-grammar.gbnf"
-
 function usage() {
     p=$(basename "$0")
     echo "$p: [--oneline|--multiline] [git diff options] -- [help.sh options]"
@@ -31,7 +24,7 @@ while [[ $# -gt 0 ]]; do
 	    exit 0
 	    ;;
 	--oneline|--multiline|--one-line|--multi-line)
-	    MESSAGE_LINE=$(echo "$1" | sed -E -e 's/-//g')
+	    MESSAGE_LINE=$(printf "%s" "$1" | sed -E -e 's/-//g')
 	    shift
 	    ;;
         --)
@@ -46,22 +39,28 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
+# Set main parameters
+export MODEL_TYPE="${MODEL_TYPE:=mixtral}"
+default_system_message="$(printf "%b" "You are an expert in Linux, Bash, Python, general programming, and related topics.\n")"
+export SYSTEM_MESSAGE="${SYSTEM_MESSAGE:-${default_system_message}}"
+printf -v PROMPT 'Write a %s `git commit` command line to commit the changes listed in the following `git diff` output:' "${MESSAGE_LINE}"
+GRAMMAR_FILE_FLAG="--grammar-file ${SCRIPT_DIR}/git-commit-${MESSAGE_LINE}-grammar.gbnf"
+
 # Pipeline to connect 'git diff' with 'help.sh' below.
 function get_results {
     # set globals
-    local options=" $1 "
-    DIFF_COMMAND="git diff $options ${GIT_DIFF_OPTIONS}"
+    local options="$1"
+    DIFF_COMMAND="git diff ${options}${options:+ }${GIT_DIFF_OPTIONS}"
     DIFF_OUTPUT="$($DIFF_COMMAND)"
 }
 
-get_results ""
-
-if [ "${DIFF_OUTPUT}" == '' ]; then
+get_results
+if [ -z "${DIFF_OUTPUT}" ]; then
     echo "No staged changes, looking for unstaged" >> /dev/stderr
     get_results --staged
 fi
 
-if [ "${DIFF_OUTPUT}" == '' ]; then
+if [ -z "${DIFF_OUTPUT}" ]; then
     echo "No changes seen" >> /dev/stderr
     exit 1
 fi
@@ -69,10 +68,10 @@ fi
 # remove triple-backquote from the diff output since we're enclosing the body in that
 diff_output_sanitized="$(printf "%s" "$DIFF_OUTPUT" | sed -e 's/```/`_`_`/g')"
 
-TEMPLATE='```sh
+TEMPLATE='```h
 $ %s
 %s
-```\n'
-printf -v INPUT "${TEMPLATE}" "${DIFF_COMMAND}" "${diff_output_sanitized}"
+$ git commit -am'
 
+printf -v INPUT "${TEMPLATE}" "${DIFF_COMMAND}" "${diff_output_sanitized}"
 printf "%s\n" "${INPUT}" | help.sh ${*} ${GRAMMAR_FILE_FLAG} -e -- "${PROMPT}"
