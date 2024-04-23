@@ -2,6 +2,9 @@
 
 SCRIPT_DIR=$(dirname $(realpath "${BASH_SOURCE}"))
 
+FILES="ask.sh bashblock.sh codeblock.sh help-commit.sh nvfree.sh machelp.sh summarize.sh scuttle.sh systype.sh via-api.sh"
+SH_FILES="help.sh"
+
 DEST_DIR="${1}"
 if [ -z "${DEST_DIR}" ];
 then
@@ -9,23 +12,29 @@ then
     exit 1
 fi
 
-FILES="ask.sh bashblock.sh codeblock.sh help-commit.sh nvfree.sh summarize.sh scuttle.sh systype.sh via-api.sh"
-SH_FILES="help.sh"
-
-function do_ln {
+function lnf {
     local src="$1"
     local dst="$2"
-    echo ln -s "${src}" "${dst}"
-    ln -s "${src}" "${dst}"
+    if [ -z "$src" ] || [ -z "$dst" ] ;
+    then
+	echo "fail: lnf src=$src dst=$dst"
+	exit 1
+    fi
+    if [ ! -e "${dst}/" ]; then
+	echo "* ln -s ${src} ${dst}"
+	ln -s "${src}" "${dst}"
+    else
+	true
+	#echo "${dst}" exists
+    fi
 }
-    
 
 for file in ${FILES}
 do
-    do_ln "${SCRIPT_DIR}/${file}" "${DEST_DIR}/${file%.sh}"
+    lnf "${SCRIPT_DIR}/${file}" "${DEST_DIR}/${file%.sh}"
 done
 
 for file in ${SH_FILES}
 do
-    do_ln "${SCRIPT_DIR}/${file}" "${DEST_DIR}/${file}"
+    lnf "${SCRIPT_DIR}/${file}" "${DEST_DIR}/${file}"
 done
