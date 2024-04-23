@@ -47,7 +47,6 @@ default_system_message="$(printf "%b" "You are an expert in Linux, Bash, Python,
 export SYSTEM_MESSAGE="${SYSTEM_MESSAGE:-${default_system_message}}"
 printf -v PROMPT 'Write a %s `git commit` command line to commit the changes listed in the following `git diff` output:' "${MESSAGE_LINE}"
 GRAMMAR_FILE_FLAG="--grammar-file ${SCRIPT_DIR}/git-commit-${MESSAGE_LINE}-grammar.gbnf"
-
 PROMPT="Provide ${MESSAGE_LINE} git commit message for the changes listed in the \`git diff\` below, in the form of a \`git commit\` command:\n"
 GRAMMAR_FILE_FLAG="--grammar-file ${SCRIPT_DIR}/git-commit-${MESSAGE_LINE}-grammar.gbnf"
 
@@ -77,7 +76,7 @@ fi
 # remove triple-backquote from the diff output since we're enclosing the body in that
 diff_output_sanitized="$(printf "%s" "$DIFF_OUTPUT" | sed -e 's/```/`_`_`/g')"
 
-TEMPLATE='```sh
+TEMPLATE='```h
 $ %s
 %s
 ```\n'
