@@ -1,6 +1,7 @@
 #!/bin/bash
 
 SCRIPT_DIR=$(dirname $(realpath "${BASH_SOURCE}"))
+HELP_SH="help.sh"
 
 HELP_SH_OPTIONS=""
 GIT_DIFF_OPTIONS=""
@@ -14,13 +15,14 @@ printf -v PROMPT 'A good %s `git commit` message for the following `git diff` ou
 GRAMMAR_FILE_FLAG="--grammar-file ${SCRIPT_DIR}/git-commit-${MESSAGE_LINE}-grammar.gbnf"
 
 function usage() {
+
     p=$(basename "$0")
     echo "$p: [--oneline|--multiline] [git diff options] -- [help.sh options]"
-    echo '- optionally specify --oneline or --multiline first, for commit message style'
+    echo '- specify --oneline or --multiline first, for commit message style'
     echo '- any next arguments until `--` are given to `git diff`'
     echo '- all after a `--` is given to `help.sh`'
     echo "- to change model, use \`$p -- -m $MODEL_TYPE\` or \`export \$MODEL_TYPE=$MODEL_TYPE\`"
-    #set -x
+    echo "- See \`git diff\` and \`$HELP_SH\` for options"
 }
 
 # help-commit.sh [git diff options] -- [help.sh options]
@@ -28,7 +30,7 @@ while [[ $# -gt 0 ]]; do
     case $1 in
 	--help)
 	    usage
-	    exit 0
+	    exit 1
 	    ;;
 	--oneline|--multiline|--one-line|--multi-line)
 	    MESSAGE_LINE=$(echo "$1" | sed -E -e 's/-//g')
@@ -47,7 +49,15 @@ while [[ $# -gt 0 ]]; do
 done
 
 # Pipeline to connect 'git diff' with 'help.sh' below.
+PROMPT="Provide ${MESSAGE_LINE} git commit message for the changes listed in the \`git diff\` below, in the form of a \`git commit\` command:\n"
+GRAMMAR_FILE_FLAG="--grammar-file ${SCRIPT_DIR}/git-commit-${MESSAGE_LINE}-grammar.gbnf"
+
 function get_results {
+    if ! git rev-parse --is-inside-work-tree 2>&1> /dev/null;
+    then
+	echo "$(basename "$0"): PWD=$PWD is not in a git repository"
+	exit 1
+    fi
     # set globals
     local options=" $1 "
     DIFF_COMMAND="git diff $options ${GIT_DIFF_OPTIONS}"
@@ -73,6 +83,7 @@ TEMPLATE='```sh
 $ %s
 %s
 ```\n'
-printf -v INPUT "${TEMPLATE}" "${DIFF_COMMAND}" "${diff_output_sanitized}"
 
-printf "%s\n" "${INPUT}" | help.sh ${*} ${GRAMMAR_FILE_FLAG} -e -- "${PROMPT}"
+printf -v INPUT "${TEMPLATE}" "${DIFF_COMMAND}" "${diff_output_sanitized}"
+printf "%s\n" "${INPUT}" | ${HELP_SH} ${*} ${GRAMMAR_FILE_FLAG} -e -- "${PROMPT}"
+
