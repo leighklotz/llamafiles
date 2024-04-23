@@ -37,6 +37,9 @@ ERROR_OUTPUT="/dev/null"
 # Old versions of llamafile sometimes need -silent-prompt or --no-display-prompt
 # edit this, or use FORCE_MODEL_RUNNER and a newer MODEL_RUNNER .
 SILENT_PROMPT="--silent-prompt --no-display-prompt"
+# NO_PENALIZE_NL is gone and we only have --penalize-ml in llamafile 0.7
+#NO_PENALIZE_NL="--no-penalize-nl "
+NO_PENALIZE_NL=""
 
 # Read input
 INPUT=""
@@ -311,7 +314,7 @@ function cli_perform_inference {
     if [ -n "${PRESET}" ]; then
 	PRESET="--preset ${PRESET}"
     fi
-    cat "${PROMPT_TEMP_FILE}" | fixup_input | ${MODEL_RUNNER} ${MODEL} ${CLI_MODE} ${LOG_DISABLE} ${GPU} ${NGL} ${GRAMMAR_FILE} ${PRESET} ${TEMPERATURE} ${CONTEXT_LENGTH} ${N_PREDICT} ${BATCH_SIZE} --no-penalize-nl --repeat-penalty 1 ${THREADS} -f /dev/stdin ${SILENT_PROMPT} --seed "${SEED}" ${LLM_ADDITIONAL_ARGS} 2> "${ERROR_OUTPUT}"
+    cat "${PROMPT_TEMP_FILE}" | fixup_input | ${MODEL_RUNNER} ${MODEL} ${CLI_MODE} ${LOG_DISABLE} ${GPU} ${NGL} ${GRAMMAR_FILE} ${PRESET} ${TEMPERATURE} ${CONTEXT_LENGTH} ${N_PREDICT} ${BATCH_SIZE} ${NO_PENALIZE_NL}--repeat-penalty 1 ${THREADS} -f /dev/stdin ${SILENT_PROMPT} --seed "${SEED}" ${LLM_ADDITIONAL_ARGS} 2> "${ERROR_OUTPUT}"
     return $?
 }
 

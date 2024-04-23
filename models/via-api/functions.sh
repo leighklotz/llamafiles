@@ -18,22 +18,18 @@ LLM_LIB_DIR=$(realpath "${SCRIPT_DIR}/../lib")
 LLM_MODELS_DIR=$(realpath "${SCRIPT_DIR}/../models")
 MODEL_FILE="mixtral/mixtral-8x7b-instruct-v0.1.Q5_K_M.llamafile"
 PIDFILE="/tmp/via-api.pid"
-SEED="${SEED:-NaN}"
+SEED="${SEED:--1}"
 
 # fixme: some models support the system role API and some do not.
-# looks like MODEL_MODE must be "instruct" to use
-# system-message; otherwise it's a mix of context, characters,
-# and presets, best avoided for now.
-#
 # todo: query ooba API to find the model behind the api,
 # and add put a new function to each model/*/*functions.sh
 # to determinue USE_SYSTEM_ROLE properly for each model type.
-#
 # workaround: for now use `export USE_SYSTEM_ROLE=1` if you need it.
+USE_SYSTEM_ROLE="${USE_SYSTEM_ROLE:-}"
 # mixtral-7b-instruct-v0.1: no
 # dolphin-2.6-mistral-7b-dpo: yes
 # dolphin-2.7-mixtral: yes
-USE_SYSTEM_ROLE="${USE_SYSTEM_ROLE:-}"
+# nous-hermes-2-mixtral-8x7b-dpo: 
 
 SYSTEM_ROLE_TEMPLATE='{
     messages: [
@@ -47,13 +43,10 @@ SYSTEM_ROLE_TEMPLATE='{
       }
     ],
     mode: $mode,
-    top_p: 0.9,
-    top_k: 20,
     temperature: $temperature,
     repetition_penalty: $repetition_penalty,
     penalize_nl: $penalize_nl,
     grammar_string: $grammar_string,
-    preset: $preset,
     seed: $seed
 }'
 
@@ -69,7 +62,6 @@ NO_SYSTEM_ROLE_TEMPLATE='{
     repetition_penalty: $repetition_penalty,
     penalize_nl: $penalize_nl,
     grammar_string: $grammar_string,
-    preset: $preset,
     seed: $seed
 }'
 
@@ -98,16 +90,11 @@ function via_api_mistral_output_fixup {
 # todo: so many files and strings back and forth
 function via_api_perform_inference() {
     local mode="$1" system_message="$2" question="$3" grammar_file="$4"
-    local preset="$5" temperature="$6" repetition_penalty="$7" penalize_nl="$8"
+    local temperature="$5" repetition_penalty="$6" penalize_nl="$7"
     
     if [ -z "$grammar_file" ] || [ -n "${VIA_API_INHIBIT_GRAMMAR}" ];
     then
 	grammar_file="/dev/null"
-    fi
-
-    if [ -z "$temperature" ];
-    then
-	temperature=null
     fi
 
     # fixme: not all models support the system role in the API, and there's no way to tell afaik
@@ -132,30 +119,25 @@ function via_api_perform_inference() {
     question=${question%%[[:space:]]}
     question_file=$(mktemp); printf "%s" "${question}" >> "${question_file}"
 
-    # hack: Drop empty string, and null parameters. NaN seems th show as null.
-    #       sadly seed must be a number
-    temperature=${temperature:-NaN} 
     data=$(jq --raw-input --raw-output  --compact-output -n \
 	      --arg mode "${mode}" \
-	      --argjson temperature "${temperature}" \
-	      --argjson repetition_penalty "${repetition_penalty}" \
-	      --argjson penalize_nl "${penalize_nl}" \
-	      --arg preset "${preset}" \
-	      --argjson seed ${SEED} \
+	      --arg temperature "${temperature}" \
+	      --arg repetition_penalty "${repetition_penalty}" \
+	      --arg penalize_nl "${penalize_nl}" \
+	      --arg seed "${SEED}" \
 	      --rawfile system_message "${system_message_file}" \
 	      --rawfile question "${question_file}" \
 	      --rawfile grammar_string "${grammar_file}" \
 	      "${TEMPLATE}" \
-	| jq 'del(.[] | select(. == ""))' \
-	| jq 'del(.[] | select(. == null))' 
+	| jq 'del(.[] | select(. == ""))' || (log_and_exit $? "jq parsing failed") \
 	)
+    #set -x
     if [ "${VERBOSE}" ]; then
 	echo "USE_SYSTEM_ROLE='$USE_SYSTEM_ROLE'"
 	printf "%s\n" "${data}" | jq --indent 1 >> /dev/stderr
     fi
 
-    # Invoke via the HTTP API endpoint 
-    #set -x
+    # Invoke the HTTP API endpoint via
     result=$(printf "%s" "${data}" | curl -s "${VIA_API_CHAT_COMPLETIONS_ENDPOINT}" -H 'Content-Type: application/json' -d @-)
     s=$?
     if [ "$s" != 0 ];
@@ -186,6 +168,7 @@ function via_api_model {
 function get_model_name {
     # curl prints
     # `{"model_name":"LoneStriker_dolphin-2.7-mixtral-8x7b-3.75bpw-h6-exl2","lora_names":[]}`
+    # todo:  this correct
     curl -s "${VIA_API_MODEL_INFO_ENDPOINT}" | jq -r .model_name
 }
 
