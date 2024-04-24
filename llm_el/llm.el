@@ -45,16 +45,16 @@
   "mistral" 
   "Default model type for LLM."
   :type '(choice
-           (const :tag "cerebrum" "cerebrum")
-           (const :tag "codebooga" "codebooga")
-           (const :tag "deepseek-coder" "deepseek-coder")
-           (const :tag "dolphin" "dolphin")
-           (const :tag "mistral" "mistral")
-           (const :tag "mixtral" "mixtral")
-           (const :tag "nous-hermes" "nous-hermes")
-           (const :tag "phi" "phi")
-           (const :tag "rocket" "rocket")
-           (const :tag "via-api" "via-api"))
+           (const 'cerebrum)
+           (const 'codebooga)
+           (const 'deepseek-coder)
+           (const 'dolphin)
+           (const 'mistral)
+           (const 'mixtral)
+           (const 'nous-hermes)
+           (const 'phi)
+           (const 'rocket)
+           (const 'via-api))
   :group 'llm)
 
 (defvar llm-ask-buffer-name     "*llm-ask*")
@@ -131,7 +131,7 @@ See [shell-command-on-region] for interpretation of output-buffer-name."
   (let ((command (format "%s %s %s %d"
 			 llm-rewrite-script-path
 			 (shell-quote-argument "complete")
-			 (shell-quote-argument model-type)
+			 (shell-quote-argument (format "%s" model-type))
 			 n-predict))
 	(display-error-buffer t)
 	(region-noncontiguous-p nil))
