@@ -42,7 +42,7 @@ function post_process {
 	scuttle_extract_json
 	s=$?
     fi
-    [ $s != 0 ] && log_and_exit "$0" $s "post_process"
+    [ $s != 0 ] && log_and_exit $s "$0" $s "post_process"
     return $s
 }
 
