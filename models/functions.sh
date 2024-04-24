@@ -42,7 +42,7 @@ function log_and_exit {
     local code=$1
     local message="$2"
     printf "* ERROR %s (%s): %s\n" "${prog}" "${code}" "${message}" > /dev/stderr
-    exit $code
+    [[ $code =~ ^[0-9]+$ ]] && exit $code || exit 1
 }
 
 # Check if the script is being sourced or directly executed
