@@ -2,6 +2,10 @@
 
 ## Nonce script for querying text-generation-webui and llamafile and llama.cpp HTTP API
 SCRIPT_DIR=$(dirname $(realpath "${BASH_SOURCE}"))
+
+# Get site variables from env.sh, if present
+[ -f "${SCRIPT_DIR}/env.sh" ] && source "${SCRIPT_DIR}/env.sh"
+
 MODEL_TYPE="${MODEL_TYPE:-via-api}"
 
 function usage {
