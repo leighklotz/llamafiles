@@ -1,0 +1,29 @@
+klotz@core:~$ help.sh what cli is like top and pstree combined
+ There isn't a single CLI (Command-Line Interface) tool that directly merges the functionalities of `top` and `pstree` with an exact match, but you can achieve similar results by using a combination of these two commands or other tools like `htop` or `gpstree`.
+
+`top` displays the running processes along with their system resources usage like CPU, memory, and process IDs. On the other hand, `pstree` shows the hierarchical tree representation of the currently running processes, including their parent-child relationships.
+
+If you'd like to view the process hierarchy with some real-time monitoring capabilities similar to `top`, you can use `htop` instead. `htop` is an interactive process viewer, which provides more advanced features than `top`, including colorful process hierarchies, easy navigation, and the ability to interactively change process states. You can install it using your package manager, e.g., for Debian-based systems:
+
+```bash
+sudo apt-get install htop
+```
+
+To run `htop`, simply type `htop` in your terminal.
+
+For an alternative to `pstree` that works better with real-time monitoring, consider using `pgrep` and `ptree` together. `pgrep` is a simple command-line utility for searching processes and `ptree` is a tool for displaying the tree-like structure of the process hierarchy.
+
+First, install `ptree` using your package manager:
+
+```bash
+sudo apt-get install ptree # for Debian-based systems
+sudo yum install ptree # for CentOS-based systems
+```
+
+To display the tree structure of the running processes and update it in real-time, use the following command:
+
+```bash
+watch 'ptree -p'
+```
+
+This command uses `watch` to refresh the `ptree` output every two seconds.
