@@ -35,7 +35,7 @@ function mistral_prompt {
     local system_message="${SYSTEM_MESSAGE%$'\n'}"
     local input="${INPUT%$'\n'}"
     local question="${QUESTION%$'\n'}"
-    [ -n "${system_message}" ] && printf -v PROMPT "%s%s" "${PROMPT}" "${system_message}"
+    [ -n "${system_message}" ] && printf -v PROMPT "%s%s\n" "${PROMPT}" "${system_message}"
     [ -n "${question}" ] &&       printf -v PROMPT "%s\n%s" "${PROMPT}" "${question}"
     [ -n "${input}" ] &&          printf -v PROMPT "%s\n%s" "${PROMPT}" "${input}"
                                   printf -v PROMPT "%s[/INST]" "${PROMPT}"
