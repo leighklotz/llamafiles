@@ -80,6 +80,10 @@ function parse_args() {
     then
 	while [[ $# -gt 0 ]]; do
             case $1 in
+		--help)
+		    printf "$0: %s\n" "${USAGE}" >> /dev/stderr
+		    exit 0
+		    ;;
 		-m|--model-type)
                     shift; MODEL_TYPE="$1" ;;
 		--fast)
@@ -228,7 +232,7 @@ function prepare_model {
 	phi) phi_model ;;
 	via-api) via_api_model ;;
 	*)
-            echo "unknown model type $MODEL_TYPE" >> /dev/stderr
+            printf "unknown model type %s\n" "${MODEL_TYPE}" >> /dev/stderr
             exit 1
             ;;
     esac
