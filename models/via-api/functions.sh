@@ -112,7 +112,7 @@ function via_api_perform_inference() {
     then
 	TEMPLATE="${NO_SYSTEM_ROLE_TEMPLATE}"
 	question=$(printf "%s\n%s" "${system_message}" "${question}")
-	system_mesage="xxx unused"
+	system_mesage=""
     else
 	TEMPLATE="${SYSTEM_ROLE_TEMPLATE}"
     fi
@@ -122,11 +122,11 @@ function via_api_perform_inference() {
     # prepare system message and question
     system_message=${system_message##[[:space:]]}
     system_message=${system_message%%[[:space:]]}
-    system_message_file=$(mktemp); printf "%s\n" "${system_message%$'\n'}" >> "${system_message_file}"
+    system_message_file=$(mktemp -t sysmsg.XXXXXX); printf "%s\n" "${system_message%$'\n'}" >> "${system_message_file}"
 
     question=${question##[[:space:]]}
     question=${question%%[[:space:]]}
-    question_file=$(mktemp); printf "%s" "${question}" >> "${question_file}"
+    question_file=$(mktemp -t quest.XXXXXX); printf "%s" "${question}" >> "${question_file}"
 
     # hack: Drop empty string, and null parameters. NaN seems th show as null.
     #       sadly seed must be a number
@@ -164,8 +164,18 @@ function via_api_perform_inference() {
     then
 	log_warn $s "via-api perform inference cannot parse output"
     fi
-    rm -f "${question_file}" || echo "* WARN: unable to remove ${question_file}" >> /dev/stderr
-    rm -f "${system_message_file}" || log_warn $? "* WARN: unable to remove ${system_message_file}"
+    case "$KEEP_PROMPT_TEMP_FILE" in
+	ALL)
+	    true
+	    ;;
+	ERROR|ERRORS|NONE)
+	    if [ "$s" == 0 ] || [ "${KEEP_PROMPT_TEMP_FILE}" == "NONE" ];
+	       then
+		   rm -f "${question_file}" || echo "* WARN: unable to remove ${question_file}" >> /dev/stderr
+		   rm -f "${system_message_file}" || log_warn $? "* WARN: unable to remove ${system_message_file}"
+	    fi
+	    ;;
+    esac
     printf "%s\n" "${output}" | via_api_mistral_output_fixup
     return $s
 }
