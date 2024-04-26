@@ -115,7 +115,7 @@ See [shell-command-on-region] for interpretation of output-buffer-name."
 	(command (format "%s %s %s %s %s"
 			 llm-rewrite-script-path
 			 (shell-quote-argument use-case)
-			 (shell-quote-argument model-type)
+			 (shell-quote-argument (format "%s" model-type))
 			 (shell-quote-argument major-mode-name)
 			 (shell-quote-argument user-prompt)))
 	(display-error-buffer t)
