@@ -37,6 +37,7 @@ function rocket_model {
                     "${MODELS_DIRECTORY}/rocket/rocket-3b.Q5_K_M.llamafile" \
                     "${MODELS_DIRECTORY}/rocket/rocket-3b.Q4_K_M.llamafile" \
              )
+	USE_SYSTEM_ROLE=1
         gpu_check 4
         chatml_prompt
         rocket_priority
