@@ -1,0 +1,8 @@
+klotz@rpi5:~/wip/llamafiles/scripts help-commit
+Here's a one-liner commit message for the changes listed in the `git diff`:
+git commit -am'Added USE_SYSTEM_ROLE=1 to rocket_functions.sh, and added chatml_prompt and rocket_priority to rocket_functions.sh'
+'
+
+klotz@rpi5:~/wip/llamafiles/scripts$ ls -l /home/klotz/wip/llamafiles/models/rocket/rocket-3b.Q4_K_M.llamafile
+-rwxr-xr-x 1 klotz klotz 1739067756 Jan 13 14:58 /home/klotz/wip/llamafiles/models/rocket/rocket-3b.Q4_K_M.llamafile
+klotz@rpi5:~/wip/llamafiles/scripts$
