@@ -202,7 +202,7 @@ function cap_ngl {
 function load_model {
     if [ -z "${MODEL_TYPE}" ];
     then
-	log_error_and_exit 3 "Model not found: ${MODEL_TYPE}"
+	log_and_exit 3 "Model not found: ${MODEL_TYPE}"
     fi
 
     # Construct the path to the functions file
@@ -212,7 +212,7 @@ function load_model {
     if [[ -f "${MODEL_FUNCTIONS_PATH}" ]]; then
 	source "${MODEL_FUNCTIONS_PATH}"
     else
-	log_error_and_exit 1 "Cannot find model functions for ${MODEL_TYPE}: ${MODEL_FUNCTIONS_PATH}"
+	log_and_exit 1 "Cannot find model functions for ${MODEL_TYPE}: ${MODEL_FUNCTIONS_PATH}"
     fi
 
 }
@@ -256,7 +256,7 @@ function check_context_length {
 
     if [ "${PROMPT_LENGTH_EST}" -gt "${CONTEXT_LENGTH}" ];
     then
-	log_error_and_exit 2 "* ERROR: Prompt len ${PROMPT_LENGTH_EST} estimated not to fit in context ${CONTEXT_LENGTH}"
+	log_and_exit 2 "* ERROR: Prompt len ${PROMPT_LENGTH_EST} estimated not to fit in context ${CONTEXT_LENGTH}"
     fi
 
     if [ "$CONTEXT_LENGTH" -gt "$MAX_CONTEXT_LENGTH" ];
