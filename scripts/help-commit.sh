@@ -76,7 +76,7 @@ fi
 # remove triple-backquote from the diff output since we're enclosing the body in that
 diff_output_sanitized="$(printf "%s" "$DIFF_OUTPUT" | sed -e 's/```/`_`_`/g')"
 
-TEMPLATE='```h
+TEMPLATE='```sh
 $ %s
 %s
 ```\n'
