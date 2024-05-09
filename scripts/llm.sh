@@ -382,7 +382,7 @@ then
     repeat_penalty="1"
     penalize_nl="false"
     MODEL_MODE="${MODEL_MODE:instruct}"
-    # set -x
+    #set -x
     via_api_perform_inference "${MODEL_MODE}" "${SYSTEM_MESSAGE}" "${PROMPT}" "${GRAMMAR_FILE}" "${TEMPERATURE}" "${repeat_penalty}" "${penalize_nl}"
     STATUS=$?
     # fixme: these parameters are set in model loading and cannot be accomodated here

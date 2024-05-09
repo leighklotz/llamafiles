@@ -31,6 +31,14 @@ function rocket_priority {
     cap_ngl
 }
 
+function rocket_overrides {
+    if [ -n "${SILENT_PROMPT}" ] && [[ "${SILENT_PROMPT}" =~ '--no-display-prompt' ]];
+    then
+	SILENT_PROMPT="$(printf "%s" "${SILENT_PROMPT}" | sed -e 's/ *--no-display-prompt//g')"
+    fi
+}
+
+
 function rocket_model {
         MODEL=$(find_first_model \
                     "${MODELS_DIRECTORY}/rocket/rocket-3b.Q6_K.llamafile" \
@@ -41,4 +49,5 @@ function rocket_model {
         gpu_check 4
         chatml_prompt
         rocket_priority
+	rocket_overrides
 }
