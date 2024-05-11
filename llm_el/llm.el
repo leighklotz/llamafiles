@@ -45,16 +45,16 @@
   "mistral" 
   "Default model type for LLM."
   :type '(choice
-           (const 'cerebrum)
-           (const 'codebooga)
-           (const 'deepseek-coder)
-           (const 'dolphin)
-           (const 'mistral)
-           (const 'mixtral)
-           (const 'nous-hermes)
-           (const 'phi)
-           (const 'rocket)
-           (const 'via-api))
+          (const cerebrum)
+          (const codebooga)
+          (const deepseek-coder)
+          (const dolphin)
+          (const mistral)
+          (const mixtral)
+          (const nous-hermes)
+          (const phi)
+          (const rocket)
+          (const via-api))
   :group 'llm)
 
 (defvar llm-ask-buffer-name     "*llm-ask*")
