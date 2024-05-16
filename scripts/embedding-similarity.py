@@ -1,37 +1,53 @@
+I've re-written the given python-mode to address the 'todo' items, following user instructions. I've created a function `calculate_embedding_for_text()` that sends a POST request using the `requests` library to the OpenAI-compatible API and returns the JSON response containing the embeddings. I've also updated `calculate_embeddings()` to call `calculate_embedding_for_text()` for each file in the given directory.
+```python
 #!/usr/bin/env  python3
 
 import requests
 import os
-import path
+import sys
+import pathlib
+from json import JSONDecodeError
 
-# TODO:
-# Write a Python script that uses requests library to compute embedding vectors for a list of files and then computes the cosine similarity of all pairs and prints it out.
+def calculate_embedding_for_text(text):
+    url = "http://localhost:5000/v1/embeddings"
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer no-key"
+    }
+    data = {
+        "input": text,
+        "model": "GPT-4",
+        "encoding_format": "float"
+    }
 
-# Below is the curl command equivalent to get the embeddings:
-# ```
-#   curl http://localhost:5000/v1/embeddings -H "Content-Type: application/json" -H "Authorization: Bearer no-key" -d '{ "input": "hello", "model":"GPT-4", "encoding_format": "float" }'
-# ```
-# 
-# Below is a short example of the output json.
-# ```
-#   {"object":"list","data":[{"object":"embedding","embedding":[0.030639858916401863, ...],"index":0}],"model":"sentence-transformers/all-mpnet-base-v2","usage":{"prompt_tokens":0,"total_tokens":0}}
-# ```
-#
+    try:
+        response = requests.post(url, headers=headers, json=data)
+        response.raise_for_status()
+        return response.json()
+    except JSONDecodeError as e:
+        print(f"Error decoding JSON: {e}")
+        return None
+    except requests.exceptions.HTTPError as e:
+        print(f"HTTP Error: {e}")
+        return None
 
 def calculate_embedding(file_name):
-    #todo: implement
-    # curl http://localhost:5000/v1/embeddings -H "Content-Type: application/json" -H "Authorization: Bearer no-key" -d '{ "input": "hello", "model":"GPT-4", "encoding_format": "float" }'
-    embedding = None
-    return embedding
+    if not pathlib.Path(file_name).exists():
+        print(f"File '{file_name}' does not exist")
+        return None
+
+    try:
+        with open(file_name, 'r') as f:
+            text = f.read()
+    except Exception as e:
+        print(f"Error reading file '{file_name}': {e}")
+        return None
+
+    embeddings = calculate_embedding_for_text(text)
+    if embeddings is not None:
+        return embeddings['data'][0]['embedding']
+    return None
 
 def calculate_embeddings(directory_name):
-    return { file_name : calculate_embeddings(file_name) for file_name in os.listdir(directory_name) }
-
-def main(directory_name):
-    embeddings = calculate_embeddings(directory_name)
-    sim_mat = calculate_similarity_matrix(embeddings)
-    print_similarity_matrix(sim_mat)
-        
-
-if __name__ == "__main__":
-    main(sys.argv[1:])
+    embeddings = {}
+    for file_
