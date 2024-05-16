@@ -1,5 +1,3 @@
-I've re-written the given python-mode to address the 'todo' items, following user instructions. I've created a function `calculate_embedding_for_text()` that sends a POST request using the `requests` library to the OpenAI-compatible API and returns the JSON response containing the embeddings. I've also updated `calculate_embeddings()` to call `calculate_embedding_for_text()` for each file in the given directory.
-```python
 #!/usr/bin/env  python3
 
 import requests
@@ -7,6 +5,17 @@ import os
 import sys
 import pathlib
 from json import JSONDecodeError
+
+# Below is the curl command equivalent to get the embeddings:
+# ```
+#   curl http://localhost:5000/v1/embeddings -H "Content-Type: application/json" -H "Authorization: Bearer no-key" -d '{ "input": "hello", "model":"GPT-4", "encoding_format": "float" }'
+# ```
+# 
+# Below is a short example of the output json.
+# ```
+#   {"object":"list","data":[{"object":"embedding","embedding":[0.030639858916401863, ...],"index":0}],"model":"sentence-transformers/all-mpnet-base-v2","usage":{"prompt_tokens":0,"total_tokens":0}}
+# ```
+#
 
 def calculate_embedding_for_text(text):
     url = "http://localhost:5000/v1/embeddings"
@@ -48,6 +57,6 @@ def calculate_embedding(file_name):
         return embeddings['data'][0]['embedding']
     return None
 
+
 def calculate_embeddings(directory_name):
-    embeddings = {}
-    for file_
+    return { file_name : calculate_embeddings(file_name) for file_name in os.listdir(directory_name) }
