@@ -309,7 +309,7 @@ You will need to do this on MacOS:
 ```
 $ cd ~/wip/llamafiles
 $ xattr -dr com.apple.quarantine models/*.llamafile models/*/*.llamafile lib/*
-``
+```
 
 # References
 ## Used directly
