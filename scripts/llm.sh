@@ -230,6 +230,7 @@ function prepare_model {
 	deepseek-coder) deepseek_coder_model ;;
 	rocket) rocket_model ;;
 	phi) phi_model ;;
+	phi3) phi3_model ;;
 	via-api) via_api_model ;;
 	*)
             printf "unknown model type %s\n" "${MODEL_TYPE}" >> /dev/stderr
@@ -300,8 +301,9 @@ function set_verbose_debug {
 }
 
 function fixup_input {
-    # workaround for https://github.com/Mozilla-Ocho/llamafile/issues/288
-    sed -e 's/<img src="/<img  src="/g'
+    # any workarounds needed install here, e.g.
+    # sed -e 's/<img src="/<img  src="/g'
+    cat
 }
 
 # todo: move this to a backends directory hierarchy
