@@ -46,10 +46,10 @@ $ help.sh what is my ip
 $ help.sh -m dolphin 'Give me a JQ cli to get the value of the field named `llama.context_length`'
 $ ask dolphin ...
 $ man xxd | help.sh "print file contents with xxd without the address column"
-$ help-commit 
+$ help-commit --oneline
 $ codeblock jq cat foo.jq | help.sh '"Explain this:'
 $ codeblock xslt cat redir/target.xslt | help.sh explain
-
+$ write.sh write.sh find and list empty directories in .
 ```
 
 More examples can be found below and in the [examples](https://github.com/leighklotz/llamafiles/tree/main/examples) directory.
@@ -163,6 +163,21 @@ To create multi-line commit message using the mixtral model with a long context,
 
 ```bash
 help-commit -- -m mixtral --long
+```
+
+## write.sh examples
+The `write.sh` command is similar in spirit to the iTerm2 AI command feature which https://gitlab.com/gnachman/iterm2/-/issues/11475
+But it is not hardwared to OpenAI and does not execute the code. It differs from `help.sh` only in the default prompt.
+
+```bash
+$ write.sh show git commit message for 70eab9e
+# Set the Git repository directory to /path/to/your/repo
+# Change this to the actual path of your Git repository
+cd /path/to/your/repo
+
+# Show the commit message for the commit with SHA-1 70eab9e
+git show 70eab9e --pretty=%s</s>
+$ 
 ```
 
 # llm_el for Emacs
