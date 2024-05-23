@@ -319,11 +319,32 @@ function handle_temp_files {
 }
 
 # if --raw-input is specified, use stdin as the only text to send to the model
-function adjust_raw_input {
+function adjust_raw_flag {
     if [ -n "${RAW_FLAG}" ]; then
 	PROMPT="${INPUT}"
 	SYSTEM_MESSAGE=""
     fi
+}
+
+function perform_inference {
+    if [ "$MODEL_TYPE" == "via-api" ];
+    then
+	# fixme: accept these
+	repeat_penalty="1"
+	penalize_nl="false"
+	MODEL_MODE="${MODEL_MODE:instruct}"
+	#set -x
+	# fixme: these parameters are set in model loading and cannot be accomodated here
+	# ${N_PREDICT} ${BATCH_SIZE}
+	# fixme: what do do about this parameter for API-bound fields?
+	# ${LLM_ADDITIONAL_ARGS}
+	via_api_perform_inference "${MODEL_MODE}" "${SYSTEM_MESSAGE}" "${PROMPT}" "${GRAMMAR_FILE}" "${TEMPERATURE}" "${repeat_penalty}" "${penalize_nl}"
+	status=$?
+    else
+	cli_perform_inference
+	status=$?
+    fi
+    return $status
 }
 
 set_threads
@@ -332,29 +353,12 @@ load_model
 process_question_escapes
 do_stdin
 prepare_model && [ -n "${VERBOSE}" ] && log_info "MODEL=${MODEL}"
-adjust_raw_input
+adjust_raw_flag
 check_context_length
 set_cli_options
 set_model_runner
 set_verbose_debug
-
-if [ "$MODEL_TYPE" == "via-api" ];
-then
-    # fixme: accept these
-    repeat_penalty="1"
-    penalize_nl="false"
-    MODEL_MODE="${MODEL_MODE:instruct}"
-    #set -x
-    via_api_perform_inference "${MODEL_MODE}" "${SYSTEM_MESSAGE}" "${PROMPT}" "${GRAMMAR_FILE}" "${TEMPERATURE}" "${repeat_penalty}" "${penalize_nl}"
-    STATUS=$?
-    # fixme: these parameters are set in model loading and cannot be accomodated here
-    # ${N_PREDICT} ${BATCH_SIZE}
-    # fixme: what do do about this parameter for API-bound fields?
-    # ${LLM_ADDITIONAL_ARGS}
-else
-    cli_perform_inference
-    STATUS=$?
-fi
+perform_inference; STATUS=$?
 report_success_or_fail $STATUS
 handle_temp_files $STATUS
 exit $STATUS

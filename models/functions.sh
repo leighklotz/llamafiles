@@ -185,7 +185,7 @@ function chatml_prompt {
 }
 
 # todo: much work here
-# for example, why not just call these all functions the same name?
+# load_model and prepare_model are two functions so llm.sh can do prep work once it knows the model but before it is loaded
 function load_model {
     if [ -z "${MODEL_TYPE}" ];
     then
@@ -193,16 +193,18 @@ function load_model {
     fi
 
     # Construct the path to the functions file
-    MODEL_FUNCTIONS_PATH="$(realpath "${MODELS_DIRECTORY}/${MODEL_TYPE}/functions.sh")"
+    model_functions_path="$(realpath "${MODELS_DIRECTORY}/${MODEL_TYPE}/functions.sh")"
 
     # Check if the model functions file exists
-    if [[ -f "${MODEL_FUNCTIONS_PATH}" ]]; then
-	source "${MODEL_FUNCTIONS_PATH}"
+    if [[ -f "${model_functions_path}" ]]; then
+	source "${model_functions_path}"
     else
-	log_and_exit 1 "Cannot find model functions for ${MODEL_TYPE}: ${MODEL_FUNCTIONS_PATH}"
+	log_and_exit 1 "Cannot find model functions for ${MODEL_TYPE}: ${model_functions_path}"
     fi
 
 }
+
+# why not just call these all functions the same name?
 function prepare_model {
     case "${MODEL_TYPE}" in
 	mixtral) mixtral_model ;;
