@@ -199,24 +199,6 @@ function cap_ngl {
     fi
 }
 
-function load_model {
-    if [ -z "${MODEL_TYPE}" ];
-    then
-	log_and_exit 3 "Model not found: ${MODEL_TYPE}"
-    fi
-
-    # Construct the path to the functions file
-    MODEL_FUNCTIONS_PATH="$(realpath "${MODELS_DIRECTORY}/${MODEL_TYPE}/functions.sh")"
-
-    # Check if the model functions file exists
-    if [[ -f "${MODEL_FUNCTIONS_PATH}" ]]; then
-	source "${MODEL_FUNCTIONS_PATH}"
-    else
-	log_and_exit 1 "Cannot find model functions for ${MODEL_TYPE}: ${MODEL_FUNCTIONS_PATH}"
-    fi
-
-}
-
 function check_context_length {
     # memory allocation: assume 4 chars per token
     #PROMPT_LENGTH_EST=$(((75+${#SYSTEM_MESSAGE}+${#QUESTION}+${#INPUT})/4))
@@ -242,14 +224,17 @@ function check_context_length {
 }
 
 function set_cli_options {
-    # Calculate $LLM_SH command line options
-    # Use bash :+ syntax to avoid setting prefixes on empty values
-    N_PREDICT="${N_PREDICT:+--n-predict $N_PREDICT}"
-    TEMPERATURE="${TEMPERATURE:+--temp $TEMPERATURE}"
-    CONTEXT_LENGTH="${CONTEXT_LENGTH:+-c $CONTEXT_LENGTH}"
-    BATCH_SIZE="${BATCH_SIZE:+--batch-size $BATCH_SIZE}"
-    NGL="${NGL:+-ngl $NGL}"
-    GPU="${GPU:+--gpu $GPU}"
+    if [ "$MODEL_TYPE" != "via-api" ];
+       then
+   # Calculate $LLM_SH command line options
+	# Use bash :+ syntax to avoid setting prefixes on empty values
+	N_PREDICT="${N_PREDICT:+--n-predict $N_PREDICT}"
+	TEMPERATURE="${TEMPERATURE:+--temp $TEMPERATURE}"
+	CONTEXT_LENGTH="${CONTEXT_LENGTH:+-c $CONTEXT_LENGTH}"
+	BATCH_SIZE="${BATCH_SIZE:+--batch-size $BATCH_SIZE}"
+	NGL="${NGL:+-ngl $NGL}"
+	GPU="${GPU:+--gpu $GPU}"
+    fi
 }
 
 function set_model_runner {
@@ -333,7 +318,13 @@ function handle_temp_files {
     fi
 }
 
-
+# if --raw-input is specified, use stdin as the only text to send to the model
+function adjust_raw_input {
+    if [ -n "${RAW_FLAG}" ]; then
+	PROMPT="${INPUT}"
+	SYSTEM_MESSAGE=""
+    fi
+}
 
 set_threads
 parse_args "$@"
@@ -341,12 +332,9 @@ load_model
 process_question_escapes
 do_stdin
 prepare_model && [ -n "${VERBOSE}" ] && log_info "MODEL=${MODEL}"
+adjust_raw_input
 check_context_length
-if [ "$MODEL_TYPE" != "via-api" ];
-then
-   # fixme
-   set_cli_options
-fi
+set_cli_options
 set_model_runner
 set_verbose_debug
 

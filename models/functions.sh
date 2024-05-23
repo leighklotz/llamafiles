@@ -185,7 +185,24 @@ function chatml_prompt {
 }
 
 # todo: much work here
-# for example, why not just call these all the same name?
+# for example, why not just call these all functions the same name?
+function load_model {
+    if [ -z "${MODEL_TYPE}" ];
+    then
+	log_and_exit 3 "Model not found: ${MODEL_TYPE}"
+    fi
+
+    # Construct the path to the functions file
+    MODEL_FUNCTIONS_PATH="$(realpath "${MODELS_DIRECTORY}/${MODEL_TYPE}/functions.sh")"
+
+    # Check if the model functions file exists
+    if [[ -f "${MODEL_FUNCTIONS_PATH}" ]]; then
+	source "${MODEL_FUNCTIONS_PATH}"
+    else
+	log_and_exit 1 "Cannot find model functions for ${MODEL_TYPE}: ${MODEL_FUNCTIONS_PATH}"
+    fi
+
+}
 function prepare_model {
     case "${MODEL_TYPE}" in
 	mixtral) mixtral_model ;;
@@ -204,10 +221,4 @@ function prepare_model {
             exit 1
             ;;
     esac
-
-    # if --raw-input is specified, use stdin as the only text to send to the model
-    if [ -n "${RAW_FLAG}" ]; then
-	PROMPT="${INPUT}"
-	SYSTEM_MESSAGE=""
-    fi
 }
