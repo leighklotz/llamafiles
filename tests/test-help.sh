@@ -21,7 +21,7 @@ do
     for m in "${model_types[@]}"
     do
 	echo "--- ${m} ---"
-	time help.sh --speed -m "${m}" "${q}"
+	time help.sh --fast -m "${m}" "${q}"
 	if [ $? -ne 0 ]; then
 	    echo "FAIL: status=$?"
 	fi
