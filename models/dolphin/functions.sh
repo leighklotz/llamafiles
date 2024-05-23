@@ -31,10 +31,10 @@ function dolphin_priority {
     cap_ngl
 }
 
-function dolphin_model {
+function prepare_model {
     MODEL=$(find_first_model \
                 ${MODELS_DIRECTORY}/dolphin/dolphin-2.7-mixtral-8x7b.Q4_K_M.gguf \
-		${MODELS_DIRECTORY}/dolphin/dolphin-2.7-mixtral-8x7b.Q4_K_M.gguf \
+                ${MODELS_DIRECTORY}/dolphin/dolphin-2.7-mixtral-8x7b.Q4_K_M.gguf \
          )
     gpu_check 1.3
     chatml_prompt

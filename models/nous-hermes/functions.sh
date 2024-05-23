@@ -33,7 +33,7 @@ function nous_hermes_priority {
     cap_ngl
 }
 
-function nous_hermes_model {
+function prepare_model {
     MODEL=$(find_first_model \
                 ${MODELS_DIRECTORY}/nous-hermes/nous-hermes-2-mixtral-8x7b-dpo.Q5_K_M.gguf \
                 ${MODELS_DIRECTORY}/nous-hermes/Nous-Hermes-2-Mixtral-8x7B-DPO.Q4_K_M.gguf \

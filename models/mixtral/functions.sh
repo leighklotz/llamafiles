@@ -40,7 +40,7 @@ function mixtral_priority {
     cap_ngl
 }
 
-function mixtral_model {
+function prepare_model {
     MODEL=$(find_first_model \
                 ${MODELS_DIRECTORY}/mixtral/mixtral-8x7b-instruct-v0.1.Q5_K_M.gguf \
                 ${MODELS_DIRECTORY}/mixtral/mixtral-8x7b-instruct-v0.1.Q5_K_M.llamafile \

@@ -193,7 +193,7 @@ function via_api_perform_inference() {
     return $s
 }
 
-function via_api_model {
+function prepare_model {
     model_name="$(get_model_name)"
     if [ "$model_name" == "None" ];
     then

@@ -31,7 +31,7 @@ function deepseek_coder_priority {
     cap_ngl
 }
 
-function deepseek_coder_model {
+function prepare_coder_model {
     MODEL=$(find_first_model \
                 "${MODELS_DIRECTORY}/deepseek-coder/deepseek-coder-33b-instruct.Q5_K_M.gguf" \
                 "${MODELS_DIRECTORY}/deepseek-coder/deepseek-coder-6.7b-instruct.Q4_K_M.gguf" \

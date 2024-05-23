@@ -10,7 +10,7 @@ function cerebrum_priority {
     MAX_CONTEXT_LENGTH=16384
     case "${PRIORITY}" in
         speed)
-            NGL=${NGL:=33}	# 20 for 8x7b model
+            NGL=${NGL:=33}      # 20 for 8x7b model
             CONTEXT_LENGTH=2048
             ;;
         length)
@@ -38,12 +38,12 @@ function cerebrum_priority {
 
 function cerebrum_prompt {
     if [ "${INPUT}" == "" ]; then
-	printf -v PROMPT "<s>A chat between a user and a thinking artificial intelligence assistant. The assistant describes its thought process and gives helpful and detailed answers to the user's questions. %s
+        printf -v PROMPT "<s>A chat between a user and a thinking artificial intelligence assistant. The assistant describes its thought process and gives helpful and detailed answers to the user's questions. %s
 User: %s
 AI:
 " "${SYSTEM_MESSAGE%$'\n'}" "${QUESTION%$'\n'}"
     else
-	printf -v PROMPT "<s>A chat between a user and a thinking artificial intelligence assistant. The assistant describes its thought process and gives helpful and detailed answers to the user's questions. 
+        printf -v PROMPT "<s>A chat between a user and a thinking artificial intelligence assistant. The assistant describes its thought process and gives helpful and detailed answers to the user's questions. 
 %s
 User: %s
 INPUT: %s
@@ -53,12 +53,12 @@ AI: " "${SYSTEM_MESSAGE%$'\n'}" "${QUESTION%$'\n'}" "${INPUT%$'\n'}"
 
 # todo: it's odd to mix of mistral-7b and mixtral-8x7b but they have the same prompt
 # unforunately 7b can have 33 layers but 8x7b only 20
-# 		${MODELS_DIRECTORY}/cerebrum/cerebrum-1.0-8x7b_q6_k.gguf 
+#               ${MODELS_DIRECTORY}/cerebrum/cerebrum-1.0-8x7b_q6_k.gguf 
 
-function cerebrum_model {
+function prepare_model {
     MODEL=$(find_first_model \
                 ${MODELS_DIRECTORY}/cerebrum/Cerebrum-1.0-7b-Q6_K.gguf \
-	 )
+         )
     gpu_check 4
     cerebrum_prompt
     cerebrum_priority

@@ -34,20 +34,20 @@ function rocket_priority {
 function rocket_overrides {
     if [ -n "${SILENT_PROMPT}" ] && [[ "${SILENT_PROMPT}" =~ '--no-display-prompt' ]];
     then
-	SILENT_PROMPT="$(printf "%s" "${SILENT_PROMPT}" | sed -e 's/ *--no-display-prompt//g')"
+        SILENT_PROMPT="$(printf "%s" "${SILENT_PROMPT}" | sed -e 's/ *--no-display-prompt//g')"
     fi
 }
 
 
-function rocket_model {
+function prepare_model {
         MODEL=$(find_first_model \
                     "${MODELS_DIRECTORY}/rocket/rocket-3b.Q6_K.llamafile" \
                     "${MODELS_DIRECTORY}/rocket/rocket-3b.Q5_K_M.llamafile" \
                     "${MODELS_DIRECTORY}/rocket/rocket-3b.Q4_K_M.llamafile" \
              )
-	USE_SYSTEM_ROLE=1
+        USE_SYSTEM_ROLE=1
         gpu_check 4
         chatml_prompt
         rocket_priority
-	rocket_overrides
+        rocket_overrides
 }

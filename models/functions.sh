@@ -203,24 +203,3 @@ function load_model {
     fi
 
 }
-
-# why not just call these all functions the same name?
-function prepare_model {
-    case "${MODEL_TYPE}" in
-	mixtral) mixtral_model ;;
-	nous-hermes) nous_hermes_model ;;
-	dolphin) dolphin_model ;;
-	mistral) mistral_model ;;
-	codebooga) codebooga_model ;;
-	cerebrum) cerebrum_model ;;
-	deepseek-coder) deepseek_coder_model ;;
-	rocket) rocket_model ;;
-	phi) phi_model ;;
-	phi3) phi3_model ;;
-	via-api) via_api_model ;;
-	*)
-            printf "unknown model type %s\n" "${MODEL_TYPE}" >> /dev/stderr
-            exit 1
-            ;;
-    esac
-}

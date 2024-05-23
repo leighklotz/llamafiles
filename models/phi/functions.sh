@@ -29,7 +29,7 @@ function phi_priority {
     cap_ngl
 }
 
-function phi_model {
+function prepare_model {
     MODEL=$(find_first_model \
                 "${MODELS_DIRECTORY}/phi/phi-2.Q6_K.llamafile" \
                 "${MODELS_DIRECTORY}/phi/phi-2.Q5_K_M.llamafile" \

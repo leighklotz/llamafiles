@@ -32,7 +32,7 @@ function codebooga_priority {
 function codebooga_prompt {
 
     if [ "${INPUT}" == "" ]; then
-	printf -v PROMPT "%s" "Below is an instruction that describes a task. Write a response that appropriately completes the request.
+        printf -v PROMPT "%s" "Below is an instruction that describes a task. Write a response that appropriately completes the request.
 
 ### Instruction:
 ${SYSTEM_MESSAGE%$'\n'}
@@ -41,7 +41,7 @@ ${QUESTION%$'\n'}
 ### Response:
 "
     else
-	printf -v PROMPT "Below is an instruction that describes a task, paired with an input that provides further context. Write a response that appropriately completes the request.
+        printf -v PROMPT "Below is an instruction that describes a task, paired with an input that provides further context. Write a response that appropriately completes the request.
 
 ### Instruction:
 %s
@@ -52,12 +52,12 @@ ${QUESTION%$'\n'}
 
 ### Response:
 " "${SYSTEM_MESSAGE%$'\n'}" "${QUESTION%$'\n'}" "${INPUT%$'\n'}"
-	##### END NO INPUT CASE
+        ##### END NO INPUT CASE
     fi
 }
 
 
-function codebooga_model {
+function prepare_model {
     MODEL=$(find_first_model \
                 "${MODELS_DIRECTORY}/codebooga/codebooga-34b-v0.1.Q4_K_M.gguf" \
          )
