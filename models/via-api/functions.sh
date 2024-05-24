@@ -117,7 +117,7 @@ function via_api_perform_inference() {
     then
 	TEMPLATE="${NO_SYSTEM_ROLE_TEMPLATE}"
 	question=$(printf "%s\n%s" "${system_message}" "${question}")
-	system_mesage=""
+	system_message=""
     else
 	TEMPLATE="${SYSTEM_ROLE_TEMPLATE}"
     fi
@@ -130,6 +130,8 @@ function via_api_perform_inference() {
 	system_message=${system_message##[[:space:]]}
 	system_message=${system_message%%[[:space:]]}
 	system_message_file=$(mktemp -t sysmsg.XXXXXX); printf "%s\n" "${system_message%$'\n'}" >> "${system_message_file}"
+    else
+	system_message_file="/dev/null"
     fi
 
     question=${question##[[:space:]]}
@@ -180,7 +182,7 @@ function via_api_perform_inference() {
 	    if [ "$s" == 0 ] || [ "${KEEP_PROMPT_TEMP_FILE}" == "NONE" ];
 	       then
 		   [ -n "${question_file}" ] && rm -f "${question_file}" || echo "* WARN: unable to remove ${question_file}" >> /dev/stderr
-		   [ -n "${system_message_file}" ] && rm -f "${system_message_file}" || log_warn $? "* WARN: unable to remove ${system_message_file}"
+		   [ -n "${system_message_file}" ] && [ "${system_message_file}" != "/dev/null" ] && rm -f "${system_message_file}" || log_warn $? "* WARN: unable to remove ${system_message_file}"
 	    fi
 	    ;;
     esac
