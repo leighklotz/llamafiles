@@ -78,7 +78,7 @@ function prepare_prompt {
     if [ "${INPUT}" == "" ]; then
 	printf -v PROMPT "%s" "${QUESTION%$'\n'}"
     else
-	printf -v PROMPT "%s\\nn%s" "${QUESTION%$'\n'}" "${INPUT%$'\n'}"
+	printf -v PROMPT "%s\n\n%s" "${QUESTION%$'\n'}" "${INPUT%$'\n'}"
     fi
 }
 
