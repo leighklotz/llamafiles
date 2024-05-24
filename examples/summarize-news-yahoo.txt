@@ -1,0 +1,10 @@
+$ summarize https://news.yahoo.com in bullet format markdown
+- Article Title: "Here's the evidence presented against Trump in his hush money trial"
+- Trump's hush money trial involved 20 witnesses and over 200 pieces of evidence
+- Closing arguments will start next week
+- Other news stories covered:
+  - Minnesota politician's daughter and husband killed by gang in Haiti
+  - 'Super Size Me' filmmaker Morgan Spurlock dies at 53
+  - Some iPhone customers could get up to $349 in an Apple settlement
+  - Legendary U.S. WWII submarine found 3,000 feet underwater
+  - Many people quit new weight-loss drugs because of costs, side effects
