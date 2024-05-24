@@ -6,11 +6,11 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     exit 1
 fi
 
-function nous_hermes_prompt {
+function perpare_prompt {
     chatml_prompt
 }
 
-function nous_hermes_priority {
+function perpare_priority {
     MAX_CONTEXT_LENGTH=21000
     case "${PRIORITY}" in
          speed)
@@ -39,7 +39,7 @@ function prepare_model {
                 ${MODELS_DIRECTORY}/nous-hermes/Nous-Hermes-2-Mixtral-8x7B-DPO.Q4_K_M.gguf \
          )
     gpu_check 1
-    nous_hermes_prompt
-    nous_hermes_priority
+    perpare_prompt
+    perpare_priority
 }
 

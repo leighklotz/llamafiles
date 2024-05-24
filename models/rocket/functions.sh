@@ -48,6 +48,6 @@ function prepare_model {
         USE_SYSTEM_ROLE=1
         gpu_check 4
         chatml_prompt
-        rocket_priority
-        rocket_overrides
+        prepare_priority
+        prepare_overrides
 }

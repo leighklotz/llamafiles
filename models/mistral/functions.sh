@@ -6,7 +6,7 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     exit 1
 fi
 
-function mistral_priority {
+function prepare_priority {
     MAX_CONTEXT_LENGTH=16384
     case "${PRIORITY}" in
         speed)
@@ -30,7 +30,7 @@ function mistral_priority {
     cap_ngl
 }
 
-function mistral_prompt {
+function prepare_prompt {
     PROMPT="<s>[INST]"
     local system_message="${SYSTEM_MESSAGE%$'\n'}"
     local input="${INPUT%$'\n'}"
@@ -53,6 +53,6 @@ function prepare_model {
                 ${MODELS_DIRECTORY}/mistral/mistral-7b-instruct-v0.2.Q3_K_M.llamafile \
                 ${MODELS_DIRECTORY}/mistral/mistral-7b-instruct-v0.2.Q3_K_S.llamafile)
     gpu_check 4
-    mistral_prompt
-    mistral_priority
+    prepare_prompt
+    prepare_priority
 }

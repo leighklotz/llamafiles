@@ -6,7 +6,7 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     exit 1
 fi
 
-function cerebrum_priority {
+function prepare_priority {
     MAX_CONTEXT_LENGTH=16384
     case "${PRIORITY}" in
         speed)
@@ -36,7 +36,7 @@ function cerebrum_priority {
 # User: Are you conscious?
 # AI:
 
-function cerebrum_prompt {
+function prepare_prompt {
     if [ "${INPUT}" == "" ]; then
         printf -v PROMPT "<s>A chat between a user and a thinking artificial intelligence assistant. The assistant describes its thought process and gives helpful and detailed answers to the user's questions. %s
 User: %s
@@ -60,6 +60,6 @@ function prepare_model {
                 ${MODELS_DIRECTORY}/cerebrum/Cerebrum-1.0-7b-Q6_K.gguf \
          )
     gpu_check 4
-    cerebrum_prompt
-    cerebrum_priority
+    prepare_prompt
+    prepare_priority
 }

@@ -8,7 +8,7 @@ fi
 
 # Dolphin of various sorts
 
-function dolphin_priority {
+function prepare_priority {
     MAX_CONTEXT_LENGTH=32768
     case "${PRIORITY}" in
          speed)
@@ -38,5 +38,5 @@ function prepare_model {
          )
     gpu_check 1.3
     chatml_prompt
-    dolphin_priority
+    prepare_priority
 }

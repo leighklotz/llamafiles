@@ -6,22 +6,32 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     exit 1
 fi
 
-function phi_prompt {
+# <|system|>
+# You are a helpful AI assistant.<|end|>
+# <|user|>
+# How to explain Internet for a medieval knight?<|end|>
+# <|assistant|>
+
+
+function prepare_prompt {
     if [ "${INPUT}" == "" ];
     then
-      printf -v PROMPT "Instruct: %s
+      printf -v PROMPT "<|system|>
 %s
-Output:" "${SYSTEM_MESSAGE%$'\n'}" "${QUESTION%$'\n'}"
+<|user|>
+%s
+<|assistant|>" "${SYSTEM_MESSAGE%$'\n'}" "${QUESTION%$'\n'}"
     else
-      printf -v PROMPT "Instruct: %s
+      printf -v PROMPT "<|system|<>
+%s
+<|user|>
 %s
 %s
-Output:
-" "${SYSTEM_MESSAGE%$'\n'}" "${QUESTION%$'\n'}" "${INPUT%$'\n'}"
+<|assistant|>" "${SYSTEM_MESSAGE%$'\n'}" "${QUESTION%$'\n'}" "${INPUT%$'\n'}"
     fi
 }
 
-function phi_priority {
+function prepare_priority {
     MAX_CONTEXT_LENGTH=2048
     CONTEXT_LENGTH=${CONTEXT_LENGTH:=2048}
     BATCH_SIZE=${BATCH_SIZE:=128}
@@ -31,8 +41,7 @@ function phi_priority {
 
 function prepare_model {
     MODEL=$(find_first_model \
-                "${MODELS_DIRECTORY}/phi/phi-2.Q6_K.llamafile" \
-                "${MODELS_DIRECTORY}/phi/phi-2.Q5_K_M.llamafile" \
+                "${MODELS_DIRECTORY}/phi3/Phi-3-mini-4k-instruct.Q8_0.llamafile" \
          )
     gpu_check 4
     prepare_prompt

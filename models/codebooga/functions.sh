@@ -6,7 +6,7 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     exit 1
 fi
 
-function codebooga_priority {
+function prepare_priority {
     MAX_CONTEXT_LENGTH=32768
     case "${PRIORITY}" in
          speed)
@@ -29,7 +29,7 @@ function codebooga_priority {
     cap_ngl
 }
 
-function codebooga_prompt {
+function prepare_prompt {
 
     if [ "${INPUT}" == "" ]; then
         printf -v PROMPT "%s" "Below is an instruction that describes a task. Write a response that appropriately completes the request.
@@ -63,6 +63,6 @@ function prepare_model {
          )
     SILENT_PROMPT=""        # not supported by codebooga
     gpu_check 1
-    codebooga_prompt
-    codebooga_priority
+    prepare_prompt
+    prepare_priority
 }

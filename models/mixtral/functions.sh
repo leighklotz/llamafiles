@@ -6,7 +6,7 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     exit 1
 fi
 
-function mixtral_prompt {
+function prepare_prompt {
     PROMPT="<s>[INST]"
     local system_message="${SYSTEM_MESSAGE%$'\n'}"
     local input="${INPUT%$'\n'}"
@@ -17,7 +17,7 @@ function mixtral_prompt {
                                   printf -v PROMPT "%s[/INST]" "${PROMPT}"
 }
 
-function mixtral_priority {
+function prepare_priority {
     MAX_CONTEXT_LENGTH=21000
     case "${PRIORITY}" in
          speed)
@@ -44,10 +44,10 @@ function prepare_model {
     MODEL=$(find_first_model \
                 ${MODELS_DIRECTORY}/mixtral/mixtral-8x7b-instruct-v0.1.Q5_K_M.gguf \
                 ${MODELS_DIRECTORY}/mixtral/mixtral-8x7b-instruct-v0.1.Q5_K_M.llamafile \
-                ${MODELS_DIRECTORY}/mixtral/mixtral_7bx2_moe.Q3_K_M.gguf \
+                ${MODELS_DIRECTORY}/mixtral/prepare_7bx2_moe.Q3_K_M.gguf \
          )
     gpu_check 1.5
-    mixtral_prompt
-    mixtral_priority
+    prepare_prompt
+    prepare_priority
 }
 

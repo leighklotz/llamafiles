@@ -35,62 +35,54 @@ SEED="${SEED:-NaN}"
 # dolphin-2.7-mixtral: yes
 USE_SYSTEM_ROLE="${USE_SYSTEM_ROLE:-}"
 
-SYSTEM_ROLE_TEMPLATE='{
-    messages: [
-      {
-	role: "system",
-	content: $system_message
-      },
-      {
-	role: "user",
-	content: $question
-      }
-    ],
-    mode: $mode,
+TEMPLATE_SETTINGS="
+    mode: \$mode,
     temperature_last: true,
-    temperature: $temperature,
-    repetition_penalty: $repetition_penalty,
-    penalize_nl: $penalize_nl,
-    grammar_string: $grammar_string,
-    seed: $seed,
-
+    temperature: \$temperature,
+    repetition_penalty: \$repetition_penalty,
+    penalize_nl: \$penalize_nl,
+    grammar_string: \$grammar_string,
+    seed: \$seed,
     repeat_last_n: 64, repeat_penalty: 1.000, frequency_penalty: 0.000, presence_penalty: 0.000,
     top_k: 40, tfs_z: 1.000, top_p: 0.950, min_p: 0.050, typical_p: 1.000, temp: 0.000,
     mirostat: 0, mirostat_lr: 0.100, mirostat_ent: 5.000,
-    n_keep: 1
-}'
+    n_keep: 1"
+
+SYSTEM_ROLE_TEMPLATE="{
+    messages: [
+      {
+	role: \"system\",
+	content: \$system_message
+      },
+      {
+	role: \"user\",
+	content: \$question
+      }
+    ],
+    ${TEMPLATE_SETTINGS}
+}"
 
 # sampling order:  CFG -> Penalties -> top_k -> tfs_z -> typical_p -> top_p -> min_p -> temperature 
 
-NO_SYSTEM_ROLE_TEMPLATE='{
+NO_SYSTEM_ROLE_TEMPLATE="{
     messages: [
       {
-	role: "user",
-	content: $question
+	role: \"user\",
+	content: \$question
       }
     ],
-    mode: $mode,
-    temperature_last: true,
-    temperature: $temperature,
-    repetition_penalty: $repetition_penalty,
-    penalize_nl: $penalize_nl,
-    grammar_string: $grammar_string,
-    seed: $seed,
-    repeat_last_n: 64, repeat_penalty: 1.000, frequency_penalty: 0.000, presence_penalty: 0.000,
-    top_k: 40, tfs_z: 1.000, top_p: 0.950, min_p: 0.050, typical_p: 1.000, temp: 0.000,
-    mirostat: 0, mirostat_lr: 0.100, mirostat_ent: 5.000,
-    n_keep: 1
-}'
+    ${TEMPLATE_SETTINGS}    
+}"
 
-function via_api_prompt {
+function prepare_prompt {
     if [ "${INPUT}" == "" ]; then
 	printf -v PROMPT "%s" "${QUESTION%$'\n'}"
     else
-	printf -v PROMPT "%s\n%s" "${QUESTION%$'\n'}" "${INPUT%$'\n'}"
+	printf -v PROMPT "%s\\nn%s" "${QUESTION%$'\n'}" "${INPUT%$'\n'}"
     fi
 }
 
-function via_api_priority {
+function prepare_priority {
     true
 }
 
@@ -133,9 +125,12 @@ function via_api_perform_inference() {
     #set -x
     # remove leading and trailing whitespace for system_message and question
     # prepare system message and question
-    system_message=${system_message##[[:space:]]}
-    system_message=${system_message%%[[:space:]]}
-    system_message_file=$(mktemp -t sysmsg.XXXXXX); printf "%s\n" "${system_message%$'\n'}" >> "${system_message_file}"
+    if [ -n "${system_message}" ];
+    then
+	system_message=${system_message##[[:space:]]}
+	system_message=${system_message%%[[:space:]]}
+	system_message_file=$(mktemp -t sysmsg.XXXXXX); printf "%s\n" "${system_message%$'\n'}" >> "${system_message_file}"
+    fi
 
     question=${question##[[:space:]]}
     question=${question%%[[:space:]]}
@@ -144,7 +139,7 @@ function via_api_perform_inference() {
     # hack: Drop empty string, and null parameters. NaN seems th show as null.
     #       sadly seed must be a number
     temperature=${temperature:-NaN} 
-    #set -x
+    # set -x
     data=$(jq --raw-input --raw-output  --compact-output -n \
 	      --arg mode "${mode}" \
 	      --argjson temperature ${temperature} \
@@ -184,8 +179,8 @@ function via_api_perform_inference() {
 	ERROR|ERRORS|NONE)
 	    if [ "$s" == 0 ] || [ "${KEEP_PROMPT_TEMP_FILE}" == "NONE" ];
 	       then
-		   rm -f "${question_file}" || echo "* WARN: unable to remove ${question_file}" >> /dev/stderr
-		   rm -f "${system_message_file}" || log_warn $? "* WARN: unable to remove ${system_message_file}"
+		   [ -n "${question_file}" ] && rm -f "${question_file}" || echo "* WARN: unable to remove ${question_file}" >> /dev/stderr
+		   [ -n "${system_message_file}" ] && rm -f "${system_message_file}" || log_warn $? "* WARN: unable to remove ${system_message_file}"
 	    fi
 	    ;;
     esac
@@ -199,7 +194,7 @@ function prepare_model {
     then
 	log_and_exit 2 "No model loaded via-api"
     fi
-    via_api_prompt
+    prepare_prompt
 }
 
 function get_model_name {
