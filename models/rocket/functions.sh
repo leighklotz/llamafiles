@@ -6,7 +6,7 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     exit 1
 fi
 
-function rocket_priority {
+function prepare_priority {
     MAX_CONTEXT_LENGTH=4096
     case "${PRIORITY}" in
          speed)
@@ -31,7 +31,7 @@ function rocket_priority {
     cap_ngl
 }
 
-function rocket_overrides {
+function prepare_overrides {
     if [ -n "${SILENT_PROMPT}" ] && [[ "${SILENT_PROMPT}" =~ '--no-display-prompt' ]];
     then
         SILENT_PROMPT="$(printf "%s" "${SILENT_PROMPT}" | sed -e 's/ *--no-display-prompt//g')"
