@@ -9,8 +9,11 @@ SCRIPT_DIR=$(dirname $(realpath "${BASH_SOURCE}"))
 MODEL_TYPE="${MODEL_TYPE:-via-api}"
 
 function usage {
-    echo "usage: $0 [--get-model-name] [--list-models] [--load-model model-name] [--unload-model]"
-    echo "       $1"
+    echo "usage: $0 [--get-model-name] [--list-models] [--load-model model-name] [--unload-model] [--help]"
+    if [ -n "$1" ];
+    then
+       echo "       $1"
+    fi
     exit 1
 }
 
@@ -59,6 +62,9 @@ function main {
 	    ;;
 	--unload-model)
 	    unload_model
+	    ;;
+	--help)
+	    usage
 	    ;;
 	'')
 	    usage "at least one flag required"
