@@ -32,7 +32,7 @@ do
 
 	PROMPT="For the file named \`${FN}\` and whose filetype is \`${FILETYPE}\` and whose first ${NLINES} lines are shown below, output markdown link in the form \`- [title](${FN}): brief descriptionn\` with \`title\` being a short title for the file, followed by a very brief description of the file contents."
 	echo -n "- "
-	set -x
+	# set -x
 	if [[ "${FILETYPE}" =~ text ]];
 	   then
 	       ${SCRIPT_DIR}/codeblock.sh '' head -"${NLINES}" "${FN}" | ${SCRIPT_DIR}/help.sh --debug ${GRAMMAR_FILE_FLAG} -e -- "${PROMPT}" || exit 1
