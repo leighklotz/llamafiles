@@ -14,7 +14,11 @@ root ::= "[" [A-Za-z][^\]]+ "]" "(" [^)]+ ")" ": " [^\n]+[\n]
 EOF
 fi
 
+HELP_OPTIONS="--debug"
+
 NLINES_=10
+
+
 echo "# Files in $(basename $(pwd))"
 
 for FN in *
@@ -35,7 +39,7 @@ do
 	# set -x
 	if [[ "${FILETYPE}" =~ text ]];
 	   then
-	       ${SCRIPT_DIR}/codeblock.sh '' head -"${NLINES}" "${FN}" | ${SCRIPT_DIR}/help.sh --debug ${GRAMMAR_FILE_FLAG} -e -- "${PROMPT}" || exit 1
+	       ${SCRIPT_DIR}/codeblock.sh '' head -"${NLINES}" "${FN}" | ${SCRIPT_DIR}/help.sh ${HELP_OPTIONS} ${GRAMMAR_FILE_FLAG} -e -- "${PROMPT}" || exit 1
 	else
 	    echo "Not a text file: ${FN}" | ${SCRIPT_DIR}/help.sh ${GRAMMAR_FILE_FLAG} -e -- "${PROMPT}" || exit 1
 	fi
