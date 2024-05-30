@@ -14,7 +14,8 @@ root ::= "[" [A-Za-z][^\]]+ "]" "(" [^)]+ ")" ": " [^\n]+[\n]
 EOF
 fi
 
-HELP_OPTIONS="--debug"
+#HELP_OPTIONS="--debug"
+HELP_OPTIONS=""
 
 NLINES_=10
 
