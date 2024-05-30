@@ -7,7 +7,7 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
 fi
 
 function prepare_priority {
-    MAX_CONTEXT_LENGTH=16384
+    MAX_CONTEXT_LENGTH=32768
     case "${PRIORITY}" in
         speed)
             NGL=${NGL:=33}
@@ -43,6 +43,7 @@ function prepare_prompt {
 
 function prepare_model {
     MODEL=$(find_first_model \
+		${MODELS_DIRECTORY}/mistral/Mistral-7B-Instruct-v0.3-Q6_K.gguf \
                 ${MODELS_DIRECTORY}/mistral/Mistral-7B-Instruct-v0.3-Q4_K_M.gguf \
                 ${MODELS_DIRECTORY}/mistral/mistral-7b-instruct-v0.2.Q6_K.gguf \
                 ${MODELS_DIRECTORY}/mistral/mistral-7b-instruct-v0.2.Q5_K_M.llamafile \
