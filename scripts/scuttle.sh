@@ -24,12 +24,12 @@ do
 	    ;;
 	*)
 	    LINK=$1
+	    shift
 	    ARGS=$@
 	    break
 	    ;;
     esac
 done
-
 
 if [ -z "$LINK" ];
 then
