@@ -47,7 +47,8 @@ else
     exit 1
 fi
 
-SCUTTLE_SYSTEM_MESSAGE='Summarize the following web page article at the specified link address address and give link, title, description, and keywords as a JSON object with keys `link`, `title`, `description`, and `keywords`, like this: ```{ "link": "https://www.example.com/page", "title": "The Example Page", "description": "- This page is an example.\nA real summary would be longer\n", "keywords": ["example", "page", "IETF"]```:'
+SCUTTLE_SYSTEM_MESSAGE='Summarize the following web page article at the specified link address as a JSON object with keys `link`, `title`, `description`, and `keywords`, formatted like this example:
+{ "link": "...", "title": "...", "description": "...", "keywords": ["...", "..."]}'
 export SYSTEM_MESSAGE="${SYSTEM_MESSAGE:-$(printf "%b" "${SCUTTLE_SYSTEM_MESSAGE}")}"
 
 # transforms JSON output from LLM into a properly formatted URL string for Scuttlebookmark adding.
