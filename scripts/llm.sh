@@ -332,7 +332,7 @@ function perform_inference {
 	# fixme: accept these
 	repeat_penalty="1"
 	penalize_nl="false"
-	MODEL_MODE="${MODEL_MODE:instruct}"
+	MODEL_MODE="${MODEL_MODE:-instruct}"
 	#set -x
 	# fixme: these parameters are set in model loading and cannot be accomodated here
 	# ${N_PREDICT} ${BATCH_SIZE}
