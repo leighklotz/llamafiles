@@ -35,6 +35,7 @@ SEED="${SEED:-NaN}"
 # dolphin-2.7-mixtral: yes
 USE_SYSTEM_ROLE="${USE_SYSTEM_ROLE:-}"
 
+#    innstruction_template: \"Alpaca\",
 TEMPLATE_SETTINGS="
     mode: \$mode,
     temperature_last: true,
