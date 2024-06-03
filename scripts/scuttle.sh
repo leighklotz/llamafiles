@@ -2,7 +2,7 @@
 
 SCRIPT_DIR=$(dirname $(realpath "${BASH_SOURCE}"))
 
-. ${SCRIPT_DIR}/../models/functions.sh
+. ${SCRIPT_DIR}/../via/functions.sh
 
 function usage() {
     echo "Usage: $(basename $0) [--json] <LINK> [llm.sh options]"
@@ -47,8 +47,13 @@ else
     exit 1
 fi
 
-SCUTTLE_SYSTEM_MESSAGE='Summarize the following web page article at the specified link address as a JSON object: {"link": "...", "title": "...", "description": "...", "keywords": ["...", "..."]}'
+SCUTTLE_SYSTEM_MESSAGE='Summarize the web page article at the specified link address. Respond with only a short JSON object with these 4 fields: `link`, `title`, `description`, and `keywords` array:'
 export SYSTEM_MESSAGE="${SYSTEM_MESSAGE:-$(printf "%b" "${SCUTTLE_SYSTEM_MESSAGE}")}"
+
+# replace all '```json`' and '```' with empty. hope that's enough and we don't ahve to get stateful.
+function preprocess_markdown {
+    cat | sed -n '/{/,/}/p' | sed '1h;1!H;$!d;g;s/.*\({.*}\).*/\1/'
+}
 
 # transforms JSON output from LLM into a properly formatted URL string for Scuttlebookmark adding.
 # todo: try to find the json in the input, for example inside backquotes
@@ -56,10 +61,10 @@ export SYSTEM_MESSAGE="${SYSTEM_MESSAGE:-$(printf "%b" "${SCUTTLE_SYSTEM_MESSAGE
 function scuttle_extract_json {
     if [ -n "${JSON_MODE}" ];
     then
-	cat
+	cat | preprocess_markdown
 	return $?
     else
-	jq --arg xspace "%20" --arg plus "+" --arg xcomma "%2[cC]" --arg comma "," -r '.keywords |= if(type == "array") then join(",") else . end | "https://scuttle.klotz.me/bookmarks/klotz?action=add&address=\(.link|@uri|gsub($xspace; $plus)|gsub($xcomma; $comma))&description=\(.description|@uri|gsub($xspace; $plus)|gsub($xcomma; $comma))&title=\(.title|@uri|gsub($xspace; $plus)|gsub($xcomma; $comma))&tags=\(.keywords|@uri|gsub($xspace; $plus)|gsub($xcomma; $comma))"'
+	cat | preprocess_markdown | jq --arg xspace "%20" --arg plus "+" --arg xcomma "%2[cC]" --arg comma "," -r '.keywords |= if(type == "array") then join(",") else . end | "https://scuttle.klotz.me/bookmarks/klotz?action=add&address=\(.link|@uri|gsub($xspace; $plus)|gsub($xcomma; $comma))&description=\(.description|@uri|gsub($xspace; $plus)|gsub($xcomma; $comma))&title=\(.title|@uri|gsub($xspace; $plus)|gsub($xcomma; $comma))&tags=\(.keywords|@uri|gsub($xspace; $plus)|gsub($xcomma; $comma))"'
 	return $?
     fi
 }
@@ -79,4 +84,11 @@ function post_process {
     return $s
 }
 
-${LYNX} "${LINK}" | ${SCRIPT_DIR}/llm.sh --long ${ARGS} "# Text of link ${LINK}" | post_process
+if [ -z "${INHIBIT_GRAMMAR}" ];
+   then
+       GRAMMAR_FLAG="--grammar-file ${SCRIPT_DIR}/json3.gbnf"
+else
+    GRAMMAR_FLAG=""
+fi
+
+(${LYNX} "${LINK}"; printf "\n# Instruction\n%s\n" "${SCUTTLE_SYSTEM_MESSAGE}")| ${SCRIPT_DIR}/llm.sh --long ${GRAMMAR_FLAG} ${ARGS} "# Text of link ${LINK}" | post_process

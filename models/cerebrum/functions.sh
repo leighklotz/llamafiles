@@ -54,11 +54,22 @@ AI: " "${SYSTEM_MESSAGE%$'\n'}" "${QUESTION%$'\n'}" "${INPUT%$'\n'}"
 # todo: it's odd to mix of mistral-7b and mixtral-8x7b but they have the same prompt
 # unforunately 7b can have 33 layers but 8x7b only 20
 #               ${MODELS_DIRECTORY}/cerebrum/cerebrum-1.0-8x7b_q6_k.gguf 
+function set_model_path {
+    if [ -z "${MODEL_PATH}" ];
+    then
+	MODEL_PATH=$(find_first_model \
+			 ${MODELS_DIRECTORY}/cerebrum/Cerebrum-1.0-7b-Q6_K.gguf \
+		  )
+    fi
+}
+
+function get_model_name {
+    set_model_path
+    basename "${MODEL_PATH}"
+}
 
 function prepare_model {
-    MODEL=$(find_first_model \
-                ${MODELS_DIRECTORY}/cerebrum/Cerebrum-1.0-7b-Q6_K.gguf \
-         )
+    set_model_path
     gpu_check 4
     prepare_prompt
     prepare_priority

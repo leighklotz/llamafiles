@@ -1,0 +1,53 @@
+$ via --api --get-model-name
+turboderp_command-r-v01-35B-exl2_3.75bpw
+
+$ systype | help.sh how do I set default timezone to San Francisco on this ubuntu system via cli
+You can set the timezone by using the `timedatectl` command. Here's how you can set the timezone to America/Los_Angeles which is San Francisco's timezone:
+```bash
+sudo timedatectl set-timezone America/Los_Angeles
+```
+
+You can also use the `tzselect` command which lets you select the desired timezone by selecting the region and city:
+```bash
+sudo tzselect
+```
+For America, select 5 for New York (which is in the same timezone as San Francisco). This will update the timezone in the system. 
+
+After setting the timezone, the system files will be updated, but you might need to reboot the system for some applications to pick up the changes.
+$ 
+
+klotz@nuc1:~$ systype | help.sh how do I set default timezone on this ubuntu system via cli.
+You can use the `timedatectl` command to set the timezone. Here's how you can set the timezone to Asia/Jerusalem:
+```bash
+sudo timedatectl set-timezone Asia/Jerusalem
+```
+You can replace Asia/Jerusalem with your desired timezone from the list of available timezones. You can find the list of available timezones by running:
+```bash
+timedatectl list-timezones
+```
+klotz@nuc1:~$ timedatectl list-timezones
+Africa/Abidjan
+... 550 lines omitted ...
+PRC
+
+klotz@nuc1:~$ timedatectl list-timezones |help.sh "Which timezone for San Francisco?"
+The timezone for San Francisco is America/Los_Angeles.
+klotz@nuc1:~$ systype | help.sh how do I set default timezone on this ubuntu system via cli.
+You can set the default timezone on your Ubuntu system via CLI by using the `timedatectl` command, which is a utility for controlling the system time and date on Linux.
+
+To see the current system timezone, you can run:
+```bash
+timedatectl
+```
+This should output the current date, time, and timezone.
+
+To change the timezone, you can run the following command, replacing 'Europe/London' with your desired timezone:
+```bash
+timedatectl set-timezone 'Europe/London'
+```
+Here are some example timezones you can use:
+- 'America/New_York'
+- 'Europe/London'
+- 'Asia/Tokyo'
+
+You can replace the zone with the desired location and it will update the system timezone accordingly.

@@ -27,5 +27,5 @@ watch 'ptree -p'
 ```
 
 This command uses `watch` to refresh the `ptree` output every two seconds.
-klotz@core:~/wip/llamafiles/examples$ via-api --get-model-name
+klotz@core:~/wip/llamafiles/examples$ via --api --get-model-name
 LoneStriker_dolphin-2.7-mixtral-8x7b-3.75bpw-h6-exl2

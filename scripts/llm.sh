@@ -8,6 +8,7 @@ USAGE="[-m|--model-type model-type] [--stdin|--interactive|-i] [--fast | --long]
 [ -f "${SCRIPT_DIR}/env.sh" ] && source "${SCRIPT_DIR}/env.sh"
 
 # Use CLI flags, or environment variables below:
+VIA=${VIA:-cli}
 MODEL_TYPE=${MODEL_TYPE:-mistral}
 TEMPERATURE=${TEMPERATURE:-}
 CONTEXT_LENGTH=${CONTEXT_LENGTH:-}
@@ -50,14 +51,12 @@ KEEP_PROMPT_TEMP_FILE="${KEEP_PROMPT_TEMP_FILE:-ALL}" # "NONE"|"ERROR"|"ALL"
 PROMPT_TEMP_FILE="/tmp/prompt.$$"
 
 # Load functions
-MODELS_DIRECTORY="$(realpath "${SCRIPT_DIR}/../models")"
-FUNCTIONS_PATH="$(realpath "${MODELS_DIRECTORY}/functions.sh")"
-if [[ -f "${FUNCTIONS_PATH}" ]]; then
-    source "${FUNCTIONS_PATH}"
-else
-    echo "* ERROR: Cannot find functions: ${FUNCTIONS_PATH}" > /dev/stderr
-    exit 3
-fi
+VIA_DIRECTORY="$(realpath "${SCRIPT_DIR}/../via")"
+FUNCTIONS_PATH="$(realpath "${VIA_DIRECTORY}/functions.sh")"
+VIA_CLI_FUNCTIONS_PATH="$(realpath "${VIA_DIRECTORY}/cli/functions.sh")"
+VIA_API_FUNCTIONS_PATH="$(realpath "${VIA_DIRECTORY}/api/functions.sh")"
+
+source "${FUNCTIONS_PATH}"
 
 function set_threads() {
     # Get thread count
@@ -84,6 +83,8 @@ function parse_args() {
 		    printf "$0: %s\n" "${USAGE}" >> /dev/stderr
 		    exit 0
 		    ;;
+		--via)
+		    shift; VIA="$1" ;;
 		-m|--model-type)
                     shift; MODEL_TYPE="$1" ;;
 		--fast)
@@ -199,14 +200,16 @@ function cap_ngl {
     fi
 }
 
+# todo: support via=api; use cli or api calls for accurate counts;
 function check_context_length {
+    #set -x
     # memory allocation: assume 4 chars per token
     #PROMPT_LENGTH_EST=$(((75+${#SYSTEM_MESSAGE}+${#QUESTION}+${#INPUT})/4))
     PROMPT_LENGTH_EST=$((${#PROMPT}/4))
 
-    if [ "$MODEL_TYPE" == "via-api" ];
+    if [ "${VIA}" == "api" ];
     then
-	return;
+	return
     fi
 
     if [ "${PROMPT_LENGTH_EST}" -gt "${CONTEXT_LENGTH}" ];
@@ -224,9 +227,9 @@ function check_context_length {
 }
 
 function set_cli_options {
-    if [ "$MODEL_TYPE" != "via-api" ];
-       then
-   # Calculate $LLM_SH command line options
+    if [ "${VIA}" == "cli" ];
+    then
+	# Calculate $LLM_SH command line options
 	# Use bash :+ syntax to avoid setting prefixes on empty values
 	N_PREDICT="${N_PREDICT:+--n-predict $N_PREDICT}"
 	TEMPERATURE="${TEMPERATURE:+--temp $TEMPERATURE}"
@@ -234,6 +237,22 @@ function set_cli_options {
 	BATCH_SIZE="${BATCH_SIZE:+--batch-size $BATCH_SIZE}"
 	NGL="${NGL:+-ngl $NGL}"
 	GPU="${GPU:+--gpu $GPU}"
+    fi
+}
+
+# fixme: does not accept options yet
+function set_api_options {
+    if [ "${VIA}" == "api" ];
+    then
+	# fixme: other env are pre-calculated; try to move them here
+	# fixme: these are fixed and not variable
+	repeat_penalty="1"
+	penalize_nl="false"
+	MODEL_MODE="${MODEL_MODE:-instruct}"
+	# fixme: these parameters are set in model loading and cannot be accomodated here
+	# ${N_PREDICT} ${BATCH_SIZE}
+	# fixme: what do do about this parameter for API-bound fields?
+	# ${LLM_ADDITIONAL_ARGS}
     fi
 }
 
@@ -255,24 +274,6 @@ function set_verbose_debug {
     then
 	set -x
     fi
-}
-
-function fixup_input {
-    # any workarounds needed install here, e.g.
-    # sed -e 's/<img src="/<img  src="/g'
-    cat
-}
-
-# todo: move this to a backends directory hierarchy
-function cli_perform_inference {
-    # Use llamafile or similar CLI runner to perform inference
-    printf '%s' "${PROMPT}" > "${PROMPT_TEMP_FILE}"
-    if [ -n "${GRAMMAR_FILE}" ]; then
-	GRAMMAR_FILE="--grammar-file ${GRAMMAR_FILE}"
-    fi
-    #set -x
-    cat "${PROMPT_TEMP_FILE}" | fixup_input | ${MODEL_RUNNER} ${MODEL} ${CLI_MODE} ${LOG_DISABLE} ${GPU} ${NGL} ${GRAMMAR_FILE} ${TEMPERATURE} ${CONTEXT_LENGTH} ${N_PREDICT} ${BATCH_SIZE} ${NO_PENALIZE_NL}--repeat-penalty 1 ${THREADS} -f /dev/stdin ${SILENT_PROMPT} --seed "${SEED}" ${LLM_ADDITIONAL_ARGS} 2> "${ERROR_OUTPUT}"
-    return $?
 }
 
 # Try to inform user about errors
@@ -327,35 +328,33 @@ function adjust_raw_flag {
 }
 
 function perform_inference {
-    if [ "$MODEL_TYPE" == "via-api" ];
+    if [ "$VIA" == "api" ];
     then
-	# fixme: accept these
-	repeat_penalty="1"
-	penalize_nl="false"
-	MODEL_MODE="${MODEL_MODE:-instruct}"
-	#set -x
-	# fixme: these parameters are set in model loading and cannot be accomodated here
-	# ${N_PREDICT} ${BATCH_SIZE}
-	# fixme: what do do about this parameter for API-bound fields?
-	# ${LLM_ADDITIONAL_ARGS}
+	source_functions "${VIA_API_FUNCTIONS_PATH}"
+	set_api_options
 	via_api_perform_inference "${MODEL_MODE}" "${SYSTEM_MESSAGE}" "${PROMPT}" "${GRAMMAR_FILE}" "${TEMPERATURE}" "${repeat_penalty}" "${penalize_nl}"
 	status=$?
-    else
+    elif [ "$VIA" == "cli" ];
+    then
+	set_cli_options
+	source_functions "${VIA_CLI_FUNCTIONS_PATH}"
 	cli_perform_inference
 	status=$?
+    else
+	log_error "Unknown VIA=${VIA}"
+	status=1
     fi
     return $status
 }
 
 set_threads
 parse_args "$@"
-load_model
+init_model
 process_question_escapes
 do_stdin
-prepare_model && [ -n "${VERBOSE}" ] && log_info "MODEL=${MODEL}"
+prepare_model && [ -n "${VERBOSE}" ] && log_info "MODEL_PATH=${MODEL_PATH}"
 adjust_raw_flag
 check_context_length
-set_cli_options
 set_model_runner
 set_verbose_debug
 perform_inference; STATUS=$?

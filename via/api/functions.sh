@@ -2,6 +2,7 @@
 
 VIA_API_CHAT_BASE="${VIA_API_CHAT_BASE:-http://localhost:5000}"
 VIA_API_CHAT_COMPLETIONS_ENDPOINT="${VIA_API_CHAT_BASE}/v1/chat/completions"
+VIA_API_TOKEN_COUNT_ENDPOINT="${VIA_API_CHAT_BASE}/v1/chat/token-count"
 VIA_API_MODEL_INFO_ENDPOINT="${VIA_API_CHAT_BASE}/v1/internal/model/info"
 VIA_API_MODEL_LIST_ENDPOINT="${VIA_API_CHAT_BASE}/v1/internal/model/list"
 VIA_API_LOAD_MODEL_ENDPOINT="${VIA_API_CHAT_BASE}/v1/internal/model/load"
@@ -35,6 +36,7 @@ SEED="${SEED:-NaN}"
 # dolphin-2.7-mixtral: yes
 USE_SYSTEM_ROLE="${USE_SYSTEM_ROLE:-}"
 
+#    innstruction_template: \"Alpaca\",
 TEMPLATE_SETTINGS="
     mode: \$mode,
     temperature_last: true,
@@ -46,7 +48,8 @@ TEMPLATE_SETTINGS="
     repeat_last_n: 64, repeat_penalty: 1.000, frequency_penalty: 0.000, presence_penalty: 0.000,
     top_k: 40, tfs_z: 1.000, top_p: 0.950, min_p: 0.050, typical_p: 1.000, temp: 0.000,
     mirostat: 0, mirostat_lr: 0.100, mirostat_ent: 5.000,
-    n_keep: 1"
+    n_keep: 1,
+    skip_special_tokens: false"
 
 SYSTEM_ROLE_TEMPLATE="{
     messages: [
@@ -94,7 +97,8 @@ function via_api_mistral_output_fixup {
     sed -e 's/\\_/_/g' | sed -e 's/\\\*/*/g'
 }
 
-# via_api_perform_inference "instruct" "You are a helpful math bot. Answer the user's questions." "${question}"
+# todo: make common with cli_perform_inference by splitting out all
+#       non-inference settings to the prepare_model
 # via_api_perform_inference "$MODE" "$SYSTEM_PROMPT" "$QUESTION" "$GRAMMAR_FILE"
 # todo: so many files and strings back and forth
 function via_api_perform_inference() {
@@ -166,14 +170,12 @@ function via_api_perform_inference() {
     s=$?
     if [ "$s" != 0 ];
     then
-	log_warn $s "via-api perform inference cannot curl"
+	log_warn $s "via --api perform inference cannot curl"
     fi
     output="$(printf "%s" "${result}" | jq --raw-output '.choices[].message.content')"
     s=$?
-    if [ "$s" != 0 ];
-    then
-	log_warn $s "via-api perform inference cannot parse output"
-    fi
+
+    # deal with temp files
     case "$KEEP_PROMPT_TEMP_FILE" in
 	ALL)
 	    true
@@ -181,21 +183,41 @@ function via_api_perform_inference() {
 	ERROR|ERRORS|NONE)
 	    if [ "$s" == 0 ] || [ "${KEEP_PROMPT_TEMP_FILE}" == "NONE" ];
 	       then
-		   [ -n "${question_file}" ] && rm -f "${question_file}" || echo "* WARN: unable to remove ${question_file}" >> /dev/stderr
-		   [ -n "${system_message_file}" ] && [ "${system_message_file}" != "/dev/null" ] && rm -f "${system_message_file}" || log_warn $? "* WARN: unable to remove ${system_message_file}"
+		   ([ -n "${question_file}" ] && [ "${question_file}" != "/dev/null" ]) && (rm -f "${question_file}" || echo "* WARN: unable to remove question_file ${question_file}" >> /dev/stderr)
+		   ([ -n "${system_message_file}" ] && [ "${system_message_file}" != "/dev/null" ]) && (rm -f "${system_message_file}" || log_warn $? "* WARN: unable to remove system_message_file=${system_message_file}" >> /dev/stderr)
 	    fi
 	    ;;
     esac
+
+    # exit if we failed to parse
+    if [ "$s" != 0 ];
+    then
+	log_and_exit $s "via api perform_inference cannot parse ${result}"
+    fi
+
+    # Output if we succeeded
     printf "%s\n" "${output}" | via_api_mistral_output_fixup
     return $s
 }
 
-function prepare_model {
+# can't set the model in the API so we just validate that
+# there is a model. 
+# todo: maybe give error if $model_name != $MODEL_NAME and MODEL_NAME is specified.
+function set_model_name {
     model_name="$(get_model_name)"
     if [ "$model_name" == "None" ];
     then
-	log_and_exit 2 "No model loaded via-api"
+	log_and_exit 2 "No model loaded via --api"
     fi
+}
+
+function init_via_model {
+    # could verify that there is a model loaded
+    true
+}
+
+function prepare_model {
+    set_model_name
     prepare_prompt
 }
 
@@ -209,14 +231,21 @@ function list_models {
     curl -s "${VIA_API_MODEL_LIST_ENDPOINT}" | jq -r '.model_names[]'
 }
 
+function list_model_types() {
+    echo any
+}
+
+## fixme: overloads models/function.sh, which is really via/llamafile/function.sh
+## and this is really via/api/function.sh.
 function load_model {
     local model_path="$1"
     printf -v data '{ "model_name": "%s", "settings": {}, "args": {} }' "${model_path}"
-    result=$(printf "%s" "${data}" | curl -s "${VIA_API_LOAD_MODEL_ENDPOINT}" -H 'Content-Type: application/json' -d @- || log_and_exit $? "via-api load_model cannot curl")
+    result=$(printf "%s" "${data}" | curl -s "${VIA_API_LOAD_MODEL_ENDPOINT}" -H 'Content-Type: application/json' -d @- || log_and_exit $? "via --api --load-model cannot curl")
     printf "%s\n" "$result"
 }
 
 function unload_model {
-    result=$(printf "%s" "${data}" | curl -s "${VIA_API_UNLOAD_MODEL_ENDPOINT}" -d '' || log_and_exit $? "via-api unload_model cannot curl")
+    result=$(printf "%s" "${data}" | curl -s "${VIA_API_UNLOAD_MODEL_ENDPOINT}" -d '' || log_and_exit $? "via --api --unload-model cannot curl")
     printf "%s\n" "$result"
 }
+

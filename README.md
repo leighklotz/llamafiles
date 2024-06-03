@@ -6,7 +6,7 @@ This repository provides an LLM Help CLI for Linux and Mac systems to provide he
 
 # Self Introduction
 ```bash
-$ via-api --get-model-name
+$ via --get-model-name
 cognitivecomputations_dolphin-2.8-mistral-7b-v02.Q6_K.gguf
 $ help.sh what can you do
 ```
@@ -124,7 +124,7 @@ $ sudo lshw | help.sh -c 16384 -m codebooga --stdin -- 'Summarize the following 
 
 ### help.sh Raspberry Pi 5 lspci with Rocket model
 ```
-klotz@rpi5:~ $ export MODEL=rocket
+klotz@rpi5:~ $ export MODEL_TYPE=rocket
 klotz@rpi5:~ $ help.sh lspci
 LSPCI, or List PCI Devices, is a command used in Linux to display information about all the PCI devices connected to the system's motherboard. It provides details such as device vendor and product IDs, memory sizes, and supported devices. This command can be executed in the terminal of a Linux system with root privileges. For example, to list all PCI devices, you would type `lspci` in the terminal and press Enter. The output will display the information about each device.
 klotz@rpi5:~ $ lspci | help.sh --stdin "explain this lspci output"
@@ -279,20 +279,21 @@ $ help.sh "How can I use the `yes` command in bash?"
 
 ## Environment Variables
 
-In addition to these command line flags, the script also checks for several environment variables to configure its behavior:
+In addition to these command line flags, the script also checks for several environment variables to configure its behavior. Variables with effect in CLI-only are marked as such.
 
-- `MODEL_TYPE`: The default model type to use if none is specified via the `-m` or `--model-type` flag.
+- `VIA`: The type of model runner, `api` or `cli`. Also see `--via` flag.
+- `MODEL_TYPE`: The default model type to use if none is specified via the `-m` or `--model-type` flag. (cli)
 - `TEMPERATURE`: The default temperature parameter for the model if none is specified via the `--temperature` flag.
-- `CONTEXT_LENGTH`: The default context length for the model if none is specified via the `--context-length` or `-c` flag.
+- `CONTEXT_LENGTH`: The default context length for the model if none is specified via the `--context-length` or `-c` flag. (cli)
 - `N_PREDICT`: The default number of tokens to predict if none is specified via the `--n-predict` flag.
 - `SYSTEM_MESSAGE`: The default system message to use if none is specified via the command line.
-- `MODEL_RUNNER`: The program used to run the model. Defaults to `/usr/bin/env` and automatically set to `llamafile...` if needed. See also `FORCE_MODEL_RUNNER`
-- `LLM_ADDITIONAL_ARGS`: Value is interpolated into the call to LLM at the end of the CLI invocation..
-- `FORCE_MODEL_RUNNER`: Force usage of MODEL_RUNNER, for example to override `llamafile...` with llama.cpp set in in `MODEL_RUNNER`
-- `THREADS`: The number of threads to use for the model. Defaults to the number of CPU cores.
-- `NGL`: Number of GPU layers, same as `--ngl`
-- `GPU`: auto, none, nvidia, ...
-- `PRIORITY`: speed|length|manual controlling balance of GPU memory and context length
+- `MODEL_RUNNER`: The program used to run the model. Defaults to `/usr/bin/env` and automatically set to `llamafile...` if needed. See also `FORCE_MODEL_RUNNER` (cli)
+- `LLM_ADDITIONAL_ARGS`: Value is interpolated into the call to LLM at the end of the CLI invocation. (cli)
+- `FORCE_MODEL_RUNNER`: Force usage of MODEL_RUNNER, for example to override `llamafile...` with llama.cpp set in in `MODEL_RUNNER` (cli)
+- `THREADS`: The number of threads to use for the model. Defaults to the number of CPU cores. (cli)
+- `NGL`: Number of GPU layers, same as `--ngl` (cli)
+- `GPU`: auto, none, nvidia, ... (cli)
+- `PRIORITY`: speed|length|manual controlling balance of GPU memory and context length (cli)
 - `GRAMMAR_FILE`: Same as `--grammar-file`
 - `DEBUG`: same as --debug
 - `VERBOSE`: same as --verbose
@@ -300,13 +301,29 @@ In addition to these command line flags, the script also checks for several envi
 
 See [env.sh.example](env.sh.example).
 
+## Basic Inference Script
+
+The script [scripts/llm.sh](scripts/llm.sh) controls almost text-based access to LLamafiles and to OpenAPI inference. 
+
+Choose a model type (API or Local LLama) by by setting environment variable `export VIA=api` or `export VIA=cli`,  or `llm.sh` flag flag `--via api`.
+
+You can control the default model by specifying environment variable `$MODEL_TYPE`, for example in your shell or in [scripts/env.sh](scripts/env.sh). If `$MODEL_TYPE` or the `-m ` argument to `llm.sh` is one of the model types in [models](models), then `llm.sh` will use the largest executable `.llamafile` or GGUF file.
+
+Todo: Document LLAMAFILE_RUNNER here.
+
+The [scripts/via.sh](via.sh) CLI tool provides access to server-specific commands, such as listing models and model types. There is no facility to `load` a LLamafile model with this script.
+
 ## Open API Usage
-You can skip using a local `GGUF` or `llamafile` executable and use an Open API compatible LLM server.
+You can skip using a local `GGUF` or `llamafile` executable and instead use an Open API compatible LLM server.
 
-Do this by setting `MODEL_TYPE` environment variable or CLI flag `--model-type` to `'via-api'`.  If the server is not local, set the environment variable `VIA_API_CHAT_BASE`, which defaults to `http://localhost:5000`.
+Do this by setting `VIA` environment variable or CLI flag `--via` to `api'.  If the server is not local, set the environment variable `VIA_API_CHAT_BASE`, which defaults to `http://localhost:5000`.
 
-## Text Generation WebUI API Server
-You can run an Open API HTTP server on port 5000 with text-generation-webui (see #References). Additionally, the [scripts/via-api.sh](via-api.sh) CLI tool provides access to server-specific commands such as model loading and unloading.
+You can run `llamafiles` in server mode with [scripts/start-server.sh](scripts/start-server.sh) or by using Oobabooga/text-generation-webui (see #References).
+
+The [scripts/via.sh](via.sh) CLI tool provides access to server-specific commands, such as model loading and unloading.
+
+## Image Usage
+Image pipelines are handled solely by @jartine https://justine.lol/oneliners/ and https://github.com/Mozilla-Ocho/llamafile directly, with a few minor changes copied here for convenience, and are not yet integrated into the LLM.sh.
 
 ## Program Flow
 1. If there are any arguments, `--` or any non-hyphen word, terminate the arguments and start the question. 
@@ -347,4 +364,3 @@ Many of these are better than this package. Please try them out.
 # TODO
 - prompt caching
 - quoting safety
-
