@@ -105,6 +105,22 @@
   (interactive "sRewrite Prompt: \nr")
   (llm-region-internal "todo" llm-default-model-type (llm-mode-text-type) user-prompt start end nil t))
 
+;; This function is used in comint-mode to understand and explain the output in an
+;; interactive way. It prompts the user with a default question, "What line
+;; number contains the proximal error?", or a custom prompt if provided. It
+;; then uses the output between the last two output boundaries to generate an
+;; explanation through the llm-ask function.
+(defun llm-explain-output (prompt)
+  (interactive "sQuestion: ")
+  (let* ((bounds (my-comint-get-previous-output-bounds))
+	 (start (car bounds))
+	 (end (cadr bounds))
+	 (default-prompt "What line number contains the proximal error?")
+	 (prompt (if (or (null prompt) (string= "" prompt))
+		     default-prompt
+		   prompt)))
+    (llm-ask prompt start end)))
+
 ;;; Interface to rewrite.sh
 (defun llm-region-internal (use-case model-type major-mode-name user-prompt start end output-buffer-name replace-p)
   "Send the buffer or current region as the output of the llm-rewrite-script-path command based on the prompt and current region and either replaces the region or uses a specified buffer, based on output-buffer-name and replace-p.
@@ -146,6 +162,25 @@ See [shell-command-on-region] for interpretation of output-buffer-name."
 
 (defun llm-mode-text-type ()
   (symbol-name major-mode))
+
+;;; these probably belong elsewhere
+(defun my-comint-get-previous-output ()
+  "Return the output of the previous shell command in comint mode."
+  (interactive)
+  (let* ((bounds (my-comint-get-previous-output-bounds))
+	 (start (car bounds))
+	 (end (cadr bounds)))
+    (buffer-substring-no-properties start end)))
+
+(defun my-comint-get-previous-output-bounds ()
+  "Return the bounds of output of the previous shell command in comint mode."
+  (let ((start (save-excursion
+                 (comint-previous-prompt 1)
+                 (forward-line 1)
+                 (point)))
+        (end (point-max)))
+    (list start end)))
+
 
 ;;;
 ;;; my keybindings, should move out

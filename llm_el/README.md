@@ -46,6 +46,13 @@ Here is an example of how to use the `llm-rewrite` function:
 
 This will rewrite the current region using the LLM, replacing the region with the LLM's output.
 
+### `llm-explain-output`
+
+The `llm-explain-output` function is used in `comint-mode` to understand and explain the output in
+an interactive way. It prompts the user with a default question, "What line number contains the
+proximal error?", or a custom prompt if provided. It then uses the output between the last two
+output boundaries to generate an explanation through the llm-ask function.
+
 Conclusion
 ----------
 
