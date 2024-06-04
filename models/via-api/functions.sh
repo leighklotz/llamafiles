@@ -191,12 +191,17 @@ function via_api_perform_inference() {
     return $s
 }
 
-function prepare_model {
+function set_model_name {
     model_name="$(get_model_name)"
     if [ "$model_name" == "None" ];
     then
 	log_and_exit 2 "No model loaded via-api"
     fi
+    # todo: maybe give error if loaded model is not env $MODEL
+}
+
+function prepare_model {
+    set_model_name
     prepare_prompt
 }
 

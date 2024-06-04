@@ -39,15 +39,27 @@ function prepare_overrides {
 }
 
 
-function prepare_model {
+function set_model {
+    if [ -z "${MODEL}" ];
+    then
         MODEL=$(find_first_model \
                     "${MODELS_DIRECTORY}/rocket/rocket-3b.Q6_K.llamafile" \
                     "${MODELS_DIRECTORY}/rocket/rocket-3b.Q5_K_M.llamafile" \
                     "${MODELS_DIRECTORY}/rocket/rocket-3b.Q4_K_M.llamafile" \
              )
-        USE_SYSTEM_ROLE=1
-        gpu_check 4
-        chatml_prompt
-        prepare_priority
-        prepare_overrides
+    fi
+}
+
+function get_model_name {
+    set_model
+    basename ${MODEL}
+}
+
+function prepare_model {
+    set_model
+    USE_SYSTEM_ROLE=1
+    gpu_check 4
+    chatml_prompt
+    prepare_priority
+    prepare_overrides
 }

@@ -40,12 +40,24 @@ function prepare_priority {
     cap_ngl
 }
 
+function set_model {
+    if [ -z "${MODEL}" ];
+    then
+	MODEL=$(find_first_model \
+                    ${MODELS_DIRECTORY}/mixtral/mixtral-8x7b-instruct-v0.1.Q5_K_M.gguf \
+                    ${MODELS_DIRECTORY}/mixtral/mixtral-8x7b-instruct-v0.1.Q5_K_M.llamafile \
+                    ${MODELS_DIRECTORY}/mixtral/prepare_7bx2_moe.Q3_K_M.gguf \
+             )
+    fi
+}
+
+function get_model_name {
+    set_model
+    basename ${MODEL}
+}
+
 function prepare_model {
-    MODEL=$(find_first_model \
-                ${MODELS_DIRECTORY}/mixtral/mixtral-8x7b-instruct-v0.1.Q5_K_M.gguf \
-                ${MODELS_DIRECTORY}/mixtral/mixtral-8x7b-instruct-v0.1.Q5_K_M.llamafile \
-                ${MODELS_DIRECTORY}/mixtral/prepare_7bx2_moe.Q3_K_M.gguf \
-         )
+    set_model
     gpu_check 1.5
     prepare_prompt
     prepare_priority

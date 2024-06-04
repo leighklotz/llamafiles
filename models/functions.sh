@@ -185,7 +185,7 @@ function chatml_prompt {
 }
 
 # todo: much work here
-# load_model and prepare_model are two functions so llm.sh can do prep work once it knows the model but before it is loaded
+# load_model calls prepare_model so llm.sh can do prep work once it knows the model but before it is used
 function load_model {
     if [ -z "${MODEL_TYPE}" ];
     then

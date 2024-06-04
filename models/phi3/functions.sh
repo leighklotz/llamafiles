@@ -39,10 +39,22 @@ function prepare_priority {
     cap_ngl
 }
 
+function set_model {
+    if [ -z "${MODEL}" ];
+    then
+	MODEL=$(find_first_model \
+                    "${MODELS_DIRECTORY}/phi3/Phi-3-mini-4k-instruct.Q8_0.llamafile" \
+             )
+    fi
+}
+
+function get_model_name {
+    set_model
+    basename ${MODEL}
+}
+
 function prepare_model {
-    MODEL=$(find_first_model \
-                "${MODELS_DIRECTORY}/phi3/Phi-3-mini-4k-instruct.Q8_0.llamafile" \
-         )
+    set_model
     gpu_check 4
     prepare_prompt
     prepare_priority

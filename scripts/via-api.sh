@@ -1,6 +1,7 @@
 #!/bin/bash
 
-## Nonce script for querying text-generation-webui and llamafile and llama.cpp HTTP API
+## Admin client for OpenAPI-compatible LLM server
+## Tested with Oobabooga Text Generation Webui
 SCRIPT_DIR=$(dirname $(realpath "${BASH_SOURCE}"))
 
 # Get site variables from env.sh, if present
@@ -18,18 +19,17 @@ function usage {
 }
 
 
-if [ "${MODEL_TYPE}" != 'via-api' ];
-then
-    echo "* WARN: MODEL_TYPE=$MODEL_TYPE is not 'via-api', forcing"
-    MODEL_TYPE="via-api"
-fi
+# if [ "${MODEL_TYPE}" != 'via-api' ];
+# then
+#    echo "* WARN: MODEL_TYPE=$MODEL_TYPE is not 'via-api', forcing"
+#    MODEL_TYPE="via-api"
+#fi
 
 # fixme: dup code from llm.sh
 function setup {
     MODELS_DIRECTORY="$(realpath "${SCRIPT_DIR}/../models")"
     MODEL_FUNCTIONS_PATH="$(realpath "${MODELS_DIRECTORY}/${MODEL_TYPE}/functions.sh")"
     FUNCTIONS_PATH="$(realpath "${MODELS_DIRECTORY}/functions.sh")"
-
     # Check if the functions file exists
     if [[ -f "${FUNCTIONS_PATH}" ]]; then
 	source "${FUNCTIONS_PATH}"
