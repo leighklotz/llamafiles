@@ -188,6 +188,7 @@ See [shell-command-on-region] for interpretation of output-buffer-name."
 
 (global-set-key (kbd "M-s $") 'llm-summarize-buffer)
 (global-set-key (kbd "M-s r") 'llm-rewrite)
+(global-set-key (kbd "M-s x") 'llm-explain-output)
 
 
 (provide 'llm)
