@@ -68,6 +68,21 @@ function find_first_model() {
   return 1
 }
 
+# List all existing executable or GGUF in the list.
+# file_path=$(find_first_model /path/to/file1 /path/to/file2 /path/to/file3)
+function list_models() {
+  local files=("$@")
+  local file
+  for file in "${files[@]}"; do
+    if [ -f "$file" ] && ( [ -x "$file" ] || [ "${file##*.}" == "gguf" ] );
+    then
+      echo "${file}"
+    fi
+  done
+  return 0
+}
+
+
 # Prompt Markup
 function alpaca_prompt {
 

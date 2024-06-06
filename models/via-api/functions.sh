@@ -215,6 +215,8 @@ function list_models {
     curl -s "${VIA_API_MODEL_LIST_ENDPOINT}" | jq -r '.model_names[]'
 }
 
+## fixme: overloads models/function.sh, which is really via/llamafile/function.sh
+## and this is really via/api/function.sh.
 function load_model {
     local model_path="$1"
     printf -v data '{ "model_name": "%s", "settings": {}, "args": {} }' "${model_path}"
