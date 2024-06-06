@@ -300,13 +300,28 @@ In addition to these command line flags, the script also checks for several envi
 
 See [env.sh.example](env.sh.example).
 
+## LLamafiles Usage
+
+Script [scripts/llm.sh](scripts/llm.sh) controls almost text-based access to LLamafiles and to OpenAPI inference. 
+Do this by setting `MODEL_TYPE` environment variable or CLI flag `--model-type` to `via-api`.  
+
+You can control the default model by specifying environment variable `$MODEL_TYPE`, for example in your shell or in [scripts/env.sh](scripts/env.sh). If `$MODEL_TYPE` or the `-m ` argument to `llm.sh` is one of the model types in [models](models), then `llm.sh` will use the largest executable `.llamafile` or GGUF file.
+
+Todo: Document LLAMAFILE_RUNNER here.
+
+The [scripts/via-api.sh](via-api.sh) CLI tool provides access to server-specific commands, such as listing models and model types. There is no facility to `load` a LLamafile model with this script.
+
 ## Open API Usage
-You can skip using a local `GGUF` or `llamafile` executable and use an Open API compatible LLM server.
+You can skip using a local `GGUF` or `llamafile` executable and instead use an Open API compatible LLM server.
 
-Do this by setting `MODEL_TYPE` environment variable or CLI flag `--model-type` to `'via-api'`.  If the server is not local, set the environment variable `VIA_API_CHAT_BASE`, which defaults to `http://localhost:5000`.
+Do this by setting `MODEL_TYPE` environment variable or CLI flag `--model-type` to `via-api'.  If the server is not local, set the environment variable `VIA_API_CHAT_BASE`, which defaults to `http://localhost:5000`.
 
-## Text Generation WebUI API Server
-You can run an Open API HTTP server on port 5000 with text-generation-webui (see #References). Additionally, the [scripts/via-api.sh](via-api.sh) CLI tool provides access to server-specific commands such as model loading and unloading.
+You can run `llamafiles` in server mode with [scripts/start-server.sh](scripts/start-server.sh) or by using Oobabooga/text-generation-webui (see #References).
+
+The [scripts/via-api.sh](via-api.sh) CLI tool provides access to server-specific commands, such as model loading and unloading.
+
+## Image Usage
+Image pipelines are handled solely by @jartine https://justine.lol/oneliners/ and https://github.com/Mozilla-Ocho/llamafile directly, with a few minor changes copied here for convenience, and are not yet integrated into the LLM.sh.
 
 ## Program Flow
 1. If there are any arguments, `--` or any non-hyphen word, terminate the arguments and start the question. 
@@ -347,4 +362,3 @@ Many of these are better than this package. Please try them out.
 # TODO
 - prompt caching
 - quoting safety
-
