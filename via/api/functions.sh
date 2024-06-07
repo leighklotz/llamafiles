@@ -200,7 +200,7 @@ function set_model_name {
     # todo: maybe give error if loaded model is not env $MODEL
 }
 
-function init_model {
+function init_via_model {
     # could verify that there is a model loaded
     true
 }

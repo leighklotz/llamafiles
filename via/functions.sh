@@ -57,9 +57,23 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     log_and_exit 1 "This script is intended to be sourced, not executed directly."
 fi
 
-if [ "${MODEL_TYPE}" == "via-api" ];
-then
-    source_functions "${VIA_API_FUNCTIONS_PATH}"
-else
-    source_functions "${VIA_CLI_FUNCTIONS_PATH}"
-fi
+# Dup from llm.sh
+function source_functions {
+    local functions_path="$1"
+    if [[ -f "${functions_path}" ]]; then
+	source "${functions_path}"
+    else
+	echo "* $0: ERROR: Cannot find functions: ${functions_path}" > /dev/stderr
+	exit 3
+    fi
+}
+
+function init_model {
+    if [ "${MODEL_TYPE}" == "via-api" ];
+    then
+	source "${VIA_API_FUNCTIONS_PATH}"
+    else
+	source "${VIA_CLI_FUNCTIONS_PATH}"
+    fi
+    init_via_model
+}
