@@ -47,7 +47,8 @@ else
     exit 1
 fi
 
-SCUTTLE_SYSTEM_MESSAGE='Summarize the following web page article at the specified link address as a JSON object: {"link": "...", "title": "...", "description": "...", "keywords": ["...", "..."]}'
+#SCUTTLE_SYSTEM_MESSAGE='Summarize the following web page article at the specified link address as a JSON object: {"link": "...", "title": "...", "description": "...", "keywords": ["...", "..."]}'
+SCUTTLE_SYSTEM_MESSAGE='Summarize the web page article at the specified link address with response as a short JSON object with only these 4 fields: `link`, `title`, `description`, and `keywords` array:'
 export SYSTEM_MESSAGE="${SYSTEM_MESSAGE:-$(printf "%b" "${SCUTTLE_SYSTEM_MESSAGE}")}"
 
 # transforms JSON output from LLM into a properly formatted URL string for Scuttlebookmark adding.
@@ -79,4 +80,11 @@ function post_process {
     return $s
 }
 
-${LYNX} "${LINK}" | ${SCRIPT_DIR}/llm.sh --long ${ARGS} "# Text of link ${LINK}" | post_process
+if [ -e "${INHIBIT_GRAMMAR}" ];
+   then
+       GRAMMAR_FLAG="--grammar-file ${SCRIPT_DIR}/json2.gbnf"
+else
+    GRAMMAR_FLAG=""
+fi
+
+(${LYNX} "${LINK}"; printf "\n# Instruction\n%s\n# JSON Response\n" "${SCUTTLE_SYSTEM_MESSAGE}")| ${SCRIPT_DIR}/llm.sh --long ${GRAMMAR_FILE} ${ARGS} "# Text of link ${LINK}" | post_process

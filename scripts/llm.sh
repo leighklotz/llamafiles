@@ -52,6 +52,20 @@ PROMPT_TEMP_FILE="/tmp/prompt.$$"
 # Load functions
 VIA_DIRECTORY="$(realpath "${SCRIPT_DIR}/../via")"
 FUNCTIONS_PATH="$(realpath "${VIA_DIRECTORY}/functions.sh")"
+VIA_CLI_FUNCTIONS_PATH="$(realpath "${VIA_DIRECTORY}/cli/functions.sh")"
+VIA_API_FUNCTIONS_PATH="$(realpath "${VIA_DIRECTORY}/api/functions.sh")"
+
+function source_functions {
+    local functions_path="$1"
+    if [[ -f "${functions_path}" ]]; then
+	source "${functions_path}"
+    else
+	echo "* $0: ERROR: Cannot find functions: ${functions_path}" > /dev/stderr
+	exit 3
+    fi
+}
+
+source_functions "${FUNCTIONS_PATH}"
 
 function set_threads() {
     # Get thread count
@@ -312,6 +326,7 @@ function adjust_raw_flag {
 function perform_inference {
     if [ "$MODEL_TYPE" == "via-api" ];
     then
+	source_functions "${VIA_API_FUNCTIONS_PATH}"
 	# fixme: accept these
 	repeat_penalty="1"
 	penalize_nl="false"
@@ -331,17 +346,6 @@ function perform_inference {
     return $status
 }
 
-function source_functions {
-    local functions_path="$1"
-    if [[ -f "${functions_path}" ]]; then
-	source "${functions_path}"
-    else
-	echo "* $0: ERROR: Cannot find functions: ${functions_path}" > /dev/stderr
-	exit 3
-    fi
-}
-
-source_functions "${FUNCTIONS_PATH}"
 set_threads
 parse_args "$@"
 init_model
