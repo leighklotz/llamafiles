@@ -42,7 +42,6 @@ while [[ $# -gt 0 ]]; do
 done
 
 # Set main parameters
-export MODEL_TYPE="${MODEL_TYPE:=mixtral}"
 default_system_message="$(printf "%b" "You are an expert in Linux, Bash, Python, general programming, and related topics.\n")"
 export SYSTEM_MESSAGE="${SYSTEM_MESSAGE:-${default_system_message}}"
 printf -v PROMPT 'Write a %s `git commit` command line to commit the changes listed in the following `git diff` output:' "${MESSAGE_LINE}"
