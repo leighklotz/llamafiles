@@ -50,14 +50,8 @@ KEEP_PROMPT_TEMP_FILE="${KEEP_PROMPT_TEMP_FILE:-ALL}" # "NONE"|"ERROR"|"ALL"
 PROMPT_TEMP_FILE="/tmp/prompt.$$"
 
 # Load functions
-MODELS_DIRECTORY="$(realpath "${SCRIPT_DIR}/../models")"
-FUNCTIONS_PATH="$(realpath "${MODELS_DIRECTORY}/functions.sh")"
-if [[ -f "${FUNCTIONS_PATH}" ]]; then
-    source "${FUNCTIONS_PATH}"
-else
-    echo "* ERROR: Cannot find functions: ${FUNCTIONS_PATH}" > /dev/stderr
-    exit 3
-fi
+VIA_DIRECTORY="$(realpath "${SCRIPT_DIR}/../via")"
+FUNCTIONS_PATH="$(realpath "${VIA_DIRECTORY}/functions.sh")"
 
 function set_threads() {
     # Get thread count
@@ -263,17 +257,6 @@ function fixup_input {
     cat
 }
 
-# todo: move this to a backends directory hierarchy
-function cli_perform_inference {
-    # Use llamafile or similar CLI runner to perform inference
-    printf '%s' "${PROMPT}" > "${PROMPT_TEMP_FILE}"
-    if [ -n "${GRAMMAR_FILE}" ]; then
-	GRAMMAR_FILE="--grammar-file ${GRAMMAR_FILE}"
-    fi
-    #set -x
-    cat "${PROMPT_TEMP_FILE}" | fixup_input | ${MODEL_RUNNER} ${MODEL} ${CLI_MODE} ${LOG_DISABLE} ${GPU} ${NGL} ${GRAMMAR_FILE} ${TEMPERATURE} ${CONTEXT_LENGTH} ${N_PREDICT} ${BATCH_SIZE} ${NO_PENALIZE_NL}--repeat-penalty 1 ${THREADS} -f /dev/stdin ${SILENT_PROMPT} --seed "${SEED}" ${LLM_ADDITIONAL_ARGS} 2> "${ERROR_OUTPUT}"
-    return $?
-}
 
 # Try to inform user about errors
 function report_success_or_fail {
@@ -341,15 +324,27 @@ function perform_inference {
 	via_api_perform_inference "${MODEL_MODE}" "${SYSTEM_MESSAGE}" "${PROMPT}" "${GRAMMAR_FILE}" "${TEMPERATURE}" "${repeat_penalty}" "${penalize_nl}"
 	status=$?
     else
+	source_functions "${VIA_CLI_FUNCTIONS_PATH}"
 	cli_perform_inference
 	status=$?
     fi
     return $status
 }
 
+function source_functions {
+    local functions_path="$1"
+    if [[ -f "${functions_path}" ]]; then
+	source "${functions_path}"
+    else
+	echo "* $0: ERROR: Cannot find functions: ${functions_path}" > /dev/stderr
+	exit 3
+    fi
+}
+
+source_functions "${FUNCTIONS_PATH}"
 set_threads
 parse_args "$@"
-load_model
+init_model
 process_question_escapes
 do_stdin
 prepare_model && [ -n "${VERBOSE}" ] && log_info "MODEL=${MODEL}"

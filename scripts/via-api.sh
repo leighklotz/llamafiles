@@ -9,6 +9,24 @@ SCRIPT_DIR=$(dirname $(realpath "${BASH_SOURCE}"))
 
 MODEL_TYPE="${MODEL_TYPE:-via-api}"
 
+MODELS_DIRECTORY="$(realpath "${SCRIPT_DIR}/../models")"
+MODEL_FUNCTIONS_PATH="$(realpath "${MODELS_DIRECTORY}/${MODEL_TYPE}/functions.sh")"
+FUNCTIONS_PATH="$(realpath "${MODELS_DIRECTORY}/functions.sh")"
+
+# fixme: dup code from llm.sh
+function source_functions {
+    local functions_path="$1"
+    if [[ -f "${functions_path}" ]]; then
+	. "${functions_path}"
+    else
+	echo "* $0: ERROR: Cannot find functions: ${functions_path}" > /dev/stderr
+	exit 3
+    fi
+}
+
+source_functions "${FUNCTIONS_PATH}"
+source_functions "${MODEL_FUNCTIONS_PATH}"
+
 function usage {
     echo "usage: $0 [--get-model-name] [--list-models] [--load-model model-name] [--unload-model] [--help]"
     if [ -n "$1" ];
@@ -24,28 +42,6 @@ function usage {
 #    echo "* WARN: MODEL_TYPE=$MODEL_TYPE is not 'via-api', forcing"
 #    MODEL_TYPE="via-api"
 #fi
-
-# fixme: dup code from llm.sh
-function setup {
-    MODELS_DIRECTORY="$(realpath "${SCRIPT_DIR}/../models")"
-    MODEL_FUNCTIONS_PATH="$(realpath "${MODELS_DIRECTORY}/${MODEL_TYPE}/functions.sh")"
-    FUNCTIONS_PATH="$(realpath "${MODELS_DIRECTORY}/functions.sh")"
-    # Check if the functions file exists
-    if [[ -f "${FUNCTIONS_PATH}" ]]; then
-	source "${FUNCTIONS_PATH}"
-    else
-	echo "* ERROR: Cannot find functions: ${FUNCTIONS_PATH}"
-	exit 3
-    fi
-
-    # Check if the model functions file exists
-    if [[ -f "${MODEL_FUNCTIONS_PATH}" ]]; then
-	source "${MODEL_FUNCTIONS_PATH}"
-    else
-	echo "* ERROR: Cannot find model functions for ${MODEL_TYPE}: ${MODEL_FUNCTIONS_PATH}"
-	exit 1
-    fi
-}
 
 # fixme: better arg handling
 function main {
@@ -75,5 +71,4 @@ function main {
     esac
 }
 
-setup
 main "$@"
