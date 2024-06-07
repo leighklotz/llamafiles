@@ -2,6 +2,7 @@
 
 VIA_API_CHAT_BASE="${VIA_API_CHAT_BASE:-http://localhost:5000}"
 VIA_API_CHAT_COMPLETIONS_ENDPOINT="${VIA_API_CHAT_BASE}/v1/chat/completions"
+VIA_API_TOKEN_COUNT_ENDPOINT="${VIA_API_CHAT_BASE}/v1/chat/token-count"
 VIA_API_MODEL_INFO_ENDPOINT="${VIA_API_CHAT_BASE}/v1/internal/model/info"
 VIA_API_MODEL_LIST_ENDPOINT="${VIA_API_CHAT_BASE}/v1/internal/model/list"
 VIA_API_LOAD_MODEL_ENDPOINT="${VIA_API_CHAT_BASE}/v1/internal/model/load"
@@ -171,10 +172,8 @@ function via_api_perform_inference() {
     fi
     output="$(printf "%s" "${result}" | jq --raw-output '.choices[].message.content')"
     s=$?
-    if [ "$s" != 0 ];
-    then
-	log_warn $s "via-api perform inference cannot parse output"
-    fi
+
+    # deal with temp files
     case "$KEEP_PROMPT_TEMP_FILE" in
 	ALL)
 	    true
@@ -187,6 +186,14 @@ function via_api_perform_inference() {
 	    fi
 	    ;;
     esac
+
+    # exit if we failed to parse
+    if [ "$s" != 0 ];
+    then
+	log_and_exit $s "via api perform_inference cannot parse ${result}"
+    fi
+
+    # Output if we succeeded
     printf "%s\n" "${output}" | via_api_mistral_output_fixup
     return $s
 }
