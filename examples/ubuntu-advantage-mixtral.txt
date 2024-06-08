@@ -1,0 +1,51 @@
+$ sudo apt upgrade
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+Calculating upgrade... Done
+Get another security update through Ubuntu Pro with 'esm-apps' enabled:
+  libcjson1
+Learn more about Ubuntu Pro at https://ubuntu.com/pro
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+$ ( systype; bashblock sudo apt upgrade 2>&1 ) | help.sh how can i get the esm apps enabled
+ To get ESM (Enterprise Security Module) apps enabled on your Ubuntu 22.04 system, you need to follow these steps:
+
+1. Subscribe to Ubuntu Pro: Ubuntu Pro is a paid subscription service from Canonical that provides additional security and enterprise features, including ESM apps. You can sign up for a free trial or purchase a subscription from the Ubuntu Pro website.
+
+2. Add the Ubuntu Pro repository: Once you have a subscription, you need to add the Ubuntu Pro repository to your system. You can do this by adding the following lines to your `/etc/apt/sources.list.d/ubuntu-pro.list` file:
+
+```bash
+deb https://archive.ubuntu.com/ubuntu/ jammy partner main
+deb https://archive.ubuntu.com/ubuntu/ jammy universe
+deb https://archive.ubuntu.com/ubuntu/ jammy-updates universe
+deb https://archive.canonical.com/ubuntu/ jammy partner
+```
+
+3. Import the Ubuntu Pro GPG key: To ensure the authenticity of the packages you download from the Ubuntu Pro repository, you need to import the Ubuntu Pro GPG key. You can do this by running the following command:
+
+```bash
+wget -qO- https://keys.openpgp.org/v1/keyserver/hkp/pool/sks-keyservers.net/Ubuntu-archive-automatic-signing-key-2019/public.gpg.key | sudo apt-key add -
+```
+
+4. Enable ESM apps: After adding the Ubuntu Pro repository and importing the key, you can enable ESM apps by running the following command:
+
+```bash
+sudo apt-get config --global enable-source-updates true
+sudo apt-get update
+sudo apt-get install ubuntu-advantage-tools
+sudo ubuntu-advantage enable esm
+sudo apt-get update
+```
+
+5. Install ESM apps: Once ESM is enabled, you can install specific ESM apps using the following command:
+
+```bash
+sudo apt install <esm-app-name>
+```
+
+Replace `<esm-app-name>` with the name of the ESM app you want to install.
+
+For more information on available ESM apps, you can visit the Ubuntu Pro website: https://ubuntu.com/pro/esm.
+
+Make sure to replace `<esm-app-name>` with the actual name of the specific ESM app you want to install.
+$ 
