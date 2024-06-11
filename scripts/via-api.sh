@@ -18,10 +18,10 @@ fi
 MODELS_DIRECTORY="$(realpath "${SCRIPT_DIR}/../models")"
 MODEL_FUNCTIONS_PATH="$(realpath "${MODELS_DIRECTORY}/${MODEL_TYPE}/functions.sh")"
 VIA_FUNCTIONS_PATH="$(realpath "${SCRIPT_DIR}/../via/functions.sh")"
-VIA_FUNCTIONS_VIA_PATH="$(realpath "${SCRIPT_DIR}/../via/${VIA}/functions.sh")"
+VIA_FUNCTIONS_VIA_X_PATH="$(realpath "${SCRIPT_DIR}/../via/${VIA}/functions.sh")"
 
 source "${VIA_FUNCTIONS_PATH}"
-source_functions "${VIA_FUNCTIONS_VIA_PATH}"
+source_functions "${VIA_FUNCTIONS_VIA_X_PATH}"
 source_functions "${MODEL_FUNCTIONS_PATH}"
 
 
