@@ -55,17 +55,7 @@ FUNCTIONS_PATH="$(realpath "${VIA_DIRECTORY}/functions.sh")"
 VIA_CLI_FUNCTIONS_PATH="$(realpath "${VIA_DIRECTORY}/cli/functions.sh")"
 VIA_API_FUNCTIONS_PATH="$(realpath "${VIA_DIRECTORY}/api/functions.sh")"
 
-function source_functions {
-    local functions_path="$1"
-    if [[ -f "${functions_path}" ]]; then
-	source "${functions_path}"
-    else
-	echo "* $0: ERROR: Cannot find functions: ${functions_path}" > /dev/stderr
-	exit 3
-    fi
-}
-
-source_functions "${FUNCTIONS_PATH}"
+source "${FUNCTIONS_PATH}"
 
 function set_threads() {
     # Get thread count

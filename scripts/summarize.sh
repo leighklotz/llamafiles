@@ -2,10 +2,11 @@
 
 SCRIPT_DIR=$(dirname $(realpath "${BASH_SOURCE}"))
 
+
 LINK=${1:-}			# LAST
 ARGS=${@:2}			# BUTLAST
 
-. ${SCRIPT_DIR}/../models/functions.sh
+. ${SCRIPT_DIR}/../via/functions.sh
 
 if [ -z "$LINK" ]; then
     echo "Usage: $(basename $0) <LINK> [llm.sh options]"

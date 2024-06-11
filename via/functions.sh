@@ -58,13 +58,14 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
 fi
 
 # Dup from llm.sh
+# fixme: dup code from llm.sh
 function source_functions {
     local functions_path="$1"
     if [[ -f "${functions_path}" ]]; then
+	log_verbose "* sourcing ${functions_path}"
 	source "${functions_path}"
     else
-	echo "* $0: ERROR: Cannot find functions: ${functions_path}" > /dev/stderr
-	exit 3
+	log_and_exit 3 "* $0: ERROR: Cannot find functions: ${functions_path}"
     fi
 }
 

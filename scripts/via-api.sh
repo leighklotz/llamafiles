@@ -8,24 +8,22 @@ SCRIPT_DIR=$(dirname $(realpath "${BASH_SOURCE}"))
 [ -f "${SCRIPT_DIR}/env.sh" ] && source "${SCRIPT_DIR}/env.sh"
 
 MODEL_TYPE="${MODEL_TYPE:-via-api}"
+if [ "${MODEL_TYPE}" == "via-api" ];
+then
+    VIA='api'
+else
+    VIA='cli'
+fi
 
 MODELS_DIRECTORY="$(realpath "${SCRIPT_DIR}/../models")"
 MODEL_FUNCTIONS_PATH="$(realpath "${MODELS_DIRECTORY}/${MODEL_TYPE}/functions.sh")"
-FUNCTIONS_PATH="$(realpath "${MODELS_DIRECTORY}/functions.sh")"
+VIA_FUNCTIONS_PATH="$(realpath "${SCRIPT_DIR}/../via/functions.sh")"
+VIA_FUNCTIONS_VIA_PATH="$(realpath "${SCRIPT_DIR}/../via/${VIA}/functions.sh")"
 
-# fixme: dup code from llm.sh
-function source_functions {
-    local functions_path="$1"
-    if [[ -f "${functions_path}" ]]; then
-	. "${functions_path}"
-    else
-	echo "* $0: ERROR: Cannot find functions: ${functions_path}" > /dev/stderr
-	exit 3
-    fi
-}
-
-source_functions "${FUNCTIONS_PATH}"
+source "${VIA_FUNCTIONS_PATH}"
+source_functions "${VIA_FUNCTIONS_VIA_PATH}"
 source_functions "${MODEL_FUNCTIONS_PATH}"
+
 
 function usage {
     echo "usage: $0 [--get-model-name] [--list-models] [--load-model model-name] [--unload-model] [--help]"

@@ -300,10 +300,10 @@ In addition to these command line flags, the script also checks for several envi
 
 See [env.sh.example](env.sh.example).
 
-## LLamafiles Usage
+## Basic Inference Script
 
-Script [scripts/llm.sh](scripts/llm.sh) controls almost text-based access to LLamafiles and to OpenAPI inference. 
-Do this by setting `MODEL_TYPE` environment variable or CLI flag `--model-type` to `via-api`.  
+The script [scripts/llm.sh](scripts/llm.sh) controls almost text-based access to LLamafiles and to OpenAPI inference. 
+Choose a model type by by setting environment variable `export MODEL_TYPE=via-api` or with or `llm.sh` flag flag `--model-type via-api`.
 
 You can control the default model by specifying environment variable `$MODEL_TYPE`, for example in your shell or in [scripts/env.sh](scripts/env.sh). If `$MODEL_TYPE` or the `-m ` argument to `llm.sh` is one of the model types in [models](models), then `llm.sh` will use the largest executable `.llamafile` or GGUF file.
 

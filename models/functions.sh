@@ -1,2 +1,4 @@
-. /home/klotz/wip/llamafiles/via/functions.sh
-. /home/klotz/wip/llamafiles/via/cli/functions.sh
+echo FAIL
+exit 33
+#. /home/klotz/wip/llamafiles/via/functions.sh
+#. /home/klotz/wip/llamafiles/via/cli/functions.sh
