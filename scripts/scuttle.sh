@@ -47,12 +47,12 @@ else
     exit 1
 fi
 
-SCUTTLE_SYSTEM_MESSAGE='Summarize the web page article at the specified link address with response as a short JSON object with only these 4 fields: `link`, `title`, `description`, and `keywords` array:'
+SCUTTLE_SYSTEM_MESSAGE='Summarize the web page article at the specified link address with response as a short JSON object with these 4 fields: `link`, `title`, `description`, and `keywords` array:'
 export SYSTEM_MESSAGE="${SYSTEM_MESSAGE:-$(printf "%b" "${SCUTTLE_SYSTEM_MESSAGE}")}"
 
 # replace all '```json`' and '```' with empty. hope that's enough and we don't ahve to get stateful.
 function preprocess_markdown {
-    cat | sed -e 's/```.*$//g'
+    cat | sed -e 's/^```.*$//g'
 }
 
 # transforms JSON output from LLM into a properly formatted URL string for Scuttlebookmark adding.
@@ -61,7 +61,7 @@ function preprocess_markdown {
 function scuttle_extract_json {
     if [ -n "${JSON_MODE}" ];
     then
-	cat
+	cat | preprocess_markdown
 	return $?
     else
 	cat | preprocess_markdown | jq --arg xspace "%20" --arg plus "+" --arg xcomma "%2[cC]" --arg comma "," -r '.keywords |= if(type == "array") then join(",") else . end | "https://scuttle.klotz.me/bookmarks/klotz?action=add&address=\(.link|@uri|gsub($xspace; $plus)|gsub($xcomma; $comma))&description=\(.description|@uri|gsub($xspace; $plus)|gsub($xcomma; $comma))&title=\(.title|@uri|gsub($xspace; $plus)|gsub($xcomma; $comma))&tags=\(.keywords|@uri|gsub($xspace; $plus)|gsub($xcomma; $comma))"'
