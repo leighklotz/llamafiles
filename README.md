@@ -6,7 +6,7 @@ This repository provides an LLM Help CLI for Linux and Mac systems to provide he
 
 # Self Introduction
 ```bash
-$ via-api --get-model-name
+$ via --get-model-name
 cognitivecomputations_dolphin-2.8-mistral-7b-v02.Q6_K.gguf
 $ help.sh what can you do
 ```
@@ -309,7 +309,7 @@ You can control the default model by specifying environment variable `$MODEL_TYP
 
 Todo: Document LLAMAFILE_RUNNER here.
 
-The [scripts/via-api.sh](via-api.sh) CLI tool provides access to server-specific commands, such as listing models and model types. There is no facility to `load` a LLamafile model with this script.
+The [scripts/via.sh](via.sh) CLI tool provides access to server-specific commands, such as listing models and model types. There is no facility to `load` a LLamafile model with this script.
 
 ## Open API Usage
 You can skip using a local `GGUF` or `llamafile` executable and instead use an Open API compatible LLM server.
@@ -318,7 +318,7 @@ Do this by setting `MODEL_TYPE` environment variable or CLI flag `--model-type` 
 
 You can run `llamafiles` in server mode with [scripts/start-server.sh](scripts/start-server.sh) or by using Oobabooga/text-generation-webui (see #References).
 
-The [scripts/via-api.sh](via-api.sh) CLI tool provides access to server-specific commands, such as model loading and unloading.
+The [scripts/via.sh](via.sh) CLI tool provides access to server-specific commands, such as model loading and unloading.
 
 ## Image Usage
 Image pipelines are handled solely by @jartine https://justine.lol/oneliners/ and https://github.com/Mozilla-Ocho/llamafile directly, with a few minor changes copied here for convenience, and are not yet integrated into the LLM.sh.
