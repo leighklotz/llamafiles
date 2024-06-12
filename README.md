@@ -124,7 +124,7 @@ $ sudo lshw | help.sh -c 16384 -m codebooga --stdin -- 'Summarize the following 
 
 ### help.sh Raspberry Pi 5 lspci with Rocket model
 ```
-klotz@rpi5:~ $ export MODEL=rocket
+klotz@rpi5:~ $ export MODEL_TYPE=rocket
 klotz@rpi5:~ $ help.sh lspci
 LSPCI, or List PCI Devices, is a command used in Linux to display information about all the PCI devices connected to the system's motherboard. It provides details such as device vendor and product IDs, memory sizes, and supported devices. This command can be executed in the terminal of a Linux system with root privileges. For example, to list all PCI devices, you would type `lspci` in the terminal and press Enter. The output will display the information about each device.
 klotz@rpi5:~ $ lspci | help.sh --stdin "explain this lspci output"
@@ -281,6 +281,7 @@ $ help.sh "How can I use the `yes` command in bash?"
 
 In addition to these command line flags, the script also checks for several environment variables to configure its behavior:
 
+- `VIA`: The type of model runner, `api` or `cli`. Also see `--via` flag.
 - `MODEL_TYPE`: The default model type to use if none is specified via the `-m` or `--model-type` flag.
 - `TEMPERATURE`: The default temperature parameter for the model if none is specified via the `--temperature` flag.
 - `CONTEXT_LENGTH`: The default context length for the model if none is specified via the `--context-length` or `-c` flag.
@@ -303,7 +304,8 @@ See [env.sh.example](env.sh.example).
 ## Basic Inference Script
 
 The script [scripts/llm.sh](scripts/llm.sh) controls almost text-based access to LLamafiles and to OpenAPI inference. 
-Choose a model type by by setting environment variable `export MODEL_TYPE=via-api` or with or `llm.sh` flag flag `--model-type via-api`.
+
+Choose a model type (API or Local LLama) by by setting environment variable `export VIA=api` or `export VIA=cli`,  or `llm.sh` flag flag `--via api`.
 
 You can control the default model by specifying environment variable `$MODEL_TYPE`, for example in your shell or in [scripts/env.sh](scripts/env.sh). If `$MODEL_TYPE` or the `-m ` argument to `llm.sh` is one of the model types in [models](models), then `llm.sh` will use the largest executable `.llamafile` or GGUF file.
 
@@ -314,7 +316,7 @@ The [scripts/via.sh](via.sh) CLI tool provides access to server-specific command
 ## Open API Usage
 You can skip using a local `GGUF` or `llamafile` executable and instead use an Open API compatible LLM server.
 
-Do this by setting `MODEL_TYPE` environment variable or CLI flag `--model-type` to `via-api'.  If the server is not local, set the environment variable `VIA_API_CHAT_BASE`, which defaults to `http://localhost:5000`.
+Do this by setting `VIA` environment variable or CLI flag `--via` to `api'.  If the server is not local, set the environment variable `VIA_API_CHAT_BASE`, which defaults to `http://localhost:5000`.
 
 You can run `llamafiles` in server mode with [scripts/start-server.sh](scripts/start-server.sh) or by using Oobabooga/text-generation-webui (see #References).
 

@@ -84,7 +84,7 @@ function post_process {
     return $s
 }
 
-if [ -e "${INHIBIT_GRAMMAR}" ];
+if [ -z "${INHIBIT_GRAMMAR}" ];
    then
        GRAMMAR_FLAG="--grammar-file ${SCRIPT_DIR}/json2.gbnf"
 else

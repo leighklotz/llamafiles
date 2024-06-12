@@ -158,7 +158,7 @@ function chatml_prompt {
 # todo: much work here
 # load_model calls init_model so llm.sh can do prep work once it knows the model but before it is used
 function init_via_model {
-    if [ -z "${MODEL_TYPE}" ];
+    if [ -e "${MODEL_TYPE}" ];
     then
 	log_and_exit 3 "Model not found: ${MODEL_TYPE}"
     fi
@@ -166,16 +166,17 @@ function init_via_model {
     # Construct the path to the functions file
     model_functions_path="$(realpath "${MODELS_DIRECTORY}/${MODEL_TYPE}/functions.sh")"
 
-    # Check if the model functions file exists
-    if [[ -f "${model_functions_path}" ]]; then
-	source "${model_functions_path}"
-    else
-	log_and_exit 1 "Cannot find model functions for ${MODEL_TYPE}: ${model_functions_path}"
-    fi
+    source_functions "${model_functions_path}"
+}
 
+# any workarounds needed install here, e.g.
+# sed -e 's/<img src="/<img  src="/g'
+function fixup_input {
+    cat
 }
 
 # todo: reduce global variables from llm.sh
+# todo: make parallel with via_api_perform_inference
 function cli_perform_inference {
     # Use llamafile or similar CLI runner to perform inference
     printf '%s' "${PROMPT}" > "${PROMPT_TEMP_FILE}"
@@ -183,6 +184,6 @@ function cli_perform_inference {
 	GRAMMAR_FILE="--grammar-file ${GRAMMAR_FILE}"
     fi
     #set -x
-    cat "${PROMPT_TEMP_FILE}" | fixup_input | ${MODEL_RUNNER} ${MODEL} ${CLI_MODE} ${LOG_DISABLE} ${GPU} ${NGL} ${GRAMMAR_FILE} ${TEMPERATURE} ${CONTEXT_LENGTH} ${N_PREDICT} ${BATCH_SIZE} ${NO_PENALIZE_NL}--repeat-penalty 1 ${THREADS} -f /dev/stdin ${SILENT_PROMPT} --seed "${SEED}" ${LLM_ADDITIONAL_ARGS} 2> "${ERROR_OUTPUT}"
+    cat "${PROMPT_TEMP_FILE}" | fixup_input | ${MODEL_RUNNER} ${MODEL_PATH} ${CLI_MODE} ${LOG_DISABLE} ${GPU} ${NGL} ${GRAMMAR_FILE} ${TEMPERATURE} ${CONTEXT_LENGTH} ${N_PREDICT} ${BATCH_SIZE} ${NO_PENALIZE_NL}--repeat-penalty 1 ${THREADS} -f /dev/stdin ${SILENT_PROMPT} --seed "${SEED}" ${LLM_ADDITIONAL_ARGS} 2> "${ERROR_OUTPUT}"
     return $?
 }

@@ -56,22 +56,22 @@ ${QUESTION%$'\n'}
     fi
 }
 
-function set_model {
-    if [ -z "${MODEL}" ];
+function set_model_path {
+    if [ -z "${MODEL_PATH}" ];
     then
-	MODEL=$(find_first_model \
-                    "${MODELS_DIRECTORY}/codebooga/codebooga-34b-v0.1.Q4_K_M.gguf" \
-             )
+	MODEL_PATH="$(find_first_model \
+			 "${MODELS_DIRECTORY}/codebooga/codebooga-34b-v0.1.Q4_K_M.gguf" \
+		  )"
     fi
 }
 
 function get_model_name {
-    set_model
-    basename ${MODEL}
+    set_model_path
+    basename "${MODEL_PATH}"
 }
 
 function prepare_model {
-    set_model
+    set_model_path
     SILENT_PROMPT=""        # not supported by codebooga
     gpu_check 1
     prepare_prompt

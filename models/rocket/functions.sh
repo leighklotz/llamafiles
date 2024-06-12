@@ -39,24 +39,27 @@ function prepare_overrides {
 }
 
 
-function set_model {
-    if [ -z "${MODEL}" ];
+function set_model_path {
+    if [ -z "${MODEL_PATH}" ];
     then
-        MODEL=$(find_first_model \
-                    "${MODELS_DIRECTORY}/rocket/rocket-3b.Q6_K.llamafile" \
-                    "${MODELS_DIRECTORY}/rocket/rocket-3b.Q5_K_M.llamafile" \
-                    "${MODELS_DIRECTORY}/rocket/rocket-3b.Q4_K_M.llamafile" \
-             )
+        MODEL_PATH=$(find_first_model \
+			 "${MODELS_DIRECTORY}/rocket/rocket-3b.Q6_K.llamafile" \
+			 "${MODELS_DIRECTORY}/rocket/rocket-3b.Q5_K_M.llamafile" \
+			 "${MODELS_DIRECTORY}/rocket/rocket-3b.Q4_K_M.llamafile" \
+		  )
+    fi
+    if [ "${MODEL_PATH}" == "" ]; then
+	log_and_exit 1 "Cannot find model for MODEL_TYPE=$MODEL_TYPE in $MODELS_DIRECTORY"
     fi
 }
 
 function get_model_name {
-    set_model
-    basename ${MODEL}
+    set_model_path
+    basename "${MODEL_PATH}"
 }
 
 function prepare_model {
-    set_model
+    set_model_path
     USE_SYSTEM_ROLE=1
     gpu_check 4
     chatml_prompt

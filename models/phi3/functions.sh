@@ -39,22 +39,22 @@ function prepare_priority {
     cap_ngl
 }
 
-function set_model {
-    if [ -z "${MODEL}" ];
+function set_model_PATH {
+    if [ -z "${MODEL_PATH}" ];
     then
-	MODEL=$(find_first_model \
-                    "${MODELS_DIRECTORY}/phi3/Phi-3-mini-4k-instruct.Q8_0.llamafile" \
-             )
+	MODEL_PATH="$(find_first_model \
+			 "${MODELS_DIRECTORY}/phi3/Phi-3-mini-4k-instruct.Q8_0.llamafile" \
+             )"
     fi
 }
 
 function get_model_name {
-    set_model
-    basename ${MODEL}
+    set_model_path
+    basename "${MODEL_PATH}"
 }
 
 function prepare_model {
-    set_model
+    set_model_PATH
     gpu_check 4
     prepare_prompt
     prepare_priority

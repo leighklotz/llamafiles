@@ -96,7 +96,8 @@ function via_api_mistral_output_fixup {
     sed -e 's/\\_/_/g' | sed -e 's/\\\*/*/g'
 }
 
-# via_api_perform_inference "instruct" "You are a helpful math bot. Answer the user's questions." "${question}"
+# todo: make common with cli_perform_inference by splitting out all
+#       non-inference settings to the prepare_model
 # via_api_perform_inference "$MODE" "$SYSTEM_PROMPT" "$QUESTION" "$GRAMMAR_FILE"
 # todo: so many files and strings back and forth
 function via_api_perform_inference() {
@@ -198,13 +199,15 @@ function via_api_perform_inference() {
     return $s
 }
 
+# can't set the model in the API so we just validate that
+# there is a model. 
+# todo: maybe give error if $model_name != $MODEL_NAME and MODEL_NAME is specified.
 function set_model_name {
     model_name="$(get_model_name)"
     if [ "$model_name" == "None" ];
     then
 	log_and_exit 2 "No model loaded via-api"
     fi
-    # todo: maybe give error if loaded model is not env $MODEL
 }
 
 function init_via_model {
