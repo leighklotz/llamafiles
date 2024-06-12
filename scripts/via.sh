@@ -17,7 +17,7 @@ VIA="${VIA:-api}"
 
 
 function usage {
-    echo "usage: $0 [--via] [api|cli] [--get-model-name] [--list-models] [--load-model model-name] [--unload-model] [--help]"
+    echo "usage: $0 [--via] [api|cli|--api|--cli] [--get-model-name] [--list-models] [--load-model model-name] [--unload-model] [--help]"
     if [ -n "$1" ];
     then
        echo "       $1"
@@ -27,12 +27,12 @@ function usage {
 
 # fixme: better arg handling
 function main {
-    # first arg or two are optional: [--via] [api|cli]
+    # first arg or two are optional: [--via] [api|cli|--api|--cli]
     while true;
     do
 	case "$1" in
 	    --via) shift; ;;
-	    api|cli) VIA=$1; shift ;;
+	    --api|--cli|api|cli) VIA="${1#--}"; shift ;;
 	    *) break ;;
 	esac
     done

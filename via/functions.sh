@@ -89,10 +89,10 @@ function source_functions {
 function init_model {
     if [ "${VIA}" == "api" ];
     then
-	source "${VIA_API_FUNCTIONS_PATH}"
+	source_functions "${VIA_API_FUNCTIONS_PATH}"
     elif [ "${VIA}" == "cli" ];
     then
-	source "${VIA_CLI_FUNCTIONS_PATH}"
+	source_functions "${VIA_CLI_FUNCTIONS_PATH}"
     else
 	log_and_exit 3 "Unknown VIA=${VIA}"
     fi

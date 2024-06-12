@@ -158,14 +158,13 @@ function chatml_prompt {
 # todo: much work here
 # load_model calls init_model so llm.sh can do prep work once it knows the model but before it is used
 function init_via_model {
-    if [ -e "${MODEL_TYPE}" ];
+    if [ -z "${MODEL_TYPE}" ];
     then
-	log_and_exit 3 "Model not found: ${MODEL_TYPE}"
+	log_and_exit 1 "No MODEL_TYPE specified"
     fi
 
     # Construct the path to the functions file
     model_functions_path="$(realpath "${MODELS_DIRECTORY}/${MODEL_TYPE}/functions.sh")"
-
     source_functions "${model_functions_path}"
 }
 
