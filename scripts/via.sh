@@ -10,7 +10,7 @@ SCRIPT_DIR=$(dirname $(realpath "${BASH_SOURCE}"))
 VIA="${VIA:-api}"
 
 function usage {
-    echo "usage: $0 [--via] [api|cli|--api|--cli] [--get-model-name] [--list-models] [--load-model model-name] [--unload-model] [--list-model-types] [--help]"
+    echo "usage: $0 [--via] [api|cli|--api|--cli] [--get-model-name] [--list-models] [--load-model model-name] [--unload-model] [--list-model-types] [--get-via] [--help]"
     if [ -n "$1" ];
     then
        echo "       $1"
@@ -64,6 +64,9 @@ function main {
 	    --list-model-types)
 		init_model
 		list_model_types
+		break ;;
+	    --get-via)
+		printf "%s\n" "${VIA}"
 		break ;;
 	    --help)
 		usage ;;
