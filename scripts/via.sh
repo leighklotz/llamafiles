@@ -30,13 +30,13 @@ function main {
 	esac
     done
 
-    MODELS_DIRECTORY="$(realpath "${SCRIPT_DIR}/../models")"
+    # Load the functions for specified $VIA
     VIA_FUNCTIONS_PATH="$(realpath "${SCRIPT_DIR}/../via/functions.sh")"
     VIA_FUNCTIONS_VIA_X_PATH="$(realpath "${SCRIPT_DIR}/../via/${VIA}/functions.sh")"
-
     source "${VIA_FUNCTIONS_PATH}"
     source_functions "${VIA_FUNCTIONS_VIA_X_PATH}"
 
+    # parse the command args
     while true;
     do
 	local flag="$1"; shift
