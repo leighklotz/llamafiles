@@ -1,4 +1,4 @@
-_via_api() {
+_via() {
     local cur prev opts models
     COMPREPLY=()
     cur=${COMP_WORDS[COMP_CWORD]}
@@ -7,8 +7,10 @@ _via_api() {
     opts=(
         "--get-model-name"
         "--list-models"
+        "--list-models-types"
         "--load-model"
         "--unload-model"
+        "--via"
         "--help"
     )
     
@@ -16,10 +18,14 @@ _via_api() {
         models=$(via --list-models)
         COMPREPLY=( $(compgen -W "${models}" -- ${cur}) )
         return 0
+    elif [[ ${prev} == "--via" ]]; then
+        vias="api cli"
+        COMPREPLY=( $(compgen -W "${vias}" -- ${cur}) )
+        return 0
     elif [[ ${cur} == -* && ${COMP_CWORD} -eq 1 ]]; then
         COMPREPLY=( $(compgen -W "${opts[*]}" -- ${cur}) )
         return 0
     fi
 }
 
-complete -F _via_api via-api
+complete -F _via via
