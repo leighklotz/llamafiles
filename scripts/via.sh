@@ -9,13 +9,6 @@ SCRIPT_DIR=$(dirname $(realpath "${BASH_SOURCE}"))
 
 VIA="${VIA:-api}"
 
-# if [ "${MODEL_TYPE}" != 'via-api' ];
-# then
-#    echo "* WARN: MODEL_TYPE=$MODEL_TYPE is not 'via-api', forcing"
-#    MODEL_TYPE="via-api"
-#fi
-
-
 function usage {
     echo "usage: $0 [--via] [api|cli|--api|--cli] [--get-model-name] [--list-models] [--load-model model-name] [--unload-model] [--list-model-types] [--help]"
     if [ -n "$1" ];
