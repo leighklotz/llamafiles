@@ -182,8 +182,8 @@ function via_api_perform_inference() {
 	ERROR|ERRORS|NONE)
 	    if [ "$s" == 0 ] || [ "${KEEP_PROMPT_TEMP_FILE}" == "NONE" ];
 	       then
-		   [ -n "${question_file}" ] && rm -f "${question_file}" || echo "* WARN: unable to remove ${question_file}" >> /dev/stderr
-		   [ -n "${system_message_file}" ] && [ "${system_message_file}" != "/dev/null" ] && rm -f "${system_message_file}" || log_warn $? "* WARN: unable to remove ${system_message_file}"
+		   ([ -n "${question_file}" ] && [ "${question_file}" != "/dev/null" ]) && (rm -f "${question_file}" || echo "* WARN: unable to remove question_file ${question_file}" >> /dev/stderr)
+		   ([ -n "${system_message_file}" ] && [ "${system_message_file}" != "/dev/null" ]) && (rm -f "${system_message_file}" || log_warn $? "* WARN: unable to remove system_message_file=${system_message_file}" >> /dev/stderr)
 	    fi
 	    ;;
     esac
