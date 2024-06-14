@@ -17,7 +17,7 @@ VIA="${VIA:-api}"
 
 
 function usage {
-    echo "usage: $0 [--via] [api|cli|--api|--cli] [--get-model-name] [--list-models] [--load-model model-name] [--unload-model] [--help]"
+    echo "usage: $0 [--via] [api|cli|--api|--cli] [--get-model-name] [--list-models] [--load-model model-name] [--unload-model] [--list-model-types] [--help]"
     if [ -n "$1" ];
     then
        echo "       $1"
@@ -60,13 +60,17 @@ function main {
 		load_model "$1"
 		shift
 		break ;;
+	    --unload-model)
+		init_model
+		unload_model
+		break ;;
 	    --list-models)
 		init_model
 		list_models
 		break ;;
-	    --unload-model)
+	    --list-model-types)
 		init_model
-		unload_model
+		list_model_types
 		break ;;
 	    --help)
 		usage ;;

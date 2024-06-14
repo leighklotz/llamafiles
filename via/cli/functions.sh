@@ -37,6 +37,10 @@ function list_models() {
   return 0
 }
 
+function list_model_types() {
+    MODELS_DIRECTORY="$(realpath "${SCRIPT_DIR}/../models")"
+    ls "${MODELS_DIRECTORY}"/*/functions.sh | xargs dirname | xargs -I {} basename {}
+}
 
 # Prompt Markup
 function alpaca_prompt {

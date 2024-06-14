@@ -230,6 +230,10 @@ function list_models {
     curl -s "${VIA_API_MODEL_LIST_ENDPOINT}" | jq -r '.model_names[]'
 }
 
+function list_model_types() {
+    echo any
+}
+
 ## fixme: overloads models/function.sh, which is really via/llamafile/function.sh
 ## and this is really via/api/function.sh.
 function load_model {
