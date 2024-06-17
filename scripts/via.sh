@@ -10,10 +10,10 @@ SCRIPT_DIR=$(dirname $(realpath "${BASH_SOURCE}"))
 VIA="${VIA:-api}"
 
 function usage {
-    echo "usage: $0 [--via] [api|cli|--api|--cli] [--get-model-name] [--list-models] [--load-model model-name] [--unload-model] [--list-model-types] [--get-via] [--help]"
+    echo "usage: $0 [--via] [api|cli|--api|--cli] [--get-model-name] [--list-models] [--load-model model-name] [--unload-model] [--list-model-types] [--get-via] [--help]" >> /dev/stderr
     if [ -n "$1" ];
     then
-       echo "       $1"
+       echo "       $1" >> /dev/stderr
     fi
     exit 1
 }
