@@ -279,21 +279,21 @@ $ help.sh "How can I use the `yes` command in bash?"
 
 ## Environment Variables
 
-In addition to these command line flags, the script also checks for several environment variables to configure its behavior:
+In addition to these command line flags, the script also checks for several environment variables to configure its behavior. Variables with effect in CLI-only are marked as such.
 
 - `VIA`: The type of model runner, `api` or `cli`. Also see `--via` flag.
-- `MODEL_TYPE`: The default model type to use if none is specified via the `-m` or `--model-type` flag.
+- `MODEL_TYPE`: The default model type to use if none is specified via the `-m` or `--model-type` flag. (cli)
 - `TEMPERATURE`: The default temperature parameter for the model if none is specified via the `--temperature` flag.
-- `CONTEXT_LENGTH`: The default context length for the model if none is specified via the `--context-length` or `-c` flag.
+- `CONTEXT_LENGTH`: The default context length for the model if none is specified via the `--context-length` or `-c` flag. (cli)
 - `N_PREDICT`: The default number of tokens to predict if none is specified via the `--n-predict` flag.
 - `SYSTEM_MESSAGE`: The default system message to use if none is specified via the command line.
-- `MODEL_RUNNER`: The program used to run the model. Defaults to `/usr/bin/env` and automatically set to `llamafile...` if needed. See also `FORCE_MODEL_RUNNER`
-- `LLM_ADDITIONAL_ARGS`: Value is interpolated into the call to LLM at the end of the CLI invocation..
-- `FORCE_MODEL_RUNNER`: Force usage of MODEL_RUNNER, for example to override `llamafile...` with llama.cpp set in in `MODEL_RUNNER`
-- `THREADS`: The number of threads to use for the model. Defaults to the number of CPU cores.
-- `NGL`: Number of GPU layers, same as `--ngl`
-- `GPU`: auto, none, nvidia, ...
-- `PRIORITY`: speed|length|manual controlling balance of GPU memory and context length
+- `MODEL_RUNNER`: The program used to run the model. Defaults to `/usr/bin/env` and automatically set to `llamafile...` if needed. See also `FORCE_MODEL_RUNNER` (cli)
+- `LLM_ADDITIONAL_ARGS`: Value is interpolated into the call to LLM at the end of the CLI invocation. (cli)
+- `FORCE_MODEL_RUNNER`: Force usage of MODEL_RUNNER, for example to override `llamafile...` with llama.cpp set in in `MODEL_RUNNER` (cli)
+- `THREADS`: The number of threads to use for the model. Defaults to the number of CPU cores. (cli)
+- `NGL`: Number of GPU layers, same as `--ngl` (cli)
+- `GPU`: auto, none, nvidia, ... (cli)
+- `PRIORITY`: speed|length|manual controlling balance of GPU memory and context length (cli)
 - `GRAMMAR_FILE`: Same as `--grammar-file`
 - `DEBUG`: same as --debug
 - `VERBOSE`: same as --verbose
