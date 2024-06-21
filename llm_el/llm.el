@@ -49,7 +49,7 @@
   :group 'llm)
 
 (defcustom llm-default-model-type
-  ;; one of: cerebrum codebooga deepseek-coder dolphin functions.sh llava mistral mixtral models.jsonl nous-hermes phi rocket via-api
+  ;; one of: cerebrum codebooga deepseek-coder dolphin functions.sh llava mistral mixtral models.jsonl nous-hermes phi rocket 
   "mistral" 
   "Default model type for LLM."
   :type '(choice

@@ -12,7 +12,7 @@ find . -type d -empty -print0 | xargs -0 printf '%s\n'
 # -0: specifies that standard input is null-delimited
 # printf: formats and prints output
 # '%s\n': formats each null-delimited item as a single line with a newline character.</s>
-klotz@tensor:~/wip/llamafiles/scripts$ via-api --get-model-name
+klotz@tensor:~/wip/llamafiles/scripts$ via --api --get-model-name
 bartowski_dolphin-2.7-mixtral-8x7b-exl2_3_75
 klotz@tensor:~/wip/llamafiles/scripts$ grep 'export LINUX' write.sh
 export LINUX_WRITE_SYSTEM_MESSAGE="${LINUX_WRITE_SYSTEM_MESSAGE:-Output one or more bare shell commands to be exceuted directly by $SHELL on $(uname). Use comment syntax for everything except executable shell commands.\nThe commands should do this:}"

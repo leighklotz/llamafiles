@@ -170,7 +170,7 @@ function via_api_perform_inference() {
     s=$?
     if [ "$s" != 0 ];
     then
-	log_warn $s "via-api perform inference cannot curl"
+	log_warn $s "via --api perform inference cannot curl"
     fi
     output="$(printf "%s" "${result}" | jq --raw-output '.choices[].message.content')"
     s=$?
@@ -207,7 +207,7 @@ function set_model_name {
     model_name="$(get_model_name)"
     if [ "$model_name" == "None" ];
     then
-	log_and_exit 2 "No model loaded via-api"
+	log_and_exit 2 "No model loaded via --api"
     fi
 }
 
@@ -240,12 +240,12 @@ function list_model_types() {
 function load_model {
     local model_path="$1"
     printf -v data '{ "model_name": "%s", "settings": {}, "args": {} }' "${model_path}"
-    result=$(printf "%s" "${data}" | curl -s "${VIA_API_LOAD_MODEL_ENDPOINT}" -H 'Content-Type: application/json' -d @- || log_and_exit $? "via-api load_model cannot curl")
+    result=$(printf "%s" "${data}" | curl -s "${VIA_API_LOAD_MODEL_ENDPOINT}" -H 'Content-Type: application/json' -d @- || log_and_exit $? "via --api --load-model cannot curl")
     printf "%s\n" "$result"
 }
 
 function unload_model {
-    result=$(printf "%s" "${data}" | curl -s "${VIA_API_UNLOAD_MODEL_ENDPOINT}" -d '' || log_and_exit $? "via-api unload_model cannot curl")
+    result=$(printf "%s" "${data}" | curl -s "${VIA_API_UNLOAD_MODEL_ENDPOINT}" -d '' || log_and_exit $? "via --api --unload-model cannot curl")
     printf "%s\n" "$result"
 }
 

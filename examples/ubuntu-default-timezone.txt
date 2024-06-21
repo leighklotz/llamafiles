@@ -1,4 +1,4 @@
-$ via-api --get-model-name
+$ via --api --get-model-name
 turboderp_command-r-v01-35B-exl2_3.75bpw
 
 $ systype | help.sh how do I set default timezone to San Francisco on this ubuntu system via cli
