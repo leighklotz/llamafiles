@@ -47,12 +47,12 @@ else
     exit 1
 fi
 
-SCUTTLE_SYSTEM_MESSAGE='Summarize the web page article at the specified link address with response as a short JSON object with these 4 fields: `link`, `title`, `description`, and `keywords` array:'
+SCUTTLE_SYSTEM_MESSAGE='Summarize the web page article at the specified link address. Respond with only a short JSON object with these 4 fields: `link`, `title`, `description`, and `keywords` array:'
 export SYSTEM_MESSAGE="${SYSTEM_MESSAGE:-$(printf "%b" "${SCUTTLE_SYSTEM_MESSAGE}")}"
 
 # replace all '```json`' and '```' with empty. hope that's enough and we don't ahve to get stateful.
 function preprocess_markdown {
-    cat | sed -e 's/^```.*$//g'
+    cat | sed -n '/{/,/}/p' | sed '1h;1!H;$!d;g;s/.*\({.*}\).*/\1/'
 }
 
 # transforms JSON output from LLM into a properly formatted URL string for Scuttlebookmark adding.
@@ -86,9 +86,9 @@ function post_process {
 
 if [ -z "${INHIBIT_GRAMMAR}" ];
    then
-       GRAMMAR_FLAG="--grammar-file ${SCRIPT_DIR}/json2.gbnf"
+       GRAMMAR_FLAG="--grammar-file ${SCRIPT_DIR}/json3.gbnf"
 else
     GRAMMAR_FLAG=""
 fi
 
-(${LYNX} "${LINK}"; printf "\n# Instruction\n%s\n# JSON Response\n" "${SCUTTLE_SYSTEM_MESSAGE}")| ${SCRIPT_DIR}/llm.sh --long ${GRAMMAR_FILE} ${ARGS} "# Text of link ${LINK}" | post_process
+(${LYNX} "${LINK}"; printf "\n# Instruction\n%s\n# JSON Response\n" "${SCUTTLE_SYSTEM_MESSAGE}")| ${SCRIPT_DIR}/llm.sh --long ${GRAMMAR_FLAG} ${ARGS} "# Text of link ${LINK}" | post_process
