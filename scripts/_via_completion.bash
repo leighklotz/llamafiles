@@ -5,6 +5,7 @@ _via() {
     prev=${COMP_WORDS[COMP_CWORD-1]}
     
     opts=(
+        "--get-via"
         "--get-model-name"
         "--list-models"
         "--list-models-types"
