@@ -1,50 +1,5 @@
 #!/bin/bash
 
-function log_verbose {
-    local prog="$(basename "$0")"
-    local message="$1"
-    if [ "${VERBOSE}" != '' ];
-       then
-	   printf "* %s: %s\n" "${prog}" "${message}" > /dev/stderr
-    fi
-}
-
-function log_debug {
-    local prog="$(basename "$0")"
-    local message="$1"
-    if [ "${DEBUG}" != '' ];
-       then
-	   printf "* %s: %s\n" "${prog}" "${message}" > /dev/stderr
-    fi
-}
-
-function log_info {
-    local prog="$(basename "$0")"
-    local message="$1"
-    printf "* %s: %s\n" "${prog}" "${message}" > /dev/stderr
-}
-
-function log_warn {
-    local prog="$(basename "$0")"
-    local code=$1
-    local message="$2"
-    printf "* WARN %s (%s): %s\n" "${prog}" "${code}" "${message}" > /dev/stderr
-}
-
-function log_error {
-    local prog="$(basename "$0")"
-    local message="$1"
-    printf "* ERROR %s: %s\n" "${prog}" "${message}" > /dev/stderr
-}
-
-function log_and_exit {
-    local prog="$(basename "$0")"
-    local code=$1
-    local message="$2"
-    printf "* ERROR %s (%s): %s\n" "${prog}" "${code}" "${message}" > /dev/stderr
-    [[ $code =~ ^[0-9]+$ ]] && exit $code || exit 1
-}
-
 # Check if the script is being sourced or directly executed
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     log_and_exit 1 "This script is intended to be sourced, not executed directly."
@@ -66,6 +21,25 @@ function find_first_model() {
   done
   log_error "Cannot find executable model in $@"
   return 1
+}
+
+# List all existing executable or GGUF in the list.
+# file_path=$(find_first_model /path/to/file1 /path/to/file2 /path/to/file3)
+function list_models() {
+  local files=("$@")
+  local file
+  for file in "${files[@]}"; do
+    if [ -f "$file" ] && ( [ -x "$file" ] || [ "${file##*.}" == "gguf" ] );
+    then
+      echo "${file}"
+    fi
+  done
+  return 0
+}
+
+function list_model_types() {
+    MODELS_DIRECTORY="$(realpath "${SCRIPT_DIR}/../models")"
+    ls "${MODELS_DIRECTORY}"/*/functions.sh | xargs dirname | xargs -I {} basename {}
 }
 
 # Prompt Markup
@@ -160,6 +134,7 @@ function chatml_prompt {
     fi
     printf -v PROMPT '%s<|im_start|>assistant' "${PROMPT}"
 }
+
 function chatml_prompt {
     local system_message="${SYSTEM_MESSAGE%$'\n'}"
     local question="${QUESTION%$'\n'}"
@@ -185,21 +160,33 @@ function chatml_prompt {
 }
 
 # todo: much work here
-# load_model and prepare_model are two functions so llm.sh can do prep work once it knows the model but before it is loaded
-function load_model {
+# load_model calls init_model so llm.sh can do prep work once it knows the model but before it is used
+function init_via_model {
     if [ -z "${MODEL_TYPE}" ];
     then
-	log_and_exit 3 "Model not found: ${MODEL_TYPE}"
+	log_and_exit 1 "No MODEL_TYPE specified"
     fi
 
     # Construct the path to the functions file
     model_functions_path="$(realpath "${MODELS_DIRECTORY}/${MODEL_TYPE}/functions.sh")"
+    source_functions "${model_functions_path}"
+}
 
-    # Check if the model functions file exists
-    if [[ -f "${model_functions_path}" ]]; then
-	source "${model_functions_path}"
-    else
-	log_and_exit 1 "Cannot find model functions for ${MODEL_TYPE}: ${model_functions_path}"
+# any workarounds needed install here, e.g.
+# sed -e 's/<img src="/<img  src="/g'
+function fixup_input {
+    cat
+}
+
+# todo: reduce global variables from llm.sh
+# todo: make parallel with via_api_perform_inference
+function cli_perform_inference {
+    # Use llamafile or similar CLI runner to perform inference
+    printf '%s' "${PROMPT}" > "${PROMPT_TEMP_FILE}"
+    if [ -n "${GRAMMAR_FILE}" ]; then
+	GRAMMAR_FILE="--grammar-file ${GRAMMAR_FILE}"
     fi
-
+    #set -x
+    cat "${PROMPT_TEMP_FILE}" | fixup_input | ${MODEL_RUNNER} ${MODEL_PATH} ${CLI_MODE} ${LOG_DISABLE} ${GPU} ${NGL} ${GRAMMAR_FILE} ${TEMPERATURE} ${CONTEXT_LENGTH} ${N_PREDICT} ${BATCH_SIZE} ${NO_PENALIZE_NL}--repeat-penalty 1 ${THREADS} -f /dev/stdin ${SILENT_PROMPT} --seed "${SEED}" ${LLM_ADDITIONAL_ARGS} 2> "${ERROR_OUTPUT}"
+    return $?
 }

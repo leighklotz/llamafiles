@@ -41,18 +41,33 @@ function prepare_prompt {
                                   printf -v PROMPT "%s[/INST]" "${PROMPT}"
 }
 
+function set_model_path {
+    if [ -z "${MODEL_PATH}" ];
+    then
+	MODEL_PATH=$(find_first_model \
+			 ${MODELS_DIRECTORY}/mistral/Mistral-7B-Instruct-v0.3-Q6_K.gguf \
+			 ${MODELS_DIRECTORY}/mistral/Mistral-7B-Instruct-v0.3-Q4_K_M.gguf \
+			 ${MODELS_DIRECTORY}/mistral/mistral-7b-instruct-v0.2.Q6_K.gguf \
+			 ${MODELS_DIRECTORY}/mistral/mistral-7b-instruct-v0.2.Q5_K_M.llamafile \
+			 ${MODELS_DIRECTORY}/mistral/mistral-7b-instruct-v0.2.Q5_K_M.gguf \
+			 ${MODELS_DIRECTORY}/mistral/mistral-7b-instruct-v0.2.Q4_K_M.llamafile \
+			 ${MODELS_DIRECTORY}/mistral/mistral-7b-instruct-v0.2.Q4_K_M.gguf \
+			 ${MODELS_DIRECTORY}/mistral/mistral-7b-instruct-v0.1-Q4_K_M-main.llamafile \
+			 ${MODELS_DIRECTORY}/mistral/mistral-7b-instruct-v0.2.Q3_K_M.llamafile \
+			 ${MODELS_DIRECTORY}/mistral/mistral-7b-instruct-v0.2.Q3_K_S.llamafile)
+	if [ "${MODEL_PATH}" == "" ]; then
+	    log_and_exit 1 "Cannot find model for MODEL_TYPE=$MODEL_TYPE in $MODELS_DIRECTORY"
+	fi
+    fi
+}
+
+function get_model_name {
+    set_model_path
+    basename "${MODEL_PATH}"
+}
+
 function prepare_model {
-    MODEL=$(find_first_model \
-		${MODELS_DIRECTORY}/mistral/Mistral-7B-Instruct-v0.3-Q6_K.gguf \
-                ${MODELS_DIRECTORY}/mistral/Mistral-7B-Instruct-v0.3-Q4_K_M.gguf \
-                ${MODELS_DIRECTORY}/mistral/mistral-7b-instruct-v0.2.Q6_K.gguf \
-                ${MODELS_DIRECTORY}/mistral/mistral-7b-instruct-v0.2.Q5_K_M.llamafile \
-                ${MODELS_DIRECTORY}/mistral/mistral-7b-instruct-v0.2.Q5_K_M.gguf \
-                ${MODELS_DIRECTORY}/mistral/mistral-7b-instruct-v0.2.Q4_K_M.llamafile \
-                ${MODELS_DIRECTORY}/mistral/mistral-7b-instruct-v0.2.Q4_K_M.gguf \
-                ${MODELS_DIRECTORY}/mistral/mistral-7b-instruct-v0.1-Q4_K_M-main.llamafile \
-                ${MODELS_DIRECTORY}/mistral/mistral-7b-instruct-v0.2.Q3_K_M.llamafile \
-                ${MODELS_DIRECTORY}/mistral/mistral-7b-instruct-v0.2.Q3_K_S.llamafile)
+    set_model_path
     gpu_check 4
     prepare_prompt
     prepare_priority

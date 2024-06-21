@@ -11,5 +11,5 @@ The command git log --oneline --graph --decorate grammar-fixes..main is used to 
 grammar-fixes..main: This is a special syntax in git to show commits that are in the specified branch (grammar-fixes) but not in the second specified branch (main). It shows the changes made in the 'grammar-fixes' branch that have not been merged into the 'main' branch.
 
 Please note that after running this command, you will probably see that the commits in 'grammar-fixes' have not been merged into 'main'. This might be intentional because you are working on a feature branch that needs to be reviewed or tested before being merged.
-$ via-api --get-model-name
+$ via --api --get-model-name
 cognitivecomputations_dolphin-2.8-mistral-7b-v02.Q8_0.gguf

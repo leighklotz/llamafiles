@@ -29,11 +29,23 @@ function phi_priority {
     cap_ngl
 }
 
+function set_model_path {
+    if [ -z "${MODEL_PATH}" ];
+    then
+	MODEL_PATH=$(find_first_model \
+                    "${MODELS_DIRECTORY}/phi/phi-2.Q6_K.llamafile" \
+                    "${MODELS_DIRECTORY}/phi/phi-2.Q5_K_M.llamafile" \
+             )
+    fi
+}
+
+function get_model_name {
+    set_model_path
+    basename "${MODEL_PATH}"
+}
+
 function prepare_model {
-    MODEL=$(find_first_model \
-                "${MODELS_DIRECTORY}/phi/phi-2.Q6_K.llamafile" \
-                "${MODELS_DIRECTORY}/phi/phi-2.Q5_K_M.llamafile" \
-         )
+    set_model_path
     gpu_check 4
     prepare_prompt
     prepare_priority

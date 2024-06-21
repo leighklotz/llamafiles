@@ -1,0 +1,20 @@
+This example fails to put the --exclude options first, uses the odd '*' instead of '.', and produces the output in the input directory.
+
+    $ help.sh  'i want to tar up the current directory $(pwd) but skip any `*.gguf` or `*.llamafile` files'
+    You can achieve this by using the `tar` command with the `--exclude` option. Here's an example of how to do it:
+
+    ```bash
+    tar czf output.tar.gz * --exclude '*.gguf' --exclude '*.llamafile'
+    ```
+
+    Let me break it down for you:
+
+    - `c`: Creates a new tar archive.
+    - `z`: Specifies that the archive will be in gzip (.tar.gz) format.
+    - `f output.tar.gz`: Specifies the output file name and format.
+    - `*`: Selects all files in the current directory.
+    - `--exclude '*.gguf' --exclude '*.llamafile'`: Skips files with the specified names.
+
+    This command will create an archive named `output.tar.gz` in the current directory, but it will exclude any `*.gguf` or `*.llamafile` files.
+    $ via --get-model-name
+    cognitivecomputations_dolphin-2.8-mistral-7b-v02.Q8_0.gguf

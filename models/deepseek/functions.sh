@@ -31,11 +31,23 @@ function prepare_priority {
     cap_ngl
 }
 
+function set_model_path {
+    if [ -z "${MODEL_PATH}" ];
+    then
+	MODEL_PATH="$(find_first_model \
+			 "${MODELS_DIRECTORY}/deepseek/deepseek-coder-33b-instruct.Q5_K_M.gguf" \
+			 "${MODELS_DIRECTORY}/deepseek/deepseek-coder-6.7b-instruct.Q4_K_M.gguf" \
+		  )"
+    fi
+}
+
+function get_model_name {
+    set_model_path
+    basename ${MODELS_PAT}
+}
+
 function prepare_model {
-    MODEL=$(find_first_model \
-                "${MODELS_DIRECTORY}/deepseek/deepseek-coder-33b-instruct.Q5_K_M.gguf" \
-                "${MODELS_DIRECTORY}/deepseek/deepseek-coder-6.7b-instruct.Q4_K_M.gguf" \
-         )
+    set_model_path
     SILENT_PROMPT=""
     gpu_check 2.1
     llama_prompt
