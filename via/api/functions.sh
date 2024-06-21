@@ -48,7 +48,8 @@ TEMPLATE_SETTINGS="
     repeat_last_n: 64, repeat_penalty: 1.000, frequency_penalty: 0.000, presence_penalty: 0.000,
     top_k: 40, tfs_z: 1.000, top_p: 0.950, min_p: 0.050, typical_p: 1.000, temp: 0.000,
     mirostat: 0, mirostat_lr: 0.100, mirostat_ent: 5.000,
-    n_keep: 1"
+    n_keep: 1,
+    skip_special_tokens: false"
 
 SYSTEM_ROLE_TEMPLATE="{
     messages: [
