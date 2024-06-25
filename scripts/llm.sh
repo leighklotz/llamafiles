@@ -18,7 +18,8 @@ NGL="${NGL:-}"
 GPU="${GPU:-auto}"		# auto|nvidia|omit
 PRIORITY="${PRIORITY:-manual}" # speed|length|manual
 DEBUG="${DEBUG:-}"
-VERBOSE=${VERBOSE:-}
+VERBOSE="${VERBOSE:-}"
+INFO="${INFO:-${VERBOSE}}"
 LOG_DISABLE="--log-disable"
 GRAMMAR_FILE="${GRAMMAR_FILE:-}"
 BATCH_SIZE="${BATCH_SIZE:-}"
@@ -95,6 +96,8 @@ function parse_args() {
                     shift; TEMPERATURE="$1" ;;
 		--verbose|-v)
                     VERBOSE=1 ;;
+		--info|-v)
+                    INFO=1 ;;
 		-c|--context-length)
                     shift; CONTEXT_LENGTH="$1" ;;
 		--ngl)
@@ -266,7 +269,7 @@ function set_model_runner {
 
 function set_verbose_debug {
     # Set verbose and debug last
-    if [ "${DEBUG}" ] || [ "${VERBOSE}" ];
+    if [ "${DEBUG}" ] || [ "${INFO}" ] || [ "${VERBOSE}" ];
     then
 	log_info "Parameters: ngl=${NGL} context_length=${CONTEXT_LENGTH} est_len=${PROMPT_LENGTH_EST}"
     fi
@@ -352,7 +355,7 @@ parse_args "$@"
 init_model
 process_question_escapes
 do_stdin
-prepare_model && [ -n "${VERBOSE}" ] && log_info "MODEL_PATH=${MODEL_PATH}"
+prepare_model && [ -n "${INFO}" ] && log_info "MODEL_PATH=${MODEL_PATH}"
 adjust_raw_flag
 check_context_length
 set_model_runner
