@@ -10,7 +10,6 @@ MODELS_DIRECTORY="$(realpath "${SCRIPT_DIR}/../models")"
 # RWK: https://gist.github.com/akostadinov/33bb2606afe1b334169dfbf202991d36?permalink_comment_id=4962266#gistcomment-4962266
 function stack_trace() {
     local status_code="${1}"
-
     local -a stack=("Stack trace of error code '${status_code}':")
     local stack_size=${#FUNCNAME[@]}
     local -i i
@@ -29,17 +28,15 @@ function stack_trace() {
 function log_verbose {
     local prog="$(basename "$0")"
     local message="$1"
-    if [ "${VERBOSE}" != '' ];
-       then
-	   printf "* %s: %s\n" "${prog}" "${message}" > /dev/stderr
+    if [ -n "${VERBOSE}" ]; then
+	printf "* %s: %s\n" "${prog}" "${message}" > /dev/stderr
     fi
 }
 
 function log_debug {
     local prog="$(basename "$0")"
     local message="$1"
-    if [ "${DEBUG}" != '' ];
-       then
+    if [ -n "${DEBUG}" ]; then
 	   printf "* %s: %s\n" "${prog}" "${message}" > /dev/stderr
     fi
 }
@@ -47,7 +44,9 @@ function log_debug {
 function log_info {
     local prog="$(basename "$0")"
     local message="$1"
-    printf "* %s: %s\n" "${prog}" "${message}" > /dev/stderr
+    if [ -n "${INFO}" ]; then
+	printf "* %s: %s\n" "${prog}" "${message}" > /dev/stderr
+    fi
 }
 
 function log_warn {
@@ -98,3 +97,10 @@ function init_model {
     fi
     init_via_model
 }
+
+# if [ -n "${VIA_FUNCTIONS_LOADED}" ]; then
+#     log_error_and_exit "VIA_FUNCTIONS_LOADED again"
+# else
+#     VIA_FUNCTIONS_LOADED=1
+#     log_error "VIA_FUNCTIONS_LOADED first_time"
+# fi

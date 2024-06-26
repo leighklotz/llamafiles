@@ -331,16 +331,14 @@ function adjust_raw_flag {
 }
 
 function perform_inference {
-    if [ "$VIA" == "api" ];
+    if [ "${VIA}" == "api" ];
     then
-	source_functions "${VIA_API_FUNCTIONS_PATH}"
 	set_api_options
 	via_api_perform_inference "${MODEL_MODE}" "${SYSTEM_MESSAGE}" "${PROMPT}" "${GRAMMAR_FILE}" "${TEMPERATURE}" "${repeat_penalty}" "${penalize_nl}"
 	status=$?
     elif [ "$VIA" == "cli" ];
     then
 	set_cli_options
-	source_functions "${VIA_CLI_FUNCTIONS_PATH}"
 	cli_perform_inference
 	status=$?
     else

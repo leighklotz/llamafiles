@@ -1,5 +1,7 @@
 #!/bin/bash
 
+MODELS_PATHS="${MODELS_DIRECTORY}/deepseek/DeepSeek-Coder-V2-Lite-Instruct-Q6_K_L.gguf"
+
 # Check if the script is being sourced or directly executed
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     echo "This script '${BASH_SOURCE[0]}' is intended to be sourced, not executed directly."
@@ -31,25 +33,39 @@ function prepare_priority {
     cap_ngl
 }
 
-function set_model_path {
-    if [ -z "${MODEL_PATH}" ];
-    then
-	MODEL_PATH="$(find_first_model \
-			 "${MODELS_DIRECTORY}/deepseek/deepseek-coder-33b-instruct.Q5_K_M.gguf" \
-			 "${MODELS_DIRECTORY}/deepseek/deepseek-coder-6.7b-instruct.Q4_K_M.gguf" \
-		  )"
-    fi
+function get_model_name {
+    cli_set_model_path ${MODELS_PATHS}
+    basename "${MODEL_PATH}"
 }
 
-function get_model_name {
-    set_model_path
-    basename ${MODELS_PAT}
+# """<｜begin▁of▁sentence｜>{system_prompt}
+# 
+# User: {prompt}
+# 
+# Assistant: <｜end▁of▁sentence｜>"""
+
+
+function deepseek_coder_v2_prompt {
+    local system_message="${SYSTEM_MESSAGE%$'\n'}"
+    local question="${QUESTION%$'\n'}"
+    local input="${INPUT%$'\n'}"
+    local BOS="<｜begin▁of▁sentence｜>"
+    local EOS="<｜end▁of▁sentence｜>"
+    # deepseek_coder_v2 does not support system role but it has a place for me
+    # see if it works
+    printf -v PROMPT "${BOS}%s\n" "${system_message}"
+
+    if [ -n "${input}" ];then
+	printf -v PROMPT "%s\nUser: %s\n%s\n" "${PROMPT}" "${question}" "${input}"
+    else
+	printf -v PROMPT "%s\nUser: %s\n" "${PROMPT}" "${question}" 
+    fi
+    printf -v PROMPT "%s\nAssistant: ${EOS}\n" "${PROMPT}"
 }
 
 function prepare_model {
-    set_model_path
-    SILENT_PROMPT=""
+    cli_set_model_path ${MODELS_PATHS[@]}
     gpu_check 2.1
-    llama_prompt
+    deepseek_coder_v2_prompt
     prepare_priority
 }

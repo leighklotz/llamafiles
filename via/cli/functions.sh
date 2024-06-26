@@ -9,7 +9,6 @@ fi
 # file_path=$(find_first_model /path/to/file1 /path/to/file2 /path/to/file3)
 function find_first_model() {
   local files=("$@")
-  local file
   for file in "${files[@]}"; do
     log_verbose "Checking Model $file"
     if [ -f "$file" ] && ( [ -x "$file" ] || [ "${file##*.}" == "gguf" ] );
@@ -135,30 +134,6 @@ function chatml_prompt {
     printf -v PROMPT '%s<|im_start|>assistant' "${PROMPT}"
 }
 
-function chatml_prompt {
-    local system_message="${SYSTEM_MESSAGE%$'\n'}"
-    local question="${QUESTION%$'\n'}"
-    local input="${INPUT%$'\n'}"
-    PROMPT=""
-
-    if [ -n "${USE_SYSTEM_ROLE}" ];
-    then
-	printf -v PROMPT '%s<|im_start|>system\n%s<|im_end|>\n' "${PROMPT}" "${system_message}"
-    else
-	# fixme: we just use two 'user' messages with no 'assistant' message
-	#        it might be better to prepend system message to the question+input, ending with newline
-	printf -v PROMPT '%s<|im_start|>user\n%s<|im_end|>\n' "${PROMPT}" "${system_message}"
-    fi
-
-    if [ -n "${input}" ];
-    then
-	printf -v PROMPT '%s<|im_start|>user\n%s\n%s<|im_end|>\n' "${PROMPT}" "${question}" "${input}"
-    else
-	printf -v PROMPT '%s<|im_start|>user\n%s<|im_end|>\n' "${PROMPT}" "${question}"
-    fi
-    printf -v PROMPT '%s<|im_start|>assistant' "${PROMPT}"
-}
-
 # todo: much work here
 # load_model calls init_model so llm.sh can do prep work once it knows the model but before it is used
 function init_via_model {
@@ -174,7 +149,14 @@ function init_via_model {
 
 # any workarounds needed install here, e.g.
 # sed -e 's/<img src="/<img  src="/g'
+# by overriding this function in model/*/functions.sh
 function fixup_input {
+    cat
+}
+
+# any workarounds needed install here, e.g.
+# by overriding this function in model/*/functions.sh
+function fixup_output {
     cat
 }
 
@@ -187,6 +169,27 @@ function cli_perform_inference {
 	GRAMMAR_FILE="--grammar-file ${GRAMMAR_FILE}"
     fi
     #set -x
-    cat "${PROMPT_TEMP_FILE}" | fixup_input | ${MODEL_RUNNER} ${MODEL_PATH} ${CLI_MODE} ${LOG_DISABLE} ${GPU} ${NGL} ${GRAMMAR_FILE} ${TEMPERATURE} ${CONTEXT_LENGTH} ${N_PREDICT} ${BATCH_SIZE} ${NO_PENALIZE_NL}--repeat-penalty 1 ${THREADS} -f /dev/stdin ${SILENT_PROMPT} --seed "${SEED}" ${LLM_ADDITIONAL_ARGS} 2> "${ERROR_OUTPUT}"
+    cat "${PROMPT_TEMP_FILE}" | fixup_input | ${MODEL_RUNNER} ${MODEL_PATH} ${CLI_MODE} ${LOG_DISABLE} ${GPU} ${NGL} ${GRAMMAR_FILE} ${TEMPERATURE} ${CONTEXT_LENGTH} ${N_PREDICT} ${BATCH_SIZE} ${NO_PENALIZE_NL} --repeat-penalty 1 ${THREADS} -f /dev/stdin ${SILENT_PROMPT} --seed "${SEED}" ${LLM_ADDITIONAL_ARGS} | fixup_output 2> "${ERROR_OUTPUT}"
     return $?
 }
+
+function cli_set_model_path {
+    #set -x
+    if [ -z "${MODEL_PATH}" ];
+    then
+	local models_paths=${@}
+	log_info "* models_paths = ${models_paths}"
+	MODEL_PATH=$(find_first_model ${models_paths[@]})
+    fi
+    if [ -z "${MODEL_PATH}" ]; then
+	log_and_exit 1 "Cannot find model for MODEL_TYPE=$MODEL_TYPE in $MODELS_DIRECTORY"
+    fi
+}
+
+# if [ -n "${VIA_CLI_FUNCTIONS_LOADED}" ]; then
+#     log_and_exit "VIA_CLI_FUNCTIONS_LOADED again"
+# else
+#     VIA_CLI_FUNCTIONS_LOADED=1
+#     log_error "VIA_CLI_FUNCTIONS_LOADED first_time"
+# fi
+

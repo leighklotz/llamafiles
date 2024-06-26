@@ -249,3 +249,9 @@ function unload_model {
     printf "%s\n" "$result"
 }
 
+# if [ -n "${VIA_API_FUNCTIONS_LOADED}" ]; then
+#     log_and_exit "VIA_API_FUNCTIONS_LOADED again"
+# else
+#     VIA_API_FUNCTIONS_LOADED=1
+#     log_error "VIA_API_FUNCTIONS_LOADED first_time"
+# fi

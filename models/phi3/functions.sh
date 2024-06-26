@@ -1,5 +1,7 @@
 #!/bin/bash
 
+MODELS_PATHS="${MODELS_DIRECTORY}/phi3/Phi-3-mini-4k-instruct.Q8_0.llamafile"
+
 # Check if the script is being sourced or directly executed
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     echo "This script '${BASH_SOURCE[0]}' is intended to be sourced, not executed directly."
@@ -13,21 +15,22 @@ fi
 # <|assistant|>
 
 
+# <|user|>\nQuestion <|end|>\n<|assistant|>
+
+
 function prepare_prompt {
     if [ "${INPUT}" == "" ];
     then
-      printf -v PROMPT "<|system|>
+      printf -v PROMPT '<|user|>
 %s
-<|user|>
-%s
-<|assistant|>" "${SYSTEM_MESSAGE%$'\n'}" "${QUESTION%$'\n'}"
+%s <|end|>
+<|assistant|>' "${SYSTEM_MESSAGE%$'\n'}" "${QUESTION%$'\n'}"
     else
-      printf -v PROMPT "<|system|<>
-%s
-<|user|>
+      printf -v PROMPT '<|user|>
 %s
 %s
-<|assistant|>" "${SYSTEM_MESSAGE%$'\n'}" "${QUESTION%$'\n'}" "${INPUT%$'\n'}"
+%s <|end|>
+<|assistant|>' "${SYSTEM_MESSAGE%$'\n'}" "${QUESTION%$'\n'}" "${INPUT%$'\n'}"
     fi
 }
 
@@ -39,23 +42,19 @@ function prepare_priority {
     cap_ngl
 }
 
-function set_model_PATH {
-    if [ -z "${MODEL_PATH}" ];
-    then
-	MODEL_PATH="$(find_first_model \
-			 "${MODELS_DIRECTORY}/phi3/Phi-3-mini-4k-instruct.Q8_0.llamafile" \
-             )"
-    fi
-}
-
 function get_model_name {
-    set_model_path
+    cli_set_model_path ${MODELS_PATHS}
     basename "${MODEL_PATH}"
 }
 
 function prepare_model {
-    set_model_PATH
+    cli_set_model_path ${MODELS_PATHS}
     gpu_check 4
     prepare_prompt
     prepare_priority
+}
+
+# workaround: override fixup_output frrom via/cli/functions.sh
+function fixup_output {
+    cat | sed -r 's/<\|(end|endoftext)\|>//g'
 }
