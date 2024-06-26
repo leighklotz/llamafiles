@@ -49,3 +49,7 @@ function prepare_model {
     perpare_priority
 }
 
+# workaround: override fixup_output frrom via/cli/functions.sh
+function fixup_output {
+    cat | sed -r 's/<\|im_end\|>//g'
+}
