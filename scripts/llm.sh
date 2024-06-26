@@ -217,13 +217,13 @@ function check_context_length {
 
     if [ "${PROMPT_LENGTH_EST}" -gt "${CONTEXT_LENGTH}" ];
     then
-	log_and_exit 2 "* ERROR: Prompt len ${PROMPT_LENGTH_EST} estimated not to fit in context ${CONTEXT_LENGTH}"
+	log_warn "* prompt len ${PROMPT_LENGTH_EST} estimated not to fit in context ${CONTEXT_LENGTH}"
     fi
 
     if [ "$CONTEXT_LENGTH" -gt "$MAX_CONTEXT_LENGTH" ];
     then
 	CONTEXT_LENGTH="$MAX_CONTEXT_LENGTH"
-	log_warn "Truncated context length to $CONTEXT_LENGTH"
+	log_warn "* truncated context length to $CONTEXT_LENGTH"
     fi
 
     #BATCH_SIZE=${BATCH_SIZE:-$(($CONTEXT_LENGTH / 2))}

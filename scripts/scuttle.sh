@@ -75,12 +75,11 @@ function post_process {
     then
 	log_debug "post_process"
 	tee /dev/stderr | scuttle_extract_json
-	s=$?
     else
 	scuttle_extract_json
-	s=$?
     fi
-    [ $s != 0 ] && log_and_exit $s "$0" $s "post_process"
+    s=$?
+    [ $? != 0 ] && log_error "post_process"
     return $s
 }
 

@@ -59,14 +59,17 @@ function log_warn {
 function log_error {
     local prog="$(basename "$0")"
     local message="$1"
-    printf "* ERROR in %s: %s\n%s\n" "${prog}" "${message}" "$(stack_trace $?)" > /dev/stderr
+    local code=$?
+    printf "* ERROR in %s: %s\n" "${prog}" "${message}" > /dev/stderr
+    [ -n "${PRINT_STACK_TRACE}" ] && printf "%s\n" "$(stack_trace $code)" > /dev/stderr
 }
 
 function log_and_exit {
     local prog="$(basename "$0")"
     local code=$1
     local message="$2"
-    printf "* ERROR in %s: %s\n%s\n" "${prog}" "${code}" "${message}" "$(stack_trace "${code}")" > /dev/stderr
+    printf "* ERROR in %s: %s\n" "${prog}" "${message}" > /dev/stderr
+    [ -n "${PRINT_STACK_TRACE}" ] && printf "%s\n" "$(stack_trace $code)" > /dev/stderr
     [[ $code =~ ^[0-9]+$ ]] && exit $code || exit 1
 }
 
