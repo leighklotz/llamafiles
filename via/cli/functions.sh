@@ -137,6 +137,7 @@ function chatml_prompt {
 # todo: much work here
 # load_model calls init_model so llm.sh can do prep work once it knows the model but before it is used
 function init_via_model {
+    echo "MODEL_TYPE=$MODEL_TYPE"
     if [ -z "${MODEL_TYPE}" ];
     then
 	log_and_exit 1 "No MODEL_TYPE specified"

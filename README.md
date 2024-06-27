@@ -311,7 +311,8 @@ You can control the default model by specifying environment variable `$MODEL_TYP
 
 Todo: Document LLAMAFILE_RUNNER here.
 
-The [scripts/via.sh](via.sh) CLI tool provides access to server-specific commands, such as listing models and model types. There is no facility to `load` a LLamafile model with this script.
+The [scripts/via.sh](via.sh) CLI tool provides access to server-specific commands, such as listing models and model types.
+Although it can use Oobabooga/text-generation-webui API to remotey load models in the `--via api` case,  there is no facility to `load` a LLamafile model in the `--via cli` case; instead set `MODEL_TYPE` or use the `-m` flag.
 
 ## Open API Usage
 You can skip using a local `GGUF` or `llamafile` executable and instead use an Open API compatible LLM server.

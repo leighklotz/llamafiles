@@ -83,6 +83,8 @@ function source_functions {
     if [[ -f "${functions_path}" ]]; then
 	log_verbose "* sourcing ${functions_path}"
 	source "${functions_path}"
+    elif [[ -z "${functions_path}" ]]; then
+	log_and_exit 3 "* $0: ERROR: functions_path is empty"
     else
 	log_and_exit 3 "* $0: ERROR: Cannot find functions: ${functions_path}"
     fi
