@@ -229,36 +229,6 @@ function check_context_length {
     #BATCH_SIZE=${BATCH_SIZE:-$(($CONTEXT_LENGTH / 2))}
 }
 
-function set_cli_options {
-    if [ "${VIA}" == "cli" ];
-    then
-	# Calculate $LLM_SH command line options
-	# Use bash :+ syntax to avoid setting prefixes on empty values
-	N_PREDICT="${N_PREDICT:+--n-predict $N_PREDICT}"
-	TEMPERATURE="${TEMPERATURE:+--temp $TEMPERATURE}"
-	CONTEXT_LENGTH="${CONTEXT_LENGTH:+-c $CONTEXT_LENGTH}"
-	BATCH_SIZE="${BATCH_SIZE:+--batch-size $BATCH_SIZE}"
-	NGL="${NGL:+-ngl $NGL}"
-	GPU="${GPU:+--gpu $GPU}"
-    fi
-}
-
-# fixme: does not accept options yet
-function set_api_options {
-    if [ "${VIA}" == "api" ];
-    then
-	# fixme: other env are pre-calculated; try to move them here
-	# fixme: these are fixed and not variable
-	repeat_penalty="1"
-	penalize_nl="false"
-	MODEL_MODE="${MODEL_MODE:-instruct}"
-	# fixme: these parameters are set in model loading and cannot be accomodated here
-	# ${N_PREDICT} ${BATCH_SIZE}
-	# fixme: what do do about this parameter for API-bound fields?
-	# ${LLM_ADDITIONAL_ARGS}
-    fi
-}
-
 function set_model_runner {
     # set MODEL_RUNNER
     if [ "${MODEL##*.}" == "gguf" ] || [ "${FORCE_MODEL_RUNNER}" ];
@@ -333,12 +303,12 @@ function adjust_raw_flag {
 function perform_inference {
     if [ "${VIA}" == "api" ];
     then
-	set_api_options
+	via_set_options
 	via_api_perform_inference "${MODEL_MODE}" "${SYSTEM_MESSAGE}" "${PROMPT}" "${GRAMMAR_FILE}" "${TEMPERATURE}" "${repeat_penalty}" "${penalize_nl}"
 	status=$?
     elif [ "$VIA" == "cli" ];
     then
-	set_cli_options
+	via_set_options
 	cli_perform_inference
 	status=$?
     else

@@ -89,6 +89,19 @@ function prepare_priority {
     true
 }
 
+# fixme: does not accept options yet
+# fixme: other env are pre-calculated; try to move them here
+# fixme: these are fixed and not variable
+# fixme: these parameters are set in model loading and cannot be accomodated here
+# ${N_PREDICT} ${BATCH_SIZE}
+# fixme: what do do about this parameter for API-bound fields?
+# ${LLM_ADDITIONAL_ARGS}
+function via_set_options {
+    repeat_penalty="1"
+    penalize_nl="false"
+    MODEL_MODE="${MODEL_MODE:-instruct}"
+}
+
 
 # todo: make this be run only on mixtral, use as test case to separate api impl from model quirks
 # fix mistral "\_" and "\*"
