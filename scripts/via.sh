@@ -2,7 +2,7 @@
 
 ## Admin client for OpenAPI-compatible LLM server
 ## Tested with Oobabooga Text Generation Webui
-SCRIPT_DIR=$(dirname $(realpath "${BASH_SOURCE}"))
+SCRIPT_DIR="$(dirname "$(realpath "${BASH_SOURCE}")")"
 
 # Get site variables from env.sh, if present
 [ -f "${SCRIPT_DIR}/env.sh" ] && source "${SCRIPT_DIR}/env.sh"

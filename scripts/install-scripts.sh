@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_DIR=$(dirname $(realpath "${BASH_SOURCE}"))
+SCRIPT_DIR="$(dirname "$(realpath "${BASH_SOURCE}")")"
 
 FILES="ask.sh bashblock.sh codeblock.sh help-commit.sh nvfree.sh machelp.sh summarize.sh summarize-directory-files.sh scuttle.sh systype.sh via.sh onsubnet.sh"
 SH_FILES="help.sh write.sh"

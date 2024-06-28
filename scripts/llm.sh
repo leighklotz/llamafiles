@@ -144,43 +144,6 @@ function do_stdin() {
     fi
 }
 
-function gpu_check {
-    local layer_per_gb=("$@")
-
-    if [ -z "${layer_per_gb}" ];
-    then
-        layer_per_gb=1
-    fi
-    if [ "${GPU}" == "none" ] || ! gpu_detector=$(command -v nvidia-detector) || [[ "$($gpu_detector)" == "None" ]];
-    then
-        if [ "${DEBUG}" ];
-        then
-            log_debug "NO GPU"
-        fi
-        FREE_VRAM_GB=0
-        MAX_NGL_EST=0
-        NGL=0
-        GPU=""
-    else
-        # if gpu is already in use, estimate NGL max at int(free_vram_gb * 1.5)
-        FREE_VRAM_GB=$(nvidia-smi --query-gpu=memory.free --format=csv,nounits,noheader | awk '{print $1 / 1024}')
-        if (( $(echo "${FREE_VRAM_GB} < 2" |bc -l) ));
-        then
-            GPU=""
-            MAX_NGL_EST=0
-            NGL=0
-        else
-            GPU="nvidia"
-            MAX_NGL_EST=$(awk -vfree_vram_gb=$FREE_VRAM_GB -vlayer_per_gb=$layer_per_gb "BEGIN{printf(\"%d\n\",int(free_vram_gb*layer_per_gb))}")
-        fi
-    fi
-
-    if [ "${DEBUG}" ];
-    then
-        log_debug "FREE_VRAM_GB=${FREE_VRAM_GB} MAX_NGL_EST=${MAX_NGL_EST} GPU=${GPU}"
-    fi
-}
-
 # todo: support via=api; use cli or api calls for accurate counts;
 function check_context_length {
     #set -x

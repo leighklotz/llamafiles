@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_DIR=$(dirname $(realpath "${BASH_SOURCE}"))
+SCRIPT_DIR="$(dirname "$(realpath "${BASH_SOURCE}")")"
 HELP_SH="help.sh"
 
 HELP_SH_OPTIONS=""

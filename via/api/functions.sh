@@ -15,8 +15,8 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     exit 1
 fi
 
-LLM_LIB_DIR=$(realpath "${SCRIPT_DIR}/../lib")
-LLM_MODELS_DIR=$(realpath "${SCRIPT_DIR}/../models")
+LLM_LIB_DIR="$(realpath "${SCRIPT_DIR}/../lib")"
+LLM_MODELS_DIR="$(realpath "${SCRIPT_DIR}/../models")"
 MODEL_FILE="mixtral/mixtral-8x7b-instruct-v0.1.Q5_K_M.llamafile"
 PIDFILE="/tmp/via-api.pid"
 SEED="${SEED:-NaN}"
