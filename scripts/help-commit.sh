@@ -54,7 +54,7 @@ else
 fi
 
 function get_results {
-    if ! git rev-parse --is-inside-work-tree 2>&1> /dev/null;
+    if ! git rev-parse --is-inside-work-tree > /dev/null 2>&1;
     then
 	echo "$(basename "$0"): PWD=$PWD is not in a git repository"
 	exit 1
@@ -86,4 +86,5 @@ $ %s
 
 # Pipeline to send 'git diff' out to 'help.sh' input with prompt
 printf -v INPUT "${TEMPLATE}" "${DIFF_COMMAND}" "${diff_output_sanitized}"
+# Pass along all args still unprocessed
 printf "%s\n" "${INPUT}" | ${HELP_SH} ${*} ${GRAMMAR_FILE_FLAG} -e -- "${PROMPT}"
