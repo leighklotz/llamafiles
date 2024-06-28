@@ -5,7 +5,7 @@ SCRIPT_DIR="$(dirname "$(realpath "${BASH_SOURCE}")")"
 . "${SCRIPT_DIR}/../via/functions.sh"
 
 function usage() {
-    echo "Usage: $(basename $0) [--json] <LINK> [llm.sh options]"
+    echo "Usage: $(basename "$0") [--json] <LINK> [llm.sh options]"
     exit 1
 }
 
