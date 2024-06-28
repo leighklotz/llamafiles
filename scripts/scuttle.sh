@@ -25,7 +25,7 @@ do
 	*)
 	    LINK=$1
 	    shift
-	    ARGS=$@
+	    ARGS="$*"
 	    break
 	    ;;
     esac
