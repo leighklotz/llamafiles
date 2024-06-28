@@ -82,7 +82,7 @@ function parse_args() {
                     shift; TEMPERATURE="$1" ;;
 		--verbose|-v)
                     VERBOSE=1 ;;
-		--info|-v)
+		--info)
                     INFO=1 ;;
 		-c|--context-length)
                     shift; CONTEXT_LENGTH="$1" ;;
