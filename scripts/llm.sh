@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_DIR=$(dirname $(realpath "${BASH_SOURCE}"))
+SCRIPT_DIR="$(dirname "$(realpath "${BASH_SOURCE}")")"
 
 USAGE="[-m|--model-type model-type] [--stdin|--interactive|-i] [--fast | --long] [--temperature temp] [--context-length|-c n] [--ngl n] [--n-predict n] [--debug] [--verbose|-v] [--grammar-file file.gbnf] [--] QUESTION*"
 
@@ -58,19 +58,6 @@ VIA_CLI_FUNCTIONS_PATH="$(realpath "${VIA_DIRECTORY}/cli/functions.sh")"
 VIA_API_FUNCTIONS_PATH="$(realpath "${VIA_DIRECTORY}/api/functions.sh")"
 
 source "${FUNCTIONS_PATH}"
-
-function set_threads() {
-    # Get thread count
-    if [ -z "${THREADS}" ];
-    then
-	THREADS=$( ( [ -f /proc/cpuinfo ] && grep '^cpu cores\s*:' /proc/cpuinfo | head -1 | awk '{print $4}' ))
-	if [ -z "${THREADS}" ];
-	then
-            THREADS=$(sysctl -n hw.ncpu 2>/dev/null || echo "${NUMBER_OF_PROCESSORS:-4}")
-	fi
-    fi
-    THREADS="${THREADS:+-t $THREADS}"
-}
 
 function parse_args() {
     # If there are any args, require "--" or any non-hyphen word to terminate args and start question.
@@ -195,14 +182,6 @@ function gpu_check {
     fi
 }
 
-function cap_ngl {
-    if [ "$GPU" != "none" ] && [ -n "$GPU" ] && [ -n "${NGL}" ] && [ "${NGL}" -gt "${MAX_NGL_EST}" ];
-    then
-        log_verbose "* Capping $NGL at $MAX_NGL_EST"
-        NGL=$MAX_NGL_EST
-    fi
-}
-
 # todo: support via=api; use cli or api calls for accurate counts;
 function check_context_length {
     #set -x
@@ -227,14 +206,6 @@ function check_context_length {
     fi
 
     #BATCH_SIZE=${BATCH_SIZE:-$(($CONTEXT_LENGTH / 2))}
-}
-
-function set_model_runner {
-    # set MODEL_RUNNER
-    if [ "${MODEL##*.}" == "gguf" ] || [ "${FORCE_MODEL_RUNNER}" ];
-    then
-	MODEL_RUNNER="${LLAMAFILE_MODEL_RUNNER}"
-    fi
 }
 
 function set_verbose_debug {
@@ -300,25 +271,26 @@ function adjust_raw_flag {
     fi
 }
 
-function perform_inference {
-    if [ "${VIA}" == "api" ];
-    then
-	via_set_options
-	via_api_perform_inference "${MODEL_MODE}" "${SYSTEM_MESSAGE}" "${PROMPT}" "${GRAMMAR_FILE}" "${TEMPERATURE}" "${repeat_penalty}" "${penalize_nl}"
-	status=$?
-    elif [ "$VIA" == "cli" ];
-    then
-	via_set_options
-	cli_perform_inference
-	status=$?
-    else
-	log_error "Unknown VIA=${VIA}"
-	status=1
-    fi
+function perform_inference() {
+    case "${VIA}" in
+        "api")
+            via_set_options
+            via_api_perform_inference "${MODEL_MODE}" "${SYSTEM_MESSAGE}" "${PROMPT}" "${GRAMMAR_FILE}" "${TEMPERATURE}" "${repeat_penalty}" "${penalize_nl}"
+            status=$?
+            ;;
+        "cli")
+            via_set_options
+            cli_perform_inference
+            status=$?
+            ;;
+        *)
+            log_error "Unknown VIA=${VIA}"
+            status=1
+            ;;
+    esac
     return $status
 }
 
-set_threads
 parse_args "$@"
 init_model
 process_question_escapes
@@ -326,7 +298,6 @@ do_stdin
 prepare_model && [ -n "${INFO}" ] && log_info "MODEL_PATH=${MODEL_PATH}"
 adjust_raw_flag
 check_context_length
-set_model_runner
 set_verbose_debug
 perform_inference; STATUS=$?
 report_success_or_fail $STATUS

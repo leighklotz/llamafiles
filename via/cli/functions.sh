@@ -146,6 +146,17 @@ function init_via_model {
     # Construct the path to the functions file
     model_functions_path="$(realpath "${MODELS_DIRECTORY}/${MODEL_TYPE}/functions.sh")"
     source_functions "${model_functions_path}"
+
+    set_threads
+    set_model_runner
+}
+
+function set_model_runner {
+    # set MODEL_RUNNER
+    if [ "${MODEL##*.}" == "gguf" ] || [ "${FORCE_MODEL_RUNNER}" ];
+    then
+	MODEL_RUNNER="${LLAMAFILE_MODEL_RUNNER}"
+    fi
 }
 
 # any workarounds needed install here, e.g.
@@ -197,6 +208,27 @@ function cli_set_model_path {
     if [ -z "${MODEL_PATH}" ]; then
 	log_and_exit 1 "Cannot find model for MODEL_TYPE=$MODEL_TYPE in $MODELS_DIRECTORY"
     fi
+}
+
+function cap_ngl {
+    if [ "$GPU" != "none" ] && [ -n "$GPU" ] && [ -n "${NGL}" ] && [ "${NGL}" -gt "${MAX_NGL_EST}" ];
+    then
+        log_verbose "* Capping $NGL at $MAX_NGL_EST"
+        NGL=$MAX_NGL_EST
+    fi
+}
+
+function set_threads() {
+    # Get thread count
+    if [ -z "${THREADS}" ];
+    then
+	THREADS=$( ( [ -f /proc/cpuinfo ] && grep '^cpu cores\s*:' /proc/cpuinfo | head -1 | awk '{print $4}' ))
+	if [ -z "${THREADS}" ];
+	then
+            THREADS=$(sysctl -n hw.ncpu 2>/dev/null || echo "${NUMBER_OF_PROCESSORS:-4}")
+	fi
+    fi
+    THREADS="${THREADS:+-t $THREADS}"
 }
 
 # if [ -n "${VIA_CLI_FUNCTIONS_LOADED}" ]; then
