@@ -120,7 +120,7 @@ function parse_args() {
             shift
 	done
     else
-	QUESTION="${*}"
+	QUESTION=("$*")
     fi
 }
 
