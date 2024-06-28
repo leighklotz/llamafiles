@@ -2,7 +2,7 @@
 
 SCRIPT_DIR="$(dirname "$(realpath "${BASH_SOURCE}")")"
 
-. ${SCRIPT_DIR}/../via/functions.sh
+. "${SCRIPT_DIR}/../via/functions.sh"
 
 function usage() {
     echo "Usage: $(basename $0) [--json] <LINK> [llm.sh options]"
@@ -90,4 +90,4 @@ else
     GRAMMAR_FLAG=""
 fi
 
-(${LYNX} "${LINK}"; printf "\n# Instruction\n%s\n" "${SCUTTLE_SYSTEM_MESSAGE}")| ${SCRIPT_DIR}/llm.sh --long ${GRAMMAR_FLAG} ${ARGS} "# Text of link ${LINK}" | post_process
+(${LYNX} "${LINK}"; printf "\n# Instruction\n%s\n" "${SCUTTLE_SYSTEM_MESSAGE}")| "${SCRIPT_DIR}/llm.sh" --long ${GRAMMAR_FLAG} ${ARGS} "# Text of link ${LINK}" | post_process
