@@ -137,7 +137,6 @@ function chatml_prompt {
 # todo: much work here
 # load_model calls init_model so llm.sh can do prep work once it knows the model but before it is used
 function init_via_model {
-    echo "MODEL_TYPE=$MODEL_TYPE"
     if [ -z "${MODEL_TYPE}" ];
     then
 	log_and_exit 1 "No MODEL_TYPE specified"
@@ -229,6 +228,43 @@ function set_threads() {
 	fi
     fi
     THREADS="${THREADS:+-t $THREADS}"
+}
+
+function gpu_check {
+    local layer_per_gb=("$@")
+
+    if [ -z "${layer_per_gb}" ];
+    then
+        layer_per_gb=1
+    fi
+    if [ "${GPU}" == "none" ] || ! gpu_detector=$(command -v nvidia-detector) || [[ "$($gpu_detector)" == "None" ]];
+    then
+        if [ "${DEBUG}" ];
+        then
+            log_debug "NO GPU"
+        fi
+        FREE_VRAM_GB=0
+        MAX_NGL_EST=0
+        NGL=0
+        GPU=""
+    else
+        # if gpu is already in use, estimate NGL max at int(free_vram_gb * 1.5)
+        FREE_VRAM_GB=$(nvidia-smi --query-gpu=memory.free --format=csv,nounits,noheader | awk '{print $1 / 1024}')
+        if (( $(echo "${FREE_VRAM_GB} < 2" |bc -l) ));
+        then
+            GPU=""
+            MAX_NGL_EST=0
+            NGL=0
+        else
+            GPU="nvidia"
+            MAX_NGL_EST=$(awk -vfree_vram_gb=$FREE_VRAM_GB -vlayer_per_gb=$layer_per_gb "BEGIN{printf(\"%d\n\",int(free_vram_gb*layer_per_gb))}")
+        fi
+    fi
+
+    if [ "${DEBUG}" ];
+    then
+        log_debug "FREE_VRAM_GB=${FREE_VRAM_GB} MAX_NGL_EST=${MAX_NGL_EST} GPU=${GPU}"
+    fi
 }
 
 # if [ -n "${VIA_CLI_FUNCTIONS_LOADED}" ]; then
