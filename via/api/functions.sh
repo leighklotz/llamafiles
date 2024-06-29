@@ -10,15 +10,14 @@ VIA_API_UNLOAD_MODEL_ENDPOINT="${VIA_API_CHAT_BASE}/v1/internal/model/unload"
 VIA_API_USE_GRAMMAR="${VIA_API_USE_GRAMMAR:-}"
 
 # Check if the script is being sourced or directly executed
-if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]];
+then
     echo "This script '${BASH_SOURCE[0]}' is intended to be sourced, not executed directly."
     exit 1
 fi
 
 LLM_LIB_DIR="$(realpath "${SCRIPT_DIR}/../lib")"
 LLM_MODELS_DIR="$(realpath "${SCRIPT_DIR}/../models")"
-MODEL_FILE="mixtral/mixtral-8x7b-instruct-v0.1.Q5_K_M.llamafile"
-PIDFILE="/tmp/via-api.pid"
 SEED="${SEED:-NaN}"
 
 # fixme: some models support the system role API and some do not.
@@ -78,7 +77,8 @@ NO_SYSTEM_ROLE_TEMPLATE="{
 }"
 
 function prepare_prompt {
-    if [ "${INPUT}" == "" ]; then
+    if [ "${INPUT}" == "" ];
+    then
 	printf -v PROMPT "%s" "${QUESTION%$'\n'}"
     else
 	printf -v PROMPT "%s\n\n%s" "${QUESTION%$'\n'}" "${INPUT%$'\n'}"
@@ -108,6 +108,27 @@ function via_set_options {
 # https://www.reddit.com/r/LocalLLaMA/comments/1agrddy/has_anyone_encountered_mistrals_tendency_to_use/
 function via_api_mistral_output_fixup {
     sed -e 's/\\_/_/g' | sed -e 's/\\\*/*/g'
+}
+
+function cleanup_temp_files {
+    local s=$1
+    case "$KEEP_PROMPT_TEMP_FILE" in
+	ALL)
+	    true
+	    ;;
+	ERROR|ERRORS)
+	    if [ $s -eq 0 ]; then
+		cleanup_file "${question_file}"
+		cleanup_file "${system_message_file}"
+		cleanup_file "${PROMPT_TEMP_FILE}"
+	    fi
+	    ;;
+	NONE)
+	    cleanup_file "${question_file}"
+	    cleanup_file "${system_message_file}"
+	    cleanup_file "${PROMPT_TEMP_FILE}"
+	    ;;
+    esac
 }
 
 # todo: make common with cli_perform_inference by splitting out all
@@ -146,14 +167,16 @@ function via_api_perform_inference() {
     then
 	system_message=${system_message##[[:space:]]}
 	system_message=${system_message%%[[:space:]]}
-	system_message_file=$(mktemp -t sysmsg.XXXXXX); printf "%s\n" "${system_message%$'\n'}" >> "${system_message_file}"
+	system_message_file=$(mktemp_file sysmsg);
+	printf "%s\n" "${system_message%$'\n'}" >> "${system_message_file}"
     else
 	system_message_file="/dev/null"
     fi
 
     question=${question##[[:space:]]}
     question=${question%%[[:space:]]}
-    question_file=$(mktemp -t quest.XXXXXX); printf "%s" "${question}" >> "${question_file}"
+    question_file=$(mktemp_file quest)
+    printf "%s" "${question}" >> "${question_file}"
 
     # hack: Drop empty string, and null parameters. NaN seems th show as null.
     #       sadly seed must be a number
@@ -173,44 +196,29 @@ function via_api_perform_inference() {
 	| jq 'del(.[] | select(. == null))' 
 	)
 
-    if [ "${VERBOSE}" ]; then
+    if [ "${VERBOSE}" ];
+    then
 	echo "USE_SYSTEM_ROLE='$USE_SYSTEM_ROLE'"
 	printf "%s\n" "${data}" | jq --indent 1 >> /dev/stderr
     fi
 
     # Invoke via the HTTP API endpoint
+    # todo might need to do `set -o pipefail` here.
     result=$(printf "%s" "${data}" | curl -s "${VIA_API_CHAT_COMPLETIONS_ENDPOINT}" -H 'Content-Type: application/json' -d @-)
     s=$?
     if [ "$s" != 0 ];
     then
-	log_warn $s "via --api perform inference cannot curl"
+	cleanup_temp_files $s
+	log_and_exit $s "via --api perform inference cannot curl"
     fi
+
     output="$(printf "%s" "${result}" | jq --raw-output '.choices[].message.content')"
     s=$?
 
-    # deal with temp files
-    case "$KEEP_PROMPT_TEMP_FILE" in
-	ALL)
-	    true
-	    ;;
-	ERROR|ERRORS|NONE)
-	    if [ "$s" == 0 ] || [ "${KEEP_PROMPT_TEMP_FILE}" == "NONE" ];
-	    then
-		if [ -n "${question_file}" ] && [ "${question_file}" != "/dev/null" ];
-		then
-		    if ! rm -f "${question_file}" ;
-		    then
-			echo "* WARN: unable to remove question_file ${question_file}" >> /dev/stderr
-		    fi
-		fi
-		([ -n "${system_message_file}" ] && [ "${system_message_file}" != "/dev/null" ]) && (rm -f "${system_message_file}" || log_warn $? "* WARN: unable to remove system_message_file=${system_message_file}" >> /dev/stderr)
-	    fi
-	    ;;
-    esac
+    cleanup_temp_files $s
 
     # exit if we failed to parse
-    if [ "$s" != 0 ];
-    then
+    if [ "$s" != 0 ]; then
 	log_and_exit $s "via api perform_inference cannot parse ${result}"
     fi
 
@@ -218,6 +226,7 @@ function via_api_perform_inference() {
     printf "%s\n" "${output}" | via_api_mistral_output_fixup
     return $s
 }
+
 
 # can't set the model in the API so we just validate that
 # there is a model. 
@@ -268,7 +277,13 @@ function unload_model {
     printf "%s\n" "$result"
 }
 
-# if [ -n "${VIA_API_FUNCTIONS_LOADED}" ]; then
+# todo: support via=api; use cli or api calls for accurate counts;
+function check_context_length {
+    true
+}
+
+# if [ -n "${VIA_API_FUNCTIONS_LOADED}" ];
+# then
 #     log_and_exit "VIA_API_FUNCTIONS_LOADED again"
 # else
 #     VIA_API_FUNCTIONS_LOADED=1

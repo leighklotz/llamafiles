@@ -267,6 +267,24 @@ function gpu_check {
     fi
 }
 
+function check_context_length {
+    #set -x
+    # todo: get better estimate of prompt length
+    # assume 4 chars per token
+    PROMPT_LENGTH_EST=$((${#PROMPT}/4))
+
+    if [ "${PROMPT_LENGTH_EST}" -gt "${CONTEXT_LENGTH}" ];
+    then
+	log_warn "* prompt len ${PROMPT_LENGTH_EST} estimated not to fit in context ${CONTEXT_LENGTH}"
+    fi
+
+    if [ "$CONTEXT_LENGTH" -gt "$MAX_CONTEXT_LENGTH" ];
+    then
+	CONTEXT_LENGTH="$MAX_CONTEXT_LENGTH"
+	log_warn "* truncated context length to $CONTEXT_LENGTH"
+    fi
+}
+
 # if [ -n "${VIA_CLI_FUNCTIONS_LOADED}" ]; then
 #     log_and_exit "VIA_CLI_FUNCTIONS_LOADED again"
 # else

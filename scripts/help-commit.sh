@@ -44,7 +44,7 @@ done
 # Set main parameters
 default_system_message="$(printf "%b" "You are an expert in Linux, Bash, Python, general programming, and related topics.\n")"
 export SYSTEM_MESSAGE="${SYSTEM_MESSAGE:-${default_system_message}}"
-PROMPT="Provide ${MESSAGE_LINE} git commit message for the changes listed in the \`git diff\` below, in the form of a \`git commit\` command:\n"
+PROMPT="Provide ${MESSAGE_LINE} git commit message for the changes listed in unified \`git diff\` below, in the form of a \`git commit\` command:\n"
 
 if [ -n "${INHIBIT_GRAMMAR}" ];
 then	 

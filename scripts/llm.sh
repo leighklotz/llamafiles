@@ -40,28 +40,27 @@ SILENT_PROMPT="${SILENT_PROMPT:---silent-prompt --no-display-prompt}"
 # NO_PENALIZE_NL is gone and we only have --penalize-ml in llamafile 0.7
 #NO_PENALIZE_NL="--no-penalize-nl "
 NO_PENALIZE_NL=""
+KEEP_PROMPT_TEMP_FILE="${KEEP_PROMPT_TEMP_FILE:-ALL}" # "NONE"|"ERROR"|"ALL"
 
 # Read input
 INPUT=""
 QUESTION=""
 DO_STDIN="$(test -t 0 || echo $?)"
 
-# prompt machinery
-KEEP_PROMPT_TEMP_FILE="${KEEP_PROMPT_TEMP_FILE:-ALL}" # "NONE"|"ERROR"|"ALL"
-PROMPT_TEMP_FILE="/tmp/prompt.$$"
-
 # Load functions
 VIA_DIRECTORY="$(realpath "${SCRIPT_DIR}/../via")"
 FUNCTIONS_PATH="$(realpath "${VIA_DIRECTORY}/functions.sh")"
 VIA_CLI_FUNCTIONS_PATH="$(realpath "${VIA_DIRECTORY}/cli/functions.sh")"
 VIA_API_FUNCTIONS_PATH="$(realpath "${VIA_DIRECTORY}/api/functions.sh")"
-
 source "${FUNCTIONS_PATH}"
 
+# todo: move this to where it is used
+PROMPT_TEMP_FILE="$(mktemp_file "prompt")"
+
+# If there are any args, require "--" or any non-hyphen word to terminate args and start question.
+# Assume the whole args is a question if there is no hyphen to start.
+# There may be no question, if all is contained in SYSTEM_MESSAGE and STDIN.
 function parse_args() {
-    # If there are any args, require "--" or any non-hyphen word to terminate args and start question.
-    # Assume the whole args is a question if there is no hyphen to start.
-    # There may be no question, if all is contained in SYSTEM_MESSAGE and STDIN.
     if [[ "${1}" == "-"* ]];
     then
 	while [[ $# -gt 0 ]]; do
@@ -124,15 +123,17 @@ function parse_args() {
     fi
 }
 
+# Process escape sequences in QUESTION if requested.
+# This will turn literal "\n" into literal newline in the QUESTION>
+# STDIN is never processed for escapes.
 function process_question_escapes() {
-    # Process escape sequences in QUESTION if requested.
-    # STDIN never processes escapes.
     if [ "${PROCESS_QUESTION_ESCAPES}" ]; then
 	log_verbose "Processing escape sequences in QUESTION"
 	printf -v QUESTION "%b" "$QUESTION"
     fi
 }
 
+# Read STDIN into INPUT, and prompt if stdin is tty
 function do_stdin() {
     if [ -n "$DO_STDIN" ];
     then
@@ -144,31 +145,6 @@ function do_stdin() {
     fi
 }
 
-# todo: support via=api; use cli or api calls for accurate counts;
-function check_context_length {
-    #set -x
-    # memory allocation: assume 4 chars per token
-    #PROMPT_LENGTH_EST=$(((75+${#SYSTEM_MESSAGE}+${#QUESTION}+${#INPUT})/4))
-    PROMPT_LENGTH_EST=$((${#PROMPT}/4))
-
-    if [ "${VIA}" == "api" ];
-    then
-	return
-    fi
-
-    if [ "${PROMPT_LENGTH_EST}" -gt "${CONTEXT_LENGTH}" ];
-    then
-	log_warn "* prompt len ${PROMPT_LENGTH_EST} estimated not to fit in context ${CONTEXT_LENGTH}"
-    fi
-
-    if [ "$CONTEXT_LENGTH" -gt "$MAX_CONTEXT_LENGTH" ];
-    then
-	CONTEXT_LENGTH="$MAX_CONTEXT_LENGTH"
-	log_warn "* truncated context length to $CONTEXT_LENGTH"
-    fi
-
-    #BATCH_SIZE=${BATCH_SIZE:-$(($CONTEXT_LENGTH / 2))}
-}
 
 function set_verbose_debug {
     # Set verbose and debug last
@@ -195,34 +171,6 @@ function report_success_or_fail {
 	fi
     fi
     return $STATUS
-}
-
-function handle_temp_files {
-    status=$1
-    if [ -f "${PROMPT_TEMP_FILE}" ];
-    then
-	case "$KEEP_PROMPT_TEMP_FILE" in
-	    ALL)
-		true
-		;;
-	    ERROR|ERRORS)
-		if [ $status -ne 0 ];
-		then
-		    log_error "PROMPT=${PROMPT_TEMP_FILE}"
-		else
-		    rm "${PROMPT_TEMP_FILE}"
-		fi
-		;;
-	    NONE)
-		rm "${PROMPT_TEMP_FILE}"
-		;;
-	esac
-    else
-	if [ -z "$KEEP_PROMPT_TEMP_FILE" ] && [ -f "${PROMPT_TEMP_FILE}" ]; 
-	then
-	    rm "${PROMPT_TEMP_FILE}"
-	fi
-    fi
 }
 
 # if --raw-input is specified, use stdin as the only text to send to the model
@@ -263,7 +211,7 @@ check_context_length
 set_verbose_debug
 perform_inference; STATUS=$?
 report_success_or_fail $STATUS
-handle_temp_files $STATUS
+cleanup_temp_files $STATUS
 exit $STATUS
 
 ###

@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# force umask - any tmp files and any files we create inadvertently should be private
+umask 077
+
 # Assume we are called from llamafiles script directory
 # todo: fix the many global variable dependencies in this file
 VIA_DIRECTORY="$(realpath "${SCRIPT_DIR}/../via")"
@@ -28,7 +31,8 @@ function stack_trace() {
 function log_verbose {
     local prog="$(basename "$0")"
     local message="$1"
-    if [ -n "${VERBOSE}" ]; then
+    if [ -n "${VERBOSE}" ];
+    then
 	printf "* %s: %s\n" "${prog}" "${message}" > /dev/stderr
     fi
 }
@@ -70,7 +74,7 @@ function log_and_exit {
     local message="$2"
     printf "* ERROR in %s: %s\n" "${prog}" "${message}" > /dev/stderr
     [ -n "${PRINT_STACK_TRACE}" ] && printf "%s\n" "$(stack_trace "$code")" > /dev/stderr
-    [[ $code =~ ^[0-9]+$ ]] && exit $code || exit 1
+    [[ "${code}" =~ ^[0-9]+$ ]] && exit "${code}" || exit 1
 }
 
 # Check if the script is being sourced or directly executed
@@ -88,6 +92,55 @@ function source_functions {
     else
 	log_and_exit 3 "* $0: ERROR: Cannot find functions: ${functions_path}"
     fi
+}
+
+# work directory for temp files
+export TMPDIR="${TMPDIR:-/tmp}"
+function mktemp_file() {
+    local prefix="$1"
+    if [ -z "${TMPDIR}" ] || [ "${TMPDIR}" == "/tmp" ]; then
+	orig=$(umask)
+	export TMPDIR=$(mktemp -d)
+	umask $orig
+    fi
+    mktemp -t "${prefix}.XXXXXX"
+}
+
+function cleanup_temp_files {
+    status=$1
+    if [ -n "${TEMP_DIR}" ] && [ -d "${TEMP_DIR}" ]; then
+	case "$KEEP_PROMPT_TEMP_FILE" in
+	    ALL)
+		true
+		;;
+	    ERROR|ERRORS)
+		if [ $status -ne 0 ];
+		then
+		    log_error "TEMP_DIR=${TEMP_DIR}"
+		else
+		    log_warn "* DRY RUN rm -rf ${TEMP_DIR}"
+		fi
+		;;
+	    NONE)
+		log_warn "* DRY RUN rm -rf ${TEMP_DIR}" 
+		;;
+	esac
+    else
+	if [ -z "$KEEP_PROMPT_TEMP_FILE" ] && [ -d "${TEMP_DIR}" ]; 
+	then
+	    log_warn "* DRY RUN rm -rf ${TEMP_DIR}" 
+	fi
+    fi
+}
+
+function cleanup_file() {
+  local file=$1
+
+  if [ -n "${file}" ] && [ "${file}" != "/dev/null" ]; then
+     if ! rm -f "${file}" ; then
+         log_warn $? "remove ${file}"
+     fi
+  fi
 }
 
 function init_model {
