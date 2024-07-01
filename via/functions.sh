@@ -96,19 +96,23 @@ function source_functions {
 
 # work directory for temp files
 export TMPDIR="${TMPDIR:-/tmp}"
+TMPDIR_SET=""
 function mktemp_file() {
     local prefix="$1"
-    if [ -z "${TMPDIR}" ] || [ "${TMPDIR}" == "/tmp" ]; then
-	orig=$(umask)
-	export TMPDIR=$(mktemp -d)
-	umask $orig
+    if [ -z "${TMPDIR_SET}" ] && ([ -z "${TMPDIR}" ] || [ "${TMPDIR}" == "/tmp" ]); then
+	orig="$(umask)"
+	export TMPDIR="$(mktemp -d)"
+	umask "${orig}"
+	TMPDIR_SET=1
     fi
-    mktemp -t "${prefix}.XXXXXX"
+    if ! mktemp -t "${prefix}.XXXXXX"; then
+	log_and_exit 4 "Cannot make temp file with prefix=${prefix}"
+    fi
 }
 
 function cleanup_temp_files {
     status=$1
-    if [ -n "${TEMP_DIR}" ] && [ -d "${TEMP_DIR}" ]; then
+    if [ -n "${TMPDIR_SET}" ] && [ -n "${TMPDIR}" ] && [ -d "${TMPDIR}" ] && [ "${TMPDIR}" != "/tmp" ]; then
 	case "$KEEP_PROMPT_TEMP_FILE" in
 	    ALL)
 		true
@@ -116,20 +120,15 @@ function cleanup_temp_files {
 	    ERROR|ERRORS)
 		if [ $status -ne 0 ];
 		then
-		    log_error "TEMP_DIR=${TEMP_DIR}"
+		    log_error "TMPDIR=${TMPDIR}"
 		else
-		    log_warn "* DRY RUN rm -rf ${TEMP_DIR}"
+		    echo "* DRY RUN rm -rf ${TMPDIR}" >> /dev/stderr
 		fi
 		;;
 	    NONE)
-		log_warn "* DRY RUN rm -rf ${TEMP_DIR}" 
+		    echo "* DRY RUN rm -rf ${TMPDIR}" >> /dev/stderr
 		;;
 	esac
-    else
-	if [ -z "$KEEP_PROMPT_TEMP_FILE" ] && [ -d "${TEMP_DIR}" ]; 
-	then
-	    log_warn "* DRY RUN rm -rf ${TEMP_DIR}" 
-	fi
     fi
 }
 

@@ -150,7 +150,7 @@ function process_question_escapes() {
 }
 
 # Read STDIN into INPUT, and prompt if stdin is tty
-function do_stdin() {
+function process_stdin() {
     if [ -n "$DO_STDIN" ];
     then
 	if [ -t 0 ];
@@ -229,8 +229,9 @@ function perform_inference() {
 ###
 init_model
 process_question_escapes
-do_stdin
-prepare_model && [ -n "${INFO}" ] && log_info "MODEL_PATH=${MODEL_PATH}"
+process_stdin
+prepare_model
+log_info "MODEL_PATH=${MODEL_PATH}"
 adjust_raw_flag
 check_context_length
 set_verbose_debug

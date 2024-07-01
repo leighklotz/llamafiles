@@ -110,27 +110,6 @@ function via_api_mistral_output_fixup {
     sed -e 's/\\_/_/g' | sed -e 's/\\\*/*/g'
 }
 
-function cleanup_temp_files {
-    local s=$1
-    case "$KEEP_PROMPT_TEMP_FILE" in
-	ALL)
-	    true
-	    ;;
-	ERROR|ERRORS)
-	    if [ $s -eq 0 ]; then
-		cleanup_file "${question_file}"
-		cleanup_file "${system_message_file}"
-		cleanup_file "${PROMPT_TEMP_FILE}"
-	    fi
-	    ;;
-	NONE)
-	    cleanup_file "${question_file}"
-	    cleanup_file "${system_message_file}"
-	    cleanup_file "${PROMPT_TEMP_FILE}"
-	    ;;
-    esac
-}
-
 # todo: make common with cli_perform_inference by splitting out all
 #       non-inference settings to the prepare_model
 # via_api_perform_inference "$MODE" "$SYSTEM_PROMPT" "$QUESTION" "$GRAMMAR_FILE"
