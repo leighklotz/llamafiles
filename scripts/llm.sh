@@ -4,62 +4,16 @@ SCRIPT_DIR="$(dirname "$(realpath "${BASH_SOURCE}")")"
 
 USAGE="[-m|--model-type model-type] [--stdin|--interactive|-i] [--fast | --long] [--temperature temp] [--context-length|-c n] [--ngl n] [--n-predict n] [--debug] [--verbose|-v] [--grammar-file file.gbnf] [--] QUESTION*"
 
-# Get site variables from env.sh, if present
-[ -f "${SCRIPT_DIR}/env.sh" ] && source "${SCRIPT_DIR}/env.sh"
-
-# Use CLI flags, or environment variables below:
-VIA=${VIA:-cli}
-MODEL_TYPE=${MODEL_TYPE:-mistral}
-TEMPERATURE=${TEMPERATURE:-}
-CONTEXT_LENGTH=${CONTEXT_LENGTH:-}
-N_PREDICT="${N_PREDICT:-}"
-SYSTEM_MESSAGE="${SYSTEM_MESSAGE-"Answer the following user question:"}"
-NGL="${NGL:-}"
-GPU="${GPU:-auto}"		# auto|nvidia|omit
-PRIORITY="${PRIORITY:-manual}" # speed|length|manual
-DEBUG="${DEBUG:-}"
-VERBOSE="${VERBOSE:-}"
-INFO="${INFO:-${VERBOSE}}"
-LOG_DISABLE="--log-disable"
-GRAMMAR_FILE="${GRAMMAR_FILE:-}"
-BATCH_SIZE="${BATCH_SIZE:-}"
-SEED="${SEED:--1}"
-LLAMAFILE_MODEL_RUNNER="${LLAMAFILE_MODEL_RUNNER:-"$(realpath "${SCRIPT_DIR}/../lib/llamafile-0.6.2") -m"}"
-FORCE_MODEL_RUNNER="${FORCE_MODEL_RUNNER:-}"
-LLM_ADDITIONAL_ARGS="${LLM_ADDITIONAL_ARGS:-}"
-
-# Not settable via ENV
-PROCESS_QUESTION_ESCAPES=""
-MODEL_RUNNER="/usr/bin/env"
-RAW_FLAG=""
-ERROR_OUTPUT="/dev/null"
-
-# Old versions of llamafile sometimes need -silent-prompt or --no-display-prompt
-# edit this, or use FORCE_MODEL_RUNNER and a newer MODEL_RUNNER .
-SILENT_PROMPT="${SILENT_PROMPT:---silent-prompt --no-display-prompt}"
-# NO_PENALIZE_NL is gone and we only have --penalize-ml in llamafile 0.7
-#NO_PENALIZE_NL="--no-penalize-nl "
-NO_PENALIZE_NL=""
-KEEP_PROMPT_TEMP_FILE="${KEEP_PROMPT_TEMP_FILE:-ALL}" # "NONE"|"ERROR"|"ALL"
-
-# Read input
+###
+### CLI arg parsing
+###
+### If there are any args, require "--" or any non-hyphen word to terminate args and start question.
+### Assume the whole args is a question if there is no hyphen to start.
+### There may be no question, if all is contained in SYSTEM_MESSAGE and STDIN.
 INPUT=""
-QUESTION=""
+QUESTION="${QUESTION:-}"
 DO_STDIN="$(test -t 0 || echo $?)"
 
-# Load functions
-VIA_DIRECTORY="$(realpath "${SCRIPT_DIR}/../via")"
-FUNCTIONS_PATH="$(realpath "${VIA_DIRECTORY}/functions.sh")"
-VIA_CLI_FUNCTIONS_PATH="$(realpath "${VIA_DIRECTORY}/cli/functions.sh")"
-VIA_API_FUNCTIONS_PATH="$(realpath "${VIA_DIRECTORY}/api/functions.sh")"
-source "${FUNCTIONS_PATH}"
-
-# todo: move this to where it is used
-PROMPT_TEMP_FILE="$(mktemp_file "prompt")"
-
-# If there are any args, require "--" or any non-hyphen word to terminate args and start question.
-# Assume the whole args is a question if there is no hyphen to start.
-# There may be no question, if all is contained in SYSTEM_MESSAGE and STDIN.
 function parse_args() {
     if [[ "${1}" == "-"* ]];
     then
@@ -123,6 +77,68 @@ function parse_args() {
     fi
 }
 
+parse_args ${@}
+
+###
+### Site Variables
+### Set site variables from env.sh
+### 
+[ -z "${IN_LLM_SH_ENV}" ] && [ -f "${SCRIPT_DIR}/env.sh" ] && source "${SCRIPT_DIR}/env.sh"
+
+###
+### Process CLI flags and environment variables
+###
+VIA=${VIA:-cli}
+MODEL_TYPE=${MODEL_TYPE:-mistral}
+TEMPERATURE=${TEMPERATURE:-}
+CONTEXT_LENGTH=${CONTEXT_LENGTH:-}
+N_PREDICT="${N_PREDICT:-}"
+SYSTEM_MESSAGE="${SYSTEM_MESSAGE-"Answer the following user question:"}"
+NGL="${NGL:-}"
+GPU="${GPU:-auto}"		# auto|nvidia|omit
+PRIORITY="${PRIORITY:-manual}" # speed|length|manual
+DEBUG="${DEBUG:-}"
+VERBOSE="${VERBOSE:-}"
+INFO="${INFO:-${VERBOSE}}"
+LOG_DISABLE="--log-disable"
+GRAMMAR_FILE="${GRAMMAR_FILE:-}"
+BATCH_SIZE="${BATCH_SIZE:-}"
+SEED="${SEED:--1}"
+LLAMAFILE_MODEL_RUNNER="${LLAMAFILE_MODEL_RUNNER:-"$(realpath "${SCRIPT_DIR}/../lib/llamafile-0.6.2") -m"}"
+FORCE_MODEL_RUNNER="${FORCE_MODEL_RUNNER:-}"
+LLM_ADDITIONAL_ARGS="${LLM_ADDITIONAL_ARGS:-}"
+KEEP_PROMPT_TEMP_FILE="${KEEP_PROMPT_TEMP_FILE:-ALL}" # "NONE"|"ERROR"|"ALL"
+
+###
+### These variables are not settable via environment
+###
+PROCESS_QUESTION_ESCAPES=""
+MODEL_RUNNER="/usr/bin/env"
+RAW_FLAG=""
+ERROR_OUTPUT="/dev/null"
+# Old versions of llamafile sometimes need -silent-prompt or --no-display-prompt
+# edit this, or use FORCE_MODEL_RUNNER and a newer MODEL_RUNNER .
+SILENT_PROMPT="${SILENT_PROMPT:---silent-prompt --no-display-prompt}"
+# NO_PENALIZE_NL is gone and we only have --penalize-ml in llamafile 0.7
+#NO_PENALIZE_NL="--no-penalize-nl "
+NO_PENALIZE_NL=""
+
+
+###
+### Load functions for API or CLI
+### 
+VIA_DIRECTORY="$(realpath "${SCRIPT_DIR}/../via")"
+FUNCTIONS_PATH="$(realpath "${VIA_DIRECTORY}/functions.sh")"
+VIA_CLI_FUNCTIONS_PATH="$(realpath "${VIA_DIRECTORY}/cli/functions.sh")"
+VIA_API_FUNCTIONS_PATH="$(realpath "${VIA_DIRECTORY}/api/functions.sh")"
+source "${FUNCTIONS_PATH}"
+
+###
+### Prompt and STDIN processing
+
+# todo: move this to where it is used
+PROMPT_TEMP_FILE="$(mktemp_file "prompt")"
+
 # Process escape sequences in QUESTION if requested.
 # This will turn literal "\n" into literal newline in the QUESTION>
 # STDIN is never processed for escapes.
@@ -145,6 +161,9 @@ function do_stdin() {
     fi
 }
 
+###
+### Debug and log
+###
 
 function set_verbose_debug {
     # Set verbose and debug last
@@ -181,6 +200,10 @@ function adjust_raw_flag {
     fi
 }
 
+###
+### Perform Inference
+###
+
 function perform_inference() {
     case "${VIA}" in
         "api")
@@ -201,7 +224,9 @@ function perform_inference() {
     return $status
 }
 
-parse_args "$@"
+###
+### Main Flow
+###
 init_model
 process_question_escapes
 do_stdin

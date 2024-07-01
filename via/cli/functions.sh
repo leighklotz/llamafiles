@@ -192,7 +192,7 @@ function cli_perform_inference {
 	GRAMMAR_FILE="--grammar-file ${GRAMMAR_FILE}"
     fi
     #set -x
-    cat "${PROMPT_TEMP_FILE}" | fixup_input | ${MODEL_RUNNER} "${MODEL_PATH}" ${CLI_MODE} ${LOG_DISABLE} ${GPU} ${NGL} ${GRAMMAR_FILE} ${TEMPERATURE} ${CONTEXT_LENGTH} ${N_PREDICT} ${BATCH_SIZE} ${NO_PENALIZE_NL} --repeat-penalty 1 ${THREADS} -f /dev/stdin ${SILENT_PROMPT} --seed "${SEED}" ${LLM_ADDITIONAL_ARGS} | fixup_output 2> "${ERROR_OUTPUT}"
+    cat "${PROMPT_TEMP_FILE}" | fixup_input | ${MODEL_RUNNER} "${MODEL_PATH}" --cli ${LOG_DISABLE} ${GPU} ${NGL} ${GRAMMAR_FILE} ${TEMPERATURE} ${CONTEXT_LENGTH} ${N_PREDICT} ${BATCH_SIZE} ${NO_PENALIZE_NL} --repeat-penalty 1 ${THREADS} -f /dev/stdin ${SILENT_PROMPT} --seed "${SEED}" ${LLM_ADDITIONAL_ARGS} | fixup_output 2> "${ERROR_OUTPUT}"
     return $?
 }
 

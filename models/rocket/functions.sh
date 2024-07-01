@@ -42,7 +42,6 @@ function prepare_overrides {
     fi
 }
 
-
 function get_model_name {
     cli_set_model_path ${MODELS_PATHS}
     basename "${MODEL_PATH}"

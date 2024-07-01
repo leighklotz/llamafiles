@@ -32,6 +32,13 @@ function prepare_priority {
     cap_ngl
 }
 
+function prepare_overrides {
+    if [ -n "${SILENT_PROMPT}" ] && [[ "${SILENT_PROMPT}" =~ '--no-display-prompt' ]];
+    then
+        SILENT_PROMPT="$(printf "%s" "${SILENT_PROMPT}" | sed -e 's/ *--no-display-prompt//g')"
+    fi
+}
+
 function get_model_name {
     cli_set_model_path ${MODELS_PATHS}
     basename "${MODEL_PATH}"
@@ -42,4 +49,5 @@ function prepare_model {
     gpu_check 4
     prepare_prompt
     prepare_priority
+    prepare_overrides
 }
