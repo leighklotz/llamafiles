@@ -191,6 +191,11 @@ function via_api_perform_inference() {
 	log_and_exit $s "via --api perform inference cannot curl"
     fi
 
+    if [ -n "${INFO}" ]; then
+       usage_output="$(printf "%s" "${result}" | jq -r '.usage | to_entries[] | "\(.key)=\(.value)"' | tr '\n' ' ')"
+       log_info "usage: ${usage_output}"
+    fi
+
     output="$(printf "%s" "${result}" | jq --raw-output '.choices[].message.content')"
     s=$?
 
@@ -257,7 +262,7 @@ function unload_model {
 }
 
 # todo: support via=api; use cli or api calls for accurate counts;
-function check_context_length {
+function truncate_to_context_length {
     true
 }
 

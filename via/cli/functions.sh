@@ -267,8 +267,7 @@ function gpu_check {
     fi
 }
 
-function check_context_length {
-    #set -x
+function truncate_to_context_length {
     # todo: get better estimate of prompt length
     # assume 4 chars per token
     PROMPT_LENGTH_EST=$((${#PROMPT}/4))

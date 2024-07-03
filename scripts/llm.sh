@@ -233,7 +233,7 @@ process_stdin
 prepare_model
 log_info "MODEL_PATH=${MODEL_PATH}"
 adjust_raw_flag
-check_context_length
+truncate_to_context_length
 set_verbose_debug
 perform_inference; STATUS=$?
 report_success_or_fail $STATUS
