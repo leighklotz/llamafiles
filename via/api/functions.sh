@@ -177,8 +177,8 @@ function via_api_perform_inference() {
 
     if [ "${VERBOSE}" ];
     then
-	echo "USE_SYSTEM_ROLE='$USE_SYSTEM_ROLE'"
-	printf "%s\n" "${data}" | jq --indent 1 >> /dev/stderr
+	log_verbose "USE_SYSTEM_ROLE='$USE_SYSTEM_ROLE'"
+	log_verbose "data=$(printf "%s\n" "${data}" | jq --indent 1)"
     fi
 
     # Invoke via the HTTP API endpoint
