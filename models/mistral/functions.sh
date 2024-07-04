@@ -42,10 +42,14 @@ function prepare_priority {
 }
 
 function prepare_prompt {
-    PROMPT="<s>[INST]"
     local system_message="${SYSTEM_MESSAGE%$'\n'}"
     local input="${INPUT%$'\n'}"
     local question="${QUESTION%$'\n'}"
+    if [ -n "${ADD_BOS}" ]; then
+	PROMPT='<s>[INST]'
+    else
+	PROMPT='[INST]'
+    fi
     [ -n "${system_message}" ] && printf -v PROMPT "%s%s\n" "${PROMPT}" "${system_message}"
     [ -n "${question}" ] &&       printf -v PROMPT "%s\n%s" "${PROMPT}" "${question}"
     [ -n "${input}" ] &&          printf -v PROMPT "%s\n%s" "${PROMPT}" "${input}"

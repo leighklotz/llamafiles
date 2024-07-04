@@ -39,17 +39,22 @@ function prepare_priority {
 # AI:
 
 function prepare_prompt {
+    if [ -n "${ADD_BOS}" ]; then
+	BOS='<s>'
+    else
+	BOS=''
+    fi
     if [ "${INPUT}" == "" ]; then
-        printf -v PROMPT "<s>A chat between a user and a thinking artificial intelligence assistant. The assistant describes its thought process and gives helpful and detailed answers to the user's questions. %s
+        printf -v PROMPT "%sA chat between a user and a thinking artificial intelligence assistant. The assistant describes its thought process and gives helpful and detailed answers to the user's questions. %s
 User: %s
 AI:
-" "${SYSTEM_MESSAGE%$'\n'}" "${QUESTION%$'\n'}"
+" "${BOS}" "${SYSTEM_MESSAGE%$'\n'}" "${QUESTION%$'\n'}"
     else
-        printf -v PROMPT "<s>A chat between a user and a thinking artificial intelligence assistant. The assistant describes its thought process and gives helpful and detailed answers to the user's questions. 
+        printf -v PROMPT "%sA chat between a user and a thinking artificial intelligence assistant. The assistant describes its thought process and gives helpful and detailed answers to the user's questions. 
 %s
 User: %s
 INPUT: %s
-AI: " "${SYSTEM_MESSAGE%$'\n'}" "${QUESTION%$'\n'}" "${INPUT%$'\n'}"
+AI: " "${BOS}" "${SYSTEM_MESSAGE%$'\n'}" "${QUESTION%$'\n'}" "${INPUT%$'\n'}"
     fi
 }
 

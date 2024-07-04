@@ -71,31 +71,35 @@ ${QUESTION%$'\n'}
 }
 
 function llama_prompt {
-    if [ "${INPUT}" == "" ]; then
-	printf -v PROMPT "<s> [INST] %s
-%s [/INST]
-" "${SYSTEM_MESSAGE%$'\n'}" "${QUESTION%$'\n'}"
+    if [ -n "${ADD_BOS}" ]; then
+	BOS='<s>'
     else
-	printf -v PROMPT "<s>[INST]%s
+	BOS=''
+    fi
+
+    if [ "${INPUT}" == "" ]; then
+	printf -v PROMPT '%s[INST]%s
+%s[/INST]
+' "${BOS}" "${SYSTEM_MESSAGE%$'\n'}" "${QUESTION%$'\n'}"
+    else
+	printf -v PROMPT '%s[INST]%s
 %s
-%s
-[/INST]
-" "${SYSTEM_MESSAGE%$'\n'}" "${QUESTION%$'\n'}" "${INPUT%$'\n'}"
+%s[/INST]' "${BOS}" "${SYSTEM_MESSAGE%$'\n'}" "${QUESTION%$'\n'}" "${INPUT%$'\n'}"
     fi
 }
 
 function alpaca_prompt {
     if [ "${INPUT}" == "" ]; then
-	printf -v PROMPT "%s" "Below is an instruction that describes a task. Write a response that appropriately completes the request.
+	printf -v PROMPT 'Below is an instruction that describes a task. Write a response that appropriately completes the request.
 
 ### Instruction:
-${SYSTEM_MESSAGE%$'\n'}
-${QUESTION%$'\n'}
+%s
+%s
 
 ### Response:
-"
+' "${SYSTEM_MESSAGE%$'\n'}" "${QUESTION%$'\n'}"
     else
-	printf -v PROMPT "Below is an instruction that describes a task, paired with an input that provides further context. Write a response that appropriately completes the request.
+	printf -v PROMPT 'Below is an instruction that describes a task, paired with an input that provides further context. Write a response that appropriately completes the request.
 
 ### Instruction:
 %s
@@ -105,7 +109,7 @@ ${QUESTION%$'\n'}
 %s
 
 ### Response:
-" "${SYSTEM_MESSAGE%$'\n'}" "${QUESTION%$'\n'}" "${INPUT%$'\n'}"
+' "${SYSTEM_MESSAGE%$'\n'}" "${QUESTION%$'\n'}" "${INPUT%$'\n'}"
 	##### END NO INPUT CASE
     fi
 }
@@ -191,7 +195,7 @@ function cli_perform_inference {
     if [ -n "${GRAMMAR_FILE}" ]; then
 	GRAMMAR_FILE="--grammar-file ${GRAMMAR_FILE}"
     fi
-    #set -x
+    # set -x
     cat "${PROMPT_TEMP_FILE}" | fixup_input | ${MODEL_RUNNER} "${MODEL_PATH}" --cli ${LOG_DISABLE} ${GPU} ${NGL} ${GRAMMAR_FILE} ${TEMPERATURE} ${CONTEXT_LENGTH} ${N_PREDICT} ${BATCH_SIZE} ${NO_PENALIZE_NL} --repeat-penalty 1 ${THREADS} -f /dev/stdin ${SILENT_PROMPT} --seed "${SEED}" ${LLM_ADDITIONAL_ARGS} | fixup_output 2> "${ERROR_OUTPUT}"
     return $?
 }
