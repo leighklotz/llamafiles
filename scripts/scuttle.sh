@@ -90,4 +90,4 @@ else
     GRAMMAR_FLAG=""
 fi
 
-("${LYNX}" "${LINK}"; printf "\n# Instruction\n%s\n" "${SCUTTLE_SYSTEM_MESSAGE}")| "${SCRIPT_DIR}/llm.sh" --long ${GRAMMAR_FLAG} ${ARGS} "# Text of link ${LINK}" | post_process
+(${LYNX} "${LINK}"; printf "\n# Instruction\n%s\n" "${SCUTTLE_SYSTEM_MESSAGE}")| "${SCRIPT_DIR}/llm.sh" --long ${GRAMMAR_FLAG} ${ARGS} "# Text of link ${LINK}" | post_process
