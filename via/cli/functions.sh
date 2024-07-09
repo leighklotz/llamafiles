@@ -147,6 +147,7 @@ function init_via_model {
     fi
 
     # Construct the path to the functions file
+    log_info "* init_via_model ${MODELS_DIRECTORY}/${MODEL_TYPE}/functions.sh"
     model_functions_path="$(realpath "${MODELS_DIRECTORY}/${MODEL_TYPE}/functions.sh")"
     source_functions "${model_functions_path}"
 
