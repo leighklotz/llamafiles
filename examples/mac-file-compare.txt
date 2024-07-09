@@ -1,0 +1,28 @@
+$ machelp give a bash cli to find lines in file A that are not in file B and the files are not sorted
+A classic problem!
+
+To find lines in file A that are not in file B, even if the files are not sorted, you can use the following Bash command:
+```bash
+comm -13 <(sort fileA) <(sort fileB)
+```
+Here's how it works:
+
+* `comm` is a command that compares two files line by line.
+* The `-1` option tells `comm` to print only the lines that are not common to both files.
+* The `-3` option tells `comm` to print only the lines that are not found in either file.
+* The `<( )` syntax is called process substitution, which allows you to treat the output of a command as a file.
+* `sort` is used to sort the files before comparing them. This ensures that the comparison is case-sensitive and considers only the line order.
+
+To use this command, replace `fileA` and `fileB` with the actual paths to your files.
+
+Example:
+```bash
+comm -13 <(sort example1.txt) <(sort example2.txt)
+```
+This will print the lines that are unique to `example1.txt` and not found in `example2.txt`.
+
+If you want to write the output to a new file, you can redirect the output to a file:
+```bash
+comm -13 <(sort fileA) <(sort fileB) > output.txt
+```
+Note that the `comm` command assumes that the files are in the same encoding (e.g., both are UTF-8). If the files have different encodings, you may need to use a different approach.
