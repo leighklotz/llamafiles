@@ -2,12 +2,15 @@
 
 # requirements: pandas, numpy, tabulate, colorama, scikit-learn
 
+from typing import Union
+import argparse
 import os
 import sys
 import argparse
 import pathlib
 import glob
 import requests
+import subprocess
 
 from json import JSONDecodeError
 from tabulate import tabulate
@@ -96,7 +99,7 @@ def print_cosine_distance_matrix(cosine_distance_matrix, files):
     # Print the matrix as a table
     print(tabulate(cosine_distance_matrix, headers="firstrow", tablefmt="plain"))
 
-def make_cosine_distance_list(cosine_distance_matrix, files, threshold=0.1):
+def make_cosine_distance_list(cosine_distance_matrix, files, threshold=0.1, process=lambda f1,f2: f2):
     related_files = {}
     # Sort the distances before threshold check, increasing distance
     sorted_distances = sorted(enumerate(cosine_distance_matrix[0]), key=lambda x: x[1])
@@ -104,14 +107,15 @@ def make_cosine_distance_list(cosine_distance_matrix, files, threshold=0.1):
         related = []
         for idx, distance in sorted_distances:
             if cosine_distance_matrix[i][idx] <= threshold and files[idx] != file1:
-                related.append(files[idx])
+                related.append(process(file1, files[idx]))
         related_files[file1] = related
     return related_files
 
 def print_cosine_distance_list(d):
    for k, v in d.items():
-       vs = ', '.join(v)
-       print(f"{k} -> {vs}")
+       print(k)
+       for vv in v:
+           print(f"\t-> {vv}")
 
 def print_cosine_distance_heatmap(cosine_distance_matrix, files):
     # Convert to numpy array for easier manipulation
@@ -151,17 +155,32 @@ def usage(msg):
     print(f"usage: {sys.argv[0]} [--matrix][--heatmap][--list] file1...")
     print(msg)
 
-from typing import Union
-import argparse
+
 
 def parse_args() -> argparse.Namespace:
    parser = argparse.ArgumentParser(description='Some helpful description for your tool')
    parser.add_argument('--matrix', action='store_true')
    parser.add_argument('--heatmap', action='store_true')
    parser.add_argument('--list', action='store_true')
+   parser.add_argument('--diff', action='store_true')
    parser.add_argument('--threshold', type=float, default=0.1)
    parser.add_argument('files', nargs='*', type=str)
    return parser.parse_args()
+
+# def diff_process(f1, f2):
+#     return run_shell_pipeline(f"diff {f2} {f2} | diffstat")
+# 
+# def run_shell_pipeline(cmd):
+#     process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+#     output, error = process.communicate()
+#     return output
+# 
+def diff_process(f1, f2):
+    p1 = subprocess.Popen(['diff', f1, f2], stdout=subprocess.PIPE)
+    p2 = subprocess.Popen(['diffstat', '-q', '-b', '-f', '1'], stdin=p1.stdout, stdout=subprocess.PIPE)
+    p3 = subprocess.Popen(['head', '-1'], stdin=p2.stdout, stdout=subprocess.PIPE)
+    r = p3.communicate()
+    return f2 + ' ' + r[0].decode().strip()
 
 def main(args):
     files = args.files
@@ -179,8 +198,10 @@ def main(args):
     if args.list:
         d = make_cosine_distance_list(cosine_distance_matrix, files, threshold=args.threshold)
         print_cosine_distance_list(d)
-    else:
-        usage("At least one option is required: --matrix, --heatmap or --list")
+
+    if args.diff:
+        d = make_cosine_distance_list(cosine_distance_matrix, files, threshold=args.threshold, process=diff_process)
+        print_cosine_distance_list(d)
 
 if __name__ == "__main__":
     args = parse_args()
