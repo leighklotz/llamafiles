@@ -360,6 +360,9 @@ Many of these are better than this package. Please try them out.
 - https://github.com/yusufcanb/tlm
 - https://github.com/noemaresearch/pinboard
 
+### Similar Emacs Packages
+- https://github.com/chep/copilot-chat.el
+
 ## Compatible Tools
 - https://github.com/oobabooga/text-generation-webui
 
