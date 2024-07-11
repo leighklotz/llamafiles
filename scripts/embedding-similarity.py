@@ -4,6 +4,7 @@
 
 import os
 import sys
+import argparse
 import pathlib
 import glob
 import requests
@@ -63,6 +64,15 @@ def calculate_embeddings(file_names):
 def get_files(files):
    return sorted(f for f in files if os.path.isfile(f) and os.access(f, os.R_OK))
 
+#def calculate_cosine_distance_matrix(embeddings):
+#    file_names, embedding_vectors = zip(*embeddings.items())
+#    embedding_vectors = np.array(embedding_vectors)
+#    import pdb;pdb.set_trace()
+#    distance_matrix = pairwise_distances(embedding_vectors, metric='cosine')
+#    distance_matrix = distance_matrix.astype(np.float64)
+#    distances = distance_matrix.tolist()
+#    return distances
+
 def calculate_cosine_distance_matrix(embeddings):
     # Extract the file names and embedding vectors
     file_names, embedding_vectors = zip(*embeddings.items())
@@ -85,6 +95,23 @@ def print_cosine_distance_matrix(cosine_distance_matrix, files):
     cosine_distance_matrix = list(map(list, zip(*cosine_distance_matrix)))
     # Print the matrix as a table
     print(tabulate(cosine_distance_matrix, headers="firstrow", tablefmt="plain"))
+
+def make_cosine_distance_list(cosine_distance_matrix, files, threshold=0.1):
+    related_files = {}
+    # Sort the distances before threshold check, increasing distance
+    sorted_distances = sorted(enumerate(cosine_distance_matrix[0]), key=lambda x: x[1])
+    for i, file1 in enumerate(files):
+        related = []
+        for idx, distance in sorted_distances:
+            if cosine_distance_matrix[i][idx] <= threshold and files[idx] != file1:
+                related.append(files[idx])
+        related_files[file1] = related
+    return related_files
+
+def print_cosine_distance_list(d):
+   for k, v in d.items():
+       vs = ', '.join(v)
+       print(f"{k} -> {vs}")
 
 def print_cosine_distance_heatmap(cosine_distance_matrix, files):
     # Convert to numpy array for easier manipulation
@@ -120,21 +147,41 @@ def print_cosine_distance_heatmap(cosine_distance_matrix, files):
             print(color_code + f"{value:.2f}", end="\t")
         print(Style.RESET_ALL)
 
-def main(files):
+def usage(msg):
+    print(f"usage: {sys.argv[0]} [--matrix][--heatmap][--list] file1...")
+    print(msg)
+
+from typing import Union
+import argparse
+
+def parse_args() -> argparse.Namespace:
+   parser = argparse.ArgumentParser(description='Some helpful description for your tool')
+   parser.add_argument('--matrix', action='store_true')
+   parser.add_argument('--heatmap', action='store_true')
+   parser.add_argument('--list', action='store_true')
+   parser.add_argument('--threshold', type=float, default=0.1)
+   parser.add_argument('files', nargs='*', type=str)
+   return parser.parse_args()
+
+def main(args):
+    files = args.files
     file_embeddings = calculate_embeddings(files)
     files = list(file_embeddings.keys())
     # Calculate cosine distance for all pairs
     cosine_distance_matrix = calculate_cosine_distance_matrix(file_embeddings)
-    if False:
-        # print cosine_distance_matrix as a table
+
+    if args.matrix:
         print_cosine_distance_matrix(cosine_distance_matrix, files)
-    if True:
-        # print cosine_distance_matrix as a heatmap
+       
+    if args.heatmap:
         print_cosine_distance_heatmap(cosine_distance_matrix, files)
 
-if __name__ == "__main__":
-    if len(sys.argv) > 1:
-        main(get_files(sys.argv[1:]))
+    if args.list:
+        d = make_cosine_distance_list(cosine_distance_matrix, files, threshold=args.threshold)
+        print_cosine_distance_list(d)
     else:
-        print(f"usage: {sys.argv[0]} file1...")
-        sys.exit(1)
+        usage("At least one option is required: --matrix, --heatmap or --list")
+
+if __name__ == "__main__":
+    args = parse_args()
+    main(args)
