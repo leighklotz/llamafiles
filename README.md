@@ -358,6 +358,7 @@ Many of these are better than this package. Please try them out.
 - https://github.com/jart
 - https://github.com/llimllib/gpt-bash-cli
 - https://github.com/yusufcanb/tlm
+- https://github.com/noemaresearch/pinboard
 
 ## Compatible Tools
 - https://github.com/oobabooga/text-generation-webui
