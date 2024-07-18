@@ -57,7 +57,7 @@ function preprocess_markdown {
 
 # fixme: this removes quotes inside JSON strings as well, which will cause errors if they exist.
 function remove_smart_quotes {
-    cat | sed -e 's/[“”]/"//g'
+    cat | sed -e 's/[“”]/"/g'
 }
 
 # transforms JSON output from LLM into a properly formatted URL string for Scuttlebookmark adding.
