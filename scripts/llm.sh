@@ -11,7 +11,7 @@ USAGE="[-m|--model-type model-type] [--stdin|--interactive|-i] [--fast | --long]
 ### Assume the whole args is a question if there is no hyphen to start.
 ### There may be no question, if all is contained in SYSTEM_MESSAGE and STDIN.
 INPUT=""
-QUESTION="${QUESTION:-}"
+: "${QUESTION:=}"
 DO_STDIN="$(test -t 0 || echo $?)"
 
 function parse_args() {
@@ -46,7 +46,7 @@ function parse_args() {
 		--grammar-file)
                     shift; GRAMMAR_FILE="$1" ;;
 		--debug)
-                    ERROR_OUTPUT="/dev/stdout"; SILENT_PROMPT=""; DEBUG=1; LOG_DISABLE="" ;;
+                    ERROR_OUTPUT="/dev/stdout"; SILENT_PROMPT=""; DEBUG=1; LOG_DISABLE=" " ;; # LOG_DISABLE space requried to override default
 		--noerror)
                     ERROR_OUTPUT="/dev/null" ;;
 		--stdin|--interactive|-i)
@@ -88,26 +88,26 @@ parse_args ${@}
 ###
 ### Process CLI flags and environment variables
 ###
-VIA=${VIA:-cli}
-MODEL_TYPE=${MODEL_TYPE:-mistral}
-TEMPERATURE=${TEMPERATURE:-}
-CONTEXT_LENGTH=${CONTEXT_LENGTH:-}
-N_PREDICT="${N_PREDICT:-}"
-SYSTEM_MESSAGE="${SYSTEM_MESSAGE-"Answer the following user question:"}"
-NGL="${NGL:-}"
-GPU="${GPU:-auto}"		# auto|nvidia|omit
-PRIORITY="${PRIORITY:-manual}" # speed|length|manual
-DEBUG="${DEBUG:-}"
-VERBOSE="${VERBOSE:-}"
-INFO="${INFO:-${VERBOSE}}"
-LOG_DISABLE="${LOG_DISABLE:---log-disable}" # hack: space ' ' to override
-GRAMMAR_FILE="${GRAMMAR_FILE:-}"
-BATCH_SIZE="${BATCH_SIZE:-}"
-SEED="${SEED:--1}"
-LLAMAFILE_MODEL_RUNNER="${LLAMAFILE_MODEL_RUNNER:-"$(realpath "${SCRIPT_DIR}/../lib/llamafile-0.6.2") -m"}"
-FORCE_MODEL_RUNNER="${FORCE_MODEL_RUNNER:-}"
-LLM_ADDITIONAL_ARGS="${LLM_ADDITIONAL_ARGS:-}"
-KEEP_PROMPT_TEMP_FILE="${KEEP_PROMPT_TEMP_FILE:-ALL}" # "NONE"|"ERROR"|"ALL"
+: "${VIA:=cli}"
+: "${MODEL_TYPE:=mistral}"
+: "${TEMPERATURE:=}"
+: "${CONTEXT_LENGTH:=}"
+: "${N_PREDICT:=}"
+: "${SYSTEM_MESSAGE:=}" # used to default to "Answer the following user question:"
+: "${NGL:=}"
+: "${GPU:=auto}"		# auto|nvidia|omit
+: "${PRIORITY:=manual}" # speed|length|manual
+: "${DEBUG:=}"
+: "${VERBOSE:=}"
+: "${INFO:=${VERBOSE}}"
+: "${LOG_DISABLE:=--log-disable}" # use space ' ' to override
+: "${GRAMMAR_FILE:=}"
+: "${BATCH_SIZE:=}"
+: "${SEED:=-1}"
+: "${LLAMAFILE_MODEL_RUNNER:="$(realpath "${SCRIPT_DIR}/../lib/llamafile-0.6.2") -m"}"
+: "${FORCE_MODEL_RUNNER:=}"
+: "${LLM_ADDITIONAL_ARGS:=}"
+: "${KEEP_PROMPT_TEMP_FILE:=ALL}" # "NONE"|"ERROR"|"ALL"
 
 ###
 ### These variables are not settable via environment
@@ -118,7 +118,7 @@ RAW_FLAG=""
 ERROR_OUTPUT="/dev/null"
 # Old versions of llamafile sometimes need -silent-prompt or --no-display-prompt
 # edit this, or use FORCE_MODEL_RUNNER and a newer MODEL_RUNNER .
-SILENT_PROMPT="${SILENT_PROMPT:---silent-prompt --no-display-prompt}"
+: "${SILENT_PROMPT:=--silent-prompt --no-display-prompt}"
 # NO_PENALIZE_NL is gone and we only have --penalize-ml in llamafile 0.7
 #NO_PENALIZE_NL="--no-penalize-nl "
 NO_PENALIZE_NL=""
