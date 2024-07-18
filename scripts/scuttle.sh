@@ -55,16 +55,20 @@ function preprocess_markdown {
     cat | sed -n '/{/,/}/p' | sed '1h;1!H;$!d;g;s/.*\({.*}\).*/\1/'
 }
 
+# fixme: this removes quotes inside JSON strings as well, which will cause errors if they exist.
+function remove_smart_quotes {
+    cat | sed -e 's/[“”]/"//g'
+}
+
 # transforms JSON output from LLM into a properly formatted URL string for Scuttlebookmark adding.
 # todo: try to find the json in the input, for example inside backquotes
 #       or force json schema
 function scuttle_extract_json {
-    if [ -n "${JSON_MODE}" ];
-    then
-	cat | preprocess_markdown
+    if [ -n "${JSON_MODE}" ]; then
+	cat | preprocess_markdown | remove_smart_quotes
 	return $?
     else
-	cat | preprocess_markdown | jq --arg xspace "%20" --arg plus "+" --arg xcomma "%2[cC]" --arg comma "," -r '.keywords |= if(type == "array") then join(",") else . end | "https://scuttle.klotz.me/bookmarks/klotz?action=add&address=\(.link|@uri|gsub($xspace; $plus)|gsub($xcomma; $comma))&description=\(.description|@uri|gsub($xspace; $plus)|gsub($xcomma; $comma))&title=\(.title|@uri|gsub($xspace; $plus)|gsub($xcomma; $comma))&tags=\(.keywords|@uri|gsub($xspace; $plus)|gsub($xcomma; $comma))"'
+	cat | preprocess_markdown | remove_smart_quotes | jq --arg xspace "%20" --arg plus "+" --arg xcomma "%2[cC]" --arg comma "," -r '.keywords |= if(type == "array") then join(",") else . end | "https://scuttle.klotz.me/bookmarks/klotz?action=add&address=\(.link|@uri|gsub($xspace; $plus)|gsub($xcomma; $comma))&description=\(.description|@uri|gsub($xspace; $plus)|gsub($xcomma; $comma))&title=\(.title|@uri|gsub($xspace; $plus)|gsub($xcomma; $comma))&tags=\(.keywords|@uri|gsub($xspace; $plus)|gsub($xcomma; $comma))"'
 	return $?
     fi
 }
