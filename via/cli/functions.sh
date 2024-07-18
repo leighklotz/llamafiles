@@ -78,13 +78,12 @@ function llama_prompt {
     fi
 
     if [ "${INPUT}" == "" ]; then
-	printf -v PROMPT '%s[INST]%s
-%s[/INST]
-' "${BOS}" "${SYSTEM_MESSAGE%$'\n'}" "${QUESTION%$'\n'}"
+	printf -v PROMPT '%s[INST] %s
+%s [/INST] ' "${BOS}" "${SYSTEM_MESSAGE%$'\n'}" "${QUESTION%$'\n'}"
     else
-	printf -v PROMPT '%s[INST]%s
+	printf -v PROMPT '%s[INST] %s
 %s
-%s[/INST]' "${BOS}" "${SYSTEM_MESSAGE%$'\n'}" "${QUESTION%$'\n'}" "${INPUT%$'\n'}"
+%s [/INST] ' "${BOS}" "${SYSTEM_MESSAGE%$'\n'}" "${QUESTION%$'\n'}" "${INPUT%$'\n'}"
     fi
 }
 
