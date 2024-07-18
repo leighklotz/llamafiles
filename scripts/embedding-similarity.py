@@ -176,7 +176,7 @@ def parse_args() -> argparse.Namespace:
 #     return output
 # 
 def diff_process(f1, f2):
-    p1 = subprocess.Popen(['diff', f1, f2], stdout=subprocess.PIPE)
+    p1 = subprocess.Popen(['diff', '-u', f1, f2], stdout=subprocess.PIPE)
     p2 = subprocess.Popen(['diffstat', '-q', '-b', '-f', '1'], stdin=p1.stdout, stdout=subprocess.PIPE)
     p3 = subprocess.Popen(['head', '-1'], stdin=p2.stdout, stdout=subprocess.PIPE)
     r = p3.communicate()
