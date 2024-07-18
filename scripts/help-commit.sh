@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_DIR=$(dirname $(realpath "${BASH_SOURCE}"))
+SCRIPT_DIR="$(dirname "$(realpath "${BASH_SOURCE}")")"
 HELP_SH="help.sh"
 
 HELP_SH_OPTIONS=""
@@ -44,8 +44,8 @@ done
 # Set main parameters
 default_system_message="$(printf "%b" "You are an expert in Linux, Bash, Python, general programming, and related topics.\n")"
 export SYSTEM_MESSAGE="${SYSTEM_MESSAGE:-${default_system_message}}"
-printf -v PROMPT 'Write a %s `git commit` command line to commit the changes listed in the following `git diff` output:' "${MESSAGE_LINE}"
-PROMPT="Provide ${MESSAGE_LINE} git commit message for the changes listed in the \`git diff\` below, in the form of a \`git commit\` command:\n"
+PROMPT="Provide ${MESSAGE_LINE} git commit message for the changes listed in unified \`git diff\` below, in the form of a \`git commit\` command:\n"
+
 if [ -n "${INHIBIT_GRAMMAR}" ];
 then	 
     GRAMMAR_FILE_FLAG=""
@@ -54,7 +54,7 @@ else
 fi
 
 function get_results {
-    if ! git rev-parse --is-inside-work-tree 2>&1> /dev/null;
+    if ! git rev-parse --is-inside-work-tree > /dev/null 2>&1;
     then
 	echo "$(basename "$0"): PWD=$PWD is not in a git repository"
 	exit 1
@@ -86,4 +86,5 @@ $ %s
 
 # Pipeline to send 'git diff' out to 'help.sh' input with prompt
 printf -v INPUT "${TEMPLATE}" "${DIFF_COMMAND}" "${diff_output_sanitized}"
+# Pass along all args still unprocessed
 printf "%s\n" "${INPUT}" | ${HELP_SH} ${*} ${GRAMMAR_FILE_FLAG} -e -- "${PROMPT}"

@@ -7,18 +7,17 @@ VIA_API_MODEL_INFO_ENDPOINT="${VIA_API_CHAT_BASE}/v1/internal/model/info"
 VIA_API_MODEL_LIST_ENDPOINT="${VIA_API_CHAT_BASE}/v1/internal/model/list"
 VIA_API_LOAD_MODEL_ENDPOINT="${VIA_API_CHAT_BASE}/v1/internal/model/load"
 VIA_API_UNLOAD_MODEL_ENDPOINT="${VIA_API_CHAT_BASE}/v1/internal/model/unload"
-VIA_API_INHIBIT_GRAMMAR="${VIA_API_INHIBIT_GRAMMAR:-}"
+VIA_API_USE_GRAMMAR="${VIA_API_USE_GRAMMAR:-}"
 
 # Check if the script is being sourced or directly executed
-if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]];
+then
     echo "This script '${BASH_SOURCE[0]}' is intended to be sourced, not executed directly."
     exit 1
 fi
 
-LLM_LIB_DIR=$(realpath "${SCRIPT_DIR}/../lib")
-LLM_MODELS_DIR=$(realpath "${SCRIPT_DIR}/../models")
-MODEL_FILE="mixtral/mixtral-8x7b-instruct-v0.1.Q5_K_M.llamafile"
-PIDFILE="/tmp/via-api.pid"
+LLM_LIB_DIR="$(realpath "${SCRIPT_DIR}/../lib")"
+LLM_MODELS_DIR="$(realpath "${SCRIPT_DIR}/../models")"
 SEED="${SEED:-NaN}"
 
 # fixme: some models support the system role API and some do not.
@@ -46,7 +45,7 @@ TEMPLATE_SETTINGS="
     grammar_string: \$grammar_string,
     seed: \$seed,
     repeat_last_n: 64, repeat_penalty: 1.000, frequency_penalty: 0.000, presence_penalty: 0.000,
-    top_k: 40, tfs_z: 1.000, top_p: 0.950, min_p: 0.050, typical_p: 1.000, temp: 0.000,
+    top_k: 40, tfs_z: 1.000, top_p: 0.950, min_p: 0.050, typical_p: 1.000, temp: \$temperature,
     mirostat: 0, mirostat_lr: 0.100, mirostat_ent: 5.000,
     n_keep: 1,
     skip_special_tokens: false"
@@ -78,7 +77,8 @@ NO_SYSTEM_ROLE_TEMPLATE="{
 }"
 
 function prepare_prompt {
-    if [ "${INPUT}" == "" ]; then
+    if [ "${INPUT}" == "" ];
+    then
 	printf -v PROMPT "%s" "${QUESTION%$'\n'}"
     else
 	printf -v PROMPT "%s\n\n%s" "${QUESTION%$'\n'}" "${INPUT%$'\n'}"
@@ -87,6 +87,19 @@ function prepare_prompt {
 
 function prepare_priority {
     true
+}
+
+# fixme: does not accept options yet
+# fixme: other env are pre-calculated; try to move them here
+# fixme: these are fixed and not variable
+# fixme: these parameters are set in model loading and cannot be accomodated here
+# ${N_PREDICT} ${BATCH_SIZE}
+# fixme: what do do about this parameter for API-bound fields?
+# ${LLM_ADDITIONAL_ARGS}
+function via_set_options {
+    repeat_penalty="1"
+    penalize_nl="false"
+    MODEL_MODE="${MODEL_MODE:-instruct}"
 }
 
 
@@ -105,7 +118,7 @@ function via_api_perform_inference() {
     local mode="$1" system_message="$2" question="$3" grammar_file="$4"
     local temperature="$5" repetition_penalty="$6" penalize_nl="$7"
 
-    if [ -z "$grammar_file" ] || [ -n "${VIA_API_INHIBIT_GRAMMAR}" ];
+    if [ -z "$grammar_file" ] || [ -z "${VIA_API_USE_GRAMMAR}" ];
     then
 	grammar_file="/dev/null"
     fi
@@ -120,7 +133,7 @@ function via_api_perform_inference() {
     if [ -z "${USE_SYSTEM_ROLE}" ];
     then
 	TEMPLATE="${NO_SYSTEM_ROLE_TEMPLATE}"
-	question=$(printf "%s\n%s" "${system_message}" "${question}")
+	question=$(printf "%s\n%s" "${system_message%$'\n'}" "${question}")
 	system_message=""
     else
 	TEMPLATE="${SYSTEM_ROLE_TEMPLATE}"
@@ -133,14 +146,16 @@ function via_api_perform_inference() {
     then
 	system_message=${system_message##[[:space:]]}
 	system_message=${system_message%%[[:space:]]}
-	system_message_file=$(mktemp -t sysmsg.XXXXXX); printf "%s\n" "${system_message%$'\n'}" >> "${system_message_file}"
+	system_message_file=$(mktemp_file sysmsg);
+	printf "%s\n" "${system_message%$'\n'}" >> "${system_message_file}"
     else
 	system_message_file="/dev/null"
     fi
 
     question=${question##[[:space:]]}
     question=${question%%[[:space:]]}
-    question_file=$(mktemp -t quest.XXXXXX); printf "%s" "${question}" >> "${question_file}"
+    question_file=$(mktemp_file quest)
+    printf "%s" "${question}" >> "${question_file}"
 
     # hack: Drop empty string, and null parameters. NaN seems th show as null.
     #       sadly seed must be a number
@@ -160,38 +175,34 @@ function via_api_perform_inference() {
 	| jq 'del(.[] | select(. == null))' 
 	)
 
-    if [ "${VERBOSE}" ]; then
-	echo "USE_SYSTEM_ROLE='$USE_SYSTEM_ROLE'"
-	printf "%s\n" "${data}" | jq --indent 1 >> /dev/stderr
+    if [ "${VERBOSE}" ];
+    then
+	log_verbose "USE_SYSTEM_ROLE='$USE_SYSTEM_ROLE'"
+	log_verbose "data=$(printf "%s\n" "${data}" | jq --indent 1)"
     fi
 
     # Invoke via the HTTP API endpoint
+    # todo might need to do `set -o pipefail` here.
     result=$(printf "%s" "${data}" | curl -s "${VIA_API_CHAT_COMPLETIONS_ENDPOINT}" -H 'Content-Type: application/json' -d @-)
     s=$?
     if [ "$s" != 0 ];
     then
-	log_warn $s "via --api perform inference cannot curl"
+	cleanup_temp_files $s
+	log_and_exit $s "via --api perform inference cannot curl"
     fi
+
+    if [ -n "${INFO}" ]; then
+       usage_output="$(printf "%s" "${result}" | jq -r '.usage | to_entries[] | "\(.key)=\(.value)"' | tr '\n' ' ')"
+       log_info "usage: ${usage_output}"
+    fi
+
     output="$(printf "%s" "${result}" | jq --raw-output '.choices[].message.content')"
     s=$?
 
-    # deal with temp files
-    case "$KEEP_PROMPT_TEMP_FILE" in
-	ALL)
-	    true
-	    ;;
-	ERROR|ERRORS|NONE)
-	    if [ "$s" == 0 ] || [ "${KEEP_PROMPT_TEMP_FILE}" == "NONE" ];
-	       then
-		   ([ -n "${question_file}" ] && [ "${question_file}" != "/dev/null" ]) && (rm -f "${question_file}" || echo "* WARN: unable to remove question_file ${question_file}" >> /dev/stderr)
-		   ([ -n "${system_message_file}" ] && [ "${system_message_file}" != "/dev/null" ]) && (rm -f "${system_message_file}" || log_warn $? "* WARN: unable to remove system_message_file=${system_message_file}" >> /dev/stderr)
-	    fi
-	    ;;
-    esac
+    cleanup_temp_files $s
 
     # exit if we failed to parse
-    if [ "$s" != 0 ];
-    then
+    if [ "$s" != 0 ]; then
 	log_and_exit $s "via api perform_inference cannot parse ${result}"
     fi
 
@@ -199,6 +210,7 @@ function via_api_perform_inference() {
     printf "%s\n" "${output}" | via_api_mistral_output_fixup
     return $s
 }
+
 
 # can't set the model in the API so we just validate that
 # there is a model. 
@@ -249,3 +261,15 @@ function unload_model {
     printf "%s\n" "$result"
 }
 
+# todo: support via=api; use cli or api calls for accurate counts;
+function truncate_to_context_length {
+    true
+}
+
+# if [ -n "${VIA_API_FUNCTIONS_LOADED}" ];
+# then
+#     log_and_exit "VIA_API_FUNCTIONS_LOADED again"
+# else
+#     VIA_API_FUNCTIONS_LOADED=1
+#     log_error "VIA_API_FUNCTIONS_LOADED first_time"
+# fi

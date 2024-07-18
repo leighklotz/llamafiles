@@ -12,7 +12,14 @@ To use the `llm.el` package, you will need to have an LLM installed and accessib
 need to customize the `llm-rewrite-script-path` variable to point to the script that invokes your LLM.
 
 Once you have set up your LLM and customized the `llm-rewrite-script-path` variable, you can begin using the `llm.el`
-functions. Here is a brief overview of the main functions provided by the package:
+functions.
+
+
+## Example
+![docs/Mac Emacs Arduino M-x llm-ask](docs/mac-emacs-arduino-llm-ask.png)
+
+## M-x functions
+Here is a brief overview of the main functions provided by the package:
 
 ### `llm-write`
 

@@ -1,5 +1,9 @@
 #!/bin/bash
 
+MODELS_PATHS="${MODELS_DIRECTORY}/phi/phi-2.Q6_K.llamafile\
+              ${MODELS_DIRECTORY}/phi/phi-2.Q5_K_M.llamafile"
+
+
 # Check if the script is being sourced or directly executed
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     echo "This script '${BASH_SOURCE[0]}' is intended to be sourced, not executed directly."
@@ -38,28 +42,13 @@ function prepare_overrides {
     fi
 }
 
-
-function set_model_path {
-    if [ -z "${MODEL_PATH}" ];
-    then
-        MODEL_PATH=$(find_first_model \
-			 "${MODELS_DIRECTORY}/rocket/rocket-3b.Q6_K.llamafile" \
-			 "${MODELS_DIRECTORY}/rocket/rocket-3b.Q5_K_M.llamafile" \
-			 "${MODELS_DIRECTORY}/rocket/rocket-3b.Q4_K_M.llamafile" \
-		  )
-    fi
-    if [ "${MODEL_PATH}" == "" ]; then
-	log_and_exit 1 "Cannot find model for MODEL_TYPE=$MODEL_TYPE in $MODELS_DIRECTORY"
-    fi
-}
-
 function get_model_name {
-    set_model_path
+    cli_set_model_path ${MODELS_PATHS}
     basename "${MODEL_PATH}"
 }
 
 function prepare_model {
-    set_model_path
+    cli_set_model_path ${MODELS_PATHS}
     USE_SYSTEM_ROLE=1
     gpu_check 4
     chatml_prompt

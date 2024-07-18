@@ -1,5 +1,16 @@
 #!/bin/bash
 
+MODELS_PATHS="${MODELS_DIRECTORY}/mistral/Mistral-7B-Instruct-v0.3-Q6_K.gguf \
+ ${MODELS_DIRECTORY}/mistral/Mistral-7B-Instruct-v0.3-Q4_K_M.gguf \
+ ${MODELS_DIRECTORY}/mistral/mistral-7b-instruct-v0.2.Q6_K.gguf \
+ ${MODELS_DIRECTORY}/mistral/mistral-7b-instruct-v0.2.Q5_K_M.llamafile \
+ ${MODELS_DIRECTORY}/mistral/mistral-7b-instruct-v0.2.Q5_K_M.gguf \
+ ${MODELS_DIRECTORY}/mistral/mistral-7b-instruct-v0.2.Q4_K_M.llamafile \
+ ${MODELS_DIRECTORY}/mistral/mistral-7b-instruct-v0.2.Q4_K_M.gguf \
+ ${MODELS_DIRECTORY}/mistral/mistral-7b-instruct-v0.1-Q4_K_M-main.llamafile \
+ ${MODELS_DIRECTORY}/mistral/mistral-7b-instruct-v0.2.Q3_K_M.llamafile \
+ ${MODELS_DIRECTORY}/mistral/mistral-7b-instruct-v0.2.Q3_K_S.llamafile"
+
 # Check if the script is being sourced or directly executed
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     echo "This script '${BASH_SOURCE[0]}' is intended to be sourced, not executed directly."
@@ -31,43 +42,27 @@ function prepare_priority {
 }
 
 function prepare_prompt {
-    PROMPT="<s>[INST]"
     local system_message="${SYSTEM_MESSAGE%$'\n'}"
     local input="${INPUT%$'\n'}"
     local question="${QUESTION%$'\n'}"
+    if [ -n "${ADD_BOS}" ]; then
+	PROMPT='<s>[INST] '
+    else
+	PROMPT='[INST] '
+    fi
     [ -n "${system_message}" ] && printf -v PROMPT "%s%s\n" "${PROMPT}" "${system_message}"
     [ -n "${question}" ] &&       printf -v PROMPT "%s\n%s" "${PROMPT}" "${question}"
     [ -n "${input}" ] &&          printf -v PROMPT "%s\n%s" "${PROMPT}" "${input}"
-                                  printf -v PROMPT "%s[/INST]" "${PROMPT}"
-}
-
-function set_model_path {
-    if [ -z "${MODEL_PATH}" ];
-    then
-	MODEL_PATH=$(find_first_model \
-			 ${MODELS_DIRECTORY}/mistral/Mistral-7B-Instruct-v0.3-Q6_K.gguf \
-			 ${MODELS_DIRECTORY}/mistral/Mistral-7B-Instruct-v0.3-Q4_K_M.gguf \
-			 ${MODELS_DIRECTORY}/mistral/mistral-7b-instruct-v0.2.Q6_K.gguf \
-			 ${MODELS_DIRECTORY}/mistral/mistral-7b-instruct-v0.2.Q5_K_M.llamafile \
-			 ${MODELS_DIRECTORY}/mistral/mistral-7b-instruct-v0.2.Q5_K_M.gguf \
-			 ${MODELS_DIRECTORY}/mistral/mistral-7b-instruct-v0.2.Q4_K_M.llamafile \
-			 ${MODELS_DIRECTORY}/mistral/mistral-7b-instruct-v0.2.Q4_K_M.gguf \
-			 ${MODELS_DIRECTORY}/mistral/mistral-7b-instruct-v0.1-Q4_K_M-main.llamafile \
-			 ${MODELS_DIRECTORY}/mistral/mistral-7b-instruct-v0.2.Q3_K_M.llamafile \
-			 ${MODELS_DIRECTORY}/mistral/mistral-7b-instruct-v0.2.Q3_K_S.llamafile)
-	if [ "${MODEL_PATH}" == "" ]; then
-	    log_and_exit 1 "Cannot find model for MODEL_TYPE=$MODEL_TYPE in $MODELS_DIRECTORY"
-	fi
-    fi
+                                  printf -v PROMPT "%s [/INST] " "${PROMPT}"
 }
 
 function get_model_name {
-    set_model_path
+    cli_set_model_path ${MODELS_PATHS}
     basename "${MODEL_PATH}"
 }
 
 function prepare_model {
-    set_model_path
+    cli_set_model_path ${MODELS_PATHS}
     gpu_check 4
     prepare_prompt
     prepare_priority

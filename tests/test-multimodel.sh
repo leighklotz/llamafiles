@@ -1,6 +1,6 @@
 #!/bin/bash -x
 
-SCRIPT_DIR=$(dirname $(realpath "${BASH_SOURCE}"))
+SCRIPT_DIR="$(dirname "$(realpath "${BASH_SOURCE}")")"
 
 USAGE="${0}"
 QUERY="Write a MicroPython script to read human input of International Morse Code from GPIO10 and output it to Serial one character at a time."

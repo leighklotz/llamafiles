@@ -1,5 +1,9 @@
 #!/bin/bash
 
+MODELS_PATHS="${MODELS_DIRECTORY}/mixtral/mixtral-8x7b-instruct-v0.1.Q5_K_M.gguf \
+              ${MODELS_DIRECTORY}/mixtral/mixtral-8x7b-instruct-v0.1.Q5_K_M.llamafile"
+
+
 # Check if the script is being sourced or directly executed
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     echo "This script '${BASH_SOURCE[0]}' is intended to be sourced, not executed directly."
@@ -7,10 +11,14 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
 fi
 
 function prepare_prompt {
-    PROMPT="<s>[INST]"
     local system_message="${SYSTEM_MESSAGE%$'\n'}"
     local input="${INPUT%$'\n'}"
     local question="${QUESTION%$'\n'}"
+    if [ -n "${ADD_BOS}" ]; then
+	PROMPT='<s>[INST]'
+    else
+	PROMPT='[INST]'
+    fi
     [ -n "${system_message}" ] && printf -v PROMPT "%s%s\n" "${PROMPT}" "${system_message}"
     [ -n "${question}" ] &&       printf -v PROMPT "%s\n%s" "${PROMPT}" "${question}"
     [ -n "${input}" ] &&          printf -v PROMPT "%s\n%s" "${PROMPT}" "${input}"
@@ -40,24 +48,13 @@ function prepare_priority {
     cap_ngl
 }
 
-function set_model_path {
-    if [ -z "${MODEL_PATH}" ];
-    then
-	MODEL_PATH="$(find_first_model \
-			 ${MODELS_DIRECTORY}/mixtral/mixtral-8x7b-instruct-v0.1.Q5_K_M.gguf \
-			 ${MODELS_DIRECTORY}/mixtral/mixtral-8x7b-instruct-v0.1.Q5_K_M.llamafile \
-			 ${MODELS_DIRECTORY}/mixtral/mixtral_7bx2_moe.Q3_K_M.gguf \
-		  )"
-    fi
-}
-
 function get_model_name {
-    set_model_path
+    cli_set_model_path ${MODELS_PATHS}
     basename "${MODEL_PATH}"
 }
 
 function prepare_model {
-    set_model_path
+    cli_set_model_path ${MODELS_PATHS}
     gpu_check 1.5
     prepare_prompt
     prepare_priority

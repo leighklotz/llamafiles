@@ -2,7 +2,7 @@
 
 (env; printf "\n%s\n" "${*}") >> /tmp/out-$$.txt
 
-SCRIPT_DIR=$(dirname $(realpath "${BASH_SOURCE}"))
+SCRIPT_DIR="$(dirname "$(realpath "${BASH_SOURCE}")")"
 LLM_SH="${SCRIPT_DIR}/../scripts/llm.sh"
 DEBUG=""
 
