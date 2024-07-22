@@ -94,14 +94,12 @@ parse_args ${@}
 
 
 ###
-### These variables are not settable via environment
+### These variables are not settable by environment variables
 ###
 PROCESS_QUESTION_ESCAPES=""
 MODEL_RUNNER="/usr/bin/env"
 RAW_FLAG=""
 ERROR_OUTPUT="/dev/null"
-# NO_PENALIZE_NL is gone and we only have --penalize-ml in llamafile 0.7
-#NO_PENALIZE_NL="--no-penalize-nl "
 NO_PENALIZE_NL=""
 
 
