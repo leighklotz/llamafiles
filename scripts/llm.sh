@@ -17,63 +17,41 @@ DO_STDIN="$(test -t 0 || echo $?)"
 function parse_args() {
     if [[ "${1}" == "-"* ]];
     then
-	while [[ $# -gt 0 ]]; do
+        while [[ $# -gt 0 ]]; do
             case $1 in
-		--help)
-		    printf "$0: %s\n" "${USAGE}" >> /dev/stderr
-		    exit 0
-		    ;;
-		--via)
-		    shift; VIA="$1" ;;
-		-m|--model-type)
-                    shift; MODEL_TYPE="$1" ;;
-		--fast)
-                    PRIORITY="speed" ;;
-		--long)
-                    PRIORITY="length" ;;
-		--temperature)
-                    shift; TEMPERATURE="$1" ;;
-		--verbose|-v)
-                    VERBOSE=1 ;;
-		--info)
-                    INFO=1 ;;
-		-c|--context-length)
-                    shift; CONTEXT_LENGTH="$1" ;;
-		--ngl)
-                    shift; NGL="$1" ;;
-		--n-predict)
-                    shift; N_PREDICT="$1" ;;
-		--grammar-file)
-                    shift; GRAMMAR_FILE="$1" ;;
-		--debug)
-                    ERROR_OUTPUT="/dev/stdout"; SILENT_PROMPT=""; DEBUG=1; LOG_DISABLE=" " ;; # LOG_DISABLE space requried to override default
-		--noerror)
-                    ERROR_OUTPUT="/dev/null" ;;
-		--stdin|--interactive|-i)
-                    DO_STDIN=1 ;;
-		--raw-input)
-		    RAW_FLAG="--raw-input"
-		    ;;
-		-e|--process-question-escapes)
-		    PROCESS_QUESTION_ESCAPES=1 ;;
-		--)
-                    # consumes rest of line
-                    shift; QUESTION=("$*")
-                    break
+                --help)
+                    printf "$0: %s\n" "${USAGE}" >> /dev/stderr
+                    exit 0
                     ;;
-		-*)
-                    log_and_exit 1 "Unrecognized option: $1"
-                    ;;
-		*)
-                    # consumes rest of line
-                    QUESTION=("$*")
-                    break
-                    ;;
+                --via) shift; VIA="$1" ;;
+                --model-type|-m) shift; MODEL_TYPE="$1" ;;
+		# Logging 
+                --info) INFO=1 ;;
+                --verbose|-v) VERBOSE=1 ;;
+                --debug) ERROR_OUTPUT="/dev/stdout"; SILENT_PROMPT=""; DEBUG=1; LOG_DISABLE=" " ;; # LOG_DISABLE space requried to override default
+                --noerror) ERROR_OUTPUT="/dev/null" ;;
+		# Generation optionsn
+                --n-predict) shift; N_PREDICT="$1" ;;
+                --temperature) shift; TEMPERATURE="$1" ;;
+                --grammar-file) shift; GRAMMAR_FILE="$1" ;;
+		# Input Options
+		--stdin|--interactive|-i) DO_STDIN=1 ;;
+                --raw-input) RAW_FLAG="--raw-input" ;;
+                --process-question-escapes|-e) PROCESS_QUESTION_ESCAPES=1 ;;
+		# these next four options only apply to --cli models
+                --fast) PRIORITY="speed" ;;
+                --long) PRIORITY="length" ;;
+                --context-length|-c) shift; CONTEXT_LENGTH="$1" ;;
+                --ngl) shift; NGL="$1" ;;
+		# prompt
+                --) shift; QUESTION=("$*"); break ;; # consumes rest of line
+                -*) log_and_exit 1 "Unrecognized option: $1" ;;
+                *) QUESTION=("$*") break ;; # consumes rest of line
             esac
             shift
-	done
+        done
     else
-	QUESTION=("$*")
+        QUESTION=("$*")
     fi
 }
 
@@ -82,7 +60,7 @@ parse_args ${@}
 ###
 ### Site Variables
 ### Set site variables from env.sh
-### 
+###
 [ -z "${IN_LLM_SH_ENV}" ] && [ -f "${SCRIPT_DIR}/env.sh" ] && source "${SCRIPT_DIR}/env.sh"
 
 ###
@@ -95,7 +73,7 @@ parse_args ${@}
 : "${N_PREDICT:=}"
 : "${SYSTEM_MESSAGE:=}" # used to default to "Answer the following user question:"
 : "${NGL:=}"
-: "${GPU:=auto}"		# auto|nvidia|omit
+: "${GPU:=auto}"        # auto|nvidia|omit
 : "${PRIORITY:=manual}" # speed|length|manual
 : "${DEBUG:=}"
 : "${VERBOSE:=}"
@@ -126,7 +104,7 @@ NO_PENALIZE_NL=""
 
 ###
 ### Load functions for API or CLI
-### 
+###
 VIA_DIRECTORY="$(realpath "${SCRIPT_DIR}/../via")"
 FUNCTIONS_PATH="$(realpath "${VIA_DIRECTORY}/functions.sh")"
 VIA_CLI_FUNCTIONS_PATH="$(realpath "${VIA_DIRECTORY}/cli/functions.sh")"
@@ -144,8 +122,8 @@ PROMPT_TEMP_FILE="$(mktemp_file "prompt")"
 # STDIN is never processed for escapes.
 function process_question_escapes() {
     if [ "${PROCESS_QUESTION_ESCAPES}" ]; then
-	log_verbose "Processing escape sequences in QUESTION"
-	printf -v QUESTION "%b" "$QUESTION"
+        log_verbose "Processing escape sequences in QUESTION"
+        printf -v QUESTION "%b" "$QUESTION"
     fi
 }
 
@@ -153,11 +131,11 @@ function process_question_escapes() {
 function process_stdin() {
     if [ -n "$DO_STDIN" ];
     then
-	if [ -t 0 ];
-	then
+        if [ -t 0 ];
+        then
             echo "Give input followed by Ctrl-D:"
-	fi
-	INPUT=$(cat)
+        fi
+        INPUT=$(cat)
     fi
 }
 
@@ -169,11 +147,11 @@ function set_verbose_debug {
     # Set verbose and debug last
     if [ "${DEBUG}" ] || [ "${INFO}" ] || [ "${VERBOSE}" ];
     then
-	log_info "Parameters: ngl=${NGL} context_length=${CONTEXT_LENGTH} est_len=${PROMPT_LENGTH_EST}"
+        log_info "Parameters: ngl=${NGL} context_length=${CONTEXT_LENGTH} est_len=${PROMPT_LENGTH_EST}"
     fi
     if [ "${DEBUG}" ];
     then
-	set -x
+        set -x
     fi
 }
 
@@ -182,12 +160,12 @@ function report_success_or_fail {
     status=$1
     if [ $status -ne 0 ];
     then
-	if [ "${ERROR_OUTPUT}" == "/dev/null" ];
-	then
-	    log_error "FAIL STATUS=$status: re-run with --debug"
-	else
-	    log_error "FAIL STATUS=$status: errors went to ${ERROR_OUTPUT}" > /dev/stderr
-	fi
+        if [ "${ERROR_OUTPUT}" == "/dev/null" ];
+        then
+            log_error "FAIL STATUS=$status: re-run with --debug"
+        else
+            log_error "FAIL STATUS=$status: errors went to ${ERROR_OUTPUT}" > /dev/stderr
+        fi
     fi
     return $STATUS
 }
@@ -195,8 +173,8 @@ function report_success_or_fail {
 # if --raw-input is specified, use stdin as the only text to send to the model
 function adjust_raw_flag {
     if [ -n "${RAW_FLAG}" ]; then
-	PROMPT="${INPUT}"
-	SYSTEM_MESSAGE=""
+        PROMPT="${INPUT}"
+        SYSTEM_MESSAGE=""
     fi
 }
 
