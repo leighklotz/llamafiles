@@ -30,7 +30,7 @@ function parse_args() {
                 --verbose|-v) VERBOSE=1 ;;
                 --debug) ERROR_OUTPUT="/dev/stdout"; SILENT_PROMPT=""; DEBUG=1; LOG_DISABLE=" " ;; # LOG_DISABLE space requried to override default
                 --noerror) ERROR_OUTPUT="/dev/null" ;;
-		# Generation optionsn
+		# Generation options
                 --n-predict) shift; N_PREDICT="$1" ;;
                 --temperature) shift; TEMPERATURE="$1" ;;
                 --grammar-file) shift; GRAMMAR_FILE="$1" ;;
@@ -46,7 +46,7 @@ function parse_args() {
 		# prompt
                 --) shift; QUESTION=("$*"); break ;; # consumes rest of line
                 -*) log_and_exit 1 "Unrecognized option: $1" ;;
-                *) QUESTION=("$*") break ;; # consumes rest of line
+                *) QUESTION=("$*"); break ;; # consumes rest of line
             esac
             shift
         done
@@ -68,24 +68,32 @@ parse_args ${@}
 ###
 : "${VIA:=cli}"
 : "${MODEL_TYPE:=mistral}"
+# Logging
+: "${INFO:=${VERBOSE}}"
+: "${VERBOSE:=}"
+: "${DEBUG:=}"
+: "${LOG_DISABLE:=--log-disable}" # use space ' ' to override
+: "${KEEP_PROMPT_TEMP_FILE:=ALL}" # "NONE"|"ERROR"|"ALL"
+# Old versions of llamafile sometimes need -silent-prompt or --no-display-prompt
+# edit this, or use FORCE_MODEL_RUNNER and a newer MODEL_RUNNER .
+: "${SILENT_PROMPT:=--silent-prompt --no-display-prompt}"
+# Geneation Options
 : "${TEMPERATURE:=}"
-: "${CONTEXT_LENGTH:=}"
 : "${N_PREDICT:=}"
 : "${SYSTEM_MESSAGE:=}" # used to default to "Answer the following user question:"
-: "${NGL:=}"
 : "${GPU:=auto}"        # auto|nvidia|omit
-: "${PRIORITY:=manual}" # speed|length|manual
-: "${DEBUG:=}"
-: "${VERBOSE:=}"
-: "${INFO:=${VERBOSE}}"
-: "${LOG_DISABLE:=--log-disable}" # use space ' ' to override
 : "${GRAMMAR_FILE:=}"
 : "${BATCH_SIZE:=}"
 : "${SEED:=-1}"
-: "${LLAMAFILE_MODEL_RUNNER:="$(realpath "${SCRIPT_DIR}/../lib/llamafile-0.6.2") -m"}"
-: "${FORCE_MODEL_RUNNER:=}"
+# Extra
 : "${LLM_ADDITIONAL_ARGS:=}"
-: "${KEEP_PROMPT_TEMP_FILE:=ALL}" # "NONE"|"ERROR"|"ALL"
+# todo: move these to CLI module
+: "${FORCE_MODEL_RUNNER:=}"
+: "${LLAMAFILE_MODEL_RUNNER:="$(realpath "${SCRIPT_DIR}/../lib/llamafile-0.6.2") -m"}"
+: "${NGL:=}"
+: "${CONTEXT_LENGTH:=}"
+: "${PRIORITY:=manual}" # speed|length|manual
+
 
 ###
 ### These variables are not settable via environment
@@ -94,9 +102,6 @@ PROCESS_QUESTION_ESCAPES=""
 MODEL_RUNNER="/usr/bin/env"
 RAW_FLAG=""
 ERROR_OUTPUT="/dev/null"
-# Old versions of llamafile sometimes need -silent-prompt or --no-display-prompt
-# edit this, or use FORCE_MODEL_RUNNER and a newer MODEL_RUNNER .
-: "${SILENT_PROMPT:=--silent-prompt --no-display-prompt}"
 # NO_PENALIZE_NL is gone and we only have --penalize-ml in llamafile 0.7
 #NO_PENALIZE_NL="--no-penalize-nl "
 NO_PENALIZE_NL=""
