@@ -102,7 +102,6 @@ RAW_FLAG=""
 ERROR_OUTPUT="/dev/null"
 NO_PENALIZE_NL=""
 
-
 ###
 ### Load functions for API or CLI
 ###
@@ -114,7 +113,6 @@ source "${FUNCTIONS_PATH}"
 
 ###
 ### Prompt and STDIN processing
-
 # todo: move this to where it is used
 PROMPT_TEMP_FILE="$(mktemp_file "prompt")"
 
