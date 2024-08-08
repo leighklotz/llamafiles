@@ -1,14 +1,5 @@
 #!/bin/bash
 
-VIA_API_CHAT_BASE="${VIA_API_CHAT_BASE:-http://localhost:5000}"
-VIA_API_CHAT_COMPLETIONS_ENDPOINT="${VIA_API_CHAT_BASE}/v1/chat/completions"
-VIA_API_TOKEN_COUNT_ENDPOINT="${VIA_API_CHAT_BASE}/v1/chat/token-count"
-VIA_API_MODEL_INFO_ENDPOINT="${VIA_API_CHAT_BASE}/v1/internal/model/info"
-VIA_API_MODEL_LIST_ENDPOINT="${VIA_API_CHAT_BASE}/v1/internal/model/list"
-VIA_API_LOAD_MODEL_ENDPOINT="${VIA_API_CHAT_BASE}/v1/internal/model/load"
-VIA_API_UNLOAD_MODEL_ENDPOINT="${VIA_API_CHAT_BASE}/v1/internal/model/unload"
-VIA_API_USE_GRAMMAR="${VIA_API_USE_GRAMMAR:-}"
-
 # Check if the script is being sourced or directly executed
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]];
 then
@@ -16,9 +7,23 @@ then
     exit 1
 fi
 
-LLM_LIB_DIR="$(realpath "${SCRIPT_DIR}/../lib")"
-LLM_MODELS_DIR="$(realpath "${SCRIPT_DIR}/../models")"
-SEED="${SEED:-NaN}"
+: "${VIA_API_CHAT_BASE:=http://localhost:5000}"
+VIA_API_CHAT_COMPLETIONS_ENDPOINT="${VIA_API_CHAT_BASE}/v1/chat/completions"
+VIA_API_TOKEN_COUNT_ENDPOINT="${VIA_API_CHAT_BASE}/v1/chat/token-count"
+VIA_API_MODEL_INFO_ENDPOINT="${VIA_API_CHAT_BASE}/v1/internal/model/info"
+VIA_API_MODEL_LIST_ENDPOINT="${VIA_API_CHAT_BASE}/v1/internal/model/list"
+VIA_API_LOAD_MODEL_ENDPOINT="${VIA_API_CHAT_BASE}/v1/internal/model/load"
+VIA_API_UNLOAD_MODEL_ENDPOINT="${VIA_API_CHAT_BASE}/v1/internal/model/unload"
+
+# LLM_LIB_DIR="$(realpath "${SCRIPT_DIR}/../lib")"
+# LLM_MODELS_DIR="$(realpath "${SCRIPT_DIR}/../models")"
+: "{SEED:=NaN}"
+
+# TODO: sampling order:  CFG -> Penalties -> top_k -> tfs_z -> typical_p -> top_p -> min_p -> temperature
+# todo: Sampling order appears to be a key differentiator for results from llamafile vs ooba but it's ununnvestigagted
+
+# --grammar-file support is spotty in non-gguf models so default to off
+: "${VIA_API_USE_GRAMMAR:=}"
 
 # fixme: some models support the system role API and some do not.
 # looks like MODEL_MODE must be "instruct" to use
@@ -35,7 +40,6 @@ SEED="${SEED:-NaN}"
 # dolphin-2.7-mixtral: yes
 USE_SYSTEM_ROLE="${USE_SYSTEM_ROLE:-}"
 
-#    innstruction_template: \"Alpaca\",
 TEMPLATE_SETTINGS="
     mode: \$mode,
     temperature_last: true,
@@ -83,10 +87,6 @@ function prepare_prompt {
     else
 	printf -v PROMPT "%s\n\n%s" "${QUESTION%$'\n'}" "${INPUT%$'\n'}"
     fi
-}
-
-function prepare_priority {
-    true
 }
 
 # fixme: does not accept options yet
