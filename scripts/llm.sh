@@ -2,11 +2,9 @@
 
 SCRIPT_DIR="$(dirname "$(realpath "${BASH_SOURCE}")")"
 
-USAGE="[-m|--model-type model-type] [--stdin|--interactive|-i] [--fast | --long] [--temperature temp] [--context-length|-c n] [--ngl n] [--n-predict n] [--debug] [--verbose|-v] [--grammar-file file.gbnf] [--] QUESTION*"
+USAGE="[--via api] | [ --via cli [-m|--model-type model-type] [--fast | --long] [--context-length|-c n] [--ngl n] [--n-predict n] ]
+       [--stdin|--interactive|-i] [--temperature temp] [--n-predict n] [--grammar-file file.gbnf] [--info] [--verbose|-v] [--debug] [--] QUESTION*"
 
-###
-### CLI arg parsing
-###
 ### If there are any args, require "--" or any non-hyphen word to terminate args and start question.
 ### Assume the whole args is a question if there is no hyphen to start.
 ### There may be no question, if all is contained in SYSTEM_MESSAGE and STDIN.
@@ -38,14 +36,14 @@ function parse_args() {
 		--stdin|--interactive|-i) DO_STDIN=1 ;;
                 --raw-input) RAW_FLAG="--raw-input" ;;
                 --process-question-escapes|-e) PROCESS_QUESTION_ESCAPES=1 ;;
-		# these next four options only apply to --cli models
+		# todo: these next four options only apply to --cli models so move them to via/cli
                 --fast) PRIORITY="speed" ;;
                 --long) PRIORITY="length" ;;
                 --context-length|-c) shift; CONTEXT_LENGTH="$1" ;;
                 --ngl) shift; NGL="$1" ;;
 		# prompt
                 --) shift; QUESTION=("$*"); break ;; # consumes rest of line
-                -*) log_and_exit 1 "Unrecognized option: $1" ;;
+                -*) echo "Unrecognized option: $1" >> /dev/stderr; exit 1 ;;
                 *) QUESTION=("$*"); break ;; # consumes rest of line
             esac
             shift
@@ -64,7 +62,7 @@ parse_args ${@}
 [ -z "${IN_LLM_SH_ENV}" ] && [ -f "${SCRIPT_DIR}/env.sh" ] && source "${SCRIPT_DIR}/env.sh"
 
 ###
-### Process CLI flags and environment variables
+### Process flags and environment variables
 ###
 : "${VIA:=cli}"
 : "${MODEL_TYPE:=mistral}"
@@ -96,16 +94,13 @@ parse_args ${@}
 
 
 ###
-### These variables are not settable via environment
+### These variables are not settable by environment variables
 ###
 PROCESS_QUESTION_ESCAPES=""
 MODEL_RUNNER="/usr/bin/env"
 RAW_FLAG=""
 ERROR_OUTPUT="/dev/null"
-# NO_PENALIZE_NL is gone and we only have --penalize-ml in llamafile 0.7
-#NO_PENALIZE_NL="--no-penalize-nl "
 NO_PENALIZE_NL=""
-
 
 ###
 ### Load functions for API or CLI
@@ -118,7 +113,6 @@ source "${FUNCTIONS_PATH}"
 
 ###
 ### Prompt and STDIN processing
-
 # todo: move this to where it is used
 PROMPT_TEMP_FILE="$(mktemp_file "prompt")"
 

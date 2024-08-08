@@ -15,14 +15,14 @@ function prepare_prompt {
     local input="${INPUT%$'\n'}"
     local question="${QUESTION%$'\n'}"
     if [ -n "${ADD_BOS}" ]; then
-	PROMPT='<s>[INST]'
+	PROMPT='<s>[INST] '
     else
-	PROMPT='[INST]'
+	PROMPT='[INST] '
     fi
     [ -n "${system_message}" ] && printf -v PROMPT "%s%s\n" "${PROMPT}" "${system_message}"
     [ -n "${question}" ] &&       printf -v PROMPT "%s\n%s" "${PROMPT}" "${question}"
     [ -n "${input}" ] &&          printf -v PROMPT "%s\n%s" "${PROMPT}" "${input}"
-                                  printf -v PROMPT "%s[/INST]" "${PROMPT}"
+                                  printf -v PROMPT "%s [/INST]" "${PROMPT}"
 }
 
 function prepare_priority {
