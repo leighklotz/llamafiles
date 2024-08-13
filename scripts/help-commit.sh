@@ -5,13 +5,14 @@ HELP_SH="help.sh"
 
 HELP_SH_OPTIONS=""
 GIT_DIFF_OPTIONS=""
-MESSAGE_LINE="oneline"
+MESSAGE_LINE=""
 
 function usage() {
 
     p=$(basename "$0")
-    echo "$p: [--oneline|--multiline] [git diff options] -- [help.sh options]"
-    echo '- specify --oneline or --multiline first, for commit message style'
+    echo "$p: [--oneline|--multiline|--pull-request|--git-commit]* [git diff options] [--] [help.sh options]"
+    echo '- specify --oneline or --multiline for message style; (might use GBNF schema).'
+    echo '- specify --pull-request or --git-commit, for message style'
     echo '- any next arguments until `--` are given to `git diff`'
     echo '- all after a `--` is given to `help.sh`'
     echo "- to change model, use \`$p -- -m $MODEL_TYPE\` or \`export \$MODEL_TYPE=$MODEL_TYPE\`"
@@ -25,8 +26,8 @@ while [[ $# -gt 0 ]]; do
 	    usage
 	    exit 1
 	    ;;
-	--oneline|--multiline|--one-line|--multi-line)
-	    MESSAGE_LINE=$(printf "%s" "$1" | sed -E -e 's/-//g')
+	--oneline|--multiline|--one-line|--multi-line|--pull-request|--git-commit)
+	    MESSAGE_LINE="${MESSAGE_LINE}$(printf "%s" "$1" | sed -E -e 's/-+/ /g')"
 	    shift
 	    ;;
         --)
@@ -41,15 +42,18 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
+: "${MESSAGE_LINE=one-line git commit}"
+
 # Set main parameters
 default_system_message="$(printf "%b" "You are an expert in Linux, Bash, Python, general programming, and related topics.\n")"
 export SYSTEM_MESSAGE="${SYSTEM_MESSAGE:-${default_system_message}}"
-PROMPT="Provide ${MESSAGE_LINE} git commit message for the changes listed in unified \`git diff\` below, in the form of a \`git commit\` command:\n"
+PROMPT="Provide a ${MESSAGE_LINE} message for the changes listed in unified \`git diff\` below, in the form of a \`git commit\` command or in the  form of text for a pull request:\n"
 
 if [ -n "${INHIBIT_GRAMMAR}" ];
 then	 
     GRAMMAR_FILE_FLAG=""
 else
+    # this is a bit broken with the CLI laxness and additive uses
     GRAMMAR_FILE_FLAG="--grammar-file ${SCRIPT_DIR}/git-commit-${MESSAGE_LINE}-grammar.gbnf"
 fi
 
