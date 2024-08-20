@@ -1,0 +1,31 @@
+$ file COCOA1090LOG.TXT
+COCOA1090LOG.TXT: ASCII text, with CR line terminators
+$ head COCOA1090LOG.TXT |machelp what is this file COCOA1090LOG.TXT
+The file COCOA1090LOG.TXT appears to be a log file related to aviation, specifically, it seems to contain flight logs for various aircraft. Each line in the file represents a flight and contains the following information:
+
+1. Date and time of the flight's start and end.
+2. A unique identifier (hexadecimal) for the flight.
+3. A tail number (hexadecimal), which is a unique identifier for the aircraft.
+4. Another tail number (hexadecimal), which seems to be a duplicate of the previous one.
+5. A three-letter code representing the aircraft model.
+6. A four-letter code representing the aircraft type.
+7. A numerical value, possibly representing the flight's duration or another related metric.
+
+Here are a few examples of the data from the log file, along with possible interpretations:
+
+- `10/01/23 12:35:38	10/01/23 12:40:58	a17140	N363G	N363G	170	S76`
+	+ Start time: 12:35:38 on 10/01/23
+	+ End time: 12:40:58 on 10/01/23
+	+ Tail number: a17140 (hexadecimal)
+	+ Aircraft model: N363G
+	+ Aircraft type: N363G
+	+ Flight duration: 5 minutes (assuming the numerical value represents duration)
+
+- `10/01/23 12:39:34	10/01/23 12:40:58	a02962	N104TQ	N104TQ	500	SR22`
+	+ Start time: 12:39:34 on 10/01/23
+	+ End time: 12:40:58 on 10/01/23
+	+ Tail number: a02962 (hexadecimal)
+	+ Aircraft model: N104TQ
+	+ Aircraft type: N104TQ
+	+ Flight duration: 14 minutes (assuming the numerical value represents duration)
+$
