@@ -1,0 +1,37 @@
+```
+^X-^F ~/.emacs.d/elpa/ack-1.10/ack.el
+^X-H
+M-X llm-ask
+how can I make `m-x ack` always ask for the search string and assume it without asking as it does in git mode?
+```
+---
+This Emacs Lisp code implements the `ack-el` package, which provides an interface to the `ack` (or similar) tool within Emacs. 
+
+Here's a breakdown of how to make `M-x ack` always ask for the search string and assume it without asking as it does in git mode:
+
+1. **Understanding the Default Behavior:**
+
+   - `M-x ack` by default uses the `ack-defaults-function` variable to determine how the command is constructed. 
+   - `ack-defaults-function` is set to `ack-quickgrep-defaults` by default, which offers three behaviors:
+      - `M-x ack`: Immediately starts searching for the word at point in the current project root.
+      - `C-u M-x ack`: Lets you edit the search term before running `ack`.
+      - `C-u C-u M-x ack`: Lets you choose the directory to search from.
+   - In Git mode (`git grep`), the behavior is different. It always prompts you for the search string.
+
+2. **Solution: Using `ack-legacy-defaults`:**
+
+   - The `ack-legacy-defaults` function is designed to behave more like the traditional `ack` command-line tool.
+   - It *always* prompts for a search string.
+
+3. **Code Modification:**
+
+   Set the `ack-defaults-function` variable to `ack-legacy-defaults`:
+
+   ```emacs-lisp
+   (setq ack-defaults-function 'ack-legacy-defaults)
+   ```
+
+   Add this line to your Emacs configuration file (usually `~/.emacs` or `~/.emacs.d/init.el`).
+
+
+Let me know if you have any more questions!
