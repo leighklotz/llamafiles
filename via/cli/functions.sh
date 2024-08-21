@@ -214,10 +214,13 @@ function cli_set_model_path {
 }
 
 function cap_ngl {
-    if [ "$GPU" != "none" ] && [ -n "$GPU" ] && [ -n "${NGL}" ] && [ "${NGL}" -gt "${MAX_NGL_EST}" ];
-    then
-        log_verbose "* Capping $NGL at $MAX_NGL_EST"
-        NGL=$MAX_NGL_EST
+    if [ "$GPU" != "metal" ];
+       then
+	   if [ "$GPU" != "none" ] && [ -n "$GPU" ] && [ -n "${NGL}" ] && [ "${NGL}" -gt "${MAX_NGL_EST}" ];
+	   then
+               log_verbose "* Capping $NGL at $MAX_NGL_EST"
+               NGL=$MAX_NGL_EST
+	   fi
     fi
 }
 
@@ -236,6 +239,10 @@ function set_threads() {
 
 function gpu_check {
     local layer_per_gb="$1"
+
+    if [ "$GPU" == 'metal' ]; then
+	return 0
+    fi
 
     if [ -z "${layer_per_gb}" ];
     then
