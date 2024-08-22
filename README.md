@@ -53,7 +53,7 @@ $ write.sh write.sh find and list empty directories in .
 $ summarize https://graflex.org --via api | ask nuextract '{ "link": "", "title": "", "summary": "", "keywords": ["", "", ...] }'
 ```
 
-More examples can be found below and in the [examples](https://github.com/leighklotz/llamafiles/tree/main/examples) directory.
+More examples can be found below and in the [examples](examples) directory.
 
 ## help.sh usage and examples
 USAGE="[-m|--model-type model-type] [--stdin|--interactive|-i] [--fast | --long] [--temperature temp] [--context-length|-c n] [--ngl n] [--n-predict n] [--debug] [--verbose] [--] QUESTION*"
@@ -142,7 +142,7 @@ I hope that helps! Let me know if you have any other questions.
 klotz@rpi5:~ $ 
 ```
 
-More examples are in the [examples](https://github.com/leighklotz/llamafiles/tree/main/examples) directory.
+More examples are in the [examples](examples) directory.
 
 ## help-commit.sh usage and examples
 
@@ -229,7 +229,7 @@ $ summarize https://graflex.org --via api | ask nuextract '{ "link": "", "title"
 
 
 # llm_el for Emacs
-There are many LLM integrations for Emacs; mine is here: (llm_el/)[llm_el/].
+There are many LLM integrations for Emacs; mine is here: [llm_el](llm_el).
 
 # LLamafile binaries
 Get these files from (https://github.com/Mozilla-Ocho/llamafile)[https://github.com/Mozilla-Ocho/llamafile].
@@ -263,7 +263,7 @@ These go in `models/*`:
 - rocket: `rocket-3b.Q4_K_M.llamafile`
 
 # Scripts and Files
-These files are in [scripts/](scripts/). You might want to symlink some to your bin directory.
+These files are in [scripts](scripts). You might want to symlink some to your bin directory.
 You can also copy [scripts/env.sh.example](scripts/env.sh.example) to `scripts/env.sh` and edit it to set default values.
 
 ## base
