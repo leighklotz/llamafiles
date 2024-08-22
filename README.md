@@ -204,6 +204,27 @@ The nuextract model is limited to 2048 token context, so it's best used in pipel
 
 ```bash
 $ summarize https://graflex.org --via api | ask nuextract '{ "link": "", "title": "", "summary": "", "keywords": ["", "", ...] }'
+
+{
+    "link": "Graflex.org",
+    "title": "Graflex.org is a website dedicated to Graflex Speed Graphics and other classic large-format cameras",
+    "summary": "The site aims to promote their use and preservation",
+    "keywords": [
+        "Graflex",
+        "Speed Graphics",
+        "classic",
+        "large-format",
+        "cameras",
+        "photography",
+        "Articles",
+        "Help Board",
+        "Q&A",
+        "Camera Information",
+        "Technical Information",
+        "Related Websites",
+        "News"
+    ]
+}
 ```
 
 
