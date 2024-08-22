@@ -51,6 +51,7 @@ $ codeblock jq cat foo.jq | help.sh '"Explain this:'
 $ codeblock xslt cat redir/target.xslt | help.sh explain
 $ write.sh write.sh find and list empty directories in .
 $ summarize https://graflex.org --via api | ask nuextract '{ "link": "", "title": "", "summary": "", "keywords": ["", "", ...] }'
+$ ls -l | ask nuextract '[{ "filename": "", "metadata": { ... } }, ...]'
 ```
 
 More examples can be found below and in the [examples](examples) directory.

@@ -1,0 +1,116 @@
+$  ls -l | ask nuextract '[{ "filename": "", "metadata": { ... } }, ...]'
+
+[
+  {
+    "filename": "LICENSE",
+    "metadata": {
+      "mode": "-rw-r--r--@",
+      "uid": "klotz",
+      "gid": "staff",
+      "size": "34523",
+      "mtime": "Mar 20 14:33"
+    }
+  },
+  {
+    "filename": "README.md",
+    "metadata": {
+      "mode": "-rw-r--r--",
+      "uid": "klotz",
+      "gid": "staff",
+      "size": "20546",
+      "mtime": "Aug 22 13:54"
+    }
+  },
+  {
+    "filename": "examples",
+    "metadata": {
+      "mode": "drwxr-xr-x",
+      "uid": "klotz",
+      "gid": "staff",
+      "size": "1664",
+      "mtime": "Aug 22 11:40"
+    }
+  },
+  {
+    "filename": "lib",
+    "metadata": {
+      "mode": "drwxr-xr-x",
+      "uid": "klotz",
+      "gid": "staff",
+      "size": "1664",
+      "mtime": "Mar 20 14:51"
+    }
+  },
+  {
+    "filename": "llm_el",
+    "metadata": {
+      "mode": "drwxr-xr-x",
+      "uid": "klotz",
+      "gid": "staff",
+      "size": "192",
+      "mtime": "Aug  8 13:49"
+    }
+  },
+  {
+    "filename": "models",
+    "metadata": {
+      "mode": "drwxr-xr-x",
+      "uid": "klotz",
+      "gid": "staff",
+      "size": "576",
+      "mtime": "Aug 22 09:35"
+    }
+  },
+  {
+    "filename": "private",
+    "metadata": {
+      "mode": "drwxr-xr-x",
+      "uid": "klotz",
+      "gid": "staff",
+      "size": "96",
+      "mtime": "Jan 11  2024"
+    }
+  },
+  {
+    "filename": "scripts",
+    "metadata": {
+      "mode": "drwxr-xr-x",
+      "uid": "klotz",
+      "gid": "staff",
+      "size": "1408",
+      "mtime": "Aug 22 11:57"
+    }
+  },
+  {
+    "filename": "sessions",
+    "metadata": {
+      "mode": "drwxr-xr-x",
+      "uid": "klotz",
+      "gid": "staff",
+      "size": "3",
+      "mtime": "Apr 23 11:41"
+    }
+  },
+  {
+    "filename": "tests",
+    "metadata": {
+      "mode": "drwxr-xr-x",
+      "uid": "klotz",
+      "gid": "staff",
+      "size": "352",
+      "mtime": "Aug  8 13:49"
+    }
+  },
+  {
+    "filename": "via",
+    "metadata": {
+      "mode": "drwxr-xr-x",
+      "uid": "klotz",
+      "gid": "staff",
+      "size": "384",
+      "mtime": "Aug  8 16:41"
+    }
+  }
+]
+
+$
