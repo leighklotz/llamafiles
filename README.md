@@ -228,6 +228,38 @@ $ summarize https://graflex.org --via api | ask nuextract '{ "link": "", "title"
 }
 ```
 
+With the nuextract model  limited (DWIM)[https://en.wikipedia.org/wiki/DWIM] seems to work for the JSON structure.
+Feel free to try with regular instruct-trained models as well.
+
+```bash
+$ git log -3 | ask nuextract 'appropriate JSON structure'
+
+{
+    "commit": [
+        {
+            "sha": "dbf2ab43732fc364539bb5d7fcc5f7c0f16ddac9",
+            "author": "Leigh L. Klotz, Jr.",
+            "date": "Thu Aug 22 15:03:28 2024 -0700",
+            "message": "merge pull request #9 from leighklotz/nemo"
+        },
+        {
+            "sha": "ea62e09c37b599c9c1067f7dc507fecbec7226f9",
+            "author": "Leigh Klotz",
+            "date": "Thu Aug 22 15:02:32 2024 -0700",
+            "message": "nemo: split out nemo fom mistral"
+        },
+        {
+            "sha": "4c4202f3bd93f459add366f0094890d615a9c8fd",
+            "author": "Leigh Klotz",
+            "date": "Thu Aug 22 14:11:35 2024 -0700",
+            "message": "nuextract: add example with 'ls'"
+        }
+    ]
+}
+```
+
+
+
 
 # llm_el for Emacs
 There are many LLM integrations for Emacs; mine is here: [llm_el](llm_el).
