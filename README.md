@@ -50,6 +50,7 @@ $ help-commit --oneline
 $ codeblock jq cat foo.jq | help.sh '"Explain this:'
 $ codeblock xslt cat redir/target.xslt | help.sh explain
 $ write.sh write.sh find and list empty directories in .
+$ summarize https://graflex.org --via api | ask nuextract '{ "link": "", "title": "", "summary": "", "keywords": ["", "", ...] }'
 ```
 
 More examples can be found below and in the [examples](https://github.com/leighklotz/llamafiles/tree/main/examples) directory.
@@ -178,7 +179,31 @@ cd /path/to/your/repo
 # Show the commit message for the commit with SHA-1 70eab9e
 git show 70eab9e --pretty=%s</s>
 $ 
+  ```
+
+# ask examples
+
+Ask uses a brief system prompt and allows you to conveniently/ direct your query to a specific local model, or just use
+`any` for the model name in the `-via api` case.
+
 ```
+ask phi3 2+3=
+```
+
+or
+```
+export VIA=api
+ask any 2+3=
+```
+
+## ask nuextract JSON
+You can use ask with the `nuextract` model, which provides its own system prompt.
+
+```
+$ summarize https://graflex.org --via api | ask nuextract '{ "link": "", "title": "", "summary": "", "keywords": ["", "", ...] }'
+```
+
+The nuextract model is limited to 2048 token context, so it's best used in pipelines.
 
 # llm_el for Emacs
 There are many LLM integrations for Emacs; mine is here: (llm_el/)[llm_el/].
@@ -365,6 +390,9 @@ Many of these are better than this package. Please try them out.
 
 ## Compatible Tools
 - https://github.com/oobabooga/text-generation-webui
+
+## Special-purpose models
+- https://huggingface.co/numind/NuExtract
 
 # TODO
 - prompt caching
