@@ -1,4 +1,4 @@
-root   ::= codeblock "json"? object codeblock
+root   ::= codeblock? "json"? object codeblock?
 
 object ::= "{" ws ( string ":" ws value ("," ws string ":" ws value)* )? "}" ws
 

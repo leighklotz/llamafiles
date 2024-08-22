@@ -6,6 +6,7 @@ HELP_SH="help.sh"
 HELP_SH_OPTIONS=""
 GIT_DIFF_OPTIONS=""
 MESSAGE_LINE=""
+INHIBIT_GRAMMAR=1		# it's not working
 
 function usage() {
 

@@ -1,0 +1,67 @@
+$ help.sh -i how do i troubleshoot this
+Give input followed by Ctrl-D:
+```bash
+$ sudo apt upgrade
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+Calculating upgrade... Done
+The following packages were automatically installed and are no longer required:
+  linux-headers-5.15.0-118 linux-headers-5.15.0-118-generic
+  linux-image-5.15.0-118-generic linux-modules-5.15.0-118-generic
+  linux-modules-extra-5.15.0-118-generic
+Use 'sudo apt autoremove' to remove them.
+The following packages have been kept back:
+  cuda cuda-drivers python3-update-manager update-manager update-manager-core
+0 upgraded, 0 newly installed, 0 to remove and 5 not upgraded.
+```
+
+on Ubuntu 22.04.4
+1. **Understand the Output:**
+   - Your system has no packages to upgrade at the moment. The packages listed under "The following packages have been kept back:" are not being upgraded because they are in a transitional state or there's an issue preventing their upgrade.
+
+2. **Troubleshooting Steps:**
+
+   - **Check for Held Packages:**
+     You can check which packages are held (kept back) with:
+     ```
+     sudo apt-mark showhold
+     ```
+     If any packages are listed, they might be preventing other upgrades. You can unhold them with:
+     ```
+     sudo apt-mark unhold <package_name>
+     ```
+
+   - **Update and Upgrade Again:**
+     After unholding any packages, try updating and upgrading again:
+     ```
+     sudo apt update
+     sudo apt upgrade
+          ```
+
+   - **Check for Dependency Issues:**
+     If you still have held packages or the upgrade process is failing, there might be dependency issues. You can check for broken dependencies with:
+     ```
+     sudo apt install -f
+     ```
+     This command attempts to fix broken dependencies automatically.
+
+   - **Check for Transitional Packages:**
+     Some packages might be kept back because they are transitional packages introduced during the upgrade process. You can check for these with:
+     ```
+     sudo apt-mark showtrans
+     ```
+     If transitional packages are listed, you might need to force their upgrade or remove them manually.
+
+3. **Manually Upgrade Kept-Back Packages:**
+   If you want to upgrade the kept-back packages manually, you can do so with:
+   ```
+   sudo apt upgrade <package_name>
+   ```
+   Replace `<package_name>` with the name of the package you want to upgrade.
+
+4. **Clean Up:**
+   After upgrading, remember to clean up any unused packages with:
+   ```
+   sudo apt autoremove
+   ```
