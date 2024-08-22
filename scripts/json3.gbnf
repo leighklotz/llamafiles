@@ -1,0 +1,16 @@
+root   ::= codeblock "json"? object codeblock
+
+object ::= "{" ws ( string ":" ws value ("," ws string ":" ws value)* )? "}" ws
+
+value  ::= object | array | string | number | ("true" | "false" | "null") ws
+
+array  ::= "[" ws ( value ("," ws value)* )? "]" ws
+
+string ::= "\"" ( [^"] )* "\"" ws
+
+number ::= ("-"? ([0-9] | [1-9] [0-9]*)) ("." [0-9]+)? ([eE] [-+]? [0-9]+)? ws
+
+codeblock ::= "```"
+
+
+ws ::= ([ \t\n] ws)?
