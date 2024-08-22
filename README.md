@@ -225,7 +225,7 @@ You can also copy [scripts/env.sh.example](scripts/env.sh.example) to `scripts/e
 - help.sh - CLI for Linux help - cann't be shortened to 'help' in bash
 - ask.sh - like 'help.sh -m $1' - can be shortened to 'ask' in bash
 - machelp.sh - CLI for Mac help
-- summarize.sh - CLI to summarize a hyperlink
+- summarize.sh - CLI to summarize a hyperlink / use '-' for stdin
 - help-commit.sh - CLI to run `git diff` and produce a commit message
 - summarize-directory-files.sh - summarize directory files as markdown
 

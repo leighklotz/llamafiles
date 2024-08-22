@@ -13,7 +13,9 @@ if [ -z "$LINK" ]; then
     exit 1
 fi
 
-if command -v lynx &> /dev/null; then
+if [ "${LINK}" == "-" ]; then
+    LYNX="cat"
+elif command -v lynx &> /dev/null; then
     LYNX="lynx --dump --nolist"
 elif command -v links &> /dev/null; then
     LYNX="links -codepage utf-8 -force-html -width 72 -dump"
