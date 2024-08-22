@@ -1,15 +1,7 @@
 #!/bin/bash
 
-MODELS_PATHS="${MODELS_DIRECTORY}/mistral/Mistral-7B-Instruct-v0.3-Q6_K.gguf \
- ${MODELS_DIRECTORY}/mistral/Mistral-7B-Instruct-v0.3-Q4_K_M.gguf \
- ${MODELS_DIRECTORY}/mistral/mistral-7b-instruct-v0.2.Q6_K.gguf \
- ${MODELS_DIRECTORY}/mistral/mistral-7b-instruct-v0.2.Q5_K_M.llamafile \
- ${MODELS_DIRECTORY}/mistral/mistral-7b-instruct-v0.2.Q5_K_M.gguf \
- ${MODELS_DIRECTORY}/mistral/mistral-7b-instruct-v0.2.Q4_K_M.llamafile \
- ${MODELS_DIRECTORY}/mistral/mistral-7b-instruct-v0.2.Q4_K_M.gguf \
- ${MODELS_DIRECTORY}/mistral/mistral-7b-instruct-v0.1-Q4_K_M-main.llamafile \
- ${MODELS_DIRECTORY}/mistral/mistral-7b-instruct-v0.2.Q3_K_M.llamafile \
- ${MODELS_DIRECTORY}/mistral/mistral-7b-instruct-v0.2.Q3_K_S.llamafile"
+MODELS_PATHS="${MODELS_DIRECTORY}/nemo/Mistral-Nemo-Instruct-2407-Q6_K_L.gguf \
+"
 
 # Check if the script is being sourced or directly executed
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
