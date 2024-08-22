@@ -232,7 +232,7 @@ $ summarize https://graflex.org --via api | ask nuextract '{ "link": "", "title"
 There are many LLM integrations for Emacs; mine is here: (llm_el/)[llm_el/].
 
 # LLamafile binaries
-Get these files from (https://github.com/Mozilla-Ocho/llamafile)[(https://github.com/Mozilla-Ocho/llamafile].
+Get these files from (https://github.com/Mozilla-Ocho/llamafile)[https://github.com/Mozilla-Ocho/llamafile].
 They go in `lib/`:
 
 - `llamafile-0.2.1.zip`
