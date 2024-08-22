@@ -1,6 +1,6 @@
 # LLM Help CLI for Linux
 
-Using https://github.com/Mozilla-Ocho/llamafile and https://github.com/jart models and scripts.
+Using https://github.com/Mozilla-Ocho/llamafile and https://github.com/jart models and scripts, and offering support for https://github.com/oobabooga/text-generation-webui and other API providers.
 
 This repository provides an LLM Help CLI for Linux and Mac systems to provide help, summarization, coding assistance, system information queries, image renaming, etc. Similar to https://justine.lol/oneliners/ and other resources.
 
@@ -411,10 +411,13 @@ Many of these are better than this package. Please try them out.
 ### Similar Emacs Packages
 - https://github.com/chep/copilot-chat.el
 
-## Compatible Tools
+## Compatible LLM Inference Providers
 - https://github.com/oobabooga/text-generation-webui
+- https://github.com/ggerganov/llama.cpp
+- https://github.com/Mozilla-Ocho/llamafile
+- OpenAI API - partial support
 
-## Special-purpose models
+## Special-purpose LLM Inference models
 - https://huggingface.co/numind/NuExtract
 
 # TODO
