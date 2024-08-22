@@ -196,14 +196,16 @@ export VIA=api
 ask any 2+3=
 ```
 
-## ask nuextract JSON
+## ask nuextract to convert to JSON
 You can use ask with the `nuextract` model, which provides its own system prompt.
 
-```
+
+The nuextract model is limited to 2048 token context, so it's best used in pipelines, e.g.:
+
+```bash
 $ summarize https://graflex.org --via api | ask nuextract '{ "link": "", "title": "", "summary": "", "keywords": ["", "", ...] }'
 ```
 
-The nuextract model is limited to 2048 token context, so it's best used in pipelines.
 
 # llm_el for Emacs
 There are many LLM integrations for Emacs; mine is here: (llm_el/)[llm_el/].
