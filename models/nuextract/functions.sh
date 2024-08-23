@@ -9,8 +9,8 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
 fi
 
 # override system message
-#SYSTEM_MESSAGE="Given the following JSON template and text, return a version of the JSON template filled in with the relevant data. Don't return anything besides the filled in JSON content."
-SYSTEM_MESSAGE="Given the following JSON template and text, return a version of the JSON template filled in with the relevant data:"
+SYSTEM_MESSAGE="Given the following JSON template and text, return a version of the JSON template filled in with the relevant data. Don't return anything besides the filled in JSON content."
+#SYSTEM_MESSAGE="Given the following JSON template and text, return a version of the JSON template filled in with the relevant data:"
 
 function prepare_prompt {
     printf -v PROMPT '<|input|>
@@ -45,8 +45,7 @@ function prepare_model {
     export LLM_ADDITIONAL_ARGS="${LLM_ADDITIONAL_ARGS} -r <|end-output|>"
 }
 
-# by overriding this function from via/cli/functions.sh
-
+# override this function from via/cli/functions.sh
 function fixup_output {
-    sed -e 's/\<\|end-output\|\>//'
+    sed -e 's/<|end-output|>//'
 }
