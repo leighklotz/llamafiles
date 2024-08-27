@@ -1,0 +1,61 @@
+$ uname -v
+Darwin Kernel Version 23.6.0: Mon Jul 29 21:16:46 PDT 2024; root:xnu-10063.141.2~1/RELEASE_ARM64_T8112
+$ system_profiler -detailLevel mini -json SPDisplaysDataType
+{
+  "SPDisplaysDataType" : [
+    {
+      "_name" : "Apple M2",
+      "spdisplays_mtlgpufamilysupport" : "spdisplays_metal3",
+      "spdisplays_ndrvs" : [
+        {
+          "_name" : "Color LCD",
+          "_spdisplays_display-product-id" : "a052",
+          "_spdisplays_display-serial-number" : "fd626d62",
+          "_spdisplays_display-vendor-id" : "610",
+          "_spdisplays_display-week" : "0",
+          "_spdisplays_display-year" : "0",
+          "_spdisplays_displayID" : "1",
+          "_spdisplays_pixels" : "3420 x 2224",
+          "_spdisplays_resolution" : "1710 x 1112 @ 60.00Hz",
+          "spdisplays_ambient_brightness" : "spdisplays_yes",
+          "spdisplays_connection_type" : "spdisplays_internal",
+          "spdisplays_display_type" : "spdisplays_built-in-liquid-retina",
+          "spdisplays_main" : "spdisplays_yes",
+          "spdisplays_mirror" : "spdisplays_off",
+          "spdisplays_online" : "spdisplays_yes",
+          "spdisplays_pixelresolution" : "spdisplays_2560x1664Retina"
+        }
+      ],
+      "spdisplays_vendor" : "sppci_vendor_Apple",
+      "sppci_bus" : "spdisplays_builtin",
+      "sppci_cores" : "10",
+      "sppci_device_type" : "spdisplays_gpu",
+      "sppci_model" : "Apple M2"
+    }
+  ]
+}
+$ system_profiler -detailLevel mini -json SPDisplaysDataType | help.sh jq extract spci_model
+1. Extract `spci_model` using `jq`:
+
+```bash
+jq -r '.SPDisplaysDataType[0].sppci_model' file.json
+```
+
+2. Or, if you want to extract the model along with the name:
+
+```bash
+jq -r '.SPDisplaysDataType[0]._name + " - " + .SPDisplaysDataType[0].sppci_model' file.json
+```
+
+Both commands will output:
+
+```
+Apple M2 - Apple M2
+```
+$ system_profiler -detailLevel mini -json SPDisplaysDataType | jq -r '.SPDisplaysDataType[0].sppci_model' 
+Apple M2
+$ system_profiler -detailLevel mini -json SPDisplaysDataType | jq -r '.SPDisplaysDataType[0]._name + " - " + .SPDisplaysDataType[0].sppci_model' file.json
+jq: error: Could not open file file.json: No such file or directory
+$ system_profiler -detailLevel mini -json SPDisplaysDataType | jq -r '.SPDisplaysDataType[0]._name + " - " + .SPDisplaysDataType[0].sppci_model' 
+Apple M2 - Apple M2
+$ 

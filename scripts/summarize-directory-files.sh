@@ -1,7 +1,10 @@
-#!/bin/bash
+#!/bin/bash 
 
 SCRIPT_DIR="$(dirname "$(realpath "${BASH_SOURCE}")")"
 
+
+# works poorly
+export INHIBIT_GRAMMAR=1
 
 if [ -n "${INHIBIT_GRAMMAR}" ];
 then
@@ -18,14 +21,15 @@ fi
 HELP_OPTIONS=""
 
 NLINES_=10
+FILES=${*}
+: "${FILES:=*}"
 
 
 echo "# Files in $(basename $(pwd))"
 
-for FN in *
+for FN in ${FILES}
 do
-    if [ -f "${FN}" ] ;
-    then
+    if [ -f "${FN}" ] ; then
 	FILETYPE="$(file "${FN}")"
 	if [[ "${FILETYPE}" == "* ELF *" ]];
 	then
@@ -35,16 +39,16 @@ do
 	    NLINES=${NLINES_}
 	fi
 
-	PROMPT="For the file named \`${FN}\` and whose filetype is \`${FILETYPE}\` and whose first ${NLINES} lines are shown below, output markdown link in the form \`- [title](${FN}): brief descriptionn\` with \`title\` being a short title for the file, followed by a very brief description of the file contents."
+	PROMPT="For the file named \`${FN}\` and whose filetype is \`${FILETYPE}\` and whose first ${NLINES} lines are shown below, output markdown link in the form \`- [title](${FN}): brief description\` with \`title\` being a short title for the file, followed by a very brief description of the file contents."
 	echo -n "- "
 	# set -x
-	if [[ "${FILETYPE}" =~ text ]];
-	   then
-	       "${SCRIPT_DIR}/codeblock.sh" '' head -"${NLINES}" "${FN}" | "${SCRIPT_DIR}/help.sh" ${HELP_OPTIONS} ${GRAMMAR_FILE_FLAG} -e -- "${PROMPT}" || exit 1
+	if [[ "${FILETYPE}" =~ text ]]; then
+	    "${SCRIPT_DIR}/codeblock.sh" '' head -"${NLINES}" "${FN}" | "${SCRIPT_DIR}/help.sh" ${HELP_OPTIONS} ${GRAMMAR_FILE_FLAG} -e -- "${PROMPT}" || exit 1
 	else
 	    echo "Not a text file: ${FN}" | "${SCRIPT_DIR}/help.sh" ${GRAMMAR_FILE_FLAG} -e -- "${PROMPT}" || exit 1
+	    bash -i
 	fi
     fi
 done
 
-rm "${GBNF_FILE}"
+[ -n "${GBNF_FILE}" ] && rm "${GBNF_FILE}"
