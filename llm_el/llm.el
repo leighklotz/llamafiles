@@ -86,12 +86,12 @@
   (let ((llm-write-buffer-name  t))	;insert into current buffer
     (llm-region-internal "write" llm-default-via llm-default-model-type (llm-mode-text-type) prompt start end llm-write-buffer-name nil)))
 
-(defun llm-complete (start end)
+(defun llm-complete (prompt start end)
   "Insert some inferred text based on current region to point in the current buffer. "
   ;; todo: ignores end and uses (point); should have good default behavior and get bounds better.
-  (interactive "r")
+  (interactive "sPrompt: \nr")
   (let ((n-predict 32))			;fixme ctrl-u arg?
-    (llm-complete-internal llm-default-via llm-default-model-type start end n-predict)))
+    (llm-complete-internal prompt llm-default-via llm-default-model-type start end n-predict)))
 
 (defun llm-write (prompt start end)
   "Writes a new buffer based on the prompt and current region, and the output of the llm-rewrite-script-path command"
@@ -140,6 +140,12 @@
 		   prompt)))
     (llm-ask prompt start end)))
 
+(defun llm-infer-command-internal (&rest args)
+  (concat
+   llm-rewrite-script-path
+   " "
+   (mapconcat #'(lambda (arg) (shell-quote-argument (format "%s" arg))) args " ")))
+
 ;;; Interface to rewrite.sh
 (defun llm-region-internal (use-case via model-type major-mode-name user-prompt start end output-buffer-name replace-p)
   "Send the buffer or current region as the output of the llm-rewrite-script-path command based on the prompt and current region and either replaces the region or uses a specified buffer, based on output-buffer-name and replace-p.
@@ -147,31 +153,21 @@ See [shell-command-on-region] for interpretation of output-buffer-name."
   ;; Send the buffer or selected region as a CLI input to 'llm.sh'
   (let ((start (or start (point-min)))
 	(end (or end (point-max)))
-	(command (format "%s %s %s %s %s %s"
-			 llm-rewrite-script-path
-			 (shell-quote-argument use-case)
-			 (shell-quote-argument (format "%s" via))
-			 (shell-quote-argument (format "%s" model-type))
-			 (shell-quote-argument major-mode-name)
-			 (shell-quote-argument user-prompt)))
+	(command (llm-infer-command-internal use-case model-type via major-mode-name user-prompt))
 	(display-error-buffer t)
 	(region-noncontiguous-p nil))
     ;; many args, make sure to call properly
-    (message "llm-region-internal %s %s[%s,%s] replace-p=%s output-buffer-name=%s" (buffer-name) start end command replace-p output-buffer-name)
+    (message "llm-region-internal: %s %s[%s,%s] replace-p=%s output-buffer-name=%s" (buffer-name) start end command replace-p output-buffer-name)
     (let ((max-mini-window-height 0.0))
       (shell-command-on-region start end command output-buffer-name replace-p llm-error-buffer-name display-error-buffer region-noncontiguous-p))))
 
 
-(defun llm-complete-internal (model-type start end n-predict)
+(defun llm-complete-internal (prompt via model-type start end n-predict)
   ;; Send the buffer or selected region as a CLI input to 'llm.sh'
-  (let ((command (format "%s %s %s %d"
-			 llm-rewrite-script-path
-			 (shell-quote-argument "complete")
-			 (shell-quote-argument (format "%s" model-type))
-			 n-predict))
-	(display-error-buffer t)
-	(region-noncontiguous-p nil))
-    (message "%s" command)
+  (let* ((command (llm-infer-command-internal "complete" model-type via (llm-mode-text-type) n-predict prompt))
+	 (display-error-buffer t)
+	 (region-noncontiguous-p nil))
+    (message "llm-commplete-internal: %s" command)
     (let ((max-mini-window-height 0.0)
 	  (old-text (buffer-substring start end))
 	  (new-end))
@@ -209,6 +205,8 @@ See [shell-command-on-region] for interpretation of output-buffer-name."
 (global-set-key (kbd "M-s $") 'llm-summarize-buffer)
 (global-set-key (kbd "M-s r") 'llm-rewrite)
 (global-set-key (kbd "M-s x") 'llm-explain-output)
+(global-set-key (kbd "M-s i") 'llm-insert)
+(global-set-key (kbd "M-s c") 'llm-complete)
 
 
 (provide 'llm)

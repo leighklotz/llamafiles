@@ -1,18 +1,21 @@
 #!/bin/bash
 
-(env; printf "\n%s\n" "${*}") >> /tmp/out-$$.txt
-
 SCRIPT_DIR="$(dirname "$(realpath "${BASH_SOURCE}")")"
 LLM_SH="${SCRIPT_DIR}/../scripts/llm.sh"
-DEBUG=""
+: "${DEBUG:=}"
+if [ -n "${DEBUG}" ]; then
+    (env; printf "\n%s\n" "${*}")
+fi
 
-# usage: llm-emacs-helper.sh model-type use-case major-mode WORDS WORDS WORDS
-# usage: llm-emacs-helper.sh model-type use-case major-mode 'WORDS() `WORDS` WORDS'
+# usage: llm-emacs-helper.sh use-case model-type via major-mode WORDS WORDS WORDS
+# usage: llm-emacs-helper.sh use-case model-type via major-mode 'WORDS() `WORDS` WORDS'
 # stdin is region of input
 # e.g. cat foo.sh | ./llm-emacs-helper.sh ask mixtral bash make this arg parsing better
+
+
 USE_CASE=$1; shift
-VIA=$1; shift
 MODEL_TYPE=$1; shift
+VIA=$1; shift
 
 MAJOR_MODE=""
 PROMPT=""
@@ -20,6 +23,9 @@ RAW_FLAG=""
 N_PREDICT=""
 
 case "$USE_CASE" in
+    -h) usage
+	exit 0
+	;;
     rewrite)
 	# args: major_mode prompt*
 	MAJOR_MODE=$1; shift; PROMPT="${*}"
@@ -51,10 +57,9 @@ case "$USE_CASE" in
 	;;
 
     complete)
-	# args: n_predict
-	N_PREDICT=$1; shift
-	printf -v SYSTEM_MESSAGE ""
-	printf -v PROMPT ""
+	# args: major_mode n_predict prompt*
+	N_PREDICT=$1; shift; PROMPT="${*}"
+	export SYSTEM_MESSAGE="Complete the ${MAJOR_MODE} code:"
 	RAW_FLAG="--raw-input"
 	N_PREDICT="--n-predict ${N_PREDICT}"
 	;;
