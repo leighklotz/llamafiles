@@ -1,41 +1,42 @@
 # Files in examples
+- [AI News](tensor-mixtral-news.txt): Summaries and headlines from various tech and science news, excluding sports and entertainment
 - [Ack Emacs Integration](ack-emacs.txt): Emacs Lisp code for integrating `ack` tool with Emacs, allowing users to search project files using `ack`.
-- [Upgrade Required Packages](apt-held-back.txt): Packages that need to be upgraded but are being held back.
-- [Rainbow Bash Script](bash-rainbow-mixtral.txt): Bash script using ANSI escape codes to generate a colorful rainbow gradient in a terminal supporting 24-bit colors.
-- [Dolphin-Mixtral vs Mistral Answer Comparison](dolphin-mixtral-mistral-rating.txt): This file contains a comparison of two AI model's responses to a user query about the best tool for monitoring processes and hierarchy, with a clear winner specified.
-- [Dolphin Mixtral Top Pstree](dolphin-mixtral-top-pstree.txt): This file contains a brief explanation of combining `top` and `pstree` functionalities, along with an installation guide for `htop`, a more interactive process viewer.
-- [Emacs Lisp Changes](emacs-lisp-dolphin-mistral-help-commit.txt): Updates to model types in LLM.el
-- [Git Log Options Explained](explain-the-options.txt): Details the use of `oneline`, `graph`, and `decorate` options in `git log` command
-- [Game of Life](game-of-life-py.txt): A simple implementation of the Game of Life in Python using ASCII art, with rules defined and grid updates performed in a loop.
-- [Image Format Change in html_generator.py](git-diff-upstream.txt): Now saves images in RGBA format, which may affect transparency.
-- [Renaming and Adding Git Origins](git-fork.txt): Explains how to rename the existing git origin to "old-origin" and add a new origin with the URL `git@github.com:leighklotz/llamafile`.
-- [Merge Remote Branch](git-fu-2.txt): Resolve conflicts between local and remote changes`
-- [Git Branch Status](git-fu.txt): Displays the status of a Git branch, showing ahead and behind counts, and any untracked files.
+- [Apache Config XSLT](tensor-mixtral-xslt.txt): XSLT script to transform Apache config XML into ProxyPass and Redirect rules.
 - [Aviation Flight Logs](mac-coco1090log.txt): Flight data including date, hex ID, tail numbers, and aircraft model.
 - [Bash Command for Finding Unique Lines Between Two Files](mac-file-compare.txt): Uses `comm` and `sort` to find lines in file A that are not in file B, even if files are not sorted.
-- [Using 24-bit Color in iTerm2 for Emacs](mac-iterm2-emacs.txt): Configure iTerm2 and Emacs for 24-bit color support.
+- [Bash Glob](ubuntu-bash-glob-make-this-work.txt): help with bash glob on ubuntu
+- [Bash Script Check](tensor-llm-comments.txt): Checks if there's commented-out code in a given Bash script.
 - [Curta Calculator Site](mac-summarize-website.txt): Comprehensive resource for Curta calculator enthusiasts
+- [Date and Time Formats Comparison: ISO 8601 vs RFC 3339](tensor-mixtral-iso-8601.txt): This file discusses the differences between ISO 8601 and RFC 3339 date and time formats, including timezone representation, time offsets, and extensions.
+- [Display Load Average as Sparklines in Terminal](rpi5-mistral-sparklines.txt): This file contains a bash script using `awk` and `gnuplot` to generate load average sparklines.
+- [Dolphin Mixtral Top Pstree](dolphin-mixtral-top-pstree.txt): This file contains a brief explanation of combining `top` and `pstree` functionalities, along with an installation guide for `htop`, a more interactive process viewer.
+- [Dolphin-Mixtral vs Mistral Answer Comparison](dolphin-mixtral-mistral-rating.txt): This file contains a comparison of two AI model's responses to a user query about the best tool for monitoring processes and hierarchy, with a clear winner specified.
+- [Emacs Lisp Changes](emacs-lisp-dolphin-mistral-help-commit.txt): Updates to model types in LLM.el
 - [GPU Info (M2)](mac-system-profiler-gpu.txt): Mac system profiler GPU data for Apple M2 chip.
+- [Game of Life](game-of-life-py.txt): A simple implementation of the Game of Life in Python using ASCII art, with rules defined and grid updates performed in a loop.
+- [Git Branch Status](git-fu.txt): Displays the status of a Git branch, showing ahead and behind counts, and any untracked files.
+- [Git Commit Helper](rpi5-rocket-help-commit.txt): A one-liner script to generate a commit message from `git diff` for the rocket functions.sh file.
+- [Git Log Options Explained](explain-the-options.txt): Details the use of `oneline`, `graph`, and `decorate` options in `git log` command
+- [Git Log Output](nuextract-dwim.txt): Displays the last 3 commits with their SHA, author, date, and commit message in JSON format.
+- [Graflex Camera Resource](sumarize.txt): A website promoting and preserving classic Graflex cameras, with articles, resources, and community support for Speed Graphic, Graflex Reflex, and large-format cameras.
+- [Image Format Change in html_generator.py](git-diff-upstream.txt): Now saves images in RGBA format, which may affect transparency.
+- [LICENSE](nuextract-ls.txt): License information for the project.
+- [Merge Remote Branch](git-fu-2.txt): Resolve conflicts between local and remote changes`
+- [NVMe Controller Check](rpi5-rocket-nvme-controller.txt): Guide on how to identify the NVMe controller using the `lspci` command in Linux.
+- [NVMe Drive Health Check on Raspbian](rpi5-nvme.txt): Lists NVMe drive health using `nvme monitor -h` command.
 - [Process Hierarchy and Resource Usage](mistral-top-pstree.txt): A guide on using `top`, `pstree`, and `htop` to monitor and visualize processes, along with their resource usage and hierarchical relationships.
 - [Prompt Cache Usage](mixtral-prompt-cache.txt): Explains how to use the prompt cache feature in `llamafile` tool for saving and loading prompt states, with examples.
-- [Git Log Output](nuextract-dwim.txt): Displays the last 3 commits with their SHA, author, date, and commit message in JSON format.
-- [LICENSE](nuextract-ls.txt): License information for the project.
-- [Raspberry Pi 5 Emacs Installation](rpi5-emacs-install.txt): A step-by-step guide to installing Emacs on a Raspberry Pi 5 via the terminal, including system updates and Emacs installation instructions.
-- [Display Load Average as Sparklines in Terminal](rpi5-mistral-sparklines.txt): This file contains a bash script using `awk` and `gnuplot` to generate load average sparklines.
-- [NVMe Drive Health Check on Raspbian](rpi5-nvme.txt): Lists NVMe drive health using `nvme monitor -h` command.
-- [Raspberry Pi GRUB Configuration](rpi5-rocket-grub.txt): Explains how to locate and edit GRUB_CMDLINE_LINUX in the GRUB configuration file for Raspberry Pi, specifically for Pi 4 and later models.
-- [Raspberry Pi 5 NVMe Benchmark](rpi5-rocket-hdparm.txt): HDParm test results for NVMe drive on Raspberry Pi 5 using PCIe_x1 gen=3.
-- [Git Commit Helper](rpi5-rocket-help-commit.txt): A one-liner script to generate a commit message from `git diff` for the rocket functions.sh file.
 - [RPI5 Rocket LSPCI Output](rpi5-rocket-lspci.txt): A detailed Linux `lspci` command output showing PCI devices on a Raspberry Pi 5 with a custom 'Rocket' build, including vendor IDs, device types, and revision numbers.
-- [NVMe Controller Check](rpi5-rocket-nvme-controller.txt): Guide on how to identify the NVMe controller using the `lspci` command in Linux.
-- [RPi5 Rocket Sparklines](rpi5-rocket-sparklines.txt): A guide to display load average as a sparkline in the terminal using Python and Graphviz.
 - [RPi5 Rocket Manual](rpi5-rocket.txt): Instructions on enabling ANSI colors in the input for the man page of the `less` command.
-- [Graflex Camera Resource](sumarize.txt): A website promoting and preserving classic Graflex cameras, with articles, resources, and community support for Speed Graphic, Graflex Reflex, and large-format cameras.
-- [Trump Hush Money Trial Summary](summarize-news-yahoo.txt): A brief overview of Trump's hush money trial, including witnesses, evidence, and timeline.
+- [RPi5 Rocket Sparklines](rpi5-rocket-sparklines.txt): A guide to display load average as a sparkline in the terminal using Python and Graphviz.
+- [Rainbow Bash Script](bash-rainbow-mixtral.txt): Bash script using ANSI escape codes to generate a colorful rainbow gradient in a terminal supporting 24-bit colors.
+- [Raspberry Pi 5 Emacs Installation](rpi5-emacs-install.txt): A step-by-step guide to installing Emacs on a Raspberry Pi 5 via the terminal, including system updates and Emacs installation instructions.
+- [Raspberry Pi 5 NVMe Benchmark](rpi5-rocket-hdparm.txt): HDParm test results for NVMe drive on Raspberry Pi 5 using PCIe_x1 gen=3.
+- [Raspberry Pi GRUB Configuration](rpi5-rocket-grub.txt): Explains how to locate and edit GRUB_CMDLINE_LINUX in the GRUB configuration file for Raspberry Pi, specifically for Pi 4 and later models.
+- [Renaming and Adding Git Origins](git-fork.txt): Explains how to rename the existing git origin to "old-origin" and add a new origin with the URL `git@github.com:leighklotz/llamafile`.
 - [Tar Exclude Example](tar-exclude-gguf-llamafiles.txt): This file provides an example of how to use `tar` to create an archive from the current directory while excluding `.gguf` and `.llamafile` files.
-- [Bash Script Check](tensor-llm-comments.txt): Checks if there's commented-out code in a given Bash script.
-- [Date and Time Formats Comparison: ISO 8601 vs RFC 3339](tensor-mixtral-iso-8601.txt): This file discusses the differences between ISO 8601 and RFC 3339 date and time formats, including timezone representation, time offsets, and extensions.
-- [AI News](tensor-mixtral-news.txt): Summaries and headlines from various tech and science news, excluding sports and entertainment
-- [Apache Config XSLT](tensor-mixtral-xslt.txt): XSLT script to transform Apache config XML into ProxyPass and Redirect rules.
+- [Trump Hush Money Trial Summary](summarize-news-yahoo.txt): A brief overview of Trump's hush money trial, including witnesses, evidence, and timeline.
 - [Ubuntu Advantage ESM Apps Enablement](ubuntu-advantage-mixtral.txt): Learn how to get the esm-apps enabled for additional security updates.
-- [Bash Glob](ubuntu-bash-glob-make-this-work.txt): help with bash glob on ubuntu
+- [Upgrade Required Packages](apt-held-back.txt): Packages that need to be upgraded but are being held back.
+- [Using 24-bit Color in iTerm2 for Emacs](mac-iterm2-emacs.txt): Configure iTerm2 and Emacs for 24-bit color support.
+- [manhelp](manhelp-ack-egg.txt): convenient script to do `man | help.sh`
