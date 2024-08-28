@@ -10,12 +10,13 @@ fi
 # usage: llm-emacs-helper.sh use-case model-type via major-mode WORDS WORDS WORDS
 # usage: llm-emacs-helper.sh use-case model-type via major-mode 'WORDS() `WORDS` WORDS'
 # stdin is region of input
-# e.g. cat foo.sh | ./llm-emacs-helper.sh ask mixtral bash make this arg parsing better
+# e.g. cat foo.sh | ./llm-emacs-helper.sh ask api mixtral bash make this arg parsing better
 
 
 USE_CASE=$1; shift
-MODEL_TYPE=$1; shift
 VIA=$1; shift
+MODEL_TYPE=$1; shift
+
 
 MAJOR_MODE=""
 PROMPT=""
@@ -73,13 +74,13 @@ esac
 
 export SYSTEM_MESSAGE
 
-TEMPFILE=$(mktemp)
-cat >> "${TEMPFILE}"
+INPUT_TEMPFILE=$(mktemp)
+cat >> "${INPUT_TEMPFILE}"
 
 # estimate context length
-context_length=$(( $(wc -c < "${TEMPFILE}") / 3 ))
+context_length=$(( $(wc -c < "${INPUT_TEMPFILE}") / 3 ))
 context_length=$((context_length < 2048 ? 2048 : context_length > 32768 ? 32768 : context_length))
 #set -x
 
-cat "${TEMPFILE}" | ${LLM_SH} --via ${VIA} -m ${MODEL_TYPE} ${DEBUG} --context-length "${context_length}" --stdin ${RAW_FLAG} ${N_PREDICT} "${PROMPT}" || (cat "${TEMPFILE}"; exit 1)
-rm "${TEMPFILE}"
+cat "${INPUT_TEMPFILE}" | ${LLM_SH} --via ${VIA} -m ${MODEL_TYPE} ${DEBUG} --context-length "${context_length}" --stdin ${RAW_FLAG} ${N_PREDICT} "${PROMPT}" || (cat "${INPUT_TEMPFILE}"; exit 1)
+rm "${INPUT_TEMPFILE}"

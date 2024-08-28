@@ -153,7 +153,7 @@ See [shell-command-on-region] for interpretation of output-buffer-name."
   ;; Send the buffer or selected region as a CLI input to 'llm.sh'
   (let ((start (or start (point-min)))
 	(end (or end (point-max)))
-	(command (llm-infer-command-internal use-case model-type via major-mode-name user-prompt))
+	(command (llm-infer-command-internal use-case via model-type major-mode-name user-prompt))
 	(display-error-buffer t)
 	(region-noncontiguous-p nil))
     ;; many args, make sure to call properly
@@ -164,7 +164,7 @@ See [shell-command-on-region] for interpretation of output-buffer-name."
 
 (defun llm-complete-internal (prompt via model-type start end n-predict)
   ;; Send the buffer or selected region as a CLI input to 'llm.sh'
-  (let* ((command (llm-infer-command-internal "complete" model-type via (llm-mode-text-type) n-predict prompt))
+  (let* ((command (llm-infer-command-internal "complete" via model-type (llm-mode-text-type) n-predict prompt))
 	 (display-error-buffer t)
 	 (region-noncontiguous-p nil))
     (message "llm-commplete-internal: %s" command)
