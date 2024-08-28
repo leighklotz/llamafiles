@@ -157,7 +157,7 @@ See [shell-command-on-region] for interpretation of output-buffer-name."
 	(display-error-buffer t)
 	(region-noncontiguous-p nil))
     ;; many args, make sure to call properly
-    (message "llm-region-internal: %s %s[%s,%s] replace-p=%s output-buffer-name=%s" (buffer-name) start end command replace-p output-buffer-name)
+    (message "llm-region-internal: buffer=%s[%s,%s] command=%s replace-p=%s output-buffer-name=%s" (buffer-name) start end command replace-p output-buffer-name)
     (let ((max-mini-window-height 0.0))
       (shell-command-on-region start end command output-buffer-name replace-p llm-error-buffer-name display-error-buffer region-noncontiguous-p))))
 
