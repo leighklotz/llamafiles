@@ -11,9 +11,6 @@ import sys
 
 MODEL_NAME='all-MiniLM-L6-v2'
 
-### temp
-import torch;print(f"Using GPU: {torch.cuda.is_available()}")
-
 with warnings.catch_warnings():
     warnings.filterwarnings("ignore") # simplefilter
     MODEL = SentenceTransformer(MODEL_NAME)
@@ -29,7 +26,7 @@ def read_file(filename: str) -> Optional[str]:
 
 def generate_embedding(text: str) -> np.ndarray:
     """Generates an embedding for the given text."""
-    return MODEL.encode([text])[0]
+    return MODEL.encode([text])[0] if text is not None else None
 
 def find_files(directory: str) -> Tuple[Path, ...]:
     """Finds all files in the given directory and its subdirectories."""
@@ -49,8 +46,9 @@ def main(args: argparse.Namespace) -> None:
     files = find_files(args.directory)
 
     similarities = {
-        file: cosine_similarity(search_embedding, generate_embedding(read_file(file)))
-        for file in files if read_file(file) is not None
+        file: similarity for file in files
+        if (embedding := generate_embedding(read_file(file))) is not None
+        and (similarity := cosine_similarity(search_embedding, embedding))
     }
 
     relevant_files = (
