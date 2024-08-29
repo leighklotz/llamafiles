@@ -8,9 +8,11 @@ import numpy as np
 from sentence_transformers import SentenceTransformer
 from pathlib import Path
 
+MODEL_NAME='all-MiniLM-L6-v2'
+
 with warnings.catch_warnings():
     warnings.filterwarnings("ignore") # simplefilter
-    MODEL = SentenceTransformer('all-MiniLM-L6-v2')
+    MODEL = SentenceTransformer(MODEL_NAME)
 
 def read_file(filename: str) -> Optional[str]:
     """Reads a file and returns its contents. If an error occurs, logs the error and returns None."""
