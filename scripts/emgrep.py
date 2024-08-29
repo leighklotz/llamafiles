@@ -7,8 +7,12 @@ import argparse
 import numpy as np
 from sentence_transformers import SentenceTransformer
 from pathlib import Path
+import sys
 
 MODEL_NAME='all-MiniLM-L6-v2'
+
+### temp
+import torch;print(f"Using GPU: {torch.cuda.is_available()}")
 
 with warnings.catch_warnings():
     warnings.filterwarnings("ignore") # simplefilter
