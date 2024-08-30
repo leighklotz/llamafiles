@@ -5,6 +5,10 @@ SCRIPT_DIR="$(dirname "$(realpath "${BASH_SOURCE}")")"
 USAGE="[--via api] | [ --via cli [-m|--model-type model-type] [--fast | --long] [--context-length|-c n] [--ngl n] [--n-predict n] ]
        [--stdin|--interactive|-i] [--temperature temp] [--n-predict n] [--grammar-file file.gbnf] [--info] [--verbose|-v] [--debug] [--] QUESTION*"
 
+function usage {
+    printf "Usage: %s %s\n" "$0" "${USAGE}" >> /dev/stderr
+}
+
 ### If there are any args, require "--" or any non-hyphen word to terminate args and start question.
 ### Assume the whole args is a question if there is no hyphen to start.
 ### There may be no question, if all is contained in SYSTEM_MESSAGE and STDIN.
@@ -18,7 +22,7 @@ function parse_args() {
         while [[ $# -gt 0 ]]; do
             case $1 in
                 --help)
-                    printf "$0: %s\n" "${USAGE}" >> /dev/stderr
+		    usage
                     exit 0
                     ;;
                 --via) shift; VIA="$1" ;;
@@ -26,7 +30,9 @@ function parse_args() {
 		# Logging 
                 --info) INFO=1 ;;
                 --verbose|-v) VERBOSE=1 ;;
-                --debug) ERROR_OUTPUT="/dev/stdout"; SILENT_PROMPT=""; DEBUG=1; LOG_DISABLE=" " ;; # LOG_DISABLE space requried to override default
+                --debug) # LOG_DISABLE=" " to override default
+		    ERROR_OUTPUT="/dev/stdout"; SILENT_PROMPT=""; DEBUG=1; LOG_DISABLE=" "
+		    ;;
                 --noerror) ERROR_OUTPUT="/dev/null" ;;
 		# Generation options
                 --n-predict) shift; N_PREDICT="$1" ;;
@@ -43,7 +49,10 @@ function parse_args() {
                 --ngl) shift; NGL="$1" ;;
 		# prompt
                 --) shift; QUESTION=("$*"); break ;; # consumes rest of line
-                -*) echo "Unrecognized option: $1" >> /dev/stderr; exit 1 ;;
+                -*) printf "Unrecognized option: %s\n" "$1" >> /dev/stderr
+		    usage
+		    exit 1
+		    ;;
                 *) QUESTION=("$*"); break ;; # consumes rest of line
             esac
             shift
