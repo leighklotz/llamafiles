@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 
+# todo: fix large memory growth
+# todo: try this instead: https://sbert.net/examples/applications/semantic-search/README.html
+
 from typing import Optional, Tuple
 import logging
 import warnings
