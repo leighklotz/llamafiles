@@ -2,8 +2,70 @@
 
 SCRIPT_DIR="$(dirname "$(realpath "${BASH_SOURCE}")")"
 
-USAGE="[--via api] | [ --via cli [-m|--model-type model-type] [--fast | --long] [--context-length|-c n] [--ngl n] [--n-predict n] ]
-       [--stdin|--interactive|-i] [--temperature temp] [--n-predict n] [--grammar-file file.gbnf] [--info] [--verbose|-v] [--debug] [--] QUESTION*"
+USAGE='[--via api] | [ --via cli [-m|--model-type model-type] [--fast | --long] [--context-length|-c n] [--ngl n] [--n-predict n] ] [--stdin|--interactive|-i] [--temperature temp] [--n-predict n] [--grammar-file file.gbnf] [--info] [--verbose|-v] [--debug] [--] QUESTION*
+
+Mode of operation:
+- --via api: Specifies API mode.
+- --via cli: Specifies CLI mode.
+
+General options:
+- --model-type or -m: Sets the model type (e.g., mistral).
+- --n-predict: Sets the number of prediction tokens.
+- --temperature: Sets the temperature for sampling.
+- --grammar-file: Provides a grammar file path (file.gbnf).
+- --info: Displays info logging level.
+- --verbose or -v: Enables verbose logging.
+- --debug: Enables debug logging.
+- --noerror: Suppresses error output.
+- --: Separates command-line arguments from input question prompt.
+
+Input options:
+- --stdin, --interactive, or -i: Force reading input from stdin, even if not in a pipe.
+- --raw-input: Uses stdin as the only text to send to the model.
+- --process-question-escapes or -e: Processes escape sequences in the input question.
+
+Priority and context options (apply to --via cli only):
+- --fast: Sets priority for generation speed.
+- --long: Sets priority for generation length.
+- --context-length or -c: Sets the context length.
+- --ngl: Sets the NGL parameter.
+
+Help option:
+- --help: Displays help information and usage.
+
+llm.sh is intended for use by other, friendlier scripts, such as help.sh and ask, both of which have their own options
+and also accept llm.sh options as listed above.
+
+To use llm.sh directly, you can pass these options to the script name followed by any input questions. For example:
+
+$ llm.sh --via cli --model-type mistral --temperature 0.7 "What is the capital of France?"
+
+Environment variables are used to configure the behavior of llm.sh. Here are the available environment variables:
+
+- LLM_SH_ENV: A flag to indicate that llm.sh environment is being loaded. Used internally.
+- IN_LLM_SH_ENV: A flag to indicate that the environment is already loaded. Used internally.
+- MODEL_TYPE: The type of model to use (e.g., mistral, vicuna, etc.). Default: mistral.
+- VIA: The mode of operation. Can be ''api'' or ''cli''. Default: cli.
+- GPU: The GPU configuration. Can be ''auto'', ''nvidia'', or ''omit''. Default: auto.
+- GRAMMAR_FILE: The path to a grammar file (file.gbnf).
+- BATCH_SIZE: The batch size for processing.
+- SEED: The random seed for model generation. Default: -1 (automatic).
+- LLAMAFILE_MODEL_RUNNER: The path to the llamafile model runner script. Default: $(realpath "${SCRIPT_DIR}/../lib/llamafile-0.6.2").
+- FORCE_MODEL_RUNNER: Force the use of a specific model runner script.
+- NGL: The NGL parameter. Applies only to ''--via cli'' mode.
+- CONTEXT_LENGTH: The context length. Applies only to ''--via cli'' mode.
+- PRIORITY: The priority for generation. Can be ''speed'', ''length'', or ''manual''. Applies only to ''--via cli'' mode. Default: manual.
+- TEMPERATURE: The temperature for sampling. Can be overridden by the --temperature command-line option.
+- N_PREDICT: The number of prediction tokens to generate. Can be overridden by the --n-predict command-line option.
+- SYSTEM_MESSAGE: The system message to use. Can be overridden by the --system-message command-line option.
+- RAW_FLAG: A flag to indicate that stdin should be used as the only text to send to the model. Default: --raw-input if --raw-input is specified.
+- ERROR_OUTPUT: The file descriptor for error output. Default: /dev/null (suppresses error output).
+- KEEP_PROMPT_TEMP_FILE: Determines which prompt temp files to keep. Can be ''NONE'', ''ERROR'', or ''ALL''. Default: ALL.
+- LOG_DISABLE: A flag to disable logging. Can be overridden by the --log-disable command-line option.
+- VERBOSE, INFO, DEBUG: Logging levels. Can be overridden by the --verbose, --info, and --debug command-line options, respectively.
+- Silent variables (SILENT_PROMPT, NO_PENALIZE_NL, REPEAT_PENALTY): These variables are not settable by environment variables.
+'
+
 
 function usage {
     printf "Usage: %s %s\n" "$0" "${USAGE}" >> /dev/stderr
@@ -49,7 +111,7 @@ function parse_args() {
                 --ngl) shift; NGL="$1" ;;
 		# prompt
                 --) shift; QUESTION=("$*"); break ;; # consumes rest of line
-                -*) printf "Unrecognized option: %s\n" "$1" >> /dev/stderr
+                -*) printf "Unrecognized option: %s\n\n" "$1" >> /dev/stderr
 		    usage
 		    exit 1
 		    ;;
