@@ -7,6 +7,7 @@ from typing import Optional, Tuple
 import logging
 import warnings
 import argparse
+import re
 import numpy as np
 from sentence_transformers import SentenceTransformer
 from pathlib import Path
@@ -15,7 +16,7 @@ import sys
 MODEL_NAME='all-MiniLM-L6-v2'
 
 with warnings.catch_warnings():
-    warnings.filterwarnings("ignore") # simplefilter
+    warnings.filterwarnings("ignore")
     MODEL = SentenceTransformer(MODEL_NAME)
 
 def read_file(filename: str) -> Optional[str]:
@@ -43,7 +44,7 @@ def main(args: argparse.Namespace) -> None:
     if args.search == '-':
         search_text = sys.stdin.read()
     else:
-        search_text = args.search
+        search_text = ' '.join(args.search)
 
     search_embedding = generate_embedding(search_text)
     files = find_files(args.directory)
@@ -68,13 +69,15 @@ def main(args: argparse.Namespace) -> None:
         else:
             print(f"{similarity:.4f} {file_name}")
 
-if __name__ == "__main__":
+def parse_args():
     parser = argparse.ArgumentParser(description="Find similar files with a similarity above the threshold.")
-    parser.add_argument("search", help="Search input, use '-' for stdin")
-    parser.add_argument("directory", help="Directory to search in", nargs='?', default=".", type=str)
+    parser.add_argument("search", help="Search input, use '-' for stdin", nargs='+')
+    parser.add_argument("--directory", help="Directory to search in", default=".", type=str)
     parser.add_argument("--threshold", help="Minimum similarity required for a file to be considered (default: 0.0)", type=float, default=0.0)
     parser.add_argument("--no-score", help="Print only filenames, no scores", action='store_true')
+    return parser.parse_args()
 
-    args = parser.parse_args()
-
+if __name__ == "__main__":
+    args = parse_args()
     main(args)
+
