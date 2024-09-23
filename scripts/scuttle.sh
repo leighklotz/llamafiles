@@ -36,16 +36,42 @@ then
     usage
 fi
 
-if command -v lynx &> /dev/null;
-then
-    LYNX="lynx --dump --nolist"
-elif command -v links &> /dev/null;
-then
-    LYNX="links -codepage utf-8 -force-html -width 72 -dump"
-else
-    echo "error: NOLINKS"
-    exit 1
+if command -v lynx &> /dev/null; then
+    fetcher=lynx
+    fetch_version="$(lynx -version 2>&1 | head -1)"
+    if [[ $fetch_version =~ Lynx\ Version\ ([0-9a-zA-Z.]+) ]]; then
+	fetch_version="Lynx/${BASH_REMATCH[1]}"
+    fi
+elif command -v links &> /dev/null; then
+    fetcher=links
+    fetch_version="$(links -version 2>&1 | head -1)"
+    if [[ $fetch_version =~ Links\ ([0-9a-zA-Z.]+) ]]; then
+	fetch_version="Links/${BASH_REMATCH[1]}"
+    fi
 fi
+
+if [ -e "${fetch_version}" ]; then
+    log_and_exit 2 "Could not find the Lynx/Links version number."
+fi
+
+# until we get it working
+: "${ABUSE_EMAIL_ADDRESS:=klotz@klotz.me}"
+# : "${ABUSE_EMAIL_ADDRESS:=abuse@hallux.ai}"
+: "${SCUTTLE_USER_AGENT:=ScuttleService/1.0 (+https://github.com/hallux-ai/summarizer-service; ${ABUSE_EMAIL_ADDRESS}) ${fetch_version}}"
+: "${SCUTTLE_REFERER:=https://scuttle.klotz.me}"
+
+function fetch_text() {
+    local url="$1"
+    if [ "${fetcher}" == "lynx" ]; then
+	lynx --dump --nolist -useragent="${SCUTTLE_USER_AGENT}" -header="Referer: ${SCUTTLE_REFERER}" "${url}"
+    elif [ "${fetcher}" == "links" ]; then
+	links -codepage utf-8 -force-html -width 72 -dump  -http.fake-user-agent "${SCUTTLE_USER_AGENT}" -http.fake-referer "${SCUTTLE_REFERER}" "${url}"
+    else
+	echo "error: NOLINKS"
+	exit 1
+    fi
+}
+
 
 SCUTTLE_SYSTEM_MESSAGE='Summarize the web page article at the specified link address. Respond with only a short JSON object with these 4 fields: `link`, `title`, `description`, and `keywords` array:'
 export SYSTEM_MESSAGE="${SYSTEM_MESSAGE:-$(printf "%b" "${SCUTTLE_SYSTEM_MESSAGE}")}"
@@ -94,4 +120,4 @@ else
     GRAMMAR_FLAG=""
 fi
 
-(${LYNX} "${LINK}"; printf "\n# Instruction\n%s\n" "${SCUTTLE_SYSTEM_MESSAGE}")| "${SCRIPT_DIR}/llm.sh" --long ${GRAMMAR_FLAG} ${ARGS} "# Text of link ${LINK}" | post_process
+(fetch_text "${LINK}"; printf "\n# Instruction\n%s\n" "${SCUTTLE_SYSTEM_MESSAGE}") | "${SCRIPT_DIR}/llm.sh" --long ${GRAMMAR_FLAG} ${ARGS} "# Text of link ${LINK}" | post_process
