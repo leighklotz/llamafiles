@@ -1,7 +1,4 @@
 $ git pull origin main 2>&1 | help.sh -m codebooga --speed --stdin "fix this git issue:\n"
-    [INST]Answer the following user question about Linux, bash, python, or general programming:
-    this git issue:
-
     From github:leighklotz/llamafiles
      * branch            main       -> FETCH_HEAD
     fatal: Not possible to fast-forward, aborting.[/INST]
