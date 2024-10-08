@@ -1,0 +1,10 @@
+root ::= (FIRST-LINES)+ SHBEGIN NEWLINE GIT-COMMIT-AM APOS SUMMARY-LINE NEWLINE BULLET-LINES APOS NEWLINE SHEND
+FIRST-LINES   ::= [^\n]+ NEWLINE
+GIT-COMMIT-AM ::= "git commit -am"
+SUMMARY-LINE  ::= [^\n]+
+NEWLINE       ::= "\n"
+BULLET-LINE   ::= "- " [^\n]+
+BULLET-LINES  ::= (BULLET-LINE | NEWLINE)+
+APOS          ::= "'"
+SHBEGIN       ::= "```sh"
+SHEND         ::= "```"

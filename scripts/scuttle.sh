@@ -23,7 +23,7 @@ do
 	    shift
 	    ;;
 	*)
-	    LINK=$1
+	    LINK="$1"
 	    shift
 	    ARGS="$*"
 	    break

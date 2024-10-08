@@ -3,10 +3,13 @@
 SCRIPT_DIR="$(dirname "$(realpath "${BASH_SOURCE}")")"
 HELP_SH="help.sh"
 
+GRAMMAR_FILE_FLAG=""
 HELP_SH_OPTIONS=""
 GIT_DIFF_OPTIONS=""
 MESSAGE_LINE=""
-INHIBIT_GRAMMAR=1		# it's not working
+OUTPUT_TYPE=""
+LINE_TYPE=""
+#INHIBIT_GRAMMAR=1		# if it's not working in the model you use, turn it off
 
 function usage() {
 
@@ -20,6 +23,7 @@ function usage() {
     echo "- See \`git diff\` and \`$HELP_SH\` for options"
 }
 
+
 # help-commit.sh [git diff options] -- [help.sh options]
 while [[ $# -gt 0 ]]; do
     case $1 in
@@ -27,8 +31,14 @@ while [[ $# -gt 0 ]]; do
 	    usage
 	    exit 1
 	    ;;
-	--oneline|--multiline|--one-line|--multi-line|--pull-request|--git-commit)
-	    MESSAGE_LINE="${MESSAGE_LINE}$(printf "%s" "$1" | sed -E -e 's/-+/ /g')"
+	--one-line|--oneline)
+	    LINE_TYPE="one-line"
+	    ;;
+	--multi-line|--multiline)
+	    LINE_TYPE="multi-line"
+	    ;;
+	--pull-request|--git-commit)
+	    OUTPUT_TYPE="${1//--/}"
 	    shift
 	    ;;
         --)
@@ -43,19 +53,25 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-: "${MESSAGE_LINE=one-line git commit}"
+: "${OUTPUT_TYPE:=git-commit}"
+: "${LINE_TYPE:=one-line}"
+printf -v MESSAGE_LINE "%s %s" "${LINE_TYPE}" "${OUTPUT_TYPE}"
 
 # Set main parameters
 default_system_message="$(printf "%b" "You are an expert in Linux, Bash, Python, general programming, and related topics.\n")"
 export SYSTEM_MESSAGE="${SYSTEM_MESSAGE:-${default_system_message}}"
-PROMPT="Provide a ${MESSAGE_LINE} message for the changes listed in unified \`git diff\` below, in the form of a \`git commit\` command or in the  form of text for a pull request:\n"
 
-if [ -n "${INHIBIT_GRAMMAR}" ];
-then	 
-    GRAMMAR_FILE_FLAG=""
-else
-    # this is a bit broken with the CLI laxness and additive uses
-    GRAMMAR_FILE_FLAG="--grammar-file ${SCRIPT_DIR}/git-commit-${MESSAGE_LINE}-grammar.gbnf"
+PROMPT="Describe the changes listed in unified \`git diff\` below and output a ${MESSAGE_LINE} command for the changes:\n"
+printf "%b\n" "${PROMPT}"
+
+if [ -z "${INHIBIT_GRAMMAR}" ]; then
+    fn=${SCRIPT_DIR}/${MESSAGE_LINE// /-}-grammar.gbnf
+    if [ -f "${fn}" ]; then
+	printf -v GRAMMAR_FILE_FLAG -- "--grammar-file %s" "${fn}"
+    else
+	echo "$0: Can't find grammar file" "${fn}"
+	exit 8
+    fi
 fi
 
 function get_results {
