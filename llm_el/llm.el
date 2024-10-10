@@ -30,6 +30,8 @@
 ;;;   - M-X llm-write
 ;;;     Writes a response based on the region and prompt in a new buffer
 ;;;
+;;; Some commands will use empty string if there is not a region, but other commands will error.
+;;;
 ;;; Dependencies:
 ;;;   - A shell script called 'llm-emacs-helper.sh' that contains the command(s) you want
 ;;;     to run on the buffer or region content.
@@ -70,9 +72,14 @@
 (defvar llm-error-buffer-name   "*llm-errors*")
 
 ;;; User commands
-(defun llm-ask (prompt start end)
-  "Writes a new buffer based on the prompt and current region, and the output of the llm-rewrite-script-path command"
+(defun llm-ask (prompt &optional start end)
+  "Writes a new buffer based on the prompt and current region, and the output of the llm-rewrite-script-path command.
+If no region is selected, the function will assume the entire buffer is the region."
   (interactive "sQuestion: \nr")
+  ;; Check if the region is active, if not, use empty string
+  (unless (and start end)
+    (setq start (point-min))
+    (setq end (point-min)))
   (llm-region-internal "ask" llm-default-via llm-default-model-type (llm-mode-text-type) prompt start end llm-ask-buffer-name nil))
 
 (defun llm-summarize-buffer (user-prompt)
@@ -80,10 +87,14 @@
   (interactive "sSummarize Buffer Prompt: \n")
   (llm-region-internal "summarize" llm-default-via llm-default-model-type (llm-mode-text-type) user-prompt (point-min) (point-max) llm-summary-buffer-name nil))
 
-(defun llm-insert (prompt start end)
+(defun llm-insert (prompt &optional start end)
   "Insert inferred text based on the prompt and current region in the current buffer."
   (interactive "sPrompt: \nr")
-  (let ((llm-write-buffer-name  t))	;insert into current buffer
+  ;; Check if the region is active, if not, use empty string
+  (unless (and start end)
+    (setq start (point-min))
+    (setq end (point-min)))
+  (let ((llm-write-buffer-name t))	;insert into current buffer
     (llm-region-internal "write" llm-default-via llm-default-model-type (llm-mode-text-type) prompt start end llm-write-buffer-name nil)))
 
 (defun llm-complete (prompt start end)
@@ -93,9 +104,13 @@
   (let ((n-predict 32))			;fixme ctrl-u arg?
     (llm-complete-internal prompt llm-default-via llm-default-model-type start end n-predict)))
 
-(defun llm-write (prompt start end)
+(defun llm-write (prompt &optional start end)
   "Writes a new buffer based on the prompt and current region, and the output of the llm-rewrite-script-path command"
   (interactive "sPrompt: \nr")
+  ;; Check if the region is active, if not, use empty string
+  (unless (and start end)
+    (setq start (point-min))
+    (setq end (point-min)))
   (llm-region-internal "write" llm-default-via llm-default-model-type (llm-mode-text-type) prompt start end llm-write-buffer-name nil))
 
 (defun llm-rewrite (user-prompt start end)
@@ -107,22 +122,6 @@
   "Rewrites the current region to process 'todo' items with the output of the llm-rewrite-script-path command based on the prompt and current region"
   (interactive "sRewrite Prompt: \nr")
   (llm-region-internal "todo" llm-default-via llm-default-model-type (llm-mode-text-type) user-prompt start end nil t))
-
-;; This function is used in comint-mode to understand and explain the output in an
-;; interactive way. It prompts the user with a default question, "What line
-;; number contains the proximal error?", or a custom prompt if provided. It
-;; then uses the output between the last two output boundaries to generate an
-;; explanation through the llm-ask function.
-(defun llm-explain-output (prompt)
-  (interactive "sQuestion: ")
-  (let* ((bounds (my-comint-get-previous-output-bounds))
-	 (start (car bounds))
-	 (end (cadr bounds))
-	 (default-prompt "What line number contains the proximal error?")
-	 (prompt (if (or (null prompt) (string= "" prompt))
-		     default-prompt
-		   prompt)))
-    (llm-ask prompt start end)))
 
 ;; This function is used in comint-mode to understand and explain the output in an
 ;; interactive way. It prompts the user with a default question, "What line
