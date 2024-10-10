@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_DIR="$(dirname "$(realpath "${BASH_SOURCE}")")"
+SCRIPT_DIR="$(dirname "$(realpath "${BASH_SOURCE[0]}")")"
 HELP_SH="help.sh"
 
 GRAMMAR_FILE_FLAG=""
@@ -9,18 +9,19 @@ GIT_DIFF_OPTIONS=""
 MESSAGE_LINE=""
 OUTPUT_TYPE=""
 LINE_TYPE=""
-#INHIBIT_GRAMMAR=1		# if it's not working in the model you use, turn it off
+# INHIBIT_GRAMMAR=1		# if it's not working in the model you use, turn it off
 
 function usage() {
-
-    p=$(basename "$0")
-    echo "$p: [--oneline|--multiline|--pull-request|--git-commit]* [git diff options] [--] [help.sh options]"
-    echo '- specify --oneline or --multiline for message style; (might use GBNF schema).'
-    echo '- specify --pull-request or --git-commit, for message style'
+    local p=$(basename "$0")
+    echo "$p: [--oneline|--multiline|--pull-request|--git-commit]* [--quiet] [git diff options] [--] [help.sh options]"
+    echo '- --oneline or --multiline: for message style; (might use GBNF schema).'
+    echo '- --pull-request or --git-commit: for message style'
+    echo '- --quiet: suppress introductory message'
     echo '- any next arguments until `--` are given to `git diff`'
     echo '- all after a `--` is given to `help.sh`'
-    echo "- to change model, use \`$p -- -m $MODEL_TYPE\` or \`export \$MODEL_TYPE=$MODEL_TYPE\`"
+    echo '- to change model, use \`$p -- -m $MODEL_TYPE\` or \`export \$MODEL_TYPE=$MODEL_TYPE\`'
     echo "- See \`git diff\` and \`$HELP_SH\` for options"
+    echo '- See \`help-commit -- --help\` for LLM options passthrough'
 }
 
 
@@ -32,13 +33,19 @@ while [[ $# -gt 0 ]]; do
 	    exit 1
 	    ;;
 	--one-line|--oneline)
-	    LINE_TYPE="one-line"
+	    LINE_TYPE='one-line'
+	    shift
 	    ;;
 	--multi-line|--multiline)
-	    LINE_TYPE="multi-line"
+	    LINE_TYPE='multi-line'
+	    shift
 	    ;;
 	--pull-request|--git-commit)
 	    OUTPUT_TYPE="${1//--/}"
+	    shift
+	    ;;
+	--quiet|-q)
+	    QUIET=1
 	    shift
 	    ;;
         --)
@@ -55,7 +62,7 @@ done
 
 : "${OUTPUT_TYPE:=git-commit}"
 : "${LINE_TYPE:=one-line}"
-printf -v MESSAGE_LINE "%s %s" "${LINE_TYPE}" "${OUTPUT_TYPE}"
+printf -v MESSAGE_LINE '%s %s' "${LINE_TYPE}" "${OUTPUT_TYPE}"
 
 # Set main parameters
 default_system_message="$(printf "%b" "You are an expert in Linux, Bash, Python, general programming, and related topics.\n")"
@@ -75,25 +82,24 @@ if [ -z "${INHIBIT_GRAMMAR}" ]; then
 fi
 
 function get_results {
-    if ! git rev-parse --is-inside-work-tree > /dev/null 2>&1;
-    then
+    if ! git rev-parse --is-inside-work-tree > /dev/null 2>&1; then
 	echo "$(basename "$0"): PWD=$PWD is not in a git repository"
 	exit 1
     fi
-    # set globals
     local options="$1"
+    # set globals
     DIFF_COMMAND="git diff ${options}${options:+ }${GIT_DIFF_OPTIONS}"
     DIFF_OUTPUT="$($DIFF_COMMAND)"
 }
 
 get_results
 if [ -z "${DIFF_OUTPUT}" ]; then
-    echo "No staged changes, looking for unstaged" >> /dev/stderr
+    echo "No staged changes, looking for unstaged" >&2
     get_results --staged
 fi
 
 if [ -z "${DIFF_OUTPUT}" ]; then
-    echo "No changes seen" >> /dev/stderr
+    echo "No changes seen" >&2
     exit 1
 fi
 
