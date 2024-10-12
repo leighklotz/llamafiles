@@ -1,11 +1,12 @@
 #!/bin/bash
 
 SCRIPT_DIR="$(dirname "$(realpath "${BASH_SOURCE}")")"
+CAPTURE_COMMAND="cat"
 
 . "${SCRIPT_DIR}/../via/functions.sh"
 
 function usage() {
-    echo "Usage: $(basename "$0") [--json] <LINK> [llm.sh options]"
+    echo "Usage: $(basename "$0") [--capture-file file] [--json] <LINK> [llm.sh options]"
     exit 1
 }
 
@@ -20,6 +21,11 @@ do
 	    ;;
 	"--json")
 	    JSON_MODE=1
+	    shift
+	    ;;
+	"--capture-file")
+	    shift
+	    printf -v CAPTURE_COMMAND "tee %b" "$1"
 	    shift
 	    ;;
 	*)
@@ -120,4 +126,4 @@ else
     GRAMMAR_FLAG=""
 fi
 
-(fetch_text "${LINK}"; printf "\n# Instruction\n%s\n" "${SCUTTLE_SYSTEM_MESSAGE}") | "${SCRIPT_DIR}/llm.sh" --long ${GRAMMAR_FLAG} ${ARGS} "# Text of link ${LINK}" | post_process
+(fetch_text "${LINK}" | ${CAPTURE_COMMAND}; printf "\n# Instruction\n%s\n" "${SCUTTLE_SYSTEM_MESSAGE}") | "${SCRIPT_DIR}/llm.sh" --long ${GRAMMAR_FLAG} ${ARGS} "# Text of link ${LINK}" | post_process
