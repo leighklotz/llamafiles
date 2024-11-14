@@ -1,14 +1,15 @@
 #!/bin/bash
 
 SCRIPT_DIR="$(dirname "$(realpath "${BASH_SOURCE[0]}")")"
-HELP_SH="help.sh"
+HELP_SH='help.sh'
 
-GRAMMAR_FILE_FLAG=""
-HELP_SH_OPTIONS=""
-GIT_DIFF_OPTIONS=""
-MESSAGE_LINE=""
-OUTPUT_TYPE=""
-LINE_TYPE=""
+GRAMMAR_FILE_FLAG=''
+HELP_SH_OPTIONS=''
+GIT_DIFF_OPTIONS=''
+MESSAGE_LINE=''
+OUTPUT_TYPE=''
+LINE_TYPE=''
+QUIET=''
 # INHIBIT_GRAMMAR=1		# if it's not working in the model you use, turn it off
 
 function usage() {
@@ -69,7 +70,10 @@ default_system_message="$(printf "%b" "You are an expert in Linux, Bash, Python,
 export SYSTEM_MESSAGE="${SYSTEM_MESSAGE:-${default_system_message}}"
 
 PROMPT="Describe the changes listed in unified \`git diff\` below and output a ${MESSAGE_LINE} command for the changes:\n"
-printf "%b\n" "${PROMPT}"
+
+if [ -z "${QUIET}" ]; then
+    printf "%b\n" "${PROMPT}"
+fi
 
 if [ -z "${INHIBIT_GRAMMAR}" ]; then
     fn=${SCRIPT_DIR}/${MESSAGE_LINE// /-}-grammar.gbnf
