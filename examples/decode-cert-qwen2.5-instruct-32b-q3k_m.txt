@@ -1,0 +1,47 @@
+klotz@tensor:~/wip$ help.sh decode < google.cert
+The text you provided is a PEM-encoded X.509 certificate. PEM stands for Privacy Enhanced Mail, a standard for storing and transmitting certificates, keys, and other cryptographic items. This format is widely used because it can be easily transmitted and stored as text.
+The certificate is base64-encoded and includes header and footer lines that indicate the start and end of the certificate data:
+
+- `-----BEGIN CERTIFICATE-----`: Marks the beginning of the certificate.
+- `-----END CERTIFICATE-----`: Marks the end of the certificate.
+
+The certificate contains information about the entity it was issued to, the entity that issued it, and other important details such as the validity period and public key. Here is a brief breakdown of the information contained in your certificate:
+
+- **Country Name (C)**: US
+- **State or Province Name (ST)**: California- **Locality Name (L)**: Mountain View
+- **Organization Name (O)**: Google Inc.
+- **Organizational Unit Name (OU)**: Android
+- **Common Name (CN)**: Android
+- **Validity Period**:
+  - **Not Before**: 2024-07-17 20:44:30
+  - **Not After**: 2054-07-17 20:44:30
+
+This certificate appears to be self-signed as the issuer (Google Inc., Android) and the subject (Android) are the same. The certificate includes a public key used for encryption and authentication purposes.
+
+If you want to decode this certificate further (e.g., extract the public key or more detailed information), you would typically use tools like `openssl`:
+
+```bash
+openssl x509 -in your_certificate.pem -text -noout
+```
+
+This command will print out all the details contained within the certificate in a human-readable format.
+
+klotz@tensor:~/wip$ openssl x509 -in google.cert -text -noout
+Certificate:
+    Data:
+        Version: 3 (0x2)
+        Serial Number:
+            7f:7a:2d:83:50:d2:8f:81:1f:c6:53:f6:3a:30:1a:a6:84:3f:9a:81
+        Signature Algorithm: sha256WithRSAEncryption
+        Issuer: C = US, ST = California, L = Mountain View, O = Google Inc., OU = Android, CN = Android
+        Validity
+            Not Before: Jul 17 20:44:30 2024 GMT
+            Not After : Jul 17 20:44:30 2054 GMT
+        Subject: C = US, ST = California, L = Mountain View, O = Google Inc., OU = Android, CN = Android
+        Subject Public Key Info:
+            Public Key Algorithm: rsaEncryption
+                Public-Key: (4096 bit)
+                Modulus:
+...
+
+
