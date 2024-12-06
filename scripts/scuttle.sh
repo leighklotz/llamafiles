@@ -125,9 +125,10 @@ else
     GRAMMAR_FLAG=""
 fi
 
+POST_PROMPT_ARG='Respond with only a short JSON object with these 4 fields: `link`, `title`, `description`, and `keywords` array'
 LINKS_PRE_PROMPT="Below is a web page article from the specified link address. Follow the instructions after the article."
-SCUTTLE_POST_PROMPT="Summarize the above web page article from ${LINK} and ignore website header at the start and look for the main article.\nRespond with only a short JSON object with these 4 fields: \`link\`, \`title\`, \`description\`, and \`keywords\` array."
+SCUTTLE_POST_PROMPT="Read the above web page article from ${LINK} and ignore website header at the start and look for the main article."
 
-( printf "# Text of link %s\n" "${LINK}"; fetch_text "${LINK}" | ${CAPTURE_COMMAND}; printf "\n# Instructions\n%b\n" "${SCUTTLE_POST_PROMPT}") | \
+( printf "# Text of link %s\n" "${LINK}"; fetch_text "${LINK}" | ${CAPTURE_COMMAND}; printf "\n# Instructions\n%b\n%b\n" "${SCUTTLE_POST_PROMPT}" "${POST_PROMPT_ARG}") | \
     "${SCRIPT_DIR}/llm.sh" --long ${GRAMMAR_FLAG} ${ARGS} "${LINKS_PRE_PROMPT}"| \
     post_process

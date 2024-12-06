@@ -17,7 +17,10 @@ if [ "$1" == "--capture-file" ]; then
 fi
 
 LINK=${1:-}			# LAST
-ARGS=${@:2}			# BUTLAST
+# todo: actually everything up to a '--' should go into POST_PROMPT and everything after '--' should go into the ARGS.
+POST_PROMPT_ARG="${@:2}"        # BUTLAST
+: "${POST_PROMPT_ARG:=Summarize:}"
+ARGS=''
 
 if [ -z "$LINK" ]; then
     usage
@@ -65,7 +68,7 @@ function fetch_text() {
 }
 
 LINKS_PRE_PROMPT="Below is a web page article from the specified link address. Follow the instructions after the article."
-SUMMARIZE_POST_PROMPT="Summarize the above web page article from ${LINK} and ignore website header at the start and look for the main article."
-( printf "# Text of link %s\n" "${LINK}"; fetch_text "${LINK}" | ${CAPTURE_COMMAND}; printf "\n# Instructions\n%b\n" "${SUMMARIZE_POST_PROMPT}") | \
+SUMMARIZE_POST_PROMPT="Read the above web page article from ${LINK} and ignore website header at the start and look for the main article."
+( printf "# Text of link %s\n" "${LINK}"; fetch_text "${LINK}" | ${CAPTURE_COMMAND}; printf "\n# Instructions\n%b\n%b" "${SUMMARIZE_POST_PROMPT}" "${POST_PROMPT_ARG}") | \
 "${SCRIPT_DIR}/llm.sh" --long ${ARGS} "${LINKS_PRE_PROMPT}"
 
