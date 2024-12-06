@@ -57,9 +57,9 @@ function fetch_text() {
     if [ "${fetcher}" == "lynx" ]; then
 	lynx --dump --nolist -useragent="${SCUTTLE_USER_AGENT}" -header="Referer: ${SCUTTLE_REFERER}" "${url}"
     elif [ "${fetcher}" == "links" ]; then
-	links -codepage utf-8 -force-html -width 72 -dump  -http.fake-user-agent "${SCUTTLE_USER_AGENT}" -http.fake-referer "${SCUTTLE_REFERER}" "${url}"
+	links -codepage utf-8 -force-html -width 72 -dump -http.fake-user-agent "${SCUTTLE_USER_AGENT}" -http.fake-referer "${SCUTTLE_REFERER}" "${url}"
     else
-	echo "error: NOLINKS"
+	echo "error: NOLINKS: fetcher=$fetcher"
 	exit 1
     fi
 }
