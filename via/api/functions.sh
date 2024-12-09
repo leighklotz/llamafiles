@@ -40,6 +40,8 @@ VIA_API_UNLOAD_MODEL_ENDPOINT="${VIA_API_CHAT_BASE}/v1/internal/model/unload"
 # dolphin-2.7-mixtral: yes
 USE_SYSTEM_ROLE="${USE_SYSTEM_ROLE:-}"
 
+# remove this because it forces a min bound on context
+# max_tokens: 4096, 
 TEMPLATE_SETTINGS="
     mode: \$mode,
     temperature_last: true,
@@ -52,7 +54,7 @@ TEMPLATE_SETTINGS="
     top_k: 40, tfs_z: 1.000, top_p: 0.950, min_p: 0.050, typical_p: 1.000, temp: \$temperature,
     mirostat: 0, mirostat_lr: 0.100, mirostat_ent: 5.000,
     n_keep: 1,
-    max_tokens: 4096, auto_max_new_tokens: true,
+    auto_max_new_tokens: true,
     skip_special_tokens: false"
 
 SYSTEM_ROLE_TEMPLATE="{
