@@ -42,6 +42,7 @@ USE_SYSTEM_ROLE="${USE_SYSTEM_ROLE:-}"
 
 # remove this because it forces a min bound on context
 # max_tokens: 4096, 
+# auto_max_new_tokens seems to work only with HF loaders
 TEMPLATE_SETTINGS="
     mode: \$mode,
     temperature_last: true,
@@ -55,6 +56,7 @@ TEMPLATE_SETTINGS="
     mirostat: 0, mirostat_lr: 0.100, mirostat_ent: 5.000,
     n_keep: 1,
     auto_max_new_tokens: true,
+    max_new_tokens: 4096,
     skip_special_tokens: false"
 
 SYSTEM_ROLE_TEMPLATE="{
