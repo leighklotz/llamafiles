@@ -40,9 +40,9 @@ VIA_API_UNLOAD_MODEL_ENDPOINT="${VIA_API_CHAT_BASE}/v1/internal/model/unload"
 # dolphin-2.7-mixtral: yes
 USE_SYSTEM_ROLE="${USE_SYSTEM_ROLE:-}"
 
-# remove this because it forces a min bound on context
-# max_tokens: 4096, 
 # auto_max_new_tokens seems to work only with HF loaders
+# max_tokens should be set to lower if the model has low context (i.e. 2k)
+# but if we do not set it then it defaults to 512, at least for gguf
 TEMPLATE_SETTINGS="
     mode: \$mode,
     temperature_last: true,
@@ -57,6 +57,7 @@ TEMPLATE_SETTINGS="
     n_keep: 1,
     auto_max_new_tokens: true,
     max_new_tokens: 4096,
+    max_tokens: 4096,
     skip_special_tokens: false"
 
 SYSTEM_ROLE_TEMPLATE="{
