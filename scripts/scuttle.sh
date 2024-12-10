@@ -72,7 +72,8 @@ fi
 function fetch_text() {
     local url="$1"
     if [ "${fetcher}" == "lynx" ]; then
-	lynx --dump --nolist -useragent="${SCUTTLE_USER_AGENT}" -header="Referer: ${SCUTTLE_REFERER}" "${url}"
+	# todo: support referer in lynx via -cfg file
+	lynx --dump --nolist -useragent="${SCUTTLE_USER_AGENT}" "${url}"
     elif [ "${fetcher}" == "links" ]; then
 	links -codepage utf-8 -force-html -width 72 -dump -http.fake-user-agent "${SCUTTLE_USER_AGENT}" -http.fake-referer "${SCUTTLE_REFERER}" "${url}"
     else
