@@ -44,13 +44,21 @@ USE_SYSTEM_ROLE="${USE_SYSTEM_ROLE:-}"
 # max_tokens should be set to lower if the model has low context (i.e. 2k)
 # but if we do not set it then it defaults to 512, at least for gguf
 TEMPLATE_SETTINGS="
+    temperature: \$temperature,
+    seed: \$seed,
+    max_tokens: 4096"
+
+if [ -e "${OPENAI_API_KEY}" ]; then
+TEMPLATE_SETTINGS="${TEMPLATE_SETTINGS},
     mode: \$mode,
+    temp: \$temperature,
     temperature_last: true,
     temperature: \$temperature,
     repetition_penalty: \$repetition_penalty,
     penalize_nl: \$penalize_nl,
     grammar_string: \$grammar_string,
     seed: \$seed,
+    repetition_penalty: \$repetition_penalty,
     repeat_last_n: 64, repeat_penalty: 1.000, frequency_penalty: 0.000, presence_penalty: 0.000,
     top_k: 40, tfs_z: 1.000, top_p: 0.950, min_p: 0.050, typical_p: 1.000, temp: \$temperature,
     mirostat: 0, mirostat_lr: 0.100, mirostat_ent: 5.000,
@@ -59,8 +67,10 @@ TEMPLATE_SETTINGS="
     max_new_tokens: 4096,
     max_tokens: 4096,
     skip_special_tokens: false"
+fi
 
 SYSTEM_ROLE_TEMPLATE="{
+    model: \$model_name,
     messages: [
       {
 	role: \"system\",
@@ -77,6 +87,7 @@ SYSTEM_ROLE_TEMPLATE="{
 # sampling order:  CFG -> Penalties -> top_k -> tfs_z -> typical_p -> top_p -> min_p -> temperature 
 
 NO_SYSTEM_ROLE_TEMPLATE="{
+    model: \$model_name,
     messages: [
       {
 	role: \"user\",
@@ -121,8 +132,8 @@ function via_api_mistral_output_fixup {
 # via_api_perform_inference "$MODE" "$SYSTEM_PROMPT" "$QUESTION" "$GRAMMAR_FILE"
 # todo: so many files and strings back and forth
 function via_api_perform_inference() {
-    local mode="$1" system_message="$2" question="$3" grammar_file="$4"
-    local temperature="$5" repetition_penalty="$6" penalize_nl="$7"
+    local model_type="$1" mode="$2" system_message="$3" question="$4" grammar_file="$5"
+    local temperature="$6" repetition_penalty="$7" penalize_nl="$8"
 
     if [ -z "$grammar_file" ] || [ -z "${VIA_API_USE_GRAMMAR}" ];
     then
@@ -166,13 +177,13 @@ function via_api_perform_inference() {
     # hack: Drop empty string, and null parameters. NaN seems th show as null.
     #       sadly seed must be a number
     temperature=${temperature:-NaN} 
-    # set -x
     data=$(jq --raw-input --raw-output  --compact-output -n \
 	      --arg mode "${mode}" \
 	      --argjson temperature ${temperature} \
 	      --argjson repetition_penalty ${repetition_penalty} \
 	      --argjson penalize_nl ${penalize_nl} \
 	      --argjson seed ${SEED} \
+	      --argjson model_name "\"${model_type}\"" \
 	      --rawfile system_message "${system_message_file}" \
 	      --rawfile question "${question_file}" \
 	      --rawfile grammar_string "${grammar_file}" \
@@ -189,7 +200,12 @@ function via_api_perform_inference() {
 
     # Invoke via the HTTP API endpoint
     # todo might need to do `set -o pipefail` here.
-    result=$(printf "%s" "${data}" | curl -s "${VIA_API_CHAT_COMPLETIONS_ENDPOINT}" -H 'Content-Type: application/json' -d @-)
+    # set -x
+    if [ -n "${OPENAI_API_KEY}" ]; then
+       result=$(printf "%s" "${data}" | curl -s "${VIA_API_CHAT_COMPLETIONS_ENDPOINT}" -H 'Content-Type: application/json' -H "Authorization: Bearer ${OPENAI_API_KEY}" -d @-)
+     else
+       result=$(printf "%s" "${data}" | curl -s "${VIA_API_CHAT_COMPLETIONS_ENDPOINT}" -H 'Content-Type: application/json' -d @-)
+    fi
     s=$?
     if [ "$s" != 0 ];
     then
@@ -227,6 +243,7 @@ function set_model_name {
     then
 	log_and_exit 2 "No model loaded via --api"
     fi
+    log_info "Setting model_name to ${model_name}"
 }
 
 function init_via_model {

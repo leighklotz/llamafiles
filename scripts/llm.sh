@@ -256,7 +256,7 @@ function perform_inference() {
     case "${VIA}" in
         "api")
             via_set_options
-            via_api_perform_inference "${MODEL_MODE}" "${SYSTEM_MESSAGE}" "${PROMPT}" "${GRAMMAR_FILE}" "${TEMPERATURE}" "${repeat_penalty}" "${penalize_nl}"
+            via_api_perform_inference "${MODEL_TYPE}" "${MODEL_MODE}" "${SYSTEM_MESSAGE}" "${PROMPT}" "${GRAMMAR_FILE}" "${TEMPERATURE}" "${repeat_penalty}" "${penalize_nl}"
             status=$?
             ;;
         "cli")
