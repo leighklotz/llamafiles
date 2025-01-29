@@ -29,6 +29,8 @@
 ;;;     Answers question about region in a new buffer
 ;;;   - M-X llm-write
 ;;;     Writes a response based on the region and prompt in a new buffer
+;;;   - M-X llm-load-model
+;;;     Load the specified user model; offers a completing reader.
 ;;;
 ;;; Some commands will use empty string if there is not a region, but other commands will error.
 ;;;
@@ -39,6 +41,12 @@
 (defcustom llm-rewrite-script-path
   "~/wip/llamafiles/llm_el/llm-emacs-helper.sh"
   "Path to the LLM rewrite script."
+  :type 'string
+  :group 'llm)
+
+(defcustom llm-via-script-path
+  "~/wip/llamafiles/scripts/via.sh"
+  "Path to the LLM via script."
   :type 'string
   :group 'llm)
 
@@ -177,6 +185,20 @@ See [shell-command-on-region] for interpretation of output-buffer-name."
 
 (defun llm-mode-text-type ()
   (symbol-name major-mode))
+
+(defun llm-load-model ()
+  "Load the specified model using LLM script."
+  (interactive)
+  (let* ((model-names (with-temp-buffer
+			(when (call-process llm-via-script-path nil t nil "--api" "--list-models")
+			  (split-string (buffer-string) "\n" t))))
+         (model-name (completing-read "Model: " model-names)))
+    (when model-name
+      (let ((results
+	     (with-temp-buffer
+	       (call-process llm-via-script-path nil t nil "--api" "--load-model" model-name)
+	       (split-string (buffer-string) "\n" t))))
+	(message "model-name=%s results=%s" model-name results)))))    
 
 ;;; these probably belong elsewhere
 (defun my-comint-get-previous-output ()

@@ -3,6 +3,7 @@
 ## Admin client for OpenAPI-compatible LLM server
 ## Tested with Oobabooga Text Generation Webui
 SCRIPT_DIR="$(dirname "$(realpath "${BASH_SOURCE}")")"
+status=0
 
 # Get site variables from env.sh, if present
 [ -z "${IN_LLM_SH_ENV}" ] && [ -f "${SCRIPT_DIR}/env.sh" ] && source "${SCRIPT_DIR}/env.sh"
@@ -40,6 +41,7 @@ function main {
 	local flag="$1"; shift
 	case "$flag" in
 	    -m|--model_type)
+		[ -z "$1" ] && usage
 		export MODEL_TYPE="$1"
 		shift ;;
 	    --get-model-name)
@@ -48,20 +50,25 @@ function main {
 		break ;;
 	    --load-model)
 		init_model
+		[ -z "$1" ] && usage
 		load_model "$1"
+		status=$?
 		shift
 		break ;;
 	    --unload-model)
 		init_model
 		unload_model
+		status=$?
 		break ;;
 	    --list-models)
 		init_model
 		list_models
+		status=$?
 		break ;;
 	    --list-model-types)
 		init_model
 		list_model_types
+		status=$?
 		break ;;
 	    --get-via)
 		printf "%s\n" "${VIA}"
@@ -77,3 +84,5 @@ function main {
 }
 
 main "$@"
+exit $status
+
