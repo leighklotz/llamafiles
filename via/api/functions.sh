@@ -276,7 +276,8 @@ function load_model {
     local model_path="$1"
     printf -v data '{ "model_name": "%s", "settings": {}, "args": {} }' "${model_path}"
     result=$(printf "%s" "${data}" | curl -s "${VIA_API_LOAD_MODEL_ENDPOINT}" -H 'Content-Type: application/json' -d @- || log_and_exit $? "via --api --load-model cannot curl")
-    printf "%s\n" "$result"
+    printf "%s\n" "${result}"
+    grep -s "OK" "${result}"	# set $?
 }
 
 function unload_model {
