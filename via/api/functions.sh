@@ -14,6 +14,7 @@ VIA_API_MODEL_INFO_ENDPOINT="${VIA_API_CHAT_BASE}/v1/internal/model/info"
 VIA_API_MODEL_LIST_ENDPOINT="${VIA_API_CHAT_BASE}/v1/internal/model/list"
 VIA_API_LOAD_MODEL_ENDPOINT="${VIA_API_CHAT_BASE}/v1/internal/model/load"
 VIA_API_UNLOAD_MODEL_ENDPOINT="${VIA_API_CHAT_BASE}/v1/internal/model/unload"
+AUTHORIZATION_PARAMS=()
 
 # LLM_LIB_DIR="$(realpath "${SCRIPT_DIR}/../lib")"
 # LLM_MODELS_DIR="$(realpath "${SCRIPT_DIR}/../models")"
@@ -43,14 +44,16 @@ USE_SYSTEM_ROLE="${USE_SYSTEM_ROLE:-}"
 # auto_max_new_tokens seems to work only with HF loaders
 # max_tokens should be set to lower if the model has low context (i.e. 2k)
 # but if we do not set it then it defaults to 512, at least for gguf
-TEMPLATE_SETTINGS="
+
+if [ -n "${OPENAI_API_KEY}" ]; then
+    AUTHORIZATION_PARAMS=(-H "Authorization: Bearer ${OPENAI_API_KEY}")
+    TEMPLATE_SETTINGS="
     temperature: \$temperature,
     seed: \$seed,
     max_tokens: 4096"
-
-if [ -e "${OPENAI_API_KEY}" ]; then
-TEMPLATE_SETTINGS="${TEMPLATE_SETTINGS},
-    mode: \$mode,
+else
+    TEMPLATE_SETTINGS="${TEMPLATE_SETTINGS},
+    mode: \$inference_mode,
     temp: \$temperature,
     temperature_last: true,
     temperature: \$temperature,
@@ -129,10 +132,10 @@ function via_api_mistral_output_fixup {
 
 # todo: make common with cli_perform_inference by splitting out all
 #       non-inference settings to the prepare_model
-# via_api_perform_inference "$MODE" "$SYSTEM_PROMPT" "$QUESTION" "$GRAMMAR_FILE"
+# via_api_perform_inference "$MODEL_TYPE" "$INFERENCE_MODE" "$SYSTEM_PROMPT" "$QUESTION" "$GRAMMAR_FILE"
 # todo: so many files and strings back and forth
 function via_api_perform_inference() {
-    local model_type="$1" mode="$2" system_message="$3" question="$4" grammar_file="$5"
+    local model_type="$1" inference_mode="$2" system_message="$3" question="$4" grammar_file="$5"
     local temperature="$6" repetition_penalty="$7" penalize_nl="$8"
 
     if [ -z "$grammar_file" ] || [ -z "${VIA_API_USE_GRAMMAR}" ];
@@ -178,7 +181,7 @@ function via_api_perform_inference() {
     #       sadly seed must be a number
     temperature=${temperature:-NaN} 
     data=$(jq --raw-input --raw-output  --compact-output -n \
-	      --arg mode "${mode}" \
+	      --arg mode "${inference_mode}" \
 	      --argjson temperature ${temperature} \
 	      --argjson repetition_penalty ${repetition_penalty} \
 	      --argjson penalize_nl ${penalize_nl} \
@@ -201,11 +204,7 @@ function via_api_perform_inference() {
     # Invoke via the HTTP API endpoint
     # todo might need to do `set -o pipefail` here.
     # set -x
-    if [ -n "${OPENAI_API_KEY}" ]; then
-       result=$(printf "%s" "${data}" | curl -s "${VIA_API_CHAT_COMPLETIONS_ENDPOINT}" -H 'Content-Type: application/json' -H "Authorization: Bearer ${OPENAI_API_KEY}" -d @-)
-     else
-       result=$(printf "%s" "${data}" | curl -s "${VIA_API_CHAT_COMPLETIONS_ENDPOINT}" -H 'Content-Type: application/json' -d @-)
-    fi
+    result=$(printf "%s" "${data}" | curl -s "${VIA_API_CHAT_COMPLETIONS_ENDPOINT}" -H 'Content-Type: application/json' "${AUTHORIZATION_PARAMS[@]}" -d @-)
     s=$?
     if [ "$s" != 0 ];
     then
@@ -259,11 +258,11 @@ function prepare_model {
 function get_model_name {
     # curl prints
     # `{"model_name":"LoneStriker_dolphin-2.7-mixtral-8x7b-3.75bpw-h6-exl2","lora_names":[]}`
-    curl -s "${VIA_API_MODEL_INFO_ENDPOINT}" | jq -r .model_name
+    curl -s "${VIA_API_MODEL_INFO_ENDPOINT}" "${AUTHORIZATION_PARAMS[@]}" | jq -r .model_name
 }
 
 function list_models {
-    curl -s "${VIA_API_MODEL_LIST_ENDPOINT}" | jq -r '.model_names[]'
+    curl -s "${VIA_API_MODEL_LIST_ENDPOINT}" "${AUTHORIZATION_PARAMS[@]}" | jq -r '.model_names[]'
 }
 
 function list_model_types() {
@@ -275,13 +274,13 @@ function list_model_types() {
 function load_model {
     local model_path="$1"
     printf -v data '{ "model_name": "%s", "settings": {}, "args": {} }' "${model_path}"
-    result=$(printf "%s" "${data}" | curl -s "${VIA_API_LOAD_MODEL_ENDPOINT}" -H 'Content-Type: application/json' -d @- || log_and_exit $? "via --api --load-model cannot curl")
+    result=$(printf "%s" "${data}" | curl -s "${VIA_API_LOAD_MODEL_ENDPOINT}" -H 'Content-Type: application/json' "${AUTHORIZATION_PARAMS[0]}" -d @- || log_and_exit $? "via --api --load-model cannot curl")
     printf "%s\n" "${result}"
     grep -s "OK" "${result}"	# set $?
 }
 
 function unload_model {
-    result=$(printf "%s" "${data}" | curl -s "${VIA_API_UNLOAD_MODEL_ENDPOINT}" -d '' || log_and_exit $? "via --api --unload-model cannot curl")
+    result=$(printf "%s" "${data}" | curl -s "${VIA_API_UNLOAD_MODEL_ENDPOINT}" "${AUTHORIZATION_PARAMS[0]}" -d '' || log_and_exit $? "via --api --unload-model cannot curl")
     printf "%s\n" "$result"
 }
 
