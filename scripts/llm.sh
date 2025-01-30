@@ -2,6 +2,7 @@
 
 SCRIPT_DIR="$(dirname "$(realpath "${BASH_SOURCE}")")"
 
+
 USAGE='[--via api] | [ --via cli [-m|--model-type model-type] [--fast | --long] [--context-length|-c n] [--ngl n] [--n-predict n] ] [--stdin|--interactive|-i] [--temperature temp] [--n-predict n] [--grammar-file file.gbnf] [--info] [--verbose|-v] [--debug] [--] QUESTION*
 
 Mode of operation:
@@ -45,6 +46,7 @@ Environment variables are used to configure the behavior of llm.sh. Here are the
 - LLM_SH_ENV: A flag to indicate that llm.sh environment is being loaded. Used internally.
 - IN_LLM_SH_ENV: A flag to indicate that the environment is already loaded. Used internally.
 - MODEL_TYPE: The type of model to use (e.g., mistral, vicuna, etc.). Default: mistral.
+- MODEL_MODE: The mode of inference (chat, instruct, chat-instruct): Default: chat-instruct
 - VIA: The mode of operation. Can be ''api'' or ''cli''. Default: cli.
 - GPU: The GPU configuration. Can be ''auto'', ''nvidia'', or ''omit''. Default: auto.
 - GRAMMAR_FILE: The path to a grammar file (file.gbnf).
@@ -89,6 +91,7 @@ function parse_args() {
                     ;;
                 --via) shift; VIA="$1" ;;
                 --model-type|-m) shift; MODEL_TYPE="$1" ;;
+		--inference-mode) shift; INFERENCE_MODE="$1" ;;
 		# Logging 
                 --info) INFO=1 ;;
                 --verbose|-v) VERBOSE=1 ;;
@@ -135,8 +138,10 @@ parse_args ${@}
 ###
 ### Process flags and environment variables
 ###
+
 : "${VIA:=cli}"
 : "${MODEL_TYPE:=mistral}"
+: "${INFERENCE_MODE:=chat-instruct}"
 # Logging
 : "${INFO:=${VERBOSE}}"
 : "${VERBOSE:=}"
@@ -256,7 +261,7 @@ function perform_inference() {
     case "${VIA}" in
         "api")
             via_set_options
-            via_api_perform_inference "${MODEL_MODE}" "${SYSTEM_MESSAGE}" "${PROMPT}" "${GRAMMAR_FILE}" "${TEMPERATURE}" "${repeat_penalty}" "${penalize_nl}"
+            via_api_perform_inference "${MODEL_TYPE}" "${INFERENCE_MODE}" "${SYSTEM_MESSAGE}" "${PROMPT}" "${GRAMMAR_FILE}" "${TEMPERATURE}" "${repeat_penalty}" "${penalize_nl}"
             status=$?
             ;;
         "cli")
@@ -275,6 +280,7 @@ function perform_inference() {
 ###
 ### Main Flow
 ###
+
 init_model
 process_question_escapes
 process_stdin
