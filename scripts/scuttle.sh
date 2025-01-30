@@ -6,7 +6,7 @@ CAPTURE_COMMAND="cat"
 . "${SCRIPT_DIR}/../via/functions.sh"
 
 function usage() {
-    echo "Usage: $(basename "$0") [--capture-file file] [--json] <LINK> [llm.sh options]"
+    echo "Usage: $(basename "$0") [--capture-file file] <LINK>|- [llm.sh options]"
     exit 1
 }
 
@@ -37,23 +37,26 @@ do
     esac
 done
 
-if [ -z "$LINK" ];
-then
+if [ -z "$LINK" ]; then
     usage
 fi
 
-if command -v lynx &> /dev/null; then
-    fetcher=lynx
+if [ "${LINK}" == "-" ]; then
+    fetcher="cat"
+elif command -v lynx &> /dev/null; then
+    fetcher="lynx"
     fetch_version="$(lynx -version 2>&1 | head -1)"
     if [[ $fetch_version =~ Lynx\ Version\ ([0-9a-zA-Z.]+) ]]; then
 	fetch_version="Lynx/${BASH_REMATCH[1]}"
     fi
 elif command -v links &> /dev/null; then
-    fetcher=links
+    fetcher="links"
     fetch_version="$(links -version 2>&1 | head -1)"
     if [[ $fetch_version =~ Links\ ([0-9a-zA-Z.]+) ]]; then
 	fetch_version="Links/${BASH_REMATCH[1]}"
     fi
+else
+    log_and_exit 1 "error: NOLINKS"
 fi
 
 if [ -e "${fetch_version}" ]; then
@@ -69,18 +72,15 @@ fi
 function fetch_text() {
     local url="$1"
     if [ "${fetcher}" == "lynx" ]; then
-	lynx --dump --nolist -useragent="${SCUTTLE_USER_AGENT}" -header="Referer: ${SCUTTLE_REFERER}" "${url}"
+	# todo: support referer in lynx via -cfg file
+	lynx --dump --nolist -useragent="${SCUTTLE_USER_AGENT}" "${url}"
     elif [ "${fetcher}" == "links" ]; then
-	links -codepage utf-8 -force-html -width 72 -dump  -http.fake-user-agent "${SCUTTLE_USER_AGENT}" -http.fake-referer "${SCUTTLE_REFERER}" "${url}"
+	links -codepage utf-8 -force-html -width 72 -dump -http.fake-user-agent "${SCUTTLE_USER_AGENT}" -http.fake-referer "${SCUTTLE_REFERER}" "${url}"
     else
-	echo "error: NOLINKS"
-	exit 1
+	log_and_exit 3 "error: NOLINKS: fetcher=$fetcher"
+	exit 3
     fi
 }
-
-
-SCUTTLE_SYSTEM_MESSAGE='Summarize the web page article at the specified link address. Respond with only a short JSON object with these 4 fields: `link`, `title`, `description`, and `keywords` array:'
-export SYSTEM_MESSAGE="${SYSTEM_MESSAGE:-$(printf "%b" "${SCUTTLE_SYSTEM_MESSAGE}")}"
 
 # replace all '```json`' and '```' with empty. hope that's enough and we don't ahve to get stateful.
 function preprocess_markdown {
@@ -126,4 +126,10 @@ else
     GRAMMAR_FLAG=""
 fi
 
-(fetch_text "${LINK}" | ${CAPTURE_COMMAND}; printf "\n# Instruction\n%s\n" "${SCUTTLE_SYSTEM_MESSAGE}") | "${SCRIPT_DIR}/llm.sh" --long ${GRAMMAR_FLAG} ${ARGS} "# Text of link ${LINK}" | post_process
+POST_PROMPT_ARG='Respond with only a short JSON object with these 4 fields: `link`, `title`, `description`, and `keywords` array'
+LINKS_PRE_PROMPT="Below is a web page article from the specified link address. Follow the instructions after the article."
+SCUTTLE_POST_PROMPT="Read the above web page article from ${LINK} and ignore website header at the start and look for the main article."
+
+( printf "# Text of link %s\n" "${LINK}"; fetch_text "${LINK}" | ${CAPTURE_COMMAND}; printf "\n# Instructions\n%b\n%b\n" "${SCUTTLE_POST_PROMPT}" "${POST_PROMPT_ARG}") | \
+    "${SCRIPT_DIR}/llm.sh" --long ${GRAMMAR_FLAG} ${ARGS} "${LINKS_PRE_PROMPT}"| \
+    post_process

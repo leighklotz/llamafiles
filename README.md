@@ -1,4 +1,4 @@
-# LLM Help CLI for Linux
+# LLM Help CLI for Linux and Mac
 
 Using https://github.com/Mozilla-Ocho/llamafile and https://github.com/jart models and scripts, and offering support for https://github.com/oobabooga/text-generation-webui and other API providers.
 

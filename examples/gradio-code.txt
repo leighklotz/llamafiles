@@ -1,0 +1,33 @@
+$ bashblock cat .local/lib/python3.10/site-packages/gradio/components/code.py  | help.sh what are gradio gr.Code language options
+Based on the provided code snippet from the `gradio` library, the `gr.Code` component supports the following language options:
+
+1. python
+2. c
+3. cpp
+4. markdown
+5. json
+6. html
+7. css
+8. javascript
+9. jinja2
+10. typescript
+11. yaml
+12. dockerfile
+13. shell
+14. r
+15. sql
+16. sql-msSQL
+17. sql-mySQL
+18. sql-mariaDB
+19. sql-sqlite
+20. sql-cassandra
+21. sql-plSQL
+22. sql-hive
+23. sql-pgSQL
+24. sql-gql
+25. sql-gpSQL
+26. sql-sparkSQL
+27. sql-esper
+28. None
+
+These options are defined in the `languages` attribute of the `Code` class.
