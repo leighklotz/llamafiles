@@ -203,7 +203,6 @@ function via_api_perform_inference() {
     # Invoke via the HTTP API endpoint
     # todo might need to do `set -o pipefail` here.
     # set -x
-    [ -n "${INFO}" ] && (printf "echo %s | curl %s %s\n" "${VIA_API_CHAT_COMPLETIONS_ENDPOINT}" "${data}")
     result=$(printf "%s" "${data}" | curl -s "${VIA_API_CHAT_COMPLETIONS_ENDPOINT}" -H 'Content-Type: application/json' "${AUTHORIZATION_PARAMS[@]}" -d @-)
     s=$?
     if [ "$s" != 0 ];
