@@ -1,7 +1,7 @@
 #!/bin/bash
 
 SCRIPT_DIR="$(dirname "$(realpath "${BASH_SOURCE[0]}")")"
-HELP_SH="help.sh"
+HELP_SH='help.sh'
 
 GRAMMAR_FILE_FLAG=""
 HELP_SH_OPTIONS=""
@@ -9,6 +9,7 @@ GIT_DIFF_OPTIONS=""
 : "${OUTPUT_TYPE:=git-commit command}"
 : "${LINE_TYPE:=one-line}"
 LINE_TYPE=""
+
 # INHIBIT_GRAMMAR=1		# if it's not working in the model you use, turn it off
 
 function usage() {
@@ -71,16 +72,19 @@ printf -v MESSAGE_LINE '%s with a %s message' "${OUTPUT_TYPE}" "${LINE_TYPE}"
 default_system_message="$(printf "%b" "You are an expert in Linux, Bash, Python, general programming, and related topics.\n")"
 export SYSTEM_MESSAGE="${SYSTEM_MESSAGE:-${default_system_message}}"
 
-PROMPT="Describe the changes listed in unified \`git diff\` below and output a ${MESSAGE_LINE} for the changes:\n"
-printf "%b\n" "${PROMPT}"
+PROMPT="Describe the changes listed in unified \`git diff\` below and output a ${MESSAGE_LINE} command for the changes:\n"
+
+if [ -z "${QUIET}" ]; then
+    printf "%b\n" "${PROMPT}"
+fi
 
 if [ -z "${INHIBIT_GRAMMAR}" ]; then
     fn=${SCRIPT_DIR}/${MESSAGE_LINE// /-}-grammar.gbnf
     if [ -f "${fn}" ]; then
 	printf -v GRAMMAR_FILE_FLAG -- "--grammar-file %s" "${fn}"
     else
-	# echo "$0: Can't find grammar file" "${fn}"
-	true
+	# printf "%s: grammar file not found; skipping: %s\n" "$0" "${fn}" >> /dev/stderr
+        true
     fi
 fi
 
