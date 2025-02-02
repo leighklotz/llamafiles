@@ -276,13 +276,12 @@ function load_model {
     printf -v data '{ "model_name": "%s", "settings": {}, "args": {} }' "${model_path}"
     # use no quotes on AUTHORIZATION_PARAMS so it expands into nothing if unset, or multiple tokens if set
     result=$(printf "%s" "${data}" | curl -s "${VIA_API_LOAD_MODEL_ENDPOINT}" -H 'Content-Type: application/json' ${AUTHORIZATION_PARAMS[0]} -d @- || log_and_exit $? "via --api --load-model cannot curl")
-    exit 33
     [ -n "${INFO}" ] && log_info "load_model result= ${result}"
     grep -s "OK" "${result}"	# set $?
 }
 
 function unload_model {
-    result=$(printf "%s" "${data}" | curl -s "${VIA_API_UNLOAD_MODEL_ENDPOINT}" "${AUTHORIZATION_PARAMS[0]}" -d '' || log_and_exit $? "via --api --unload-model cannot curl")
+    result=$(printf "%s" "${data}" | curl -s "${VIA_API_UNLOAD_MODEL_ENDPOINT}" "${AUTHORIZATION_PARAMS[@]}" -d '' || log_and_exit $? "via --api --unload-model cannot curl")
     printf "%s\n" "$result"
 }
 
