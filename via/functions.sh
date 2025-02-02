@@ -10,6 +10,13 @@ VIA_CLI_FUNCTIONS_PATH="$(realpath "${VIA_DIRECTORY}/cli/functions.sh")"
 VIA_API_FUNCTIONS_PATH="$(realpath "${VIA_DIRECTORY}/api/functions.sh")"
 MODELS_DIRECTORY="$(realpath "${SCRIPT_DIR}/../models")"
 
+COLOR_RED='\033[1;31m'
+COLOR_YELLOW='\033[1;33m'
+COLOR_ORANGE='\033[1;38;5;202'
+COLOR_GREEN='\033[1;32m'
+COLOR_BLUE='\033[1;36m'
+NOCOLOR='\033[0m'
+
 # RWK: https://gist.github.com/akostadinov/33bb2606afe1b334169dfbf202991d36?permalink_comment_id=4962266#gistcomment-4962266
 function stack_trace() {
     local status_code="${1}"
@@ -49,7 +56,7 @@ function log_info {
     local prog="$(basename "$0")"
     local message="$1"
     if [ -n "${INFO}" ]; then
-	printf "* %s: %s\n" "${prog}" "${message}" > /dev/stderr
+	printf "${COLOR_BLUE}* %s:${NOCOLOR} %s\n" "${prog}" "${message}" > /dev/stderr
     fi
 }
 
@@ -57,14 +64,14 @@ function log_warn {
     local prog="$(basename "$0")"
     local code=$1
     local message="$2"
-    printf "* WARN %s (%s): %s\n" "${prog}" "${code}" "${message}" > /dev/stderr
+    printf "${COLOR_ORANGE}* WARN %s (%s):${NOCOLOR} %s\n" "${prog}" "${code}" "${message}" > /dev/stderr
 }
 
 function log_error {
     local prog="$(basename "$0")"
     local message="$1"
     local code=$?
-    printf "* ERROR in %s: %s\n" "${prog}" "${message}" > /dev/stderr
+    printf "${COLOR_RED}* ERROR in %s:${NOCOLOR} %s\n" "${prog}" "${message}" > /dev/stderr
     [ -n "${PRINT_STACK_TRACE}" ] && printf "%s\n" "$(stack_trace $code)" > /dev/stderr
 }
 
@@ -72,7 +79,7 @@ function log_and_exit {
     local prog="$(basename "$0")"
     local code="$1"
     local message="$2"
-    printf "* ERROR in %s: %s\n" "${prog}" "${message}" > /dev/stderr
+    printf "${COLOR_RED}* ERROR in %s:${NOCOLOR} %s\n" "${prog}" "${message}" > /dev/stderr
     [ -n "${PRINT_STACK_TRACE}" ] && printf "%s\n" "$(stack_trace "$code")" > /dev/stderr
     [[ "${code}" =~ ^[0-9]+$ ]] && exit "${code}" || exit 1
 }

@@ -1,4 +1,4 @@
-# LLM Help CLI for Linux
+# LLM Help CLI for Linux and Mac
 
 Using https://github.com/Mozilla-Ocho/llamafile and https://github.com/jart models and scripts, and offering support for https://github.com/oobabooga/text-generation-webui and other API providers.
 
@@ -437,6 +437,7 @@ Many of these are better than this package. Please try them out.
 - https://llm.datasette.io/
 - https://github.com/simonw/llm-cmd
 - https://github.com/jart
+- https://github.com/ErikBjare/gptme
 - https://github.com/llimllib/gpt-bash-cli
 - https://github.com/yusufcanb/tlm
 - https://github.com/noemaresearch/pinboard

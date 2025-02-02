@@ -1,0 +1,26 @@
+~$ help.sh how do I show a bash function definition using declare
+To show the definition of a bash function using the `declare` command, you can use the `-f` option with the `declare` command. The `-f` option tells `declare` to display function definitions.
+
+Here is how you can do it:
+
+```bash
+declare -f function_name
+```
+
+Replace `function_name` with the name of the function you want to see the definition of.
+
+For example, if you have a function called `myFunction`, you would run:
+
+```bash
+declare -f myFunction
+```
+
+This command will print the definition of `myFunction` to the terminal.
+
+If you want to see the definition of all defined functions in your current shell, you can simply use:
+
+```bash
+declare -f
+```
+
+This will list all functions and their definitions.

@@ -3,13 +3,13 @@
 SCRIPT_DIR="$(dirname "$(realpath "${BASH_SOURCE[0]}")")"
 HELP_SH='help.sh'
 
-GRAMMAR_FILE_FLAG=''
-HELP_SH_OPTIONS=''
-GIT_DIFF_OPTIONS=''
-MESSAGE_LINE=''
-OUTPUT_TYPE=''
-LINE_TYPE=''
-QUIET=''
+GRAMMAR_FILE_FLAG=""
+HELP_SH_OPTIONS=""
+GIT_DIFF_OPTIONS=""
+: "${OUTPUT_TYPE:=git-commit command}"
+: "${LINE_TYPE:=one-line}"
+LINE_TYPE=""
+
 # INHIBIT_GRAMMAR=1		# if it's not working in the model you use, turn it off
 
 function usage() {
@@ -41,8 +41,12 @@ while [[ $# -gt 0 ]]; do
 	    LINE_TYPE='multi-line'
 	    shift
 	    ;;
-	--pull-request|--git-commit)
-	    OUTPUT_TYPE="${1//--/}"
+	--git-commit)
+	    OUTPUT_TYPE="${1//--/} command"
+	    shift
+	    ;;
+	--pull-request)
+	    OUTPUT_TYPE="${1//--/} message"
 	    shift
 	    ;;
 	--quiet|-q)
@@ -61,11 +65,10 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-: "${OUTPUT_TYPE:=git-commit}"
-: "${LINE_TYPE:=one-line}"
-printf -v MESSAGE_LINE '%s %s' "${LINE_TYPE}" "${OUTPUT_TYPE}"
+printf -v MESSAGE_LINE '%s with a %s message' "${OUTPUT_TYPE}" "${LINE_TYPE}"
 
-# Set main parameters
+# Construct Prompt
+# todo: fix the string concat
 default_system_message="$(printf "%b" "You are an expert in Linux, Bash, Python, general programming, and related topics.\n")"
 export SYSTEM_MESSAGE="${SYSTEM_MESSAGE:-${default_system_message}}"
 
