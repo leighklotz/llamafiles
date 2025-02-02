@@ -45,7 +45,8 @@ Environment variables are used to configure the behavior of llm.sh. Here are the
 - LLM_SH_ENV: A flag to indicate that llm.sh environment is being loaded. Used internally.
 - IN_LLM_SH_ENV: A flag to indicate that the environment is already loaded. Used internally.
 - MODEL_TYPE: The type of model to use (e.g., mistral, vicuna, etc.). Default: mistral.
-- VIA: The mode of operation. Can be ''api'' or ''cli''. Default: cli.
+- MODEL_MODE: The inference mode (e.g., chat, instruct, chat-instruct)
+- VIA: The mode of LLM operation service. Can be ''api'' or ''cli''. Default: cli.
 - GPU: The GPU configuration. Can be ''auto'', ''nvidia'', or ''omit''. Default: auto.
 - GRAMMAR_FILE: The path to a grammar file (file.gbnf).
 - BATCH_SIZE: The batch size for processing.
