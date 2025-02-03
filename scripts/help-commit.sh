@@ -83,7 +83,7 @@ if [ -z "${INHIBIT_GRAMMAR}" ]; then
     if [ -f "${fn}" ]; then
 	printf -v GRAMMAR_FILE_FLAG -- "--grammar-file %s" "${fn}"
     else
-	# printf "%s: grammar file not found; skipping: %s\n" "$0" "${fn}" >> /dev/stderr
+	[ -n "${VERBOSE}" ] && printf "%s: grammar file not found; skipping: %s\n" "$0" "${fn}" >> /dev/stderr
         true
     fi
 fi
