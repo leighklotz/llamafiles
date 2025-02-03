@@ -205,7 +205,7 @@ function via_api_perform_inference() {
     # set -x
     result=$(printf "%s" "${data}" | curl -s "${VIA_API_CHAT_COMPLETIONS_ENDPOINT}" -H 'Content-Type: application/json' "${AUTHORIZATION_PARAMS[@]}" -d @-)
     s=$?
-    if [ "$s" != 0 ];
+    if [ "$s" -ne 0 ];
     then
         cleanup_temp_files $s
         log_and_exit $s "via --api perform inference cannot curl"
@@ -273,11 +273,15 @@ function list_model_types() {
 ## and this is really via/api/function.sh.
 function load_model {
     local model_path="$1"
+    local data
     printf -v data '{ "model_name": "%s", "settings": {}, "args": {} }' "${model_path}"
     # use no quotes on AUTHORIZATION_PARAMS so it expands into nothing if unset, or multiple tokens if set
-    result=$(printf "%s" "${data}" | curl -s "${VIA_API_LOAD_MODEL_ENDPOINT}" -H 'Content-Type: application/json' ${AUTHORIZATION_PARAMS[0]} -d @- || log_and_exit $? "via --api --load-model cannot curl")
+    result=$(printf "%s" "${data}" | curl -s "${VIA_API_LOAD_MODEL_ENDPOINT}" -H 'Content-Type: application/json' ${AUTHORIZATION_PARAMS[0]} -d @- || { log_and_exit $? "via --api --load-model cannot curl"; return 1; })
     [ -n "${INFO}" ] && log_info "load_model result= ${result}"
-    grep -s "OK" "${result}"	# set $?
+    grep -s "OK" <<< "${result}"
+    local s=$?
+    [ $s -ne 0 ] && log_error "load_model result=${result}"
+    return $s;
 }
 
 function unload_model {
