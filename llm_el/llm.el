@@ -249,7 +249,6 @@ Note:
                       llm-output))))
     (query-replace-regexp regex replacer)))
 
-
 ;;;
 ;;; my keybindings, should move out
 ;;; 
@@ -259,6 +258,5 @@ Note:
 (global-set-key (kbd "M-s x") 'llm-explain-output)
 (global-set-key (kbd "M-s i") 'llm-insert)
 (global-set-key (kbd "M-s c") 'llm-complete)
-
 
 (provide 'llm)
