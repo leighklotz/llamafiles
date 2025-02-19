@@ -6,7 +6,7 @@ HELP_SH='help.sh'
 GRAMMAR_FILE_FLAG=""
 HELP_SH_OPTIONS=""
 GIT_DIFF_OPTIONS=""
-: "${OUTPUT_TYPE:=git-commit command}"
+: "${OUTPUT_TYPE:=\`git commit\` command}"
 : "${LINE_TYPE:=one-line}"
 LINE_TYPE=""
 
@@ -65,14 +65,14 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-printf -v MESSAGE_LINE '%s with a %s message' "${OUTPUT_TYPE}" "${LINE_TYPE}"
+printf -v MESSAGE_LINE '%s%s' "${OUTPUT_TYPE}" "${LINE_TYPE:+ with a $LINE_TYPE message}"
 
 # Construct Prompt
 # todo: fix the string concat
 default_system_message="$(printf "%b" "You are an expert in Linux, Bash, Python, general programming, and related topics.\n")"
 export SYSTEM_MESSAGE="${SYSTEM_MESSAGE:-${default_system_message}}"
 
-PROMPT="Describe the changes listed in unified \`git diff\` below and output a ${MESSAGE_LINE} command for the changes:\n"
+PROMPT="Describe the changes listed in the unified \`git diff\` below and output a ${MESSAGE_LINE} command for the changes:\n"
 
 if [ -z "${QUIET}" ]; then
     printf "%b\n" "${PROMPT}"
