@@ -42,7 +42,7 @@ case "$USE_CASE" in
     ask)
 	# args: major_mode prompt*
 	MAJOR_MODE=$1; shift; PROMPT="${*}"
-	printf -v SYSTEM_MESSAGE "Answer the user question about this the following %s:\n" "${MAJOR_MODE}"
+	printf -v SYSTEM_MESSAGE "Answer the user question about the following %s content:\n" "${MAJOR_MODE}"
 	;;
 
     write)
