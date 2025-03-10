@@ -294,11 +294,27 @@ Note:
 ;;; emacs-lisp reflective help
 ;;;
 (defun llm-apropos (apropos-match question)
-  "Calls \\[apropos] with apropos-match and then \\[llm-ask]] with question"
+  "Calls \\[apropos] with apropos-match and then \\[llm-ask] with question"
   (interactive "sApropos: \nsQuestion: ")
   (save-excursion
     (apropos apropos-match)
-    (llm-region-internal "ask" llm-default-via llm-default-model-type (llm-mode-text-type) question (point-min) (point-max) llm-ask-buffer-name nil)))
+    (llm-ask question (point-min) (point-max))))
+
+;;; Get function documentation and ask a question about it
+;;; Not sure
+(defun llm-describe-function (function-name question)
+  "Calls \\[documentation] with function-name and then \\[llm-ask]] with question.
+Function-name is completed from the list of defined Emacs Lisp functions."
+  (interactive 
+   (list (intern (completing-read "Function: " obarray 'fboundp))
+         (read-string "Question: ")))
+  (save-excursion
+    (describe-function function-name)
+    (set-buffer (help-buffer))
+    (llm-ask question (point-min) (point-max))))
+
+In this version, `completing-read` is used to prompt the user for a function name, and it provides completion based on the list of all bound functions (`obarray` with the predicate `fboundp`). The `read-string` function is used for the question prompt.
+
 
 ;;;
 ;;; my keybindings, should move out
