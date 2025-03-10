@@ -291,6 +291,16 @@ Note:
     (query-replace-regexp regex replacer)))
 
 ;;;
+;;; emacs-lisp reflective help
+;;;
+(defun llm-apropos (apropos-match question)
+  "Calls \\[apropos] with apropos-match and then \\[llm-ask]] with question"
+  (interactive "sApropos: \nsQuestion: ")
+  (save-excursion
+    (apropos apropos-match)
+    (llm-region-internal "ask" llm-default-via llm-default-model-type (llm-mode-text-type) question (point-min) (point-max) llm-ask-buffer-name nil)))
+
+;;;
 ;;; my keybindings, should move out
 ;;; 
 
