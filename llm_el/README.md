@@ -21,6 +21,9 @@ functions.
 ## M-x functions
 Here is a brief overview of the main functions provided by the package:
 
+### `llm-ask`
+The `llm-write` function respondes in the `*llm-ask*` buffer based on the prompt and current region or buffer.
+
 ### `llm-write`
 
 The `llm-write` function writes a new buffer based on the prompt and current region, as well as the output of the
@@ -47,6 +50,11 @@ Here is an example of how to use the `llm-summarize-buffer` function:
 
 This will bind the `llm-summarize-buffer` function to the `M-s $` key sequence, allowing you to quickly summarize the
 current buffer by pressing the key sequence.
+
+### `llm-todo`
+
+The `llm-todo` function rewrites the current region using the LLM, focusing on 'todo' comments.
+
 
 ### `llm-rewrite`
 
@@ -76,6 +84,22 @@ By default, it is bound to `M-s x` when you are in `comint-mode`:
 
 Comint mode others a few other functions to operate on recent output. Comint also offers automated filters, but this
 keybinding gives manual, rahter than automatic, control over access to Emacs `M-x shell` output.
+
+### `llm-apropos`
+Reflective function for asking about Emacs symbols, for programming and using Emacs Lisp and M-X commands.
+Implemented in the obvious way, calling the underlying Emacs `apropos` function and operating on the output.
+
+![docs/llm-apropos.png](docs/llm-apropos.png)
+
+### `llm-describe-function`
+Reflective function for asking about Emacs symbols, for programming and using Emacs Lisp and M-X commands.
+Implemented in the obvious way, calling the underlying Emacs `describe-function` and operating on the output.
+
+### `llm-load-model`
+`M-x llm-load-model` loads the specified LLM.
+
+### `llm-query-replace`
+`M-x llm-query-replace` uses the LLM to generate replacement text for occurrences matching a specified regular expression in the buffer, based on a user-provided prompt.
 
 Conclusion
 ----------
