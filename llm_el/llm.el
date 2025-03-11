@@ -78,6 +78,7 @@
 (defvar llm-write-buffer-name   "*llm-write*")
 (defvar llm-summary-buffer-name "*llm-summary*")
 (defvar llm-error-buffer-name   "*llm-errors*")
+(defvar llm-diff-buffer-name    "*llm-diff*")
 
 ;;; User commands
 (defun llm-ask (prompt &optional start end)
@@ -197,7 +198,7 @@ See [shell-command-on-region] for interpretation of output-buffer-name."
   (let* ((current-buffer-content (buffer-substring-no-properties (point-min) (point-max)))
          (temp-file-before (make-temp-file "emacs-diff-before-"))
          (temp-file-after (make-temp-file "emacs-diff-after-"))
-         (diff-buffer (get-buffer-create "*Diff*"))
+         (diff-buffer (get-buffer-create llm-diff-buffer-name))
          ;; git merge-file -p "$before" "$after" /dev/null > "$output"
          (git-merge-format "git merge-file -p \"%s\" /dev/null \"%s\"")
          (diff-command (format git-merge-format temp-file-before temp-file-after)))
@@ -212,7 +213,7 @@ See [shell-command-on-region] for interpretation of output-buffer-name."
       (insert new-string))
     
     (let ((result (shell-command-to-string diff-command)))
-      ;; Run the diff command and capture the output in the *Diff* buffer
+      ;; Run the diff command and capture the output in the *llm-diff* buffer
       (erase-buffer)
       (insert result)
       (smerge-mode)
