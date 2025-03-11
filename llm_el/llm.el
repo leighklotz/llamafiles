@@ -313,9 +313,6 @@ Function-name is completed from the list of defined Emacs Lisp functions."
     (set-buffer (help-buffer))
     (llm-ask question (point-min) (point-max))))
 
-In this version, `completing-read` is used to prompt the user for a function name, and it provides completion based on the list of all bound functions (`obarray` with the predicate `fboundp`). The `read-string` function is used for the question prompt.
-
-
 ;;;
 ;;; my keybindings, should move out
 ;;; 

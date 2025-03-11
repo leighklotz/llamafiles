@@ -1,13 +1,16 @@
-;;; llm.el - LLM-based rewriting and summarization functions for Emacs buffers
+;;; llm-keystroke-npc.el
 
-;; todo:  write an emacs function m-x `llm-keystroke-npc` to implement an NPC (non-player character) that wakes up every 30 seconds
-;; and populates a temp buffer with the last 100 keystrokes, then calls llm-ask on that buffer to ask it
-;; to make suggestions about emacs usage based on the keystrokes
+;; An emacs function m-x `llm-keystroke-npc` to implement an NPC
+;; (non-player character) that wakes up every 30 seconds and populates
+;; a temp buffer with the last 100 keystrokes, then calls llm-ask on
+;; that buffer to ask it to make suggestions about emacs usage based
+;; on the keystrokes
 
 ;; Define the variables to store keystrokes
 (defvar llm-keystroke-buffer "*llm-keystroke-buffer*")
 (defvar llm-keystroke-list ())
 (defvar llm-keystroke-timer nil)
+(defvar llm-keystroke-count 100 "Number of keystrokes to capture.")
 
 ;; Function to capture keystrokes
 (defun llm-capture-keystroke ()
@@ -15,9 +18,9 @@
   ;; Capture the last keystroke
   (let ((keystroke (this-command-keys-vector)))
     (setq llm-keystroke-list (nconc llm-keystroke-list (list keystroke)))
-    ;; Ensure only the last 100 keystrokes are stored
-    (if (>= (length llm-keystroke-list) 100)
-        (setq llm-keystroke-list (cdr llm-keystroke-list)))))
+    ;; Ensure only the specified number of keystrokes are stored
+    (if (>= (length llm-keystroke-list) llm-keystroke-count)
+        (setq llm-keystroke-list (nthcdr (- llm-keystroke-count 1) llm-keystroke-list)))))
 
 ;; Function to handle NPC behavior
 (defun llm-keystroke-npc ()
@@ -28,7 +31,7 @@
     (let ((prompt "Based on the keystrokes, suggest improvements for Emacs usage."))
       (llm-ask prompt (point-min) (point-max))))
   (setq llm-keystroke-list ())
-  (message "NPC suggestions generated based on the last 100 keystrokes."))
+  (message "NPC suggestions generated based on the last %d keystrokes." llm-keystroke-count))
 
 ;; Setup the timer to call llm-keystroke-npc every 30 seconds
 (defun llm-setup-keystroke-npc ()
@@ -49,4 +52,5 @@
 (defun llm-set-buffer-list (buf)
   (when (not (memq buf llm-capture-buffer-list))
     (push buf llm-capture-buffer-list)))
+
 (add-hook 'post-command-hook 'llm-capture-keystroke) 
