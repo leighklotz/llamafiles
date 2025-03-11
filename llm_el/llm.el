@@ -317,6 +317,19 @@ Function-name is completed from the list of defined Emacs Lisp functions."
     (set-buffer (help-buffer))
     (llm-ask question (point-min) (point-max))))
 
+(defun llm-describe-variable (variable-name question)
+  "Calls `describe-variable` with variable-name and then `llm-ask` with question.
+Variable-name is completed from the list of defined Emacs Lisp variables."
+  (interactive 
+   (list (intern (completing-read "Variable: " obarray 'boundp))
+         (read-string "Question: ")))
+  (save-excursion
+    (describe-variable variable-name)
+    (set-buffer (help-buffer))
+    (llm-ask question (point-min) (point-max))))
+
+
+
 ;;;
 ;;; my keybindings, should move out
 ;;; 
