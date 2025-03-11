@@ -79,6 +79,8 @@
 (defvar llm-summary-buffer-name "*llm-summary*")
 (defvar llm-error-buffer-name   "*llm-errors*")
 (defvar llm-diff-buffer-name    "*llm-diff*")
+(defvar llm-preserve-temp-files nil)
+(defvar llm-git-merge-format "git merge-file -p \"%s\" /dev/null \"%s\"")
 
 ;;; User commands
 (defun llm-ask (prompt &optional start end)
@@ -177,55 +179,40 @@ See [shell-command-on-region] for interpretation of output-buffer-name."
                       (if replace-p (kill-region start end))
                       (llm-insert-as-diff-results original-string llm-output))
                      (t
-                      (diff-current-buffer-with-string-merge-conflict llm-output)))))
+                      (llm-diff-current-buffer-with-string llm-output)))))
             (t (shell-command-on-region start end command output-buffer-name replace-p llm-error-buffer-name display-error-buffer region-noncontiguous-p))))))
 
-;;; TODO: insert the diffs in conflict merge marker format
+;;; when replacing, insert diffs in conflict merge marker format
 ;;; Background:
 ;;; Emacs automatically highlights merge conflict markers (like <<<<<<<, =======, >>>>>>>) in files with conflicts, allowing you to easily identify and resolve them. You can trigger this by opening a file with merge conflict markers in Emacs, and the diff display will automatically activate.
-;;; Here's a more detailed explanation:
-;;; Conflict Markers:
-;;; When a merge conflict occurs, version control systems (like Git) insert special markers into the file, indicating where the conflicting changes are located. These markers include:
-;;; <<<<<<<: Marks the beginning of the "your changes" section.
-;;; =======: Separates the "your changes" and "their changes" sections.
-;;; >>>>>>>: Marks the end of the "their changes" section.
-;;; Emacs's Automatic Detection:
-;;; Emacs, when configured for version control (like Git), recognizes these markers and automatically displays the file with the diff markers highlighted.
-
-(defun diff-current-buffer-with-string-merge-conflict (new-string)
-  "Simulate a merge conflict between the current buffer content and NEW-STRING by inserting the conflict in conflict marker format."
+;;; smerge-mode offers convenient commands for this format
+(defun llm-diff-current-buffer-with-string (new-string)
+  "Handy \\[smerge] between the current buffer content and new-string"
   (interactive "sEnter the new string: ")
   (let* ((current-buffer-content (buffer-substring-no-properties (point-min) (point-max)))
          (temp-file-before (make-temp-file "emacs-diff-before-"))
          (temp-file-after (make-temp-file "emacs-diff-after-"))
          (diff-buffer (get-buffer-create llm-diff-buffer-name))
          ;; git merge-file -p "$before" "$after" /dev/null > "$output"
-         (git-merge-format "git merge-file -p \"%s\" /dev/null \"%s\"")
-         (diff-command (format git-merge-format temp-file-before temp-file-after)))
+         (diff-command (format --m-git-merge-format temp-file-before temp-file-after)))
     (message "diff-command %s" diff-command)
 
-    ;; Write the current buffer content to a temporary file
     (with-temp-file temp-file-before
       (insert current-buffer-content))
     
-    ;; Write the new string to a temporary file
     (with-temp-file temp-file-after
       (insert new-string))
     
+    ;; Run the diff command and capture the output in the *llm-diff* buffer
     (let ((result (shell-command-to-string diff-command)))
-      ;; Run the diff command and capture the output in the *llm-diff* buffer
       (erase-buffer)
       (insert result)
       (smerge-mode)
-      (goto-char (point-min))
-      (diff-auto-refine-mode 1))
+      (goto-char (point-min)))
 
-    ;; Clean up temporary files
-    (when nil
+    (unless llm-preserve-temp-files
       (delete-file temp-file-before)
-      (delete-file temp-file-after))
-    (setq t1 temp-file-before
-          t2 temp-file-after)))
+      (delete-file temp-file-after))))
 
 (defun llm-complete-internal (prompt via model-type start end n-predict)
   ;; Send the buffer or selected region as a CLI input to 'llm.sh'
