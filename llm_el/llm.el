@@ -344,5 +344,13 @@ Variable-name is completed from the list of defined Emacs Lisp variables."
 (global-set-key (kbd "M-s t") 'llm-todo)
 (global-set-key (kbd "M-s i") 'llm-insert)
 (global-set-key (kbd "M-s c") 'llm-complete)
+(global-set-key (kbd "C-S-n") 'smerge-next)
+(global-set-key (kbd "C-S-p") 'smerge-prev)
+
+;;; Hooks
+(defun llm-smerge-mode-hook ()
+  (local-set-key (kbd "C-S-n") 'smerge-next)
+  (local-set-key (kbd "C-S-p") 'smerge-prev))
+(add-hook 'smerge-mode-hook 'llm-smerge-mode-hook)
 
 (provide 'llm)
