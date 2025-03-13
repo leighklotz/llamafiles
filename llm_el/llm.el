@@ -168,21 +168,20 @@ See [shell-command-on-region] for interpretation of output-buffer-name."
 	(command (llm-infer-command-internal use-case via model-type major-mode-name user-prompt))
 	(display-error-buffer t)
 	(region-noncontiguous-p nil))
-    ;; many args, make sure to call properly
     (message "llm-region-internal: buffer=%s[%s,%s] command=%s replace-p=%s diff-p=%s output-buffer-name=%s" (buffer-name) start end command replace-p diff-p output-buffer-name)
     (let ((max-mini-window-height 0.0))
-      (cond ((and replace-p diff-p)
-             (let* ((original-string (buffer-substring start end))
-                   (llm-output (with-temp-buffer
-                                 (insert original-string)
-                                 (shell-command-on-region (point-min) (point-max) command (current-buffer) nil llm-error-buffer-name display-error-buffer nil)
-                                 (buffer-string))))
-               (cond (nil 
-                      (if replace-p (kill-region start end))
-                      (llm-insert-as-diff-results original-string llm-output))
-                     (t
-                      (llm-diff-current-buffer-with-string llm-output)))))
-            (t (shell-command-on-region start end command output-buffer-name replace-p llm-error-buffer-name display-error-buffer region-noncontiguous-p))))))
+      (if (and replace-p diff-p)
+          (llm-region-as-diff-internal start end command)
+        (shell-command-on-region start end command output-buffer-name replace-p llm-error-buffer-name display-error-buffer region-noncontiguous-p)))))
+
+;; todo: fix dummy args as llm-region-as-diff-internal was just split out from llm-region-as-diff
+(defun llm-region-as-diff-internal (start end command)
+  (let* ((original-string (buffer-substring start end))
+         (llm-output (with-temp-buffer
+                       (insert original-string)
+                       (shell-command-on-region (point-min) (point-max) command (current-buffer) nil llm-error-buffer-name display-error-buffer nil)
+                       (buffer-string))))
+    (llm-diff-current-buffer-with-string llm-output)))
 
 ;;; when replacing, insert diffs in conflict merge marker format
 ;;; Background:
