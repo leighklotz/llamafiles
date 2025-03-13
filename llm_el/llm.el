@@ -350,7 +350,9 @@ Variable-name is completed from the list of defined Emacs Lisp variables."
 ;;; Hooks
 (defun llm-smerge-mode-hook ()
   (local-set-key (kbd "C-S-n") 'smerge-next)
-  (local-set-key (kbd "C-S-p") 'smerge-prev))
+  (local-set-key (kbd "C-S-p") 'smerge-prev)
+  (local-set-key (kbd "C-S-u") 'smerge-keep-upper)
+  (local-set-key (kbd "C-S-l") 'smerge-keep-lower))
 (add-hook 'smerge-mode-hook 'llm-smerge-mode-hook)
 
 (provide 'llm)
