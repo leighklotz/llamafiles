@@ -22,11 +22,11 @@ function main {
     # first arg or two are optional: [--via] [api|cli|--api|--cli]
     while true;
     do
-	case "$1" in
-	    --via) shift; ;;
-	    --api|--cli|api|cli) VIA="${1#--}"; shift ;;
-	    *) break ;;
-	esac
+        case "$1" in
+            --via) shift; ;;
+            --api|--cli|api|cli) VIA="${1#--}"; shift ;;
+            *) break ;;
+        esac
     done
 
     # Load the functions for specified $VIA
@@ -38,48 +38,48 @@ function main {
     # parse the command args
     while true;
     do
-	local flag="$1"; shift
-	case "$flag" in
-	    -m|--model_type)
-		[ -z "$1" ] && usage
-		export MODEL_TYPE="$1"
-		shift ;;
-	    --get-model-name)
-		init_model
-		get_model_name
-		break ;;
-	    --load-model)
-		init_model
-		[ -z "$1" ] && usage
-		load_model "$1"
-		status=$?
-		shift
-		break ;;
-	    --unload-model)
-		init_model
-		unload_model
-		status=$?
-		break ;;
-	    --list-models)
-		init_model
-		list_models
-		status=$?
-		break ;;
-	    --list-model-types)
-		init_model
-		list_model_types
-		status=$?
-		break ;;
-	    --get-via)
-		printf "%s\n" "${VIA}"
-		break ;;
-	    --help)
-		usage ;;
-	    '')
-		usage "at least one flag required" ;;
-	    *)
-		usage "unrecognized flag $flag" ;;
-	esac
+        local flag="$1"; shift
+        case "$flag" in
+            -m|--model_type)
+                [ -z "$1" ] && usage
+                export MODEL_TYPE="$1"
+                shift ;;
+            --get-model-name)
+                init_model
+                get_model_name
+                break ;;
+            --load-model)
+                init_model
+                [ -z "$1" ] && usage
+                load_model "$1"
+                status=$?
+                shift
+                break ;;
+            --unload-model)
+                init_model
+                unload_model
+                status=$?
+                break ;;
+            --list-models)
+                init_model
+                list_models
+                status=$?
+                break ;;
+            --list-model-types)
+                init_model
+                list_model_types
+                status=$?
+                break ;;
+            --get-via)
+                printf "%s\n" "${VIA}"
+                break ;;
+            --help)
+                usage ;;
+            '')
+                usage "at least one flag required" ;;
+            *)
+                usage "unrecognized flag $flag" ;;
+        esac
     done
 }
 
