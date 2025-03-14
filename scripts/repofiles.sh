@@ -28,9 +28,6 @@ for fn in $(git ls-files); do
 done
 
 # find sometimes gives weird exit codes
-<<<<<<< HEAD:scripts/repofiles.sh
 exit 0
 
-=======
-#exit 0
->>>>>>> 0993a52 (catfiles: now git based so remove EXCLUDE):scripts/catfiles.sh
+
