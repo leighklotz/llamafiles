@@ -22,7 +22,7 @@
 ;;; of Emacs buffers using an external script called 'llm.sh'. The package
 ;;; includes the following functions:
 ;;;   - M-X llm-summarize-buffer
-;;;     Summarizes the contents of the current bufffer in a new buffer.
+;;;     Summarizes the contents of the current buffer in a new buffer.
 ;;;   - M-X llm-rewrite
 ;;;     Replaces region with results of prompt run on region
 ;;;   - M-X llm-ask
@@ -61,8 +61,8 @@
   :group 'llm)
 
 (defcustom llm-default-model-type
-  ;; one of: cerebrum codebooga deepseek-coder dolphin functions.sh llava mistral mixtral models.jsonl nous-hermes phi rocket 
-  "mistral" 
+  ;; one of: cerebrum codebooga deepseek-coder dolphin functions.sh llava mistral mixtral models.jsonl nous-hermes phi rocket
+  "mistral"
   "Default model type for LLM."
   :type '(choice
           (const cerebrum)
@@ -92,7 +92,7 @@ If no region is selected, the function will assume the entire buffer is the regi
   ;; Check if the region is active, if not, use empty string
   (unless (and start end)
     (setq start (point-min))
-    (setq end (point-min)))
+    (setq end (point-max)))
   (llm-region-internal "ask" llm-default-via llm-default-model-type (llm-mode-text-type) prompt start end llm-ask-buffer-name nil nil))
 
 (defun llm-summarize-buffer (user-prompt)
@@ -106,12 +106,12 @@ If no region is selected, the function will assume the entire buffer is the regi
   ;; Check if the region is active, if not, use empty string
   (unless (and start end)
     (setq start (point-min))
-    (setq end (point-min)))
+    (setq end (point-max)))
   (let ((llm-write-buffer-name t))	;insert into current buffer
     (llm-region-internal "write" llm-default-via llm-default-model-type (llm-mode-text-type) prompt start end llm-write-buffer-name nil nil)))
 
 (defun llm-complete (prompt start end)
-  "Insert some inferred text based on current region to point in the current buffer. "
+  "Insert some inferred text based on current region to point in the current buffer."
   ;; todo: ignores end and uses (point); should have good default behavior and get bounds better.
   (interactive "sPrompt: \nr")
   (let ((n-predict 32))			;fixme ctrl-u arg?
@@ -123,7 +123,7 @@ If no region is selected, the function will assume the entire buffer is the regi
   ;; Check if the region is active, if not, use empty string
   (unless (and start end)
     (setq start (point-min))
-    (setq end (point-min)))
+    (setq end (point-max)))
   (llm-region-internal "write" llm-default-via llm-default-model-type (llm-mode-text-type) prompt start end llm-write-buffer-name nil nil))
 
 (defun llm-rewrite (user-prompt start end)
@@ -172,14 +172,17 @@ See [shell-command-on-region] for interpretation of output-buffer-name."
     (let ((max-mini-window-height 0.0))
       (if (and replace-p diff-p)
           (llm-region-as-diff-internal start end command)
-        (shell-command-on-region start end command output-buffer-name replace-p llm-error-buffer-name display-error-buffer region-noncontiguous-p)))))
+        (let ((output-buffer (get-buffer-create output-buffer-name)))
+          (if (and replace-p (buffer-file-name) (equal (buffer-file-name) (buffer-file-name output-buffer)))
+              (shell-command-on-region start end command nil t llm-error-buffer-name display-error-buffer region-noncontiguous-p)
+            (shell-command-on-region start end command output-buffer-name replace-p llm-error-buffer-name display-error-buffer region-noncontiguous-p)
+            (pop-to-buffer output-buffer)))))))
 
-;; todo: fix dummy args as llm-region-as-diff-internal was just split out from llm-region-as-diff
 (defun llm-region-as-diff-internal (start end command)
   (let* ((original-string (buffer-substring start end))
          (llm-output (with-temp-buffer
                        (insert original-string)
-                       (shell-command-on-region (point-min) (point-max) command (current-buffer) nil llm-error-buffer-name display-error-buffer nil)
+                       (shell-command-on-region (point-min) (point-max) command (current-buffer) t llm-error-buffer-name t nil)
                        (buffer-string))))
     (llm-diff-current-buffer-with-string llm-output)))
 
@@ -200,10 +203,10 @@ See [shell-command-on-region] for interpretation of output-buffer-name."
 
     (with-temp-file temp-file-before
       (insert current-buffer-content))
-    
+
     (with-temp-file temp-file-after
       (insert new-string))
-    
+
     ;; Run the diff command and capture the output in the *llm-diff* buffer
     (let ((result (shell-command-to-string diff-command)))
       (erase-buffer)
@@ -245,7 +248,7 @@ See [shell-command-on-region] for interpretation of output-buffer-name."
 	     (with-temp-buffer
 	       (call-process llm-via-script-path nil t nil "--api" "--load-model" model-name)
 	       (split-string (buffer-string) "\n" t))))
-	(message "model-name=%s results=%s" model-name results)))))    
+	(message "model-name=%s results=%s" model-name results)))))
 
 ;;; these probably belong elsewhere
 (defun my-comint-get-previous-output ()
@@ -311,7 +314,7 @@ Note:
 (defun llm-describe-function (function-name question)
   "Calls \\[documentation] with function-name and then \\[llm-ask]] with question.
 Function-name is completed from the list of defined Emacs Lisp functions."
-  (interactive 
+  (interactive
    (list (intern (completing-read "Function: " obarray 'fboundp))
          (read-string "Question: ")))
   (save-excursion
@@ -355,3 +358,4 @@ Variable-name is completed from the list of defined Emacs Lisp variables."
 (add-hook 'smerge-mode-hook 'llm-smerge-mode-hook)
 
 (provide 'llm)
+
