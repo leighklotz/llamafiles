@@ -1,11 +1,37 @@
-#!/bin/bash
+#!/bin/bash -e
 
 SCRIPT_DIR="$(dirname "$(realpath "${BASH_SOURCE[0]}")")"
 
-# todo: parse this from .gitignore and add images
-EXCLUDE='(\~|\#.*|\.git.*|__.*|flask_session|\.__pycache__|\.pyc$|\.pyd$|\.pyo$|\.png$|\.jpg$|\.so$|\.o$)'
 VERBOSE=""
 export FILETYPE="${SCRIPT_DIR}/filetype.sh"
+
+# Function to parse .gitignore and generate regex
+parse_gitignore() {
+    local gitignore_file="$1"
+    local effective_gitignore
+
+    # Get the effective .gitignore content
+    effective_gitignore=$(git ls-files --others --exclude-standard --directory | grep -v '^$')
+
+    # Convert gitignore patterns to regex
+    regex_patterns=""
+    for line in $effective_gitignore; do
+        # Handle different patterns (e.g., directories, files)
+        if [[ $line == */ ]]; then
+            regex_patterns="$regex_patterns|${line%/}.*"
+        elif [[ $line == * ]]; then
+            regex_patterns="$regex_patterns|${line//\./\\.}"
+        fi
+    done
+
+    # Remove leading pipe and add additional patterns
+    regex_patterns="$regex_patterns|\.png$|\.jpg$|\.so$|\.o$"
+    printf "%s" "${regex_patterns}"
+}
+
+EXCLUDE="^.git.*\|$(parse_gitignore .gitignore)"
+echo $EXCLUDE >> /dev/stderr
+exit 4
 
 function catblock() {
     local fn="$1"
