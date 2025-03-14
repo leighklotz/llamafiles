@@ -27,7 +27,7 @@ fi
 
 printf -v CMD "function %s;\n catblock" "$(declare -f catblock)"
 
-find . -type f "$[@]" | \
+find . -type f "$@" | \
     grep -vE "${EXCLUDE}" \
     | xargs -n 1 echo | xargs -I {} bash -c "$CMD {}"
 
