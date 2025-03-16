@@ -55,7 +55,9 @@ printf -v CMD "function %s;\n catblock" "$(declare -f catblock)"
 
 find . -type f "$@" | \
     grep -vE "${EXCLUDE}" \
-    | xargs -n 1 echo | xargs -I {} bash -c "$CMD {}"
+    | xargs -n 1 echo | while read -r file; do
+        bash -c "$CMD \"$file\""
+    done
 
 exit 0
 
