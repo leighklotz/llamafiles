@@ -109,7 +109,8 @@ function fetch_text() {
 function extract_output() {
     case "$OUTPUT_MODE" in
         "JSON")
-            cat
+            # awk out just the JSON '{}' objects.
+            awk '/{/{f=1} f; /}/{f=0}' 
             ;;
         "YAML")
             cat
