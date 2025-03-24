@@ -40,7 +40,7 @@ function log_verbose {
     local message="$1"
     if [ -n "${VERBOSE}" ];
     then
-	printf "* %s: %s\n" "${prog}" "${message}" > /dev/stderr
+	printf "📣 %s: %s\n" "${prog}" "${message}" > /dev/stderr
     fi
 }
 
@@ -48,7 +48,7 @@ function log_debug {
     local prog="$(basename "$0")"
     local message="$1"
     if [ -n "${DEBUG}" ]; then
-	   printf "* %s: %s\n" "${prog}" "${message}" > /dev/stderr
+	   printf "🐞 %s: %s\n" "${prog}" "${message}" > /dev/stderr
     fi
 }
 
@@ -56,7 +56,7 @@ function log_info {
     local prog="$(basename "$0")"
     local message="$1"
     if [ -n "${INFO}" ]; then
-	printf "${COLOR_BLUE}* %s:${NOCOLOR} %s\n" "${prog}" "${message}" > /dev/stderr
+	printf "✅ ${COLOR_GREEN}INFO %s:${NOCOLOR} %s\n" "${prog}" "${message}" > /dev/stderr
     fi
 }
 
@@ -64,14 +64,14 @@ function log_warn {
     local prog="$(basename "$0")"
     local code=$1
     local message="$2"
-    printf "${COLOR_ORANGE}* WARN %s (%s):${NOCOLOR} %s\n" "${prog}" "${code}" "${message}" > /dev/stderr
+    printf "⚠️  ${COLOR_ORANGE}WARN %s (%s):${NOCOLOR} %s\n" "${prog}" "${code}" "${message}" > /dev/stderr
 }
 
 function log_error {
     local prog="$(basename "$0")"
     local message="$1"
     local code=$?
-    printf "${COLOR_RED}* ERROR in %s:${NOCOLOR} %s\n" "${prog}" "${message}" > /dev/stderr
+    printf "❌ ${COLOR_RED}ERROR in %s:${NOCOLOR} %s\n" "${prog}" "${message}" > /dev/stderr
     [ -n "${PRINT_STACK_TRACE}" ] && printf "%s\n" "$(stack_trace $code)" > /dev/stderr
 }
 
@@ -79,7 +79,7 @@ function log_and_exit {
     local prog="$(basename "$0")"
     local code="$1"
     local message="$2"
-    printf "${COLOR_RED}* ERROR in %s:${NOCOLOR} %s\n" "${prog}" "${message}" > /dev/stderr
+    printf "⛔ ${COLOR_RED}ERROR in %s:${NOCOLOR} %s\n" "${prog}" "${message}" > /dev/stderr
     [ -n "${PRINT_STACK_TRACE}" ] && printf "%s\n" "$(stack_trace "$code")" > /dev/stderr
     [[ "${code}" =~ ^[0-9]+$ ]] && exit "${code}" || exit 1
 }
