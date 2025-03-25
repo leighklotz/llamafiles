@@ -137,6 +137,11 @@ function chatml_prompt {
     printf -v PROMPT '%s<|im_start|>assistant' "${PROMPT}"
 }
 
+function load_model {
+    local model_path="$1"
+    log_and_exit 1 "--cli mode cannot load models; specify --api or export VIA=api"
+}
+
 # todo: much work here
 # load_model calls init_model so llm.sh can do prep work once it knows the model but before it is used
 function init_via_model {
