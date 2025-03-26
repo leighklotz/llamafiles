@@ -70,6 +70,7 @@ function fetch_text() {
 
 LINKS_PRE_PROMPT="Below is a web page article from the specified link address. Follow the instructions after the article."
 SUMMARIZE_POST_PROMPT="Read the above web page article from ${LINK} and ignore website header at the start and look for the main article."
-( printf "# Text of link %s\n" "${LINK}"; fetch_text "${LINK}" | ${CAPTURE_COMMAND}; printf "\n# Instructions\n%b\n%b" "${SUMMARIZE_POST_PROMPT}" "${POST_PROMPT_ARG}") | \
-"${SCRIPT_DIR}/llm.sh" --long ${ARGS} "${LINKS_PRE_PROMPT}"
+
+( printf "# Text of link %s\n" "${LINK}"; fetch_text "${LINK}" | ${CAPTURE_COMMAND}; printf "\n# Instructions\n%b %b\n" "${SUMMARIZE_POST_PROMPT}" "${POST_PROMPT_ARG}") \
+ | "${SCRIPT_DIR}/llm.sh" ${ARGS} "${LINKS_PRE_PROMPT}"
 
