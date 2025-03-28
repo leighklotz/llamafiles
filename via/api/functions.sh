@@ -153,7 +153,7 @@ function via_api_perform_inference() {
     if [ -z "${USE_SYSTEM_ROLE}" ];
     then
         TEMPLATE="${NO_SYSTEM_ROLE_TEMPLATE}"
-        question=$(printf "%s\n%s" "${system_message%$'\n'}" "${question}")
+        question=$(printf "%s\n%s\n" "${system_message%$'\n'}" "${question}")
         system_message=""
     else
         TEMPLATE="${SYSTEM_ROLE_TEMPLATE}"
