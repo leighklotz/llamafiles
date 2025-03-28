@@ -191,6 +191,7 @@ source "${FUNCTIONS_PATH}"
 ### Prompt and STDIN processing
 # todo: move this to where it is used
 PROMPT_TEMP_FILE="$(mktemp_file "prompt")"
+register_temp_file "${PROMPT_TEMP_FILE}"
 
 # Process escape sequences in QUESTION if requested.
 # This will turn literal "\n" into literal newline in the QUESTION>
@@ -210,7 +211,7 @@ function process_stdin() {
         then
             echo "Give input followed by Ctrl-D:"
         fi
-        INPUT=$(cat)
+        INPUT="$(cat)"
     fi
 }
 
@@ -232,7 +233,7 @@ function set_verbose_debug {
 
 # Try to inform user about errors
 function report_success_or_fail {
-    status=$1
+    local status="$1"
     if [ $status -ne 0 ];
     then
         if [ "${ERROR_OUTPUT}" == "/dev/null" ];
@@ -242,7 +243,7 @@ function report_success_or_fail {
             log_error "FAIL STATUS=$status: errors went to ${ERROR_OUTPUT}" > /dev/stderr
         fi
     fi
-    return $STATUS
+    return $status
 }
 
 # if --raw-input is specified, use stdin as the only text to send to the model
@@ -293,6 +294,7 @@ perform_inference; STATUS=$?
 report_success_or_fail $STATUS
 cleanup_temp_files $STATUS
 exit $STATUS
+
 
 ###
 ### TODO

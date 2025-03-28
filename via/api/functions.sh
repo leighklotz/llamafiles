@@ -103,9 +103,9 @@ NO_SYSTEM_ROLE_TEMPLATE="{
 function prepare_prompt {
     if [ "${INPUT}" == "" ];
     then
-        printf -v PROMPT "%s" "${QUESTION%$'\n'}"
+        printf -v PROMPT "%s\n" "${QUESTION%$'\n'}"
     else
-        printf -v PROMPT "%s\n\n%s" "${QUESTION%$'\n'}" "${INPUT%$'\n'}"
+        printf -v PROMPT "%s\n\n%s\n" "${QUESTION%$'\n'}" "${INPUT%$'\n'}"
     fi
 }
 
@@ -167,6 +167,7 @@ function via_api_perform_inference() {
         system_message=${system_message##[[:space:]]}
         system_message=${system_message%%[[:space:]]}
         system_message_file=$(mktemp_file sysmsg);
+        register_temp_file "${system_message_file}"
         printf "%s\n" "${system_message%$'\n'}" >> "${system_message_file}"
     else
         system_message_file="/dev/null"
@@ -175,7 +176,8 @@ function via_api_perform_inference() {
     question=${question##[[:space:]]}
     question=${question%%[[:space:]]}
     question_file=$(mktemp_file quest)
-    printf "%s" "${question}" >> "${question_file}"
+    register_temp_file "${question_file}"
+    printf "%s\n" "${question%$'\n'}" >> "${question_file}"
 
     # hack: Drop empty string, and null parameters. NaN seems th show as null.
     #       sadly seed must be a number
@@ -207,7 +209,6 @@ function via_api_perform_inference() {
     s=$?
     if [ "$s" -ne 0 ];
     then
-        cleanup_temp_files $s
         log_and_exit $s "via --api perform inference cannot curl"
     fi
 
@@ -218,8 +219,6 @@ function via_api_perform_inference() {
 
     output="$(printf "%s" "${result}" | jq --raw-output '.choices[].message.content')"
     s=$?
-
-    cleanup_temp_files $s
 
     # exit if we failed to parse
     if [ "$s" != 0 ]; then

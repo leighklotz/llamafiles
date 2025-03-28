@@ -9,10 +9,9 @@ VIA_DIRECTORY="$(realpath "${SCRIPT_DIR}/../via")"
 VIA_CLI_FUNCTIONS_PATH="$(realpath "${VIA_DIRECTORY}/cli/functions.sh")"
 VIA_API_FUNCTIONS_PATH="$(realpath "${VIA_DIRECTORY}/api/functions.sh")"
 MODELS_DIRECTORY="$(realpath "${SCRIPT_DIR}/../models")"
-
+TMPFILES_TO_DELETE=""
 COLOR_RED='\033[1;31m'
 COLOR_YELLOW='\033[1;33m'
-COLOR_ORANGE='\033[1;38;5;202'
 COLOR_GREEN='\033[1;32m'
 COLOR_BLUE='\033[1;36m'
 NOCOLOR='\033[0m'
@@ -48,7 +47,7 @@ function log_debug {
     local prog="$(basename "$0")"
     local message="$1"
     if [ -n "${DEBUG}" ]; then
-	   printf "🐞 %s: %s\n" "${prog}" "${message}" > /dev/stderr
+	   printf "🐞 ${COLOR_BLUE}%s:${NOCOLOR} %s\n" "${prog}" "${message}" > /dev/stderr
     fi
 }
 
@@ -64,7 +63,7 @@ function log_warn {
     local prog="$(basename "$0")"
     local code=$1
     local message="$2"
-    printf "⚠️  ${COLOR_ORANGE}WARN %s (%s):${NOCOLOR} %s\n" "${prog}" "${code}" "${message}" > /dev/stderr
+    printf "⚠️  ${COLOR_YELLOW}WARN %s (%s):${NOCOLOR} %s\n" "${prog}" "${code}" "${message}" > /dev/stderr
 }
 
 function log_error {
@@ -104,52 +103,83 @@ function source_functions {
     fi
 }
 
-# work directory for temp files
-export TMPDIR="${TMPDIR:-/tmp}"
-TMPDIR_SET=""
+k=0
+
+# caller should add result to $TMPFILES_TO_DELETE
 function mktemp_file() {
     local prefix="$1"
-    if [ -z "${TMPDIR_SET}" ] && ([ -z "${TMPDIR}" ] || [ "${TMPDIR}" == "/tmp" ]); then
-	orig="$(umask)"
-	export TMPDIR="$(mktemp -d)"
-	umask "${orig}"
-	TMPDIR_SET=1
+    prefix="${prefix:-llm}"
+
+    local fn="$(mktemp -t "${prefix}.XXXXXX")"
+    local status=$?
+
+    if [ $status -ne 0 ]; then
+        log_and_exit 4 "Cannot make temp file with prefix=${prefix}: Status=${status}"
     fi
-    if ! mktemp -t "${prefix}.XXXXXX"; then
-	log_and_exit 4 "Cannot make temp file with prefix=${prefix}"
-    fi
+
+    printf "%s\n" "${fn}"
 }
 
-function cleanup_temp_files {
-    status=$1
-    if [ -n "${TMPDIR_SET}" ] && [ -n "${TMPDIR}" ] && [ -d "${TMPDIR}" ] && [ "${TMPDIR}" != "/tmp" ]; then
-	case "$KEEP_PROMPT_TEMP_FILE" in
-	    ALL)
-		true
-		;;
-	    ERROR|ERRORS)
-		if [ $status -ne 0 ];
-		then
-		    log_error "TMPDIR=${TMPDIR}"
-		else
-		    echo "* DRY RUN rm -rf ${TMPDIR}" >> /dev/stderr
-		fi
-		;;
-	    NONE)
-		    echo "* DRY RUN rm -rf ${TMPDIR}" >> /dev/stderr
-		;;
-	esac
-    fi
+TMPFILES_TO_DELETE=""
+
+function register_temp_file() {
+    local fn="$1"
+    TMPFILES_TO_DELETE="${fn} ${TMPFILES_TO_DELETE}"
+}
+
+function cleanup_temp_files() {
+    local status="$1"
+
+    case "${KEEP_PROMPT_TEMP_FILE}" in
+        ALL)
+            true
+            ;;
+        ERROR|ERRORS)
+            if [ "$status" -ne 0 ]; then
+                log_warn "Leaving temporary files: ${TMPFILES_TO_DELETE}"
+            elif [ -n "${TMPFILES_TO_DELETE}" ]; then
+                log_info "Cleaning up temporary files: ${TMPFILES_TO_DELETE}"
+                for file in ${TMPFILES_TO_DELETE}; do
+                    cleanup_file "$file"
+                done
+            fi
+            ;;
+        NONE)
+            if [ -n "${TMPFILES_TO_DELETE}" ]; then
+                log_info "Cleaning up temporary files: ${TMPFILES_TO_DELETE}"
+                for file in ${TMPFILES_TO_DELETE}; do
+                    cleanup_file "$file"
+                done
+            fi
+            ;;
+        *)
+            log_warn "Invalid value for KEEP_PROMPT_TEMP_FILE: ${KEEP_PROMPT_TEMP_FILE}.  No cleanup performed."
+            ;;
+    esac
 }
 
 function cleanup_file() {
-  local file=$1
+    local file="$1"
 
-  if [ -n "${file}" ] && [ "${file}" != "/dev/null" ]; then
-     if ! rm -f "${file}" ; then
-         log_warn $? "remove ${file}"
-     fi
-  fi
+    if [ -d "${file}" ]; then
+        log_warn "cleanup_file: skipping dir ${file}"
+        return 1
+    fi
+
+    if [ "${file}" == "/dev/null" ]; then
+        log_warn "cleanup_file: skipping /dev/null: ${file}"
+        return 1
+    fi
+
+    if [ "${file}" == "/tmp?" ]; then
+        log_warn "cleanup_file: skipping /tmp: ${file}"
+    fi
+
+    if [ -n "${file}" ]; then
+        if ! rm -f "${file}" ; then
+            log_error "Error Removing ${file}" $?
+        fi
+    fi
 }
 
 function init_model {
