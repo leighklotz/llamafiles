@@ -299,6 +299,11 @@ Note:
                       llm-output))))
     (query-replace-regexp regex replacer)))
 
+(defun llm-quick (question)
+  "Calls \\[llm-insert] with question and an exhortation to be succinct."
+  (interactive "sQuestion: ")
+  (llm-insert (format "briefly write %s and nothing else" question)))
+
 ;;;
 ;;; emacs-lisp reflective help
 ;;;
