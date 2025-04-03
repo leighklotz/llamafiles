@@ -9,7 +9,7 @@ status=0
 [ -z "${IN_LLM_SH_ENV}" ] && [ -f "${SCRIPT_DIR}/env.sh" ] && source "${SCRIPT_DIR}/env.sh"
 
 function usage {
-    echo "usage: $(basename "$0") [--via] [api|cli|--api|--cli] [--get-model-name] [--list-models] [--load-model model-name] [--unload-model] [--list-model-types] [--get-via] [--help]" >> /dev/stderr
+    echo "usage: $(basename "$0") [--via] [api|cli|--api|--cli] [--get-model-name] [--list-models [ match words ]] [--load-model model-name] [--unload-model] [--list-model-types] [--get-via] [--help]" >> /dev/stderr
     if [ -n "$1" ];
     then
        echo "       $1" >> /dev/stderr

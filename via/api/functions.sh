@@ -260,48 +260,6 @@ function get_model_name {
     (curl -s "${VIA_API_MODEL_INFO_ENDPOINT}" "${AUTHORIZATION_PARAMS[@]}" | jq -e -r .model_name 2> /dev/null) || echo "gpt"
 }
 
-# function list_models {
-#     # todo: pass in multiple words and then grep for all of those words. the code below is not right.
-#     local args=$@
-# 
-#     if [ -z "$args" ]; then
-#         curl -s "${VIA_API_MODEL_LIST_ENDPOINT}" "${AUTHORIZATION_PARAMS[@]}" | jq -r '.model_names[]'
-#     else
-#         local pattern="$(printf '%s' "$args" | sed -e 's/ /\|/g')"
-#         log_info pattern="${pattern}"
-#         list_models | grep -iE "$pattern"
-#     fi
-# }
-# 
-# function list_models {
-#     local args=$@
-#     local model_list
-#     local pattern
-# 
-#     if [ -z "$args" ]; then
-#         # Fetch model list using curl and handle potential errors
-#         model_list=$(curl -s "${VIA_API_MODEL_LIST_ENDPOINT}" "${AUTHORIZATION_PARAMS[@]}" 2>/dev/null)
-#         if [ $? -ne 0 ]; then
-#             log_error "Failed to retrieve model list from API."
-#             return 1  # Indicate failure
-#         fi
-#         echo "$model_list" | jq -r '.model_names[]'
-#     else
-#         # Construct a grep pattern from the arguments
-#         pattern=$(printf '%s' "$@" | tr ' ' '|') # Use tr for simpler, safer word separation
-#         log_info "List models matching pattern: r'${pattern}'"
-# 
-#         # Fetch model list and grep for the pattern
-#         model_list=$(curl -s "${VIA_API_MODEL_LIST_ENDPOINT}" "${AUTHORIZATION_PARAMS[@]}" 2>/dev/null)
-#         if [ $? -ne 0 ]; then
-#             log_error "Failed to retrieve model list from API."
-#             return 1
-#         fi
-# 
-#         echo "$model_list" | jq -r '.model_names[]' | grep -iE "$pattern"
-#     fi
-# }
-# 
 function list_models {
     local args=$@
 
@@ -322,9 +280,6 @@ function list_models {
         list_models | grep -i $grep_pattern
     fi
 }
-
-
-
 
 function list_model_types() {
     echo any
