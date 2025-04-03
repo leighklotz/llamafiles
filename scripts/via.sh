@@ -62,7 +62,7 @@ function main {
                 break ;;
             --list-models)
                 init_model
-                list_models
+                list_models "${@}"
                 status=$?
                 break ;;
             --list-model-types)
