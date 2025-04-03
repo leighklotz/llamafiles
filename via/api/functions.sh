@@ -261,7 +261,24 @@ function get_model_name {
 }
 
 function list_models {
-    curl -s "${VIA_API_MODEL_LIST_ENDPOINT}" "${AUTHORIZATION_PARAMS[@]}" | jq -r '.model_names[]'
+    local args=$@
+
+    if [ -z "$args" ]; then
+        curl -s "${VIA_API_MODEL_LIST_ENDPOINT}" "${AUTHORIZATION_PARAMS[@]}" | jq -r '.model_names[]'
+    else
+        # Quote the arguments to prevent word splitting issues, and handle empty arguments.
+        local quoted_args=("$@")
+
+        # Build the grep pattern.  We'll use xargs to pass multiple -e options to grep.
+        local grep_pattern=""
+        for arg in "${quoted_args[@]}"; do
+            if [ -n "$arg" ]; then #Skip empty arguments
+                grep_pattern="$grep_pattern -e $arg"
+            fi
+        done
+
+        list_models | grep -i $grep_pattern
+    fi
 }
 
 function list_model_types() {
