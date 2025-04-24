@@ -1,25 +1,87 @@
 klotz@tensor:~/wip/solon$ (bashblock cat solon.py; whatsty solon) | help.sh tell me how to fix what happened to these two classification jobs overnight
 
 
-Okay, I've analyzed the logs. It appears the two classification jobs are failing due to an SSL EOF error during the `IDLE` command with the IMAP server. This is happening intermittently, and the traceback consistently points to a broken connection during the `self.connection.send()` call within the `idle()` function.  Additionally, I see a `socket error: EOF occurred in violation of protocol` during logout, which suggests a similar underlying network issue. Here's a breakdown of likely causes and a plan to address them, considering the Open World Hypothesis (meaning we're prepared for unexpected issues):
+Okay, I've analyzed the logs. It appears the two classification jobs
+are failing due to an SSL EOF error during the `IDLE` command with the
+IMAP server. This is happening intermittently, and the traceback
+consistently points to a broken connection during the
+`self.connection.send()` call within the `idle()` function.
+Additionally, I see a `socket error: EOF occurred in violation of
+protocol` during logout, which suggests a similar underlying network
+issue. Here's a breakdown of likely causes and a plan to address them,
+considering the Open World Hypothesis (meaning we're prepared for
+unexpected issues):
 
 **Root Causes (likely, in order of probability):**
 
-1.  **Network Instability:** The most probable cause. Transient network hiccups between your server and the IMAP server (e.g., brief packet loss, firewall issues, ISP problems) can terminate the SSL connection during the long-running `IDLE` command. The logs show a relatively long idle time (29 minutes) which exacerbates the risk.
-2.  **IMAP Server Issues:** The IMAP server itself might be experiencing intermittent connectivity problems or resource constraints, causing it to abruptly close connections. This is less likely if other applications are connecting successfully, but still possible.
-3.  **SSL/TLS Negotiation:** A mismatch in supported SSL/TLS protocols or cipher suites between your client and the server *could* cause connection resets, though this is less common with modern libraries like `imaplib`.
-4.  **Firewall/Proxy Interference:** A firewall or proxy between your server and the IMAP server could be prematurely terminating long-lived connections, especially if it has aggressive timeout settings.
+1.  **Network Instability:** The most probable cause. Transient
+    network hiccups between your server and the IMAP server (e.g.,
+    brief packet loss, firewall issues, ISP problems) can terminate
+    the SSL connection during the long-running `IDLE` command. The
+    logs show a relatively long idle time (29 minutes) which
+    exacerbates the risk.
+
+2.  **IMAP Server Issues:** The IMAP server itself might be
+    experiencing intermittent connectivity problems or resource
+    constraints, causing it to abruptly close connections. This is
+    less likely if other applications are connecting successfully, but
+    still possible.
+    
+3.  **SSL/TLS Negotiation:** A mismatch in supported SSL/TLS protocols
+    or cipher suites between your client and the server *could* cause
+    connection resets, though this is less common with modern
+    libraries like `imaplib`.
+    
+4.  **Firewall/Proxy Interference:** A firewall or proxy between your
+    server and the IMAP server could be prematurely terminating
+    long-lived connections, especially if it has aggressive timeout
+    settings.
+    
 5. **Resource Limits:** Though less likely, your server could be hitting resource limits (file descriptors, memory) causing the socket to fail.
 
 **Troubleshooting & Fixes (in order of recommended execution):**
 
-1.  **Reduce `IDLE_TIMEOUT`:**  Significantly reduce the `IDLE_TIMEOUT` from 29 minutes to something more conservative like 5-10 minutes. This reduces the window of opportunity for network issues to disrupt the connection.  Modify `IDLE_TIMEOUT = 5 * 60` in `solon.py`.  This is the *easiest* and most likely effective first step.
-2.  **Improve Error Handling & Reconnection Logic:** While the code already *attempts* reconnection, strengthen it. Within the `idle()` function, *after* catching the `imaplib.IMAP4.error` exception, add a more robust reconnection attempt with exponential backoff.  Instead of simply retrying a fixed number of times, increase the retry delay significantly with each attempt (e.g., 30s, 60s, 120s, 300s).  Log each reconnection attempt with detailed information.
-3.  **Investigate Network Connectivity:** Use standard network diagnostic tools (`ping`, `traceroute`, `tcpdump`/`Wireshark`) to verify connectivity to the IMAP server. Look for packet loss, high latency, or unexpected routing behavior.  Run these tests *while* the `solon` script is running to see if you can reproduce the issue.
-4.  **Check IMAP Server Logs:** If you have access to the IMAP server logs, examine them for any errors or warnings that coincide with the connection failures. This could provide valuable clues about the server-side cause.
-5.  **Firewall/Proxy Review:**  If there's a firewall or proxy involved, ensure it’s configured to allow long-lived SSL connections to the IMAP server.  Check for timeout settings that might be too aggressive.
-6.  **TLS/SSL Configuration:** Verify that the SSL/TLS configuration on both your server and the IMAP server is compatible.  You might need to explicitly specify a preferred cipher suite if there's a mismatch. (Advanced - requires more network expertise).
-7. **Resource Monitoring:** Monitor your server's resource usage (CPU, memory, file descriptors) to identify potential bottlenecks.
+1.  **Reduce `IDLE_TIMEOUT`:** Significantly reduce the `IDLE_TIMEOUT`
+    from 29 minutes to something more conservative like 5-10
+    minutes. This reduces the window of opportunity for network issues
+    to disrupt the connection.  Modify `IDLE_TIMEOUT = 5 * 60` in
+    `solon.py`.  This is the *easiest* and most likely effective first
+    step.
+
+2.  **Improve Error Handling & Reconnection Logic:** While the code
+    already *attempts* reconnection, strengthen it. Within the
+    `idle()` function, *after* catching the `imaplib.IMAP4.error`
+    exception, add a more robust reconnection attempt with exponential
+    backoff.  Instead of simply retrying a fixed number of times,
+    increase the retry delay significantly with each attempt (e.g.,
+    30s, 60s, 120s, 300s).  Log each reconnection attempt with
+    detailed information.
+
+3.  **Investigate Network Connectivity:** Use standard network
+    diagnostic tools (`ping`, `traceroute`, `tcpdump`/`Wireshark`) to
+    verify connectivity to the IMAP server. Look for packet loss, high
+    latency, or unexpected routing behavior.  Run these tests *while*
+    the `solon` script is running to see if you can reproduce the
+    issue.
+
+4.  **Check IMAP Server Logs:** If you have access to the IMAP server
+    logs, examine them for any errors or warnings that coincide with
+    the connection failures. This could provide valuable clues about
+    the server-side cause.
+
+5.  **Firewall/Proxy Review:** If there's a firewall or proxy
+    involved, ensure it’s configured to allow long-lived SSL
+    connections to the IMAP server.  Check for timeout settings that
+    might be too aggressive.
+
+6.  **TLS/SSL Configuration:** Verify that the SSL/TLS configuration
+    on both your server and the IMAP server is compatible.  You might
+    need to explicitly specify a preferred cipher suite if there's a
+    mismatch. (Advanced - requires more network expertise).
+
+7. **Resource Monitoring:** Monitor your server's resource usage (CPU,
+    memory, file descriptors) to identify potential bottlenecks.
+
 
 **Code Modifications (Example – Enhanced Reconnection):**
 
@@ -44,10 +106,15 @@ Within the `idle()` function, replace the current retry loop with something like
 
 **Important Considerations:**
 
-*   **Logging:** Increase the logging level to `DEBUG` temporarily to capture more detailed information about the connection process.
+* **Logging:** Increase the logging level to `DEBUG` temporarily to
+    capture more detailed information about the connection process.
 *   **Reproducibility:**  Try to consistently reproduce the error to make testing fixes more effective.
-*   **Monitoring:** Implement monitoring to track the success/failure rate of the classification jobs over time.  This will help you identify recurring issues.
+* **Monitoring:** Implement monitoring to track the success/failure
+    rate of the classification jobs over time.  This will help you
+    identify recurring issues.
 
-
-
-Start with reducing `IDLE_TIMEOUT` and implementing the enhanced reconnection logic. Monitor the logs closely after making these changes to see if the issue is resolved. If not, proceed with the more in-depth network investigation.  Let me know how it goes, and provide any additional logs or observations you have!
+Start with reducing `IDLE_TIMEOUT` and implementing the enhanced
+    reconnection logic. Monitor the logs closely after making these
+    changes to see if the issue is resolved. If not, proceed with the
+    more in-depth network investigation.  Let me know how it goes, and
+    provide any additional logs or observations you have!
