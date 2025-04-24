@@ -56,8 +56,8 @@
   "api"
   "Default VIA for LLM."
   :type '(choice
-	  (const api)
-	  (const cli))
+          (const api)
+          (const cli))
   :group 'llm)
 
 (defcustom llm-default-model-type
@@ -107,14 +107,14 @@ If no region is selected, the function will assume the entire buffer is the regi
   (unless (and start end)
     (setq start (point-min))
     (setq end (point-max)))
-  (let ((llm-write-buffer-name t))	;insert into current buffer
+  (let ((llm-write-buffer-name t))      ;insert into current buffer
     (llm-region-internal "write" llm-default-via llm-default-model-type (llm-mode-text-type) prompt start end llm-write-buffer-name nil nil)))
 
 (defun llm-complete (prompt start end)
   "Insert some inferred text based on current region to point in the current buffer."
   ;; todo: ignores end and uses (point); should have good default behavior and get bounds better.
   (interactive "sPrompt: \nr")
-  (let ((n-predict 32))			;fixme ctrl-u arg?
+  (let ((n-predict 32))                 ;fixme ctrl-u arg?
     (llm-complete-internal prompt llm-default-via llm-default-model-type start end n-predict)))
 
 (defun llm-write (prompt &optional start end)
@@ -144,12 +144,12 @@ If no region is selected, the function will assume the entire buffer is the regi
 (defun llm-explain-output (prompt)
   (interactive "sQuestion: ")
   (let* ((bounds (my-comint-get-previous-output-bounds))
-	 (start (car bounds))
-	 (end (cadr bounds))
-	 (default-prompt "What line number contains the proximal error?")
-	 (prompt (if (or (null prompt) (string= "" prompt))
-		     default-prompt
-		   prompt)))
+         (start (car bounds))
+         (end (cadr bounds))
+         (default-prompt "What line number contains the proximal error?")
+         (prompt (if (or (null prompt) (string= "" prompt))
+                     default-prompt
+                   prompt)))
     (llm-ask prompt start end)))
 
 (defun llm-infer-command-internal (&rest args)
@@ -164,10 +164,10 @@ If no region is selected, the function will assume the entire buffer is the regi
 See [shell-command-on-region] for interpretation of output-buffer-name."
   ;; Send the buffer or selected region as a CLI input to 'llm.sh'
   (let ((start (or start (point-min)))
-	(end (or end (point-max)))
-	(command (llm-infer-command-internal use-case via model-type major-mode-name user-prompt))
-	(display-error-buffer t)
-	(region-noncontiguous-p nil))
+        (end (or end (point-max)))
+        (command (llm-infer-command-internal use-case via model-type major-mode-name user-prompt))
+        (display-error-buffer t)
+        (region-noncontiguous-p nil))
     (message "llm-region-internal: buffer=%s[%s,%s] command=%s replace-p=%s diff-p=%s output-buffer-name=%s" (buffer-name) start end command replace-p diff-p output-buffer-name)
     (let ((max-mini-window-height 0.0))
       (if (and replace-p diff-p)
@@ -222,12 +222,12 @@ See [shell-command-on-region] for interpretation of output-buffer-name."
 (defun llm-complete-internal (prompt via model-type start end n-predict)
   ;; Send the buffer or selected region as a CLI input to 'llm.sh'
   (let* ((command (llm-infer-command-internal "complete" via model-type (llm-mode-text-type) n-predict prompt))
-	 (display-error-buffer t)
-	 (region-noncontiguous-p nil))
+         (display-error-buffer t)
+         (region-noncontiguous-p nil))
     (message "llm-commplete-internal: %s" command)
     (let ((max-mini-window-height 0.0)
-	  (old-text (buffer-substring start end))
-	  (new-end))
+          (old-text (buffer-substring start end))
+          (new-end))
       ;; todo: better prompting, put point at end, leave in place for repeated application, temperature, etc
       (shell-command-on-region start end command nil t llm-error-buffer-name display-error-buffer region-noncontiguous-p)
       (goto-char start)
@@ -240,23 +240,23 @@ See [shell-command-on-region] for interpretation of output-buffer-name."
   "Load the specified model using LLM script."
   (interactive)
   (let* ((model-names (with-temp-buffer
-			(when (call-process llm-via-script-path nil t nil "--api" "--list-models")
-			  (split-string (buffer-string) "\n" t))))
+                        (when (call-process llm-via-script-path nil t nil "--api" "--list-models")
+                          (split-string (buffer-string) "\n" t))))
          (model-name (completing-read "Model: " model-names)))
     (when model-name
       (let ((results
-	     (with-temp-buffer
-	       (call-process llm-via-script-path nil t nil "--api" "--load-model" model-name)
-	       (split-string (buffer-string) "\n" t))))
-	(message "model-name=%s results=%s" model-name results)))))
+             (with-temp-buffer
+               (call-process llm-via-script-path nil t nil "--api" "--load-model" model-name)
+               (split-string (buffer-string) "\n" t))))
+        (message "model-name=%s results=%s" model-name results)))))
 
 ;;; these probably belong elsewhere
 (defun my-comint-get-previous-output ()
   "Return the output of the previous shell command in comint mode."
   (interactive)
   (let* ((bounds (my-comint-get-previous-output-bounds))
-	 (start (car bounds))
-	 (end (cadr bounds)))
+         (start (car bounds))
+         (end (cadr bounds)))
     (buffer-substring-no-properties start end)))
 
 (defun my-comint-get-previous-output-bounds ()
