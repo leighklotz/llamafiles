@@ -131,6 +131,11 @@ If no region is selected, the function will assume the entire buffer is the regi
   (interactive "sRewrite Prompt: \nr")
   (llm-region-internal "rewrite" llm-default-via llm-default-model-type (llm-mode-text-type) user-prompt start end nil t t))
 
+(defun llm-rewrite (user-prompt start end)
+  "Rewrites the current region with the output of the llm-rewrite-script-path command based on the prompt and current region"
+  (interactive "sRewrite Prompt: \nr")
+  (llm-region-internal "rewrite" llm-default-via llm-default-model-type (llm-mode-text-type) user-prompt start end (current-buffer) t t))
+
 (defun llm-todo (user-prompt start end)
   "Rewrites the current region to process 'todo' items with the output of the llm-rewrite-script-path command based on the prompt and current region"
   (interactive "sRewrite Prompt: \nr")
@@ -159,6 +164,7 @@ If no region is selected, the function will assume the entire buffer is the regi
    (mapconcat #'(lambda (arg) (shell-quote-argument (format "%s" arg))) args " ")))
 
 ;;; Interface to rewrite.sh
+;      llm-region-internal  x        x   x          x               x           x     x   (current-buffer) t t))
 (defun llm-region-internal (use-case via model-type major-mode-name user-prompt start end output-buffer-name replace-p diff-p)
   "Send the buffer or current region as the output of the llm-rewrite-script-path command based on the prompt and current region and either replaces the region or uses a specified buffer, based on output-buffer-name and replace-p.
 See [shell-command-on-region] for interpretation of output-buffer-name."
@@ -169,14 +175,12 @@ See [shell-command-on-region] for interpretation of output-buffer-name."
         (display-error-buffer t)
         (region-noncontiguous-p nil))
     (message "llm-region-internal: buffer=%s[%s,%s] command=%s replace-p=%s diff-p=%s output-buffer-name=%s" (buffer-name) start end command replace-p diff-p output-buffer-name)
-    (let ((max-mini-window-height 0.0))
-      (if (and replace-p diff-p)
-          (llm-region-as-diff-internal start end command)
-        (let ((output-buffer (get-buffer-create output-buffer-name)))
-          (if (and replace-p (buffer-file-name) (equal (buffer-file-name) (buffer-file-name output-buffer)))
-              (shell-command-on-region start end command nil t llm-error-buffer-name display-error-buffer region-noncontiguous-p)
-            (shell-command-on-region start end command output-buffer-name replace-p llm-error-buffer-name display-error-buffer region-noncontiguous-p)
-            (pop-to-buffer output-buffer)))))))
+    (let ((max-mini-window-height 0.0)
+          (output-buffer-name (if replace-p (buffer-name (current-buffer)) output-buffer-name)))
+      (cond ((and replace-p diff-p) (llm-region-as-diff-internal start end command))
+            (t (shell-command-on-region start end command output-buffer-name replace-p
+                                        llm-error-buffer-name display-error-buffer
+                                        region-noncontiguous-p))))))
 
 (defun llm-region-as-diff-internal (start end command)
   (let* ((original-string (buffer-substring start end))
@@ -184,20 +188,15 @@ See [shell-command-on-region] for interpretation of output-buffer-name."
                        (insert original-string)
                        (shell-command-on-region (point-min) (point-max) command (current-buffer) t llm-error-buffer-name t nil)
                        (buffer-string))))
-    (llm-diff-current-buffer-with-string llm-output)))
+    (message "llm-diff-region-with-string %d %d %s" start end llm-output)
+    (llm-diff-region-with-string start end llm-output)))
 
-;;; when replacing, insert diffs in conflict merge marker format
-;;; Background:
-;;; Emacs automatically highlights merge conflict markers (like <<<<<<<, =======, >>>>>>>) in files with conflicts, allowing you to easily identify and resolve them. You can trigger this by opening a file with merge conflict markers in Emacs, and the diff display will automatically activate.
-;;; smerge-mode offers convenient commands for this format
-(defun llm-diff-current-buffer-with-string (new-string)
-  "Handy \\[smerge] between the current buffer content and new-string"
-  (interactive "sEnter the new string: ")
-  (let* ((current-buffer-content (buffer-substring-no-properties (point-min) (point-max)))
+(defun llm-diff-region-with-string (start end new-string)
+  "Handy \\[smerge] between the specified region and new-string"
+  (let* ((current-buffer-content (buffer-substring-no-properties start end))
          (temp-file-before (make-temp-file "emacs-diff-before-"))
          (temp-file-after (make-temp-file "emacs-diff-after-"))
          (diff-buffer (get-buffer-create llm-diff-buffer-name))
-         ;; git merge-file -p "$before" "$after" /dev/null > "$output"
          (diff-command (format llm-git-merge-format temp-file-before temp-file-after)))
     (message "diff-command %s" diff-command)
 
@@ -208,16 +207,19 @@ See [shell-command-on-region] for interpretation of output-buffer-name."
       (insert new-string))
 
     ;; Run the diff command and capture the output in the *llm-diff* buffer
-    (let ((result (shell-command-to-string diff-command)))
+    (with-current-buffer diff-buffer
       (erase-buffer)
-      (insert result)
+      (insert (shell-command-to-string diff-command))
       (smerge-mode)
       (diff-auto-refine-mode 1)
-      (goto-char (point-min)))
+      (goto-char (point-min))))
+  (delete-region start end)
+  (goto-char start)
+  (insert new-string)
 
-    (unless llm-preserve-temp-files
-      (delete-file temp-file-before)
-      (delete-file temp-file-after))))
+  (unless llm-preserve-temp-files
+    (delete-file temp-file-before)
+    (delete-file temp-file-after)))
 
 (defun llm-complete-internal (prompt via model-type start end n-predict)
   ;; Send the buffer or selected region as a CLI input to 'llm.sh'
