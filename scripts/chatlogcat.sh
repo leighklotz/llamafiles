@@ -12,9 +12,9 @@
 
 # Usage function
 usage() {
-  echo "Usage: $0 <log_file> [--internal]"
+  echo "Usage: $0 <log_file> [-i]"
   echo "  <log_file>: Path to the logcat JSON file."
-  echo "  --internal: Use '.internal' instead of '.visible' in the JQ selector."
+  echo "  -i: Use '.internal' instead of '.visible' in the JQ selector."
   exit 1
 }
 
