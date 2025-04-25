@@ -138,7 +138,7 @@ If no region is selected, the function will assume the entire buffer is the regi
 
 (defun llm-todo (user-prompt start end)
   "Rewrites the current region to process 'todo' items with the output of the llm-rewrite-script-path command based on the prompt and current region"
-  (interactive "sRewrite Prompt: \nr")
+  (interactive "sTodo Prompt: \nr")
   (llm-region-internal "todo" llm-default-via llm-default-model-type (llm-mode-text-type) user-prompt start end nil t t))
 
 ;; This function is used in comint-mode to understand and explain the output in an
@@ -207,15 +207,11 @@ See [shell-command-on-region] for interpretation of output-buffer-name."
       (insert new-string))
 
     ;; Run the diff command and capture the output in the *llm-diff* buffer
-    (with-current-buffer diff-buffer
-      (erase-buffer)
-      (insert (shell-command-to-string diff-command))
-      (smerge-mode)
-      (diff-auto-refine-mode 1)
-      (goto-char (point-min))))
-  (delete-region start end)
-  (goto-char start)
-  (insert new-string)
+    (delete-region start end)
+    (goto-char start)
+    (insert (shell-command-to-string diff-command))
+    (smerge-mode)
+    (diff-auto-refine-mode 1))
 
   (unless llm-preserve-temp-files
     (delete-file temp-file-before)
