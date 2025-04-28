@@ -68,9 +68,10 @@ function fetch_text() {
     fi
 }
 
-LINKS_PRE_PROMPT="Below is a web page article from the specified link address. If retrieval failed, report on the failure. Otherwise, follow the instructions after the article."
-SUMMARIZE_POST_PROMPT="Read the above web page article from ${LINK} and ignore website header at the start and look for the main article. If there are retrieval failures, just report on the failures."
+LINKS_PRE_PROMPT="Below is a web page article from <${LINK}>. If it does not have content, very briefly report the failure. Otherwise, follow the instructions after the article."
+SUMMARIZE_POST_PROMPT="Read the above web page article from <${LINK}>. If it does not have content, very briefly report the failure. Otherwise, follow these instructions:\n"
 
-( printf "# Text of link %s\n" "${LINK}"; fetch_text "${LINK}" | ${CAPTURE_COMMAND}; printf "\n# Instructions\n%b %b\n" "${SUMMARIZE_POST_PROMPT}" "${POST_PROMPT_ARG}") \
- | "${SCRIPT_DIR}/llm.sh" ${ARGS} "${LINKS_PRE_PROMPT}"
-
+( printf "# Text of link %s\n" "${LINK}"; 
+  fetch_text "${LINK}" | ${CAPTURE_COMMAND};
+  printf "\n# Instructions\n%b\n%b\n" "${SUMMARIZE_POST_PROMPT}" "${POST_PROMPT_ARG}") \
+| "${SCRIPT_DIR}/llm.sh" ${ARGS} "${LINKS_PRE_PROMPT}"
