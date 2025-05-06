@@ -28,7 +28,7 @@ function reorder_code {
     # Check if a comment sequence is provided, otherwise default to "// "
     comment_seq="${1:-// }"
 
-    awk -v comment_seq="$comment_seq" '
+    gawk -v comment_seq="$comment_seq" '
     BEGIN {
         in_code_fence = 0
         lang = ""
@@ -119,7 +119,7 @@ if [ -z "${result}" ]; then
 fi
 
 if [ -n "$REORDER_CODE" ]; then
-    # todo: move this calculation to emacs since it already has the info
+    # todo: refactor into a function
     case "${MAJOR_MODE}" in
         sh-mode) comment="# " ;;
         *lisp*-mode) comment=";;; " ;;
