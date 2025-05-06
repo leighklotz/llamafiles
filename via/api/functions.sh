@@ -4,7 +4,7 @@
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]];
 then
     echo "This script '${BASH_SOURCE[0]}' is intended to be sourced, not executed directly."
-    exit 1
+#    exit 1
 fi
 
 : "${VIA_API_CHAT_BASE:=http://localhost:5000}"
@@ -22,6 +22,9 @@ AUTHORIZATION_PARAMS=()
 
 # TODO: sampling order:  CFG -> Penalties -> top_k -> tfs_z -> typical_p -> top_p -> min_p -> temperature
 # todo: Sampling order appears to be a key differentiator for results from llamafile vs ooba but it's ununnvestigagted
+TOP_K="${TOP_K:-20}"
+TOP_P="${TOP_P:-0.95}"
+MIN_P="${MIN_P:-0.1}"
 
 # --grammar-file support is spotty in non-gguf models so default to off
 : "${VIA_API_USE_GRAMMAR:=}"
@@ -63,7 +66,7 @@ else
     seed: \$seed,
     repetition_penalty: \$repetition_penalty,
     repeat_last_n: 64, repeat_penalty: 1.000, frequency_penalty: 0.000, presence_penalty: 0.000,
-    top_k: 40, tfs_z: 1.000, top_p: 0.950, min_p: 0.050, typical_p: 1.000,
+    top_k: ${TOP_K}, tfs_z: 1.000, top_p: ${TOP_P}, min_p: ${MIN_P}, typical_p: 1.000,
     mirostat: 0, mirostat_lr: 0.100, mirostat_ent: 5.000,
     n_keep: 1,
     auto_max_new_tokens: true,
