@@ -164,7 +164,6 @@ If no region is selected, the function will assume the entire buffer is the regi
    (mapconcat #'(lambda (arg) (shell-quote-argument (format "%s" arg))) args " ")))
 
 ;;; Interface to rewrite.sh
-;      llm-region-internal  x        x   x          x               x           x     x   (current-buffer) t t))
 (defun llm-region-internal (use-case via model-type major-mode-name user-prompt start end output-buffer-name replace-p diff-p)
   "Send the buffer or current region as the output of the llm-rewrite-script-path command based on the prompt and current region and either replaces the region or uses a specified buffer, based on output-buffer-name and replace-p.
 See [shell-command-on-region] for interpretation of output-buffer-name."
