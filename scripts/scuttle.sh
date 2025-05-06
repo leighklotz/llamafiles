@@ -173,8 +173,8 @@ else
 fi
 
 POST_PROMPT_ARG="Respond with only a short ${INTERMEDIATE_FORMAT} object with these 4 fields: "'`link`, `title`, `description`, and `keywords` array'
-LINKS_PRE_PROMPT="Below is a web page article from the specified link address. Follow the instructions after the article."
-SCUTTLE_POST_PROMPT="Read the above web page article from ${LINK} and ignore website header at the start and look for the main article."
+LINKS_PRE_PROMPT="Below is a web page article from the specified link address. If retrieval failed, report on the failure. Otherwise, follow the instructions after the article."
+SCUTTLE_POST_PROMPT="Read the above web page article from ${LINK} and ignore website header at the start and look for the main article. If there are retrieval failures, just report on the failures."
 
 ( printf "# Text of link %s\n" "${LINK}"; fetch_text "${LINK}" | ${CAPTURE_COMMAND}; \
   printf "\n# Instructions\n%b\n%b\n" "${SCUTTLE_POST_PROMPT}" "${POST_PROMPT_ARG}" ) | \
