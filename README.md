@@ -365,6 +365,9 @@ In addition to these command line flags, the script also checks for several envi
 - `VIA`: The type of model runner, `api` or `cli`. Also see `--via` flag.
 - `MODEL_TYPE`: The default model type to use if none is specified via the `-m` or `--model-type` flag. (cli)
 - `TEMPERATURE`: The default temperature parameter for the model if none is specified via the `--temperature` flag.
+  `TOP_K`: TOP_K. Currently only set for api models.
+  `TOP_P`: TOP_P. Currently only set for api models.
+  `MIN_P`: MIN_P. Currently only set for api models.
 - `CONTEXT_LENGTH`: The default context length for the model if none is specified via the `--context-length` or `-c` flag. (cli)
 - `N_PREDICT`: The default number of tokens to predict if none is specified via the `--n-predict` flag.
 - `SYSTEM_MESSAGE`: The default system message to use if none is specified via the command line.
