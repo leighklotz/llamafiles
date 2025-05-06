@@ -221,7 +221,8 @@ If no region is selected, the function will assume the entire buffer is the regi
 
 (defun llm-complete-internal (prompt via model-type start end n-predict)
   "Completes text based on the current region using the LLM."
-  (let ((command (llm-infer-command-internal "complete" via model-type (llm-mode-text-type) n-predict prompt)))
+  (let* ((use-case "complete")
+         (command (llm-infer-command-internal use-case via model-type "--n-predict" n-predict (llm-mode-text-type) prompt)))
     (message "llm-complete-internal: %s" command)
     (let ((old-text (buffer-substring start end)))
       (shell-command-on-region start end command nil t llm-error-buffer-name t nil)
