@@ -19,7 +19,7 @@
 ;;;
 ;;; Summary:
 ;;; This package provides functions for summarizing and rewriting the contents
-;;; of Emacs buffers using an external script called 'llm.sh'. The package
+;;; of Emacs buffers using an external script called 'llm-emacs-helper.sh'. The package
 ;;; includes the following functions:
 ;;;   - M-X llm-summarize-buffer
 ;;;     Summarizes the contents of the current buffer in a new buffer.
@@ -125,11 +125,6 @@ If no region is selected, the function will assume the entire buffer is the regi
     (setq start (point-min))
     (setq end (point-max)))
   (llm-region-internal "write" llm-default-via llm-default-model-type (llm-mode-text-type) prompt start end llm-write-buffer-name nil nil))
-
-(defun llm-rewrite (user-prompt start end)
-  "Rewrites the current region with the output of the llm-rewrite-script-path command based on the prompt and current region"
-  (interactive "sRewrite Prompt: \nr")
-  (llm-region-internal "rewrite" llm-default-via llm-default-model-type (llm-mode-text-type) user-prompt start end nil t t))
 
 (defun llm-rewrite (user-prompt start end)
   "Rewrites the current region with the output of the llm-rewrite-script-path command based on the prompt and current region"
