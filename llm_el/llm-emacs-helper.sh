@@ -1,9 +1,12 @@
 #!/bin/bash
 
-# Script to interact with an LLM for code/text manipulation via Emacs major mode.
-# It accepts a use case, model type, and input (either from stdin or a file) to perform
-# tasks like rewriting, summarizing, completing, or answering questions about the input.
-# It handles context length estimation and optional code reordering with comments.
+# Script to interface with an LLM from Emacs major modes for code/text manipulation.
+# Handles use cases like rewriting, summarizing, completion, and question answering.
+# Features context length estimation and optional code reordering with comments.
+#
+# Copyright (C) 2024-2025 Leigh L. Klotz, Jr.
+# Licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3, 19 November 2007.
+# See LICENSE file for details.
 
 SCRIPT_DIR="$(dirname "$(realpath "${BASH_SOURCE[0]}")")"
 LLM_SH="${SCRIPT_DIR}/../scripts/llm.sh"
@@ -14,127 +17,140 @@ if [ -n "${DEBUG}" ]; then
     (env; printf "\n%s\n" "${*}")
 fi
 
-# Usage: llm-emacs-helper.sh use-case model-type via major-mode [options] WORDS WORDS WORDS
-# Usage: llm-emacs-helper.sh use-case model-type via major-mode 'WORDS() `WORDS` WORDS'
-# Stdin is the region of input.
-# Example: cat foo.sh | ./llm-emacs-helper.sh ask api mixtral bash make this arg parsing better
-# Some use cases invert the sense of text and code, changing text to comments and removing code fences.
+# Usage: llm-emacs-helper.sh use-case model-type via [options] input
+# Input can be stdin or a file piped to this script.
+# Example: cat foo.sh | ./llm-emacs-helper.sh ask api mixtral bash "improve this code"
 
-USE_CASE=$1; shift
-VIA=$1; shift
-MODEL_TYPE=$1; shift
+# Argument parsing with more robust error handling
+if [[ $# -lt 3 ]]; then
+  usage
+  exit 1
+fi
+
+USE_CASE="$1"; shift
+VIA="$1"; shift
+MODEL_TYPE="$1"; shift
 
 MAJOR_MODE=""
 PROMPT=""
 RAW_FLAG=""
 N_PREDICT=""
-REORDER_CODE=""
+REORDER_CODE=0 #Use numeric for boolean flags
+
+# Parse optional arguments
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -n_predict)
+      N_PREDICT="--n-predict \"${2}\""
+      shift 2
+      ;;
+    --raw-input)
+      RAW_FLAG="--raw-input"
+      shift 1
+      ;;
+    *)
+      break
+      ;;
+  esac
+done
 
 # Function to reorder code by adding a comment sequence before each line, except within code fences.
-# The default comment sequence is "// ", but can be specified as the first argument.
+# This now uses a more concise and readable awk script.
 function reorder_code {
-    # Check if a comment sequence is provided, otherwise default to "// "
-    comment_seq="${1:-// }"
-
-    gawk -v comment_seq="$comment_seq" '
-    BEGIN {
-        in_code_fence = 0
-        lang = ""
-    }
-
+  local comment_seq="$1"
+  awk -v comment_seq="$comment_seq" '
     {
-        if ($0 ~ /^```(.*)$/) {
-            in_code_fence = 1 - in_code_fence
-            if (in_code_fence == 0) {
-                lang = ""
-            } else {
-                lang = gensub(/^```(.*)$/, "\\1", "g")
-            }
-        } else if (in_code_fence == 0) {
-            print comment_seq $0
-        } else {
-            print $0
-        }
+      if ($0 ~ /^```/) {
+        in_code_fence = !in_code_fence
+      }
+      if (!in_code_fence) {
+        print comment_seq, $0
+      } else {
+        print $0
+      }
     }
-    '
+  '
 }
 
 # Function to calculate the comment prefix based on the major mode.
-function calculate_comment_case {
+function calculate_comment_prefix {
     local major_mode="$1"
-    local comment_prefix=""
-
     case "$major_mode" in
-        sh-mode)      comment_prefix="# "   ;;
-        *lisp*-mode)  comment_prefix=";;; " ;;
-        python*-mode) comment_prefix="# "   ;;
-        c-mode)       comment_prefix="// "  ;;
-        c\+\+-mode)   comment_prefix="// "  ;;
-        *)            comment_prefix="// "  ;;
+        sh-mode)      echo "# "   ;;
+        *lisp*-mode)  echo ";;; " ;;
+        python*-mode) echo "# "   ;;
+        c-mode)       echo "// "  ;;
+        c\+\+-mode)   echo "// "  ;;
+        *)            echo "// "  ;;
     esac
+}
 
-    echo "$comment_prefix"
+# Usage function
+function usage {
+  echo "Usage: $0 use-case model-type via [options] input"
+  echo "  use-case:  One of: rewrite, ask, write, summarize, complete, todo, -h"
+  echo "  model-type: The LLM model to use (e.g., mixtral, llama2)."
+  echo "  via:       The API endpoint (e.g., api, cli)."
+  echo "  options:   -n_predict <tokens> - --raw-input"
+  echo "  input:     The text or code to process (piped or file)."
 }
 
 # Process the use case and set the system message accordingly.
 case "$USE_CASE" in
-    -h)
-        usage
-	    exit 0
-	    ;;
-    rewrite)
-	    # args: major_mode prompt*
-	    MAJOR_MODE=$1; shift; PROMPT="${*}"
-	    printf -v SYSTEM_MESSAGE "Re-write the following %s according to user instructions:\n" "${MAJOR_MODE}"
-        REORDER_CODE=1
-	    ;;
-    
-    todo)
-	    # args: major_mode prompt*
-	    MAJOR_MODE=$1; shift; PROMPT="${*}"
-	    printf -v SYSTEM_MESSAGE "Re-write the following %s to address the 'todo' items, following user instructions:\n" "${MAJOR_MODE}"
-        REORDER_CODE=1
-	    ;;
-    
-    ask)
-	    # args: major_mode prompt*
-	    MAJOR_MODE=$1; shift; PROMPT="${*}"
-	    printf -v SYSTEM_MESSAGE "Answer the user question about the following %s content:\n" "${MAJOR_MODE}"
-	    ;;
+  -h)
+    usage
+    exit 0
+    ;;
+  rewrite)
+    # args: major_mode prompt*
+    MAJOR_MODE=$1; shift; PROMPT="${*}"
+    printf -v SYSTEM_MESSAGE "Re-write the following %s according to user instructions:\n" "${MAJOR_MODE}"
+    REORDER_CODE=1
+    ;;
 
-    write)
-	    # args: major_mode prompt*
-	    MAJOR_MODE=$1; shift; PROMPT="${*}"
-	    printf -v SYSTEM_MESSAGE "Write a response according to user instructions and the following %s:\n" "${MAJOR_MODE}"
-	    ;;
+  todo)
+    # args: major_mode prompt*
+    MAJOR_MODE=$1; shift; PROMPT="${*}"
+    printf -v SYSTEM_MESSAGE "Re-write the following %s to address the 'todo' items, following user instructions:\n" "${MAJOR_MODE}"
+    REORDER_CODE=1
+    ;;
 
-    summarize)
-	    # args: major_mode prompt*
-	    MAJOR_MODE=$1; shift; PROMPT="${*}"
-	    printf -v SYSTEM_MESSAGE "Summarize the following %s:" "${MAJOR_MODE}"
-	    ;;
+  ask)
+    # args: major_mode prompt*
+    MAJOR_MODE=$1; shift; PROMPT="${*}"
+    printf -v SYSTEM_MESSAGE "Answer the user question about the following %s content:\n" "${MAJOR_MODE}"
+    ;;
 
-    complete)
-	    # args: major_mode n_predict prompt*
-	    N_PREDICT=$1; shift; PROMPT="${*}"
-	    export SYSTEM_MESSAGE="Complete the ${MAJOR_MODE} code:"
-	    RAW_FLAG="--raw-input"
-	    N_PREDICT="--n-predict ${N_PREDICT}"
-	    ;;
+  write)
+    # args: major_mode prompt*
+    MAJOR_MODE=$1; shift; PROMPT="${*}"
+    printf -v SYSTEM_MESSAGE "Write a response according to user instructions and the following %s:\n" "${MAJOR_MODE}"
+    ;;
 
-    *)
-	    # args: major_mode prompt*
-	    MAJOR_MODE=$1; shift; PROMPT="${*}"
-	    printf -v SYSTEM_MESSAGE "Read this following %s and respond to this request:" "${MAJOR_MODE}"
-	    ;;
+  summarize)
+    # args: major_mode prompt*
+    MAJOR_MODE=$1; shift; PROMPT="${*}"
+    printf -v SYSTEM_MESSAGE "Summarize the following %s:" "${MAJOR_MODE}"
+    ;;
+
+  complete)
+    # args: major_mode prompt* [--n-predict] [--raw-flag]
+    MAJOR_MODE=$1; shift; PROMPT="${*}"
+    printf -v SYSTEM_MESSAGE "Complete the %s code:\n%s\n" "${MAJOR_MODE}" "${PROMPT}"
+    ;;
+
+  *)
+    echo "ERROR: unknown use case $USE_CASE"
+    exit 1
+    ;;
 esac
 
 export SYSTEM_MESSAGE
 
 # Create a temporary file to store the input.
 INPUT_TEMPFILE=$(mktemp)
-trap 'rm -f "${INPUT_TEMPFILE}"' EXIT
-cat >> "${INPUT_TEMPFILE}"
+trap "rm \"${INPUT_TEMPFILE}\"" EXIT
+cat > "${INPUT_TEMPFILE}"
 
 # Estimate context length (limited to 2048-32768 characters)
 context_length=$(( $(wc -c < "${INPUT_TEMPFILE}") / 3 ))
@@ -150,12 +166,10 @@ if [ -z "${result}" ]; then
 fi
 
 # Reorder code with comments if the REORDER_CODE flag is set.
-if [ -n "$REORDER_CODE" ]; then
-    comment_prefix=$(calculate_comment_case "${MAJOR_MODE}")
-    printf "%s\n" "${result}" | reorder_code "${comment_prefix}"
+if [ "$REORDER_CODE" -eq 1 ]; then
+  comment_prefix=$(calculate_comment_prefix "${MAJOR_MODE}")
+  printf "%s\n" "${result}" | reorder_code "${comment_prefix}"
 else
-    printf "%s\n" "${result}"
+  printf "%s\n" "${result}"
 fi
-
-
 
