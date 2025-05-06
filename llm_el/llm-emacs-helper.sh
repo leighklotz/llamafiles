@@ -133,6 +133,7 @@ export SYSTEM_MESSAGE
 
 # Create a temporary file to store the input.
 INPUT_TEMPFILE=$(mktemp)
+trap 'rm -f "${INPUT_TEMPFILE}"' EXIT
 cat >> "${INPUT_TEMPFILE}"
 
 # Estimate context length (limited to 2048-32768 characters)
@@ -156,6 +157,5 @@ else
     printf "%s\n" "${result}"
 fi
 
-# Clean up the temporary file.
-# TODO: Do this with a trap
-rm "${INPUT_TEMPFILE}"
+
+
