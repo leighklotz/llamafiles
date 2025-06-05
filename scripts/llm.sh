@@ -2,7 +2,6 @@
 
 SCRIPT_DIR="$(dirname "$(realpath "${BASH_SOURCE}")")"
 
-
 USAGE='[--via api] | [ --via cli [-m|--model-type model-type] [--fast | --long] [--context-length|-c n] [--ngl n] [--n-predict n] ] [--stdin|--interactive|-i] [--temperature temp] [--n-predict n] [--grammar-file file.gbnf] [--info] [--verbose|-v] [--debug] [--] QUESTION*
 
 Mode of operation:
@@ -187,6 +186,10 @@ VIA_CLI_FUNCTIONS_PATH="$(realpath "${VIA_DIRECTORY}/cli/functions.sh")"
 VIA_API_FUNCTIONS_PATH="$(realpath "${VIA_DIRECTORY}/api/functions.sh")"
 source "${FUNCTIONS_PATH}"
 
+if [ -n "$DEBUG" ]; then
+    trap 'print_stack_trace' INT
+fi
+
 ###
 ### Prompt and STDIN processing
 # todo: move this to where it is used
@@ -197,7 +200,7 @@ register_temp_file "${PROMPT_TEMP_FILE}"
 # This will turn literal "\n" into literal newline in the QUESTION>
 # STDIN is never processed for escapes.
 function process_question_escapes() {
-    if [ "${PROCESS_QUESTION_ESCAPES}" ]; then
+    if [ -n "${PROCESS_QUESTION_ESCAPES}" ]; then
         log_verbose "Processing escape sequences in QUESTION"
         printf -v QUESTION "%b" "$QUESTION"
     fi
@@ -211,7 +214,7 @@ function process_stdin() {
         then
             echo "Give input followed by Ctrl-D:"
         fi
-        INPUT="$(cat)"
+        INPUT="$(cat | tr '\0' ' ')"
     fi
 }
 
@@ -221,11 +224,11 @@ function process_stdin() {
 
 function set_verbose_debug {
     # Set verbose and debug last
-    if [ "${DEBUG}" ] || [ "${INFO}" ] || [ "${VERBOSE}" ];
+    if [ -n "${DEBUG}" ] || [ -n "${INFO}" ] || [ -n "${VERBOSE}" ];
     then
         log_info "Parameters: ngl=${NGL} context_length=${CONTEXT_LENGTH} est_len=${PROMPT_LENGTH_EST}"
     fi
-    if [ "${DEBUG}" ];
+    if [ -n "${DEBUG}" ];
     then
         set -x
     fi
@@ -284,13 +287,18 @@ function perform_inference() {
 
 init_model
 process_question_escapes
+log_info "process_stdin"
 process_stdin
+log_info "process_stdin done"
 prepare_model
 log_info "MODEL_PATH=${MODEL_PATH}"
 adjust_raw_flag
+log_info "truncate_to_context_length"
 truncate_to_context_length
 set_verbose_debug
+log_info "perform_inference"
 perform_inference; STATUS=$?
+log_info "perform_inference done"
 report_success_or_fail $STATUS
 cleanup_temp_files $STATUS
 exit $STATUS

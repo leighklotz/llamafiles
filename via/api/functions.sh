@@ -104,7 +104,7 @@ NO_SYSTEM_ROLE_TEMPLATE="{
 }"
 
 function prepare_prompt {
-    if [ "${INPUT}" == "" ];
+    if [ -z "${INPUT}" ];
     then
         printf -v PROMPT "%s\n" "${QUESTION%$'\n'}"
     else
@@ -180,6 +180,7 @@ function via_api_perform_inference() {
     question=${question%%[[:space:]]}
     question_file=$(mktemp_file quest)
     register_temp_file "${question_file}"
+    log_info "writing to ${question_file}"
     printf "%s\n" "${question%$'\n'}" >> "${question_file}"
 
     # hack: Drop empty string, and null parameters. NaN seems th show as null.
@@ -199,7 +200,9 @@ function via_api_perform_inference() {
            | jq 'with_entries(select(.value != null))' \
         )
     
-    if [ "${VERBOSE}" ];
+    log_info "processed jq input"
+
+    if [ -n "${VERBOSE}" ];
     then
         log_verbose "USE_SYSTEM_ROLE='$USE_SYSTEM_ROLE'"
         log_verbose "data=$(printf "%s\n" "${data}" | jq --indent 1)"
@@ -207,7 +210,7 @@ function via_api_perform_inference() {
 
     # Invoke via the HTTP API endpoint
     # todo might need to do `set -o pipefail` here.
-    # set -x
+    #set -x
     result=$(printf "%s" "${data}" | curl -s "${VIA_API_CHAT_COMPLETIONS_ENDPOINT}" -H 'Content-Type: application/json' "${AUTHORIZATION_PARAMS[@]}" -d @-)
     s=$?
     if [ "$s" -ne 0 ];
