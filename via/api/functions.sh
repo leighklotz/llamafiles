@@ -193,7 +193,7 @@ function via_api_perform_inference() {
     read -r -d '' question <<<"$question"   # removes trailing newlines
     question="$(string_trim "$question")"
     question_file="$(mktemp /tmp/quest.XXXXXX)"
-    TEMP_FILES+=("$question_file")
+    register_temp_file "${question_file}"
     log_info "writing question to ${question_file}"
     printf "%s" "$question" >> "${question_file}"
 
