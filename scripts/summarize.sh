@@ -1,7 +1,7 @@
 #!/bin/bash
 
 SCRIPT_DIR="$(dirname "$(realpath "${BASH_SOURCE}")")"
-FETCHER_COMMAND="${SCRIPT_DIR}/fetch.sh"
+FETCHER_COMMAND="${SCRIPT_DIR}/fetcher.sh"
 CAPTURE_COMMAND="cat"
 
 . "${SCRIPT_DIR}/../via/functions.sh"
