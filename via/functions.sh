@@ -20,13 +20,13 @@ source "${VIA_DIRECTORY}/logging.sh"
 
 function source_functions {
     local functions_path="$1"
-    if [[ "${functions_path}" == "" ]]; then
+    if [ -z "${functions_path}" ]; then
 	log_and_exit 3 "* $0: ERROR: source_functions path is empty"
-    elif [[ -f "${functions_path}" ]]; then
+    elif [ -f "${functions_path}" ]; then
 	log_verbose "* sourcing ${functions_path}"
-	[ "${VERBOSE}" ] && [ -n "${PRINT_STACK_TRACE}" ] && log_verbose "* $0: stack trace:\n%s\n" "$(stack_trace $code)"
+	[ -n "${VERBOSE}" ] && [ -n "${PRINT_STACK_TRACE}" ] && log_verbose "* $0: stack trace:\n%s\n" "$(stack_trace $code)"
 	source "${functions_path}"
-    elif [[ -z "${functions_path}" ]]; then
+    elif [ -z "${functions_path}" ]; then
 	log_and_exit 3 "* $0: ERROR: functions_path is empty"
     else
 	log_and_exit 3 "* $0: ERROR: Cannot find functions: ${functions_path}"

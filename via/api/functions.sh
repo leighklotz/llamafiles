@@ -104,11 +104,15 @@ NO_SYSTEM_ROLE_TEMPLATE="{
 }"
 
 function prepare_prompt {
-    if [ "${INPUT}" == "" ];
+    log_info "prepare_prompt"
+    if [ -z "${INPUT}" ];
     then
         printf -v PROMPT "%s\n" "${QUESTION%$'\n'}"
     else
-        printf -v PROMPT "%s\n\n%s\n" "${QUESTION%$'\n'}" "${INPUT%$'\n'}"
+        # remove trailing newlines
+        read -r -d '' QUESTION <<<"$QUESTION"
+        read -r -d '' INPUT <<<"$INPUT"
+        PROMPT="${QUESTION}"$'\n'"${INPUT}"
     fi
 }
 
@@ -131,6 +135,15 @@ function via_set_options {
 # https://www.reddit.com/r/LocalLLaMA/comments/1agrddy/has_anyone_encountered_mistrals_tendency_to_use/
 function via_api_mistral_output_fixup {
     sed -e 's/\\_/_/g' | sed -e 's/\\\*/*/g'
+}
+
+function string_trim() {
+    local s="$1"
+    # Remove leading whitespace
+    s="${s#"${s%%[![:space:]]*}"}"
+    # Remove trailing whitespace
+    s="${s%"${s##*[![:space:]]}"}"
+    printf '%s' "$s"
 }
 
 # todo: make common with cli_perform_inference by splitting out all
@@ -156,7 +169,8 @@ function via_api_perform_inference() {
     if [ -z "${USE_SYSTEM_ROLE}" ];
     then
         TEMPLATE="${NO_SYSTEM_ROLE_TEMPLATE}"
-        question=$(printf "%s\n%s\n" "${system_message%$'\n'}" "${question}")
+        #question=$(printf "%s\n%s\n" "${system_message%$'\n'}" "${question}")
+        printf -v question "%s\n%s\n" "${system_message%$'\n'}" "${question}"
         system_message=""
     else
         TEMPLATE="${SYSTEM_ROLE_TEMPLATE}"
@@ -176,11 +190,12 @@ function via_api_perform_inference() {
         system_message_file="/dev/null"
     fi
 
-    question=${question##[[:space:]]}
-    question=${question%%[[:space:]]}
-    question_file=$(mktemp_file quest)
+    read -r -d '' question <<<"$question"   # removes trailing newlines
+    question="$(string_trim "$question")"
+    question_file="$(mktemp /tmp/quest.XXXXXX)"
     register_temp_file "${question_file}"
-    printf "%s\n" "${question%$'\n'}" >> "${question_file}"
+    log_info "writing question to ${question_file}"
+    printf "%s" "$question" >> "${question_file}"
 
     # hack: Drop empty string, and null parameters. NaN seems th show as null.
     #       sadly seed must be a number
@@ -199,7 +214,9 @@ function via_api_perform_inference() {
            | jq 'with_entries(select(.value != null))' \
         )
     
-    if [ "${VERBOSE}" ];
+    log_info "processed jq input"
+
+    if [ -n "${VERBOSE}" ];
     then
         log_verbose "USE_SYSTEM_ROLE='$USE_SYSTEM_ROLE'"
         log_verbose "data=$(printf "%s\n" "${data}" | jq --indent 1)"
@@ -207,7 +224,7 @@ function via_api_perform_inference() {
 
     # Invoke via the HTTP API endpoint
     # todo might need to do `set -o pipefail` here.
-    # set -x
+    #set -x
     result=$(printf "%s" "${data}" | curl -s "${VIA_API_CHAT_COMPLETIONS_ENDPOINT}" -H 'Content-Type: application/json' "${AUTHORIZATION_PARAMS[@]}" -d @-)
     s=$?
     if [ "$s" -ne 0 ];
