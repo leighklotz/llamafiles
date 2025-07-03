@@ -38,3 +38,13 @@ for file in ${SH_FILES}
 do
     lnf "${SCRIPT_DIR}/${file}" "${DEST_DIR}/${file}"
 done
+
+# optional python fetcher
+echo "Optional fetcher.py support"
+cd "${SCRIPT_DIR}"
+echo "Creating $PWD/.venv"
+python3 -m venv .venv
+. .venv/bin/activate
+
+echo "Installing requirements"
+pip3 install -r requirements.txt
