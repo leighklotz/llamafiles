@@ -8,9 +8,10 @@ import argparse
 from requests_html import HTMLSession
 from markdownify import markdownify as md
 
-def fetch_and_convert_to_markdown(url):
+def fetch_and_convert_to_markdown(url, user_agent):
     session = HTMLSession()
-    response = session.get(url)
+    headers = { 'user-agent': user_agent }
+    response = session.get(url, headers=headers)
     
     if response.status_code != 200:
         print(f"Failed to fetch the URL. Status code: {response.status_code}")
@@ -26,10 +27,11 @@ def fetch_and_convert_to_markdown(url):
 def main():
     parser = argparse.ArgumentParser(description="Convert a webpage to Markdown.")
     parser.add_argument("url", type=str, help="The URL of the webpage to convert.")
+    parser.add_argument("--user-agent", type=str, help="Optional User Agent header to send.")
     
     args = parser.parse_args()
     
-    markdown_text = fetch_and_convert_to_markdown(args.url)
+    markdown_text = fetch_and_convert_to_markdown(args.url, args.user_agent)
     if markdown_text:
         print(markdown_text)
 

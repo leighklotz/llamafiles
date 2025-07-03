@@ -19,7 +19,7 @@ if [ "$1" == "--capture-file" ]; then
 fi
 
 LINK=${1:-}                     # LAST
-# todo: actually everything up to a '--' should go into POST_PROMPT and everything after '--' should go into the ARGS.
+# future todo: actually everything up to a '--' should go into POST_PROMPT and everything after '--' should go into the ARGS.
 POST_PROMPT_ARG="${@:2}"        # BUTLAST
 : "${POST_PROMPT_ARG:=Summarize:}"
 ARGS=''
@@ -56,19 +56,21 @@ fi
 # until we get it working
 : "${ABUSE_EMAIL_ADDRESS:=klotz@klotz.me}"
 # : "${ABUSE_EMAIL_ADDRESS:=abuse@hallux.ai}"
-: "${SCUTTLE_USER_AGENT:=ScuttleService/1.0 (+https://github.com/hallux-ai/summarizer-service; ${ABUSE_EMAIL_ADDRESS}) ${fetch_version}}"
-: "${SCUTTLE_REFERER:=https://scuttle.klotz.me}"
+: "${USER_AGENT:=ScuttleService/1.0 (+https://github.com/hallux-ai/summarizer-service; ${ABUSE_EMAIL_ADDRESS}) ${fetch_version}}"
+: "${REFERER:=https://scuttle.klotz.me}"
 
 function fetch_text() {
     local url="$1"
     echo "${fetcher}" "${DOWNLINK_COMMAND}"
     if [ "${fetcher}" == "${DOWNLINK_COMMAND}" ]; then
-        "${DOWNLINK_COMMAND}" "${url}"
+        "${DOWNLINK_COMMAND}" "${url}" --user-agent "${USER_AGENT}"
     elif [ "${fetcher}" == "lynx" ]; then
         # todo: support referer in lynx via -cfg file
-        lynx --dump --nolist -useragent="${SCUTTLE_USER_AGENT}" "${url}"
+        exit 55
+        lynx --dump --nolist -useragent="${USER_AGENT}" "${url}"
     elif [ "${fetcher}" == "links" ]; then
-        links -codepage utf-8 -force-html -width 72 -dump -http.fake-user-agent "${SCUTTLE_USER_AGENT}" -http.fake-referer "${SCUTTLE_REFERER}" "${url}"
+        exit 66
+        links -codepage utf-8 -force-html -width 72 -dump -http.fake-user-agent "${USER_AGENT}" -http.fake-referer "${REFERER}" "${url}"
     else
         echo "error: NOLINKS: fetcher=$fetcher"
         exit 1
