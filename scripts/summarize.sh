@@ -5,7 +5,9 @@ CAPTURE_COMMAND="cat"
 DOWNLINK_COMMAND="${SCRIPT_DIR}/downlink.py"
 
 . "${SCRIPT_DIR}/../via/functions.sh"
-. "${SCRIPT_DIR}/.venv/bin/activate"
+if [ -f . "${SCRIPT_DIR}/.venv/bin/activate" ]; then
+    . "${SCRIPT_DIR}/.venv/bin/activate"
+fi
 
 function usage() {
     echo "Usage: $(basename "$0") [--capture-file file] <LINK>|- [llm.sh options]"
