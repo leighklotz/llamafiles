@@ -2,8 +2,10 @@
 
 SCRIPT_DIR="$(dirname "$(realpath "${BASH_SOURCE}")")"
 CAPTURE_COMMAND="cat"
+DOWNLINK_COMMAND="${SCRIPT_DIR}/downlink.py"
 
 . "${SCRIPT_DIR}/../via/functions.sh"
+. "${SCRIPT_DIR}/.venv/bin/activate"
 
 function usage() {
     echo "Usage: $(basename "$0") [--capture-file file] <LINK>|- [llm.sh options]"
@@ -28,6 +30,8 @@ fi
 
 if [ "${LINK}" == "-" ]; then
     fetcher="cat"
+elif [ -x ${DOWNLINK_COMMAND} ]; then
+    fetcher="${DOWNLINK_COMMAND}"
 elif command -v lynx &> /dev/null; then
     fetcher="lynx"
     fetch_version="$(lynx -version 2>&1 | head -1)"
@@ -57,7 +61,10 @@ fi
 
 function fetch_text() {
     local url="$1"
-    if [ "${fetcher}" == "lynx" ]; then
+    echo "${fetcher}" "${DOWNLINK_COMMAND}"
+    if [ "${fetcher}" == "${DOWNLINK_COMMAND}" ]; then
+        "${DOWNLINK_COMMAND}" "${url}"
+    elif [ "${fetcher}" == "lynx" ]; then
         # todo: support referer in lynx via -cfg file
         lynx --dump --nolist -useragent="${SCUTTLE_USER_AGENT}" "${url}"
     elif [ "${fetcher}" == "links" ]; then
