@@ -5,22 +5,23 @@
 SCRIPT_DIR="$(dirname "$(realpath "${BASH_SOURCE}")")"
 . "${SCRIPT_DIR}/../via/functions.sh"
 
-USER_AGENT_TEMPLATE="ScuttleService/1.0 (+https://github.com/hallux-ai/summarizer-service; %s) %s"
-REFERER="https://scuttle.klotz.me"
-# abuse@hallux.ai
-ABUSE_EMAIL_ADDRESS="${ABUSE_EMAIL_ADDRESS:-klotz@klotz.me}"
+DEFAULT_USER_AGENT='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36'
+USER_AGENT="${USER_AGENT:-${DEFAULT_USER_AGENT}}"
+REFERER="https://scuttle.klotz.me" # abuse@hallux.ai
 : "${FETCHER:=}"   # downlink, links, lynx
 
 usage() {
     echo "Usage: $(basename "$0") <URL>"
+    echo 'Obeys $USER_AGENT'
     exit 1
 }
 
-if [ -z "$1" ]; then
+URL="$1"
+
+if [ -z "$URL" ]; then
     usage
 fi
 
-URL="$1"
 DOWNLINK_COMMAND="${SCRIPT_DIR}/downlink.py"
 
 if [ -f "${SCRIPT_DIR}/.venv/bin/activate" ]; then
@@ -48,7 +49,7 @@ else
     exit 1
 fi
 
-USER_AGENT=$(printf "$USER_AGENT_TEMPLATE" "$ABUSE_EMAIL_ADDRESS" "$fetch_version")
+
 
 if [ -e "${fetch_version}" ]; then
     echo "Could not find the Lynx/Links version number."
@@ -58,7 +59,11 @@ fi
 log_info "${FETCHER} fetching <${URL}>"
 case "${FETCHER}" in
     downlink)
-        "${DOWNLINK_COMMAND}" "${URL}" --user-agent "${USER_AGENT}"
+        if [ -z "${USER_AGENT}" ]; then
+            "${DOWNLINK_COMMAND}" "${URL}"
+        else
+            "${DOWNLINK_COMMAND}" "${URL}" --user-agent "${USER_AGENT}"
+        fi
         ;;
     lynx)
         lynx --dump --nolist -useragent="${USER_AGENT}" "${URL}"
@@ -71,4 +76,3 @@ case "${FETCHER}" in
         exit 1
         ;;
 esac
-
