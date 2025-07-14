@@ -13,7 +13,7 @@ elif command -v "jq" >/dev/null 2>&1; then
     JQYQ="jq"
     INTERMEDIATE_FORMAT="json"
 else
-    log_error "Error: cannot find jq or yq"
+    log_error 'Error: cannot find jq or yq: do `pip install yq` and do not use yq snap'
     exit 1
 fi
 
