@@ -2,18 +2,9 @@
 
 SCRIPT_DIR="$(dirname "$(realpath "${BASH_SOURCE}")")"
 CAPTURE_COMMAND="cat"
+FETCHER_COMMAND="${SCRIPT_DIR}/fetcher.sh"
 
 . "${SCRIPT_DIR}/../via/functions.sh"
-
-: "${ABUSE_EMAIL_ADDRESS:=klotz@klotz.me}"
-# : "${ABUSE_EMAIL_ADDRESS:=abuse@hallux.ai}"
-: "${SCUTTLE_USER_AGENT:=ScuttleService/1.0 (+https://github.com/hallux-ai/summarizer-service; ${ABUSE_EMAIL_ADDRESS}) ${fetch_version}}"
-: "${SCUTTLE_REFERER:=https://scuttle.klotz.me}"
-
-function usage() {
-    echo "Usage: $(basename "$0") [--json | --yaml | --link] [--capture-file file] <LINK>|- [llm.sh options]\nCode: $1"
-    exit 1
-}
 
 if command -v "yq" >/dev/null 2>&1; then
     JQYQ="yq"
@@ -22,7 +13,7 @@ elif command -v "jq" >/dev/null 2>&1; then
     JQYQ="jq"
     INTERMEDIATE_FORMAT="json"
 else
-    log_error "Error: cannot find jq or yq"
+    log_error 'Error: cannot find jq or yq: do `pip install yq` and do not use yq snap'
     exit 1
 fi
 
@@ -70,47 +61,11 @@ if [ -z "$LINK" ]; then
     usage "NOLINK"
 fi
 
-if [ "${LINK}" == "-" ]; then
-    fetcher="cat"
-elif command -v lynx &> /dev/null; then
-    fetcher="lynx"
-    fetch_version="$(lynx -version 2>&1 | head -1)"
-    if [[ $fetch_version =~ Lynx\ Version\ ([0-9a-zA-Z.]+) ]]; then
-        fetch_version="Lynx/${BASH_REMATCH[1]}"
-    fi
-elif command -v links &> /dev/null; then
-    fetcher="links"
-    fetch_version="$(links -version 2>&1 | head -1)"
-    if [[ $fetch_version =~ Links\ ([0-9a-zA-Z.]+) ]]; then
-        fetch_version="Links/${BASH_REMATCH[1]}"
-    fi
-else
-    log_and_exit 1 "error: NOLINKS"
-fi
-
-if [ -e "${fetch_version}" ]; then
-    log_and_exit 2 "Could not find the Lynx/Links version number."
-fi
-
-function fetch_text() {
-    local url="$1"
-    if [ "${fetcher}" == "lynx" ]; then
-        # todo: support referer in lynx via -cfg file
-        # todo: lynx complains about -useragent by design so redirect errors
-        lynx --dump --nolist -useragent="${SCUTTLE_USER_AGENT}" "${url}" 2> /dev/null
-    elif [ "${fetcher}" == "links" ]; then
-        links -codepage utf-8 -force-html -width 72 -dump -http.fake-user-agent "${SCUTTLE_USER_AGENT}" -http.fake-referer "${SCUTTLE_REFERER}" "${url}"
-    else
-        log_and_exit 3 "error: NOLINKS: fetcher=$fetcher"
-        exit 3
-    fi
-}
-
 function extract_output() {
     case "$OUTPUT_MODE" in
         "JSON")
             # awk out just the JSON '{}' objects.
-            awk '/{/{f=1} f; /}/{f=0}' 
+            awk '/{/{f=1} f; /}/{f=0}'
             ;;
         "YAML")
             cat
@@ -123,23 +78,6 @@ function extract_output() {
             ;;
     esac
 }
-
-# # transforms JSON output from LLM into a properly formatted URL string for Scuttle bookmark adding.
-# function scuttle_extract() {
-#     if [ "${OUTPUT_MODE}" == 'YAML' ]; then
-#         cat | remove_code_fence | replace_smart_quotes
-#         return $?
-#     elif [ "${OUTPUT_MODE}" == 'JSON' ]; then
-#         INTERMEDIATE_FORMAT='JSON'
-#         cat | remove_code_fence | replace_smart_quotes
-#         return $?
-#     elif [ "${OUTPUT_MODE}" == 'LINK' ]; then
-#         cat | remove_code_fence | replace_smart_quotes | to_link
-#         return $?
-#     else
-#         usage xxx
-#     fi
-# }
 
 function to_link() {
     # <https://scuttle.klotz.me/bookmarks/klotz?action=add&address=https://example.com&title=Example+Website+&description=This+is+an+example+website&tags=example,website,canonical+page>
@@ -176,7 +114,7 @@ POST_PROMPT_ARG="Respond with only a short ${INTERMEDIATE_FORMAT} object with th
 LINKS_PRE_PROMPT="Below is a web page article from the specified link address. If retrieval failed, report on the failure. Otherwise, follow the instructions after the article."
 SCUTTLE_POST_PROMPT="Read the above web page article from ${LINK} and ignore website header at the start and look for the main article. If there are retrieval failures, just report on the failures."
 
-( printf "# Text of link %s\n" "${LINK}"; fetch_text "${LINK}" | ${CAPTURE_COMMAND}; \
+( printf "# Text of link %s\n" "${LINK}"; "${FETCHER_COMMAND}" "${LINK}" | ${CAPTURE_COMMAND}; \
   printf "\n# Instructions\n%b\n%b\n" "${SCUTTLE_POST_PROMPT}" "${POST_PROMPT_ARG}" ) | \
     "${SCRIPT_DIR}/llm.sh" --long ${GRAMMAR_FLAG} ${ARGS} "${LINKS_PRE_PROMPT}" | \
     postprocess

@@ -213,11 +213,11 @@ If no region is selected, the function will assume the entire buffer is the regi
     (goto-char start)
     (insert (shell-command-to-string diff-command))
     (smerge-mode)
-    (diff-auto-refine-mode 1))
+    (diff-auto-refine-mode 1)
 
-  (unless llm-preserve-temp-files
-    (delete-file temp-file-before)
-    (delete-file temp-file-after)))
+    (unless llm-preserve-temp-files
+      (delete-file temp-file-before)
+      (delete-file temp-file-after))))
 
 (defun llm-complete-internal (prompt via model-type start end n-predict)
   "Completes text based on the current region using the LLM."
