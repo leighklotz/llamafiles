@@ -38,3 +38,8 @@ for file in ${SH_FILES}
 do
     lnf "${SCRIPT_DIR}/${file}" "${DEST_DIR}/${file}"
 done
+
+cd "${SCRIPT_DIR}"
+python3 -m venv .venv
+. .venv/bin/activate
+pip3 install -r requirements.txt
