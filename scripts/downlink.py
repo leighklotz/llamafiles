@@ -1,31 +1,38 @@
 #!/usr/bin/env python3
 
-# pip install requests-html markdownify
-# See https://medium.com/@tubelwj/requests-html-an-html-parsing-library-in-python-8d182d13ecd2
-# Qwen2.5-Coder-32B-Instruct-Q5_K_S.gguf
+# pip install playwright markdownify
+# python -m playwright install
 
 import os
 import argparse
-from requests_html import HTMLSession
+from playwright.sync_api import sync_playwright
 from markdownify import markdownify as md
 
 USER_AGENT = """Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36"""
 
+def fetch_rendered_html(url: str, user_agent: str) -> str:
+    """Fetches the rendered HTML content of a URL using Playwright."""
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        context = browser.new_context(user_agent=user_agent)
+        page = context.new_page()
+        try:
+            page.goto(url, wait_until='networkidle')
+        except Exception as e:
+            print(f"Error navigating to {url}: {e}")
+            return None
+        content = page.content()
+        browser.close()
+    return content
+
 def fetch_and_convert_to_markdown(url, user_agent):
-    session = HTMLSession(browser_args=[f"""--user-agent='{user_agent}'"""])
-    headers = { 'User-Agent': user_agent }
-    response = session.get(url, headers=headers)
-    
-    if response.status_code != 200:
-        print(f"Failed to fetch the URL. Status code: {response.status_code}")
+    """Fetches HTML, renders it with Playwright, and converts to Markdown."""
+    html = fetch_rendered_html(url, user_agent)
+    if html:
+        markdown_text = md(html)
+        return markdown_text
+    else:
         return None
-    
-    # Render JavaScript if necessary
-    response.html.render(timeout=16000)
-    
-    # Convert HTML to Markdown
-    markdown_text = md(response.html.html)
-    return markdown_text
 
 def main():
     parser = argparse.ArgumentParser(description="Convert a webpage to Markdown.")

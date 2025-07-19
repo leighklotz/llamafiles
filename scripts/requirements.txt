@@ -1,3 +1,2 @@
-requests_html
+playwright
 markdownify
-lxml_html_clean

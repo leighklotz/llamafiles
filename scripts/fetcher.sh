@@ -3,6 +3,7 @@
 # fetcher.sh - Fetches content from a URL using available tools
 
 SCRIPT_DIR="$(dirname "$(realpath "${BASH_SOURCE}")")"
+VENV_ACTIVATE="${SCRIPT_DIR}/.venv/bin/activate"
 . "${SCRIPT_DIR}/../via/functions.sh"
 
 DEFAULT_USER_AGENT='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36'
@@ -12,7 +13,7 @@ REFERER="https://scuttle.klotz.me" # abuse@hallux.ai
 
 usage() {
     echo "Usage: $(basename "$0") <URL>"
-    echo 'Obeys $USER_AGENT'
+    echo "Obeys \$USER_AGENT"
     exit 1
 }
 
@@ -24,13 +25,9 @@ fi
 
 DOWNLINK_COMMAND="${SCRIPT_DIR}/downlink.py"
 
-if [ -f "${SCRIPT_DIR}/.venv/bin/activate" ]; then
-    . "${SCRIPT_DIR}/.venv/bin/activate"
-fi
-
 if [ -n "${FETCHER}" ]; then
     true
-elif [ -x "${DOWNLINK_COMMAND}" ]; then
+elif [ -x "${DOWNLINK_COMMAND}" ] && [ -f "${VENV_ACTIVATE}" ]; then
     FETCHER="downlink"
 elif command -v lynx &> /dev/null; then
     FETCHER="lynx"
@@ -59,6 +56,7 @@ fi
 log_info "${FETCHER} fetching <${URL}>"
 case "${FETCHER}" in
     downlink)
+        . "${VENV_ACTIVATE}"
         if [ -z "${USER_AGENT}" ]; then
             "${DOWNLINK_COMMAND}" "${URL}"
         else
