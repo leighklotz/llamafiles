@@ -1,3 +1,2 @@
-requests_html
+playright
 markdownify
-lxml[html_clean]
