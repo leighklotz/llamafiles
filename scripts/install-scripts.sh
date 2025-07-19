@@ -39,7 +39,12 @@ do
     lnf "${SCRIPT_DIR}/${file}" "${DEST_DIR}/${file}"
 done
 
+# Optional: install python .venv for downlink.py
+# todo: put this in DEST_DIR?
+
 cd "${SCRIPT_DIR}"
 python3 -m venv .venv
 . .venv/bin/activate
 pip3 install -r requirements.txt
+
+echo "* Installed in ${DEST_DIR} and ${SCRIPT_DIR}/.venv"
