@@ -1,2 +1,2 @@
-playright
+playwright
 markdownify
