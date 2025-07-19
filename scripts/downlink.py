@@ -14,8 +14,8 @@ def fetch_rendered_html(url: str, user_agent: str) -> str:
     """Fetches the rendered HTML content of a URL using Playwright."""
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
-        page = browser.new_page()
-        page.set_user_agent(user_agent)  # Apply user agent here
+        context = browser.new_context(user_agent=user_agent)
+        page = context.new_page()
         try:
             page.goto(url, wait_until='networkidle')
         except Exception as e:

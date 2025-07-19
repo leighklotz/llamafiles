@@ -76,11 +76,12 @@ done
 
 # Install python .venv for downlink.py
 if $DOWNLINK_MODE; then
-    echo "* Installing downlink dependencies in ${DEST_DIR}/.venv"
-    cd "${DEST_DIR}" || exit 1 # Important: cd into DEST_DIR for venv creation
+    # install in script dir, not dest_dir, for now
+    echo "* Installing downlink dependencies in ${SCRIPT_DIR}/.venv"
+    cd "${SCRIPT_DIR}" || exit 1
     python3 -m venv .venv
     . .venv/bin/activate
     pip3 install -r "${SCRIPT_DIR}/requirements.txt" #Use SCRIPT_DIR for requirements
     playwright install
-    echo "* Downlink dependencies installed in ${DEST_DIR}/.venv"
+    echo "* Downlink dependencies installed in ${SCRIPT_DIR}/.venv"
 fi
