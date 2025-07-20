@@ -12,12 +12,13 @@ DEST_DIR=""
 DOWNLINK_MODE=false
 
 usage() {
-  echo "Usage: $0 <dest-dir> [--downlink]"
+  echo "Usage: $0 [--downlink] <dest-dir>"
   echo ""
   echo "  <dest-dir>      The destination directory to symlink scripts to."
-  echo "  --downlink      Enable downlink mode: installs python virtual environment and dependencies."
+  echo "  --downlink      Install downlink fetcher: requires Python virtual environment and dependencies."
   echo ""
-  echo "Example: $0 ~/bin --downlink"
+  echo "Example: $0 ~/bin"
+  echo "Example: $0 --downlink ~/bin"
   exit 1
 }
 
