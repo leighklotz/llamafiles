@@ -5,10 +5,11 @@
 
 import os
 import argparse
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeoutError
 from markdownify import markdownify as md
 
 USER_AGENT = """Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36"""
+
 
 def fetch_rendered_html(url: str, user_agent: str) -> str:
     """Fetches the rendered HTML content of a URL using Playwright."""
@@ -17,14 +18,33 @@ def fetch_rendered_html(url: str, user_agent: str) -> str:
         context = browser.new_context(user_agent=user_agent)
         page = context.new_page()
         try:
-            page.goto(url, wait_until='networkidle')
+            page.goto(url, wait_until='domcontentloaded', timeout=10000)
+            page.wait_for_timeout(1000)  # let JS settle
+        except PlaywrightTimeoutError:
+            print(f"Timeout while loading {url}, attempting to extract partial content.")
         except Exception as e:
             print(f"Error navigating to {url}: {e}")
+            browser.close()
             return None
         content = page.content()
         browser.close()
     return content
-
+# 
+# def fetch_rendered_html(url: str, user_agent: str) -> str:
+#     """Fetches the rendered HTML content of a URL using Playwright."""
+#     with sync_playwright() as p:
+#         browser = p.chromium.launch(headless=True)
+#         context = browser.new_context(user_agent=user_agent)
+#         page = context.new_page()
+#         try:
+#             page.goto(url, wait_until='networkidle')
+#         except Exception as e:
+#             print(f"Error navigating to {url}: {e}")
+#             return None
+#         content = page.content()
+#         browser.close()
+#     return content
+# 
 def fetch_and_convert_to_markdown(url, user_agent):
     """Fetches HTML, renders it with Playwright, and converts to Markdown."""
     html = fetch_rendered_html(url, user_agent)
