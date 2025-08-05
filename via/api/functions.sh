@@ -277,7 +277,7 @@ function get_model_name {
     # curl prints
     # `{"model_name":"LoneStriker_dolphin-2.7-mixtral-8x7b-3.75bpw-h6-exl2","lora_names":[]}`
     # set -euo pipefail
-    (curl -s "${VIA_API_MODEL_INFO_ENDPOINT}" "${AUTHORIZATION_PARAMS[@]}" | jq -e -r .model_name 2> /dev/null) || echo "gpt"
+    (curl -s "${VIA_API_MODEL_INFO_ENDPOINT}" "${AUTHORIZATION_PARAMS[@]}" | jq -e -r .model_name 2> /dev/null) | sed -e "s/null/${MODEL_NAME_OVERRIDE:-None}/"
 }
 
 function list_models {
