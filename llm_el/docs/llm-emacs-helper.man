@@ -1,0 +1,97 @@
+LLM-EMACS-HELPER.SH(1)           User Commands          LLM-EMACS-HELPER.SH(1)
+
+NNAAMMEE
+       llm-emacs-helper.sh - Interface for LLM interaction from Emacs
+
+SSYYNNOOPPSSIISS
+       llllmm--eemmaaccss--hheellppeerr..sshh _u_s_e_-_c_a_s_e _m_o_d_e_l_-_t_y_p_e _v_i_a [ _o_p_t_i_o_n_s ] _i_n_p_u_t
+
+DDEESSCCRRIIPPTTIIOONN
+       llllmm--eemmaaccss--hheellppeerr..sshh is a Bash script designed to interface with large
+       language models (LLMs) from within Emacs. It provides a bridge between
+       Emacs and external LLM tools, enabling tasks such as code rewriting,
+       summarization, question answering, and code completion through
+       standardized prompts and processing.
+
+       The script accepts input via stdin and outputs results to stdout,
+       making it suitable for integration with Emacs Lisp functions via shell
+       commands.
+
+UUSSEE CCAASSEESS
+       The script supports multiple use cases:
+
+       • rreewwrriittee - Re-write code or text according to user instructions
+
+       • aasskk - Answer questions about input content
+
+       • wwrriittee - Generate new content based on input and a prompt
+
+       • ssuummmmaarriizzee - Generate a summary of the input content
+
+       • ccoommpplleettee - Complete code based on partial input and prompt
+
+       • ttooddoo - Process todo items in the input
+
+       • --hh - Display help message
+
+OOPPTTIIOONNSS
+       --nn__pprreeddiicctt
+              Specify the number of tokens to predict. Useful for controlling
+              generation length.
+
+       ----rraaww--iinnppuutt
+              Pass input directly to LLM without processing (useful for
+              specific cases).
+
+       ----hheellpp Display usage information and exit.
+
+IINNPPUUTT
+       Input is read from stdin, allowing for piped content or direct buffer
+       content from Emacs.
+
+OOUUTTPPUUTT
+       Output is written to stdout. For rewrite and todo operations, code
+       lines are prefixed with comments to preserve structure.
+
+EEXXAAMMPPLLEESS
+              # Ask a question about shell script content
+              cat my_script.sh | ./llm-emacs-helper.sh ask api mixtral bash "What does this code do?"
+
+              # Rewrite code with a prompt
+              cat my_file.py | ./llm-emacs-helper.sh rewrite cli llama2 python "Improve this code structure"
+
+              # Complete code based on a partial input
+              echo "def hello_world():" | ./llm-emacs-helper.sh complete api phi "finish the function"
+
+EENNVVIIRROONNMMEENNTT
+       DDEEBBUUGG  If set, enables debug output showing all arguments and
+              environment variables.
+
+       LLLLMM__SSHH Path to the LLM execution script (default:
+              ${SCRIPT_DIR}/../scripts/llm.sh)
+
+EEXXIITT SSTTAATTUUSS
+       00      Success - LLM completed and output was generated
+
+       11      Failure - Invalid arguments, insufficient input, or LLM returned
+              no output
+
+       22      Help requested (-h option)
+
+FFIILLEESS
+       _$_{_S_C_R_I_P_T___D_I_R_}_/_l_l_m_-_e_m_a_c_s_-_h_e_l_p_e_r_._s_h _$_{_S_C_R_I_P_T___D_I_R_}_/_._._/_s_c_r_i_p_t_s_/_l_l_m_._s_h
+
+SSEEEE AALLSSOO
+       llm.el(1), llm.sh(1)
+
+AAUUTTHHOORRSS
+       Leigh L. Klotz, Jr.
+
+CCOOPPYYRRIIGGHHTT
+       Copyright (C) 2024-2025 Leigh L. Klotz, Jr. Licensed under GNU AFFERO
+       GENERAL PUBLIC LICENSE Version 3.
+
+BBUUGGSS
+       Report bugs to the maintainer.
+
+Version 0.1                          2024               LLM-EMACS-HELPER.SH(1)
