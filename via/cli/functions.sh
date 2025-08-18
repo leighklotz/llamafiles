@@ -201,7 +201,7 @@ function cli_perform_inference {
 	GRAMMAR_FILE="--grammar-file ${GRAMMAR_FILE}"
     fi
     # TODO: add TOP_P TOP_K MIN_P from global env, skipping if not set.
-    # set -x
+    #set -x
     cat "${PROMPT_TEMP_FILE}" | fixup_input | ${MODEL_RUNNER} "${MODEL_PATH}" --cli ${LOG_DISABLE} ${GPU} ${NGL} ${GRAMMAR_FILE} ${TEMPERATURE} ${CONTEXT_LENGTH} ${N_PREDICT} ${BATCH_SIZE} ${NO_PENALIZE_NL} --repeat-penalty 1 ${THREADS} -f /dev/stdin ${SILENT_PROMPT} --seed "${SEED}" ${LLM_ADDITIONAL_ARGS} | fixup_output 2> "${ERROR_OUTPUT}"
     return $?
 }
