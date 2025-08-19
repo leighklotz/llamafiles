@@ -344,7 +344,7 @@ rocket`, and `phi`.
 - `--noerror`: disables error output.
 - `--stdin` or `--interactive` or `-i`: include stdin as input, after the question prompt
 - `-e` or `--process-question-escapes`: expand \n and friends in the question; stdin is always literal
-  `--raw-input`: prepare for pure completion, ignoring PROMPT and SYSTEM_PROMPT in favor of stdin
+  `--raw-input`: prepare for pure completion, ignoring PROMPT and SYSTEM_MESSAGE in favor of stdin
 - `--`: terminates the arguments and starts the question.
 
 In CLI prompt, be sure to use apostrophe quotes if your prompt contains backquotes, since double-quotes will allow bash to evaluate the result of the backquoted content.
