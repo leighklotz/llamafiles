@@ -1,15 +1,51 @@
 #!/bin/bash
 
+# This script symlinks useful shell scripts to a destination directory.
+# It also optionally sets up a python virtual environment for 'downlink.py'.
+
 SCRIPT_DIR="$(dirname "$(realpath "${BASH_SOURCE}")")"
 
-FILES="ask.sh bashblock.sh codeblock.sh help-commit.sh nvfree.sh machelp.sh summarize.sh summarize-directory-files.sh scuttle.sh systype.sh unblock.sh via.sh onsubnet.sh manhelp.sh"
-SH_FILES="help.sh write.sh catfiles.sh"
+FILES="ask.sh bashblock.sh codeblock.sh help-commit.sh machelp.sh manhelp.sh nvfree.sh onsubnet.sh peas.sh repofiles.sh scuttle.sh summarize-directory-files.sh summarize.sh systype.sh unfence.sh via.sh"
+SH_FILES="help.sh write.sh"
 
-DEST_DIR="${1}"
-if [ -z "${DEST_DIR}" ];
-then
-    echo "usage: $0: dest-dir"
-    exit 1
+DEST_DIR=""
+DOWNLINK_MODE=false
+
+usage() {
+  echo "Usage: $0 [--downlink] <dest-dir>"
+  echo ""
+  echo "  <dest-dir>      The destination directory to symlink scripts to."
+  echo "  --downlink      Install downlink fetcher: requires Python virtual environment and dependencies."
+  echo ""
+  echo "Example: $0 ~/bin"
+  echo "Example: $0 --downlink ~/bin"
+  exit 1
+}
+
+# Parse CLI options
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --help)
+      usage
+      ;;
+    --downlink)
+      DOWNLINK_MODE=true
+      shift
+      ;;
+    *)
+      if [ -z "$DEST_DIR" ]; then
+        DEST_DIR="$1"
+      else
+        echo "Error: Too many arguments."
+        usage
+      fi
+      shift
+      ;;
+  esac
+done
+
+if [ -z "${DEST_DIR}" ]; then
+    usage
 fi
 
 function lnf {
@@ -24,8 +60,8 @@ function lnf {
 	echo "* ln -s ${src} ${dst}"
 	ln -s "${src}" "${dst}"
     else
-	true
 	#echo "${dst}" exists
+        true # Suppress output if file exists.
     fi
 }
 
@@ -38,3 +74,15 @@ for file in ${SH_FILES}
 do
     lnf "${SCRIPT_DIR}/${file}" "${DEST_DIR}/${file}"
 done
+
+# Install python .venv for downlink.py
+if $DOWNLINK_MODE; then
+    # install in script dir, not dest_dir, for now
+    echo "* Installing downlink dependencies in ${SCRIPT_DIR}/.venv"
+    cd "${SCRIPT_DIR}" || exit 1
+    python3 -m venv .venv
+    . .venv/bin/activate
+    pip3 install -r "${SCRIPT_DIR}/requirements.txt" #Use SCRIPT_DIR for requirements
+    playwright install
+    echo "* Downlink dependencies installed in ${SCRIPT_DIR}/.venv"
+fi

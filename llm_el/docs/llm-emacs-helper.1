@@ -1,0 +1,95 @@
+.TH LLM-EMACS-HELPER.SH 1 "2024" "Version 0.1" "User Commands"
+.SH NAME
+llm-emacs-helper.sh \- Interface for LLM interaction from Emacs
+.SH SYNOPSIS
+.B llm-emacs-helper.sh
+.I use-case
+.I model-type
+.I via
+[
+.I options
+]
+.I input
+.SH DESCRIPTION
+.B llm-emacs-helper.sh
+is a Bash script designed to interface with large language models (LLMs) from within Emacs. It provides a bridge between Emacs and external LLM tools, enabling tasks such as code rewriting, summarization, question answering, and code completion through standardized prompts and processing.
+
+The script accepts input via stdin and outputs results to stdout, making it suitable for integration with Emacs Lisp functions via shell commands.
+.SH USE CASES
+The script supports multiple use cases:
+.IP \(bu 2
+.B rewrite
+- Re-write code or text according to user instructions
+.IP \(bu 2
+.B ask
+- Answer questions about input content
+.IP \(bu 2
+.B write
+- Generate new content based on input and a prompt
+.IP \(bu 2
+.B summarize
+- Generate a summary of the input content
+.IP \(bu 2
+.B complete
+- Complete code based on partial input and prompt
+.IP \(bu 2
+.B todo
+- Process todo items in the input
+.IP \(bu 2
+.B \-h
+- Display help message
+.SH OPTIONS
+.TP
+.B \-n_predict
+Specify the number of tokens to predict. Useful for controlling generation length.
+.TP
+.B \-\-raw-input
+Pass input directly to LLM without processing (useful for specific cases).
+.TP
+.B \-\-help
+Display usage information and exit.
+.SH INPUT
+Input is read from stdin, allowing for piped content or direct buffer content from Emacs.
+.SH OUTPUT
+Output is written to stdout. For rewrite and todo operations, code lines are prefixed with comments to preserve structure.
+.SH EXAMPLES
+.nf
+.RS
+# Ask a question about shell script content
+cat my_script.sh | ./llm-emacs-helper.sh ask api mixtral bash "What does this code do?"
+
+# Rewrite code with a prompt
+cat my_file.py | ./llm-emacs-helper.sh rewrite cli llama2 python "Improve this code structure"
+
+# Complete code based on a partial input
+echo "def hello_world():" | ./llm-emacs-helper.sh complete api phi "finish the function"
+.RE
+.fi
+.SH ENVIRONMENT
+.TP
+.B DEBUG
+If set, enables debug output showing all arguments and environment variables.
+.TP
+.B LLM_SH
+Path to the LLM execution script (default: ${SCRIPT_DIR}/../scripts/llm.sh)
+.SH EXIT STATUS
+.TP
+.B 0
+Success - LLM completed and output was generated
+.TP
+.B 1
+Failure - Invalid arguments, insufficient input, or LLM returned no output
+.TP
+.B 2
+Help requested (\-h option)
+.SH FILES
+.I ${SCRIPT_DIR}/llm-emacs-helper.sh
+.I ${SCRIPT_DIR}/../scripts/llm.sh
+.SH SEE ALSO
+llm.el(1), llm.sh(1)
+.SH AUTHORS
+Leigh L. Klotz, Jr.
+.SH COPYRIGHT
+Copyright (C) 2024-2025 Leigh L. Klotz, Jr. Licensed under GNU AFFERO GENERAL PUBLIC LICENSE Version 3.
+.SH BUGS
+Report bugs to the maintainer.

@@ -137,6 +137,11 @@ function chatml_prompt {
     printf -v PROMPT '%s<|im_start|>assistant' "${PROMPT}"
 }
 
+function load_model {
+    local model_path="$1"
+    log_and_exit 1 "--cli mode cannot load models; specify --api or export VIA=api"
+}
+
 # todo: much work here
 # load_model calls init_model so llm.sh can do prep work once it knows the model but before it is used
 function init_via_model {
@@ -195,7 +200,8 @@ function cli_perform_inference {
     if [ -n "${GRAMMAR_FILE}" ]; then
 	GRAMMAR_FILE="--grammar-file ${GRAMMAR_FILE}"
     fi
-    # set -x
+    # TODO: add TOP_P TOP_K MIN_P from global env, skipping if not set.
+    #set -x
     cat "${PROMPT_TEMP_FILE}" | fixup_input | ${MODEL_RUNNER} "${MODEL_PATH}" --cli ${LOG_DISABLE} ${GPU} ${NGL} ${GRAMMAR_FILE} ${TEMPERATURE} ${CONTEXT_LENGTH} ${N_PREDICT} ${BATCH_SIZE} ${NO_PENALIZE_NL} --repeat-penalty 1 ${THREADS} -f /dev/stdin ${SILENT_PROMPT} --seed "${SEED}" ${LLM_ADDITIONAL_ARGS} | fixup_output 2> "${ERROR_OUTPUT}"
     return $?
 }

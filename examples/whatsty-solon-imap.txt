@@ -1,0 +1,11 @@
+klotz@tensor:~$ via --get-model-name
+gemma-3-27b-it-Q4_K_M.gguf
+klotz@tensor:~$ whatsty solon | help.sh what happened to these two classification jobs overnight
+
+
+Okay, I've analyzed the logs. It appears two classification jobs ran overnight, both successfully labeled and classified. One message (UID 477320) was correctly identified as a `LINUX_ALERTS` notification – specifically a cron job indicating a successful MySQL backup. The other (UID 267176) was correctly categorized as `PROMOTIONS`, an email advertising ebooks from IOP Publishing.
+
+However, there's a recurring issue with the IMAP connection. The logs show repeated `ssl.SSLEOFError: EOF occurred in violation of protocol` errors, leading to the connection being closed and a traceback occurring during the `idle` process. This is happening in both "solon" and "solon-1" processes. The error suggests a problem with the SSL/TLS connection to the email server – it could be due to network instability, server-side issues, or a configuration problem with the SSL/TLS settings in your `solon.py` script.
+
+The error during logout and connection closure, combined with the consistent IDLE timeouts, strongly indicate a persistent network or server-side communication problem that needs investigating. The repeated attempts to `IDLE` suggest `solon` is trying to maintain a persistent connection but failing. It's good that the classification itself *is* working, but the connection issues will prevent continuous monitoring.
+

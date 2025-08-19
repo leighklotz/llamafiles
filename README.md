@@ -38,7 +38,7 @@ $ help.sh what can you do
 ## Brief Usage examples
 Below are brief examples to show you what these tools do.
 
-Install links to the scripts you want to use in your home bin directory. In the example below, symlink names have been shortened.
+Instal llinks to the scripts you want to use in your home bin directory. In the example below, symlink names have been shortened.
 
 ```shell
 $ help.sh -- "Split bash argument array into left and right with double hyphen as the separator using special bash builtin functions or operators"
@@ -365,6 +365,9 @@ In addition to these command line flags, the script also checks for several envi
 - `VIA`: The type of model runner, `api` or `cli`. Also see `--via` flag.
 - `MODEL_TYPE`: The default model type to use if none is specified via the `-m` or `--model-type` flag. (cli)
 - `TEMPERATURE`: The default temperature parameter for the model if none is specified via the `--temperature` flag.
+  `TOP_K`: TOP_K. Currently only set for api models.
+  `TOP_P`: TOP_P. Currently only set for api models.
+  `MIN_P`: MIN_P. Currently only set for api models.
 - `CONTEXT_LENGTH`: The default context length for the model if none is specified via the `--context-length` or `-c` flag. (cli)
 - `N_PREDICT`: The default number of tokens to predict if none is specified via the `--n-predict` flag.
 - `SYSTEM_MESSAGE`: The default system message to use if none is specified via the command line.
@@ -418,7 +421,22 @@ Image pipelines are handled solely by @jartine https://justine.lol/oneliners/ an
 1. Context length and the number of gradient layers based on the priority mode (speed, length, or manual).
 1. Finally, perform inference using the specified model and parameters.
 
-# Mac Specifics
+# Installation
+Case 1: If you want to use links or lynx to fetch web pages, install them first.
+
+```
+$ sudo apt install linx lynx
+$ ./scripts/install-scripts.sh ~/bin
+```
+
+Case 2: Install the scripts for playwright headless browser usage:
+
+If you want to use playwright to fetch web pages, give the `--downlink` final argument to `install-scripts.sh`
+```bash
+$ ./scripts/install-scripts.sh ~/bin --downlink
+```
+
+## Mac Specifics
 You will need to do this on MacOS:
 ```
 $ cd ~/wip/llamafiles

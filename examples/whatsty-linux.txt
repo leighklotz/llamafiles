@@ -1,0 +1,55 @@
+klotz@tensor:~$ function whatsty() {
+ screen -S "$1" -X hardcopy "/tmp/hc.$$"; cat "/tmp/hc.$$"; rm "/tmp/hc.$$"
+}
+
+klotz@tensor:~$ whatsty solon | help.sh 'What is going on in this Linux `screen`'
+Based on the output you've provided, it looks like you have a Linux `screen` session running with two main processes or tasks: `solon` and `text-generation-webui`. Here's a breakdown of what's happening:
+
+1. **`solon` Process:**
+   - The `solon` process appears to be a script or application running from the `/home/klotz/wip/solon/./solon.py` file.
+   - It has fetched 0 messages and is looking at the last 100 messages.
+   - It has logged several INFO messages indicating its actions, such as disconnecting, ending labels processing, and sleeping for a specified loop delay.
+   - The process seems to be configured with `self.args.max_age=0`, `self.args.reclassify=False`, and `self.args.folder_name='1Inbox'`.
+
+2. **Performance Metrics for `solon`:**
+   - There are performance metrics for the `llama` model, which includes load time, prompt evaluation time, total evaluation time, and tokens per second.
+   - The output generated in 4.34 seconds with a token generation rate of 39.63 tokens per second.
+
+3. **`text-generation-webui` Process:**
+   - The `text-generation-webui` process is another script or application running.
+   - It has a mark set, indicating it might be at a specific point in the process or code.
+
+4. **General Information:**
+   - The `screen` session is running in a shell and has two windows: one named `*solon-1*` and another named `*text-generation-webui*`.
+   - The load average (LA) for the system is 0.04, 0.06, and 0.05 over the last 1, 5, and 15 minutes, respectively.
+
+Overall, it seems like you are running two processes related to text generation and processing in a `screen` session, with detailed logs and performance metrics being outputted. If you need more specific information or help with any particular aspect, feel free to ask!
+
+klotz@tensor:~$ whatsty nvtop | help.sh 'What is going on in this Linux `screen`'
+Based on the provided output, here's what's happening in your Linux `screen` session:
+
+1. **GPU Information**:
+   - You're using an NVIDIA GeForce RTX 3090 GPU.
+   - The GPU is running at 0MHz (which might be an idle state or throttling).
+   - The memory is running at 405MHz.
+   - The GPU temperature is 38°C.
+   - The fan speed is at 30%.
+   - Power usage is 20W out of a maximum of 350W.
+   - GPU utilization is 0%.
+   - Memory utilization is approximately 88% (21.234GiB out of 24.000GiB).
+
+2. **Process Information**:
+   - There's a single process running with PID 53339, owned by user `klotz`.
+   - The process is running a Python script (`server.py`) with specific flags (`--listen --api --tensorc`).
+   - The process is using 87% of the GPU memory, 87% of the CPU, and 2249MiB of host memory.
+
+3. **Monitoring Display**:
+   - The display shows GPU utilization and memory usage over time, with the last data points being 50s, 37s, 25s, 12s, and 0s ago.
+   - It also shows a summary of the processes running on the GPU.
+
+4. **Screen Functions**:
+   - The `screen` session offers various functions via function keys, such as setup (F2), sort (F6), kill (F9), quit (F10), and save config (F12).
+
+This output suggests that the `screen` session is monitoring GPU activity and is running a Python process that is utilizing significant GPU resources.
+klotz@tensor:~$ 
+
