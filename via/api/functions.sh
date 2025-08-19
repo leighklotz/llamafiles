@@ -132,7 +132,7 @@ function via_api_mistral_output_fixup {
 
 # todo: make common with cli_perform_inference by splitting out all
 #       non-inference settings to the prepare_model
-# via_api_perform_inference "$MODEL_TYPE" "$INFERENCE_MODE" "$SYSTEM_PROMPT" "$QUESTION" "$GRAMMAR_FILE"
+# via_api_perform_inference "$MODEL_TYPE" "$INFERENCE_MODE" "$SYSTEM_MESSAGE" "$QUESTION" "$GRAMMAR_FILE"
 # todo: so many files and strings back and forth
 function via_api_perform_inference() {
     local model_type="$1" inference_mode="$2" system_message="$3" question="$4" grammar_file="$5"
