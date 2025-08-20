@@ -43,6 +43,7 @@ MIN_P="${MIN_P:-0.1}"
 # dolphin-2.6-mistral-7b-dpo: yes
 # dolphin-2.7-mixtral: yes
 USE_SYSTEM_ROLE="${USE_SYSTEM_ROLE:-}"
+REASONING_EFFORT="${REASONING_EFFORT:-low}"
 
 # auto_max_new_tokens seems to work only with HF loaders
 # max_tokens should be set to lower if the model has low context (i.e. 2k)
@@ -56,6 +57,9 @@ if [ -n "${OPENAI_API_KEY}" ]; then
     AUTHORIZATION_PARAMS=(-H "Authorization: Bearer ${OPENAI_API_KEY}")
 else
     TEMPLATE_SETTINGS="${TEMPLATE_SETTINGS},
+    tools: [],
+    builtin_tools: [],
+    reasoning_effort: \$reasoning_effort,
     mode: \$inference_mode,
     temp: \$temperature,
     temperature_last: true,
@@ -196,11 +200,12 @@ function via_api_perform_inference() {
     log_info "writing question to ${question_file}"
     printf "%s" "$question" >> "${question_file}"
 
-    # hack: Drop empty string, and null parameters. NaN seems th show as null.
+    # hack: Drop empty string, and null parameters. NaN seems to show as null.
     #       sadly seed must be a number
     temperature=${temperature:-NaN} 
     data=$(jq --raw-input --raw-output  --compact-output -n \
               --arg inference_mode "${inference_mode}" \
+              --arg reasoning_effort "${REASONING_EFFORT}" \
               --argjson temperature ${temperature} \
               --argjson repetition_penalty ${repetition_penalty} \
               --argjson penalize_nl ${penalize_nl} \
@@ -241,7 +246,7 @@ function via_api_perform_inference() {
 
     # exit if we failed to parse
     if [ "$s" != 0 ]; then
-        log_and_exit $s "via api perform_inference cannot parse ${result}"
+        log_and_exit $s "via api perform_inference cannot parse result=${result}"
     fi
 
     # Output if we succeeded
