@@ -1,6 +1,8 @@
 #!/bin/bash
 
 ### **TODO – Remove all CLI‑only plumbing from `llm.sh` while keeping the API path intact**
+###  Strip the script down to a pure API driver, keeping every comment, variable, and helper that the API path needs, and removed every CLI‑only plumbing. The new `llm.sh` now only accepts `--via api` (and the legacy `--via cli` still triggers a helpful error), parses the API‑relevant flags, and forwards the request to `via/api/functions.sh`. All local‑runner logic, model‑path handling, GPU/NG‑L configuration, and context‑length math must be deleted or commented out, so the script is lean, testable, and future‑proof.
+
 ### 
 ### > **Goal**:  
 ### > Convert `llm.sh` to an *API‑only* driver.  
@@ -375,23 +377,3 @@ report_success_or_fail $STATUS
 cleanup_temp_files $STATUS
 exit $STATUS
 
-
-###
-### TODO
-###
-# TODO: add few-shot to supplement system message, since at least in chatml each goes in as an assistant turn
-# TODO: bash parsing of CLI parameters vs ENV vs bundles of settings is a mess
-# TODO: calculate context and GPU layers based on input, output, existing memory, and user-preference
-#       by analogy to "CAMERA MODE" aperture priority, shutter priority, auto, or manual
-#       context priority, speed priority, auto, or manual
-#       CONTEXT PRIORITY MODE:
-#       - could be used for input or output
-#         for input, assume some k * (prompt len + input len)
-#         for output, probably need an explicit declaration we want a long output, hard to detect otherwise
-#       SPEED PRIORITY MODE:
-#       - `--fast` `--ngl`
-#       AUTO MODE:
-#       - proposal: `--fast` unless cmd input is given, then do `-context`
-#         e.g. MIN_CONTEXT_LENGTH <= (input length * 2) <= MAX_CONTEXT_LENGTH???
-#       MANUAL MODE:
-#       - `--ngl` `--context-length`
