@@ -29,6 +29,10 @@
 ;;;     Answers question about region in a new buffer
 ;;;   - M-X llm-write
 ;;;     Writes a response based on the region and prompt in a new buffer
+;;;   - M-X llm-insert
+;;;     Inserts a response based on the region and prompt at point in the current buffer
+;;;   - M-X llm-quick
+;;;     Inserts a brief response based on the region and prompt at point in the current buffer
 ;;;   - M-X llm-load-model
 ;;;     Load the specified user model; offers a completing reader.
 ;;;
@@ -100,52 +104,73 @@
 (defvar llm-git-merge-format "git merge-file -p \"%s\" /dev/null \"%s\""
   "Format string for the git merge command used in diffing.")
 
-;;; User Commands
+(defvar llm-prompt-history '()
+  "History of prompts used with LLM functions.")
 
+;;; Utility function to add prompt to history and prompt user for new prompt
+(defun llm-get-user-prompt (prompt)
+  "Prompt the user for a prompt, using `llm-prompt-history` for completion."
+  (let ((completion-ignore-case t))
+    (completing-read "Prompt: " llm-prompt-history nil t)))
+
+;;; User commands
 (defun llm-ask (prompt &optional start end)
   "Writes a new buffer based on the prompt and current region, and the output of the llm-rewrite-script-path command.
-If no region is selected, the function will assume the entire buffer is the region."
-  (interactive "sQuestion: \nr")
-  (let ((start (or start (point-min)))
-        (end (or end (point-max))))
-    (llm-region-internal "ask" llm-default-via llm-default-model-type (llm-mode-text-type) prompt start end llm-ask-buffer-name nil nil)))
+In order to reduce resource usage, if no region is selected, the function provide no buffer content."
+  (interactive (list (llm-get-user-prompt "Ask: ") (region-beginning) (region-end)))
+  ;; Check if the region is active, if not, use empty string
+  (unless (and start end)
+    (setq start (point-min)
+          end   (point-min)))
+  (push prompt llm-prompt-history)
+  (llm-region-internal "ask" llm-default-via llm-default-model-type (llm-mode-text-type) prompt start end llm-ask-buffer-name nil nil))
 
-(defun llm-summarize-buffer (user-prompt)
+(defun llm-summarize-buffer (prompt)
   "Creates a new buffer containing a summary of the current buffer, with a user prompt."
-  (interactive "sSummarize Buffer Prompt: \n")
-  (llm-region-internal "summarize" llm-default-via llm-default-model-type (llm-mode-text-type) user-prompt (point-min) (point-max) llm-summary-buffer-name nil nil))
+  (interactive (list (llm-get-user-prompt "Summarize Buffer Prompt: ")))
+  (push prompt llm-prompt-history)
+  (llm-region-internal "summarize" llm-default-via llm-default-model-type (llm-mode-text-type) prompt (point-min) (point-max) llm-summary-buffer-name nil nil))
 
 (defun llm-insert (prompt &optional start end)
-  "Insert inferred text based on the prompt and current region in the current buffer."
-  (interactive "sPrompt: \nr")
-  (let ((start (or start (point-min)))
-        (end (or end (point-max))))
-    (let ((llm-write-buffer-name t))      ;insert into current buffer
-      (llm-region-internal "write" llm-default-via llm-default-model-type (llm-mode-text-type) prompt start end llm-write-buffer-name nil nil))))
+  "Insert inferred text based on the prompt and current region in the current buffer.
+In order to reduce resource usage, if no region is selected, the function provide no buffer content."
+  (interactive (list (llm-get-user-prompt "Insert Prompt: ") (region-beginning) (region-end)))
+  ;; Check if the region is active, if not, use empty string
+  (unless (and start end)
+    (setq start (point-min)
+          end (point-min)))
+  (let ((llm-write-buffer-name t))      ;insert into current buffer
+    (llm-region-internal "write" llm-default-via llm-default-model-type (llm-mode-text-type) prompt start end llm-write-buffer-name nil nil)))
 
 (defun llm-complete (prompt start end)
   "Insert some inferred text based on current region to point in the current buffer."
   ;; todo: ignores end and uses (point); should have good default behavior and get bounds better.
-  (interactive "sPrompt: \nr")
+  (interactive (list (llm-get-user-prompt "Complete Prompt: ") (region-beginning) (region-end)))
   (let ((n-predict 32))                 ;fixme ctrl-u arg?
+    (push prompt llm-prompt-history)
     (llm-complete-internal prompt llm-default-via llm-default-model-type start end n-predict)))
 
 (defun llm-write (prompt &optional start end)
   "Writes a new buffer based on the prompt and current region, and the output of the llm-rewrite-script-path command"
-  (interactive "sPrompt: \nr")
-  (let ((start (or start (point-min)))
-        (end (or end (point-max))))
-    (llm-region-internal "write" llm-default-via llm-default-model-type (llm-mode-text-type) prompt start end llm-write-buffer-name nil nil)))
+  (interactive (list (llm-get-user-prompt "Write Prompt: ") (region-beginning) (region-end)))
+  ;; Check if the region is active, if not, use empty string
+  (unless (and start end)
+    (setq start (point-min))
+    (setq end (point-min)))
+  (push prompt llm-prompt-history)
+  (llm-region-internal "write" llm-default-via llm-default-model-type (llm-mode-text-type) prompt start end llm-write-buffer-name nil nil))
 
-(defun llm-rewrite (user-prompt start end)
+(defun llm-rewrite (prompt start end)
   "Rewrites the current region with the output of the llm-rewrite-script-path command based on the prompt and current region"
-  (interactive "sRewrite Prompt: \nr")
-  (llm-region-internal "rewrite" llm-default-via llm-default-model-type (llm-mode-text-type) user-prompt start end (current-buffer) t t))
+  (interactive (list (llm-get-user-prompt "Rewrite Prompt: ") (region-beginning) (region-end)))
+  (push prompt llm-prompt-history)
+  (llm-region-internal "rewrite" llm-default-via llm-default-model-type (llm-mode-text-type) prompt start end nil t t))
 
-(defun llm-todo (user-prompt start end)
+(defun llm-todo (prompt start end)
   "Rewrites the current region to process 'todo' items with the output of the llm-rewrite-script-path command based on the prompt and current region"
-  (interactive "sTodo Prompt: \nr")
-  (llm-region-internal "todo" llm-default-via llm-default-model-type (llm-mode-text-type) user-prompt start end nil t t))
+  (interactive (list (llm-get-user-prompt "Todo Prompt: ") (region-beginning) (region-end)))
+  (push prompt llm-prompt-history)
+  (llm-region-internal "todo" llm-default-via llm-default-model-type (llm-mode-text-type) prompt start end nil t t))
 
 ;; This function is used in comint-mode to understand and explain the output in an
 ;; interactive way. It prompts the user with a default question, "What line
@@ -153,8 +178,7 @@ If no region is selected, the function will assume the entire buffer is the regi
 ;; then uses the output between the last two output boundaries to generate an
 ;; explanation through the llm-ask function.
 (defun llm-explain-output (prompt)
-  "Explains output from comint-mode using LLM.  Prompts for a question, or uses a default."
-  (interactive "sQuestion: ")
+  (interactive (list (llm-get-user-prompt "Explain Output Prompt: ")))
   (let* ((bounds (my-comint-get-previous-output-bounds))
          (start (car bounds))
          (end (cadr bounds))
@@ -162,6 +186,7 @@ If no region is selected, the function will assume the entire buffer is the regi
          (prompt (if (or (null prompt) (string= "" prompt))
                      default-prompt
                    prompt)))
+    (push prompt llm-prompt-history)
     (llm-ask prompt start end)))
 
 ;;; Internal Functions
@@ -173,14 +198,15 @@ If no region is selected, the function will assume the entire buffer is the regi
    " "
    (mapconcat #'(lambda (arg) (shell-quote-argument (format "%s" arg))) args " ")))
 
-(defun llm-region-internal (use-case via model-type major-mode-name user-prompt start end output-buffer-name replace-p diff-p)
-  "Sends the buffer or current region as input to 'llm.sh'."
+(defun llm-region-internal (use-case via model-type major-mode-name prompt start end output-buffer-name replace-p diff-p)
+  "Send the buffer or current region as the output of the llm-rewrite-script-path command based on the prompt and current region and either replaces the region or uses a specified buffer, based on output-buffer-name and replace-p.
+See [shell-command-on-region] for interpretation of output-buffer-name."
   (message "llm-region-internal: buffer=%s[%s,%s] command=%s replace-p=%s diff-p=%s output-buffer-name=%s"
-           (buffer-name) start end (llm-infer-command-internal use-case via model-type major-mode-name user-prompt)
+           (buffer-name) start end (llm-infer-command-internal use-case via model-type major-mode-name prompt)
            replace-p diff-p output-buffer-name)
   (let ((output-buffer-name (if replace-p (buffer-name (current-buffer)) output-buffer-name)))
-    (cond ((and replace-p diff-p) (llm-region-as-diff-internal start end (llm-infer-command-internal use-case via model-type major-mode-name user-prompt)))
-          (t (shell-command-on-region start end (llm-infer-command-internal use-case via model-type major-mode-name user-prompt) output-buffer-name replace-p
+    (cond ((and replace-p diff-p) (llm-region-as-diff-internal start end (llm-infer-command-internal use-case via model-type major-mode-name prompt)))
+          (t (shell-command-on-region start end (llm-infer-command-internal use-case via model-type major-mode-name prompt) output-buffer-name replace-p
                                         llm-error-buffer-name t nil)))))
 
 (defun llm-region-as-diff-internal (start end command)
@@ -295,6 +321,7 @@ Note:
                       llm-output))))
     (query-replace-regexp regex replacer)))
 
+;;; llm-quick
 (defun llm-quick (question)
   "Calls \\[llm-insert] with question and an exhortation to be succinct."
   (interactive "sQuestion: ")
@@ -334,8 +361,6 @@ Variable-name is completed from the list of defined Emacs Lisp variables."
     (set-buffer (help-buffer))
     (llm-ask question (point-min) (point-max))))
 
-
-
 ;;;
 ;;; my keybindings, should move out
 ;;; 
@@ -347,11 +372,11 @@ Variable-name is completed from the list of defined Emacs Lisp variables."
 (global-set-key (kbd "M-s t") 'llm-todo)
 (global-set-key (kbd "M-s i") 'llm-insert)
 (global-set-key (kbd "M-s c") 'llm-complete)
-(global-set-key (kbd "C-S-n") 'smerge-next)
-(global-set-key (kbd "C-S-p") 'smerge-prev)
 
 ;;; Hooks
 (defun llm-smerge-mode-hook ()
+  ;; these are nice but sometimes not available on all keyboards,
+  ;; so you may have to use the 'Ctrl-C ^' versions
   (local-set-key (kbd "C-S-n") 'smerge-next)
   (local-set-key (kbd "C-S-p") 'smerge-prev)
   (local-set-key (kbd "C-S-u") 'smerge-keep-upper)
