@@ -1,8 +1,7 @@
 #!/bin/bash
 
 # Check if the script is being sourced or directly executed
-if [[ "${BASH_SOURCE[0]}" == "${0}" ]];
-then
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     echo "This script '${BASH_SOURCE[0]}' is intended to be sourced, not executed directly."
 #    exit 1
 fi
@@ -18,13 +17,13 @@ AUTHORIZATION_PARAMS=()
 
 # LLM_LIB_DIR="$(realpath "${SCRIPT_DIR}/../lib")"
 # LLM_MODELS_DIR="$(realpath "${SCRIPT_DIR}/../models")"
-: "{SEED:=NaN}"
+: "${SEED:=NaN}"
 
 # TODO: sampling order:  CFG -> Penalties -> top_k -> tfs_z -> typical_p -> top_p -> min_p -> temperature
 # todo: Sampling order appears to be a key differentiator for results from llamafile vs ooba but it's ununnvestigagted
-TOP_K="${TOP_K:-20}"
-TOP_P="${TOP_P:-0.95}"
-MIN_P="${MIN_P:-0.1}"
+: "${TOP_K:=-20}"
+: "${TOP_P:-0.95}"
+: "${MIN_P:-0.1}"
 
 # --grammar-file support is spotty in non-gguf models so default to off
 : "${VIA_API_USE_GRAMMAR:=}"
@@ -52,6 +51,7 @@ REASONING_EFFORT="${REASONING_EFFORT:-low}"
 TEMPLATE_SETTINGS="
     temperature: \$temperature,
     seed: \$seed,
+    max_new_tokens: \$max_new_tokens,
     max_tokens: 4096"
 if [ -n "${OPENAI_API_KEY}" ]; then
     AUTHORIZATION_PARAMS=(-H "Authorization: Bearer ${OPENAI_API_KEY}")
@@ -69,12 +69,10 @@ else
     grammar_string: \$grammar_string,
     seed: \$seed,
     repeat_last_n: 64, frequency_penalty: 0.000, presence_penalty: 0.000,
-    top_k: ${TOP_K}, tfs_z: 1.000, top_p: ${TOP_P}, min_p: ${MIN_P}, typical_p: 1.000,
+    top_k: \$top_k, tfs_z: 1.000, top_p: \$top_p, min_p: \$min_p, typical_p: 1.000,
     mirostat: 0, 
     n_keep: 1,
     auto_max_new_tokens: true,
-    max_new_tokens: 4096,
-    max_tokens: 4096,
     skip_special_tokens: false"
 fi
 
@@ -108,8 +106,7 @@ NO_SYSTEM_ROLE_TEMPLATE="{
 
 function prepare_prompt {
     log_info "prepare_prompt"
-    if [ -z "${INPUT}" ];
-    then
+    if [ -z "${INPUT}" ]; then
         printf -v PROMPT "%s\n" "${QUESTION%$'\n'}"
     else
         # remove trailing newlines
@@ -155,22 +152,19 @@ function string_trim() {
 # todo: so many files and strings back and forth
 function via_api_perform_inference() {
     local model_type="$1" inference_mode="$2" system_message="$3" question="$4" grammar_file="$5"
-    local temperature="$6" repetition_penalty="$7" penalize_nl="$8"
+    local temperature="$6" repetition_penalty="$7" penalize_nl="$8" n_predict="$9"
 
-    if [ -z "$grammar_file" ] || [ -z "${VIA_API_USE_GRAMMAR}" ];
-    then
+    if [ -z "$grammar_file" ] || [ -z "${VIA_API_USE_GRAMMAR}" ]; then
         grammar_file="/dev/null"
     fi
 
-    if [ -z "$temperature" ];
-    then
+    if [ -z "$temperature" ]; then
         temperature=null
     fi
 
     # fixme: not all models support the system role in the API, and there's no way to tell afaik
     # workaround: if $USE_SYSTEM_ROLE is non-empty, prepend system_message to question
-    if [ -z "${USE_SYSTEM_ROLE}" ];
-    then
+    if [ -z "${USE_SYSTEM_ROLE}" ]; then
         TEMPLATE="${NO_SYSTEM_ROLE_TEMPLATE}"
         #question=$(printf "%s\n%s\n" "${system_message%$'\n'}" "${question}")
         printf -v question "%s\n%s\n" "${system_message%$'\n'}" "${question}"
@@ -182,11 +176,10 @@ function via_api_perform_inference() {
     #set -x
     # remove leading and trailing whitespace for system_message and question
     # prepare system message and question
-    if [ -n "${system_message}" ];
-    then
+    if [ -n "${system_message}" ]; then
         system_message=${system_message##[[:space:]]}
         system_message=${system_message%%[[:space:]]}
-        system_message_file=$(mktemp_file sysmsg);
+        system_message_file=$(mktemp_file sysmsg)
         register_temp_file "${system_message_file}"
         printf "%s\n" "${system_message%$'\n'}" >> "${system_message_file}"
     else
@@ -202,26 +195,35 @@ function via_api_perform_inference() {
 
     # hack: Drop empty string, and null parameters. NaN seems to show as null.
     #       sadly seed must be a number
-    temperature=${temperature:-NaN} 
+    temperature=${temperature:-NaN}
+
+    local max_new_tokens="${n_predict}"
+    if [ -z "$max_new_tokens" ]; then
+        max_new_tokens=null
+    fi
+
     data=$(jq --raw-input --raw-output  --compact-output -n \
               --arg inference_mode "${inference_mode}" \
               --arg reasoning_effort "${REASONING_EFFORT}" \
               --argjson temperature ${temperature} \
               --argjson repetition_penalty ${repetition_penalty} \
               --argjson penalize_nl ${penalize_nl} \
-              --argjson seed ${SEED} \
+              --argjson seed ${SEED:-NaN} \
+              --argjson top_k ${TOP_K:-NaN} \
+              --argjson top_p ${TOP_P:-NaN} \
+              --argjson min_p ${MIN_P:-NaN} \
               --arg model_name "${model_type}" \
+              --argjson max_new_tokens ${max_new_tokens} \
               --rawfile system_message "${system_message_file}" \
               --rawfile question "${question_file}" \
               --rawfile grammar_string "${grammar_file}" \
               "${TEMPLATE}" \
-           | jq 'with_entries(select(.value != null))' \
-        )
-    
+               | jq 'with_entries(select(.value != null))')
+
+
     log_info "processed jq input"
 
-    if [ -n "${VERBOSE}" ];
-    then
+    if [ -n "${VERBOSE}" ]; then
         log_verbose "USE_SYSTEM_ROLE='$USE_SYSTEM_ROLE'"
         log_verbose "data=$(printf "%s\n" "${data}" | jq --indent 1)"
     fi
@@ -231,8 +233,7 @@ function via_api_perform_inference() {
     #set -x
     result=$(printf "%s" "${data}" | curl -s "${VIA_API_CHAT_COMPLETIONS_ENDPOINT}" -H 'Content-Type: application/json' "${AUTHORIZATION_PARAMS[@]}" -d @-)
     s=$?
-    if [ "$s" -ne 0 ];
-    then
+    if [ "$s" -ne 0 ]; then
         log_and_exit $s "via --api perform inference cannot curl"
     fi
 
@@ -254,10 +255,6 @@ function via_api_perform_inference() {
     return $s
 }
 
-
-# can't set the model in the API so we just validate that
-# there is a model. 
-# todo: maybe give error if $model_name != $MODEL_NAME and MODEL_NAME is specified.
 function set_model_name {
     model_name="$(get_model_name)"
     if [ "$model_name" == "None" ];
@@ -327,9 +324,4 @@ function load_model {
 function unload_model {
     result=$(printf "%s" "${data}" | curl -s "${VIA_API_UNLOAD_MODEL_ENDPOINT}" "${AUTHORIZATION_PARAMS[@]}" -d '' || log_and_exit $? "via --api --unload-model cannot curl")
     printf "%s\n" "$result"
-}
-
-# todo: support via=api; use cli or api calls for accurate counts;
-function truncate_to_context_length {
-    true
 }

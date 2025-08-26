@@ -121,4 +121,4 @@ $ %s
 # Pipeline to send 'git diff' out to 'help.sh' input with prompt
 printf -v INPUT "${TEMPLATE}" "${DIFF_COMMAND}" "${diff_output_sanitized}"
 # Pass along all args still unprocessed
-printf "%s\n" "${INPUT}" | ${HELP_SH} --long ${*} ${GRAMMAR_FILE_FLAG} -e -- "${PROMPT}"
+printf "%s\n" "${INPUT}" | ${HELP_SH} ${*} ${GRAMMAR_FILE_FLAG} -e -- "${PROMPT}"
