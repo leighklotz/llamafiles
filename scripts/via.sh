@@ -32,8 +32,8 @@ function main {
     # Load the functions for specified $VIA
     VIA_FUNCTIONS_PATH="$(realpath "${SCRIPT_DIR}/../via/functions.sh")"
     source "${VIA_FUNCTIONS_PATH}"
-    #VIA_FUNCTIONS_VIA_X_PATH="$(realpath "${SCRIPT_DIR}/../via/${VIA}/functions.sh")"
-    #source_functions "${VIA_FUNCTIONS_VIA_X_PATH}"
+    VIA_API_FUNCTIONS_PATH="$(realpath "${SCRIPT_DIR}/../via/api/functions.sh")"
+    source "${VIA_API_FUNCTIONS_PATH}"
 
     # parse the command args
     while true;
@@ -45,28 +45,23 @@ function main {
                 export MODEL_TYPE="$1"
                 shift ;;
             --get-model-name)
-                init_model
                 get_model_name
                 break ;;
             --load-model)
-                init_model
                 [ -z "$1" ] && usage
                 load_model "$1"
                 status=$?
                 shift
                 break ;;
             --unload-model)
-                init_model
                 unload_model
                 status=$?
                 break ;;
             --list-models)
-                init_model
                 list_models "${@}"
                 status=$?
                 break ;;
             --list-model-types)
-                init_model
                 list_model_types
                 status=$?
                 break ;;

@@ -6,7 +6,6 @@ umask 077
 # Assume we are called from llamafiles script directory
 # todo: fix the many global variable dependencies in this file
 VIA_DIRECTORY="$(realpath "${SCRIPT_DIR}/../via")"
-VIA_CLI_FUNCTIONS_PATH="$(realpath "${VIA_DIRECTORY}/cli/functions.sh")"
 VIA_API_FUNCTIONS_PATH="$(realpath "${VIA_DIRECTORY}/api/functions.sh")"
 MODELS_DIRECTORY="$(realpath "${SCRIPT_DIR}/../models")"
 TMPFILES_TO_DELETE=""
