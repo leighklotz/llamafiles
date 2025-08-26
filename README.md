@@ -5,40 +5,55 @@ Using https://github.com/Mozilla-Ocho/llamafile and https://github.com/jart mode
 This repository provides an LLM Help CLI for Linux and Mac systems to provide help, summarization, coding assistance, system information queries, image renaming, etc. Similar to https://justine.lol/oneliners/ and other resources.
 
 # Self Introduction
+Note that `help.sh` and `ask` have different behavior.
+
 ```bash
 $ via --get-model-name
-cognitivecomputations_dolphin-2.8-mistral-7b-v02.Q6_K.gguf
-$ help.sh what can you do
+gemma-3-27b-it-Q4_K_M.gguf
+klotz@core:~/wip/llamafiles$ help.sh what do you do
+$ help.sh what do you do
+As an AI bot, I'm designed to be a versatile assistant! I can help with a lot of different things. Here’s a breakdown of what I do:
+
+* **Answer Questions:** I can provide information on a wide range of topics, drawing from a massive knowledge base. Just ask!
+* **Provide Explanations:** Need something explained simply? I can break down complex subjects.
+* **Generate Text:** I can write different kinds of creative text formats, like poems, code, scripts, musical pieces, email, letters, etc.
+* **Technical Assistance:** I particularly excel with:
+    * **Linux & Bash:** I can help with commands, scripting, troubleshooting.
+    * **Python:** I can assist with code snippets, explanations, debugging.
+    * **General Programming:**  I understand programming concepts and can help with logic or syntax (in many languages).
+* **Execute Commands (in a conceptual way):** While I can't *actually* run commands on your system, I can *tell* you what commands would do, or help you construct them. I can also show you the likely output of a command.
+
+**Important:** Remember our interactions are one-shot. I don't have memory of previous turns. Each question needs to be self-contained.
+
+$ ask what do you do
+I'm Gemma, a large language model created by the Gemma team at Google DeepMind. I'm an open-weights AI assistant, which means I'm widely available to the public. 
+
+I take text *and* images as inputs and generate text as output. Basically, you can give me a prompt (text or an image!), and I'll do my best to give you a helpful and informative response. 
+
+Here are some things I can do:
+
+*   **Generate creative text formats:** like poems, code, scripts, musical pieces, email, letters, etc.
+*   **Answer your questions:** I'll try to provide comprehensive and informative answers.
+*   **Summarize text:** I can condense long pieces of text into shorter, more manageable summaries.
+*   **Translate languages:** I can translate text from one language to another.
+*   **Follow your instructions and complete your requests thoughtfully.**
+
+
+
+I'm still under development, but I'm learning new things every day!
+
+
+
+You can find more information about me here: [https://ai.google.dev/gemma](https://ai.google.dev/gemma)
+klotz@core:~/wip/llamafiles$ 
 ```
->Here are a few things you can do with various technologies:
->
->- Linux:
->    - Operate a Linux-based operating system for desktop, server, or containerized applications.
->    - Customize and manage system settings and hardware.
->    - Install and maintain software packages and applications.
->    - Configure networking, security, and performance.
->
->- Bash:
->    - Create and run shell scripts to automate tasks or simply shorten repetitive commands.
->    - Customize the command-line interface (CLI) shell experience with scripts, shortcuts, and personalized configurations.
->    - Navigate directories, manage files and permissions, and handle data manipulation from the command line.
->
->- Python:
->    - Implement and run Python scripts for rapid application development in various fields such as web development, data analysis, machine learning, and automated tasks.
->    - Leverage Python's extensive libraries like NumPy, Pandas, Matplotlib, Django, Flask, etc. for specific tasks.
->    - Develop applications or interact with existing ones through APIs, scripts, or GUI interfaces.
->
->- General programming:
->    - Design, write, test, and debug code using various programming languages and tools.
->    - Collaborate with other developers on projects, communicate technical concepts, and contribute to open-source communities.
->    - Learn, understand, and apply programming patterns, best practices, and algorithms to solve real-world problems.
->    - Stay updated with the latest technologies, frameworks, and trends in the software industry.
+
 
 
 ## Brief Usage examples
 Below are brief examples to show you what these tools do.
 
-Instal llinks to the scripts you want to use in your home bin directory. In the example below, symlink names have been shortened.
+Install llinks to the scripts you want to use in your home bin directory. In the example below, symlink names have been shortened.
 
 ```shell
 $ help.sh -- "Split bash argument array into left and right with double hyphen as the separator using special bash builtin functions or operators"
