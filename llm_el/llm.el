@@ -1,4 +1,6 @@
-;;; llm.el --- LLM-based rewriting and summarization functions for Emacs buffers
+;;;-*-EMACS-LISP-*-
+
+;;; llm.el - LLM-based rewriting and summarization functions for Emacs buffers
 ;;;
 ;;; Copyright (C) 2024, 2025 Leigh Klotz <klotz@klotz.me>
 ;;;
@@ -15,26 +17,38 @@
 ;;; You should have received a copy of the GNU General Public License
 ;;; along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ;;;
-;;;; Commentary:
-;;;
+;;; Summary:
 ;;; This package provides functions for summarizing and rewriting the contents
-;;; of Emacs buffers using an external script called `llm-emacs-helper.sh`.
-;;; The package includes the following commands:
-;;;   - M-x llm-summarize-buffer
-;;;   - M-x llm-rewrite
-;;;   - M-x llm-ask
-;;;   - M-x llm-write
+;;; of Emacs buffers using an external script called 'llm-emacs-helper.sh'. The package
+;;; includes the following functions:
+;;;   - M-X llm-summarize-buffer
+;;;     Summarizes the contents of the current buffer in a new buffer.
+;;;   - M-X llm-rewrite
+;;;     Replaces region with results of prompt run on region
+;;;   - M-X llm-ask
+;;;     Answers question about region in a new buffer
+;;;   - M-X llm-write
+;;;     Writes a response based on the region and prompt in a new buffer
 ;;;   - M-x llm-insert
+;;;     Insert the LLM's response to the prompt in the current buffer.
+;;;   - M-X llm-load-model
+;;;     Load the specified user model; offers a completing reader.
 ;;;   - M-x llm-quick
-;;;   - M-x llm-load-model
+;;;     Answer a question concisely and insert answer at point.
+;;;
+;;; Some commands will use empty string if there is not a region, but other commands will error.
+;;;
+;;; Dependencies:
+;;;   - A shell script called 'llm-emacs-helper.sh' that contains the command(s) you want
+;;;     to run on the buffer or region content.
 
-;; Configuration group -------------------------------------------------------
+;;; Configuration
 
 (defgroup llm nil
   "Configuration options for the LLM integration."
   :group 'emacs)
 
-;; Custom variables ---------------------------------------------------------
+;;; Custom variables
 
 (defcustom llm-rewrite-script-path
   "~/wip/llamafiles/llm_el/llm-emacs-helper.sh"
@@ -48,29 +62,7 @@
   :type 'string
   :group 'llm)
 
-(defcustom llm-default-via
-  "api"
-  "Default VIA for LLM."
-  :type '(choice (const api) (const cli))
-  :group 'llm)
-
-(defcustom llm-default-model-type
-  ;; one of: cerebrum codebooga deepseek-coder dolphin functions.sh llava mistral mixtral models.jsonl nous-hermes phi rocket
-  "mistral"
-  "Default model type for LLM."
-  :type '(choice
-          (const cerebrum)
-          (const codebooga)
-          (const deepseek-coder)
-          (const dolphin)
-          (const mistral)
-          (const mixtral)
-          (const nous-hermes)
-          (const phi)
-          (const rocket))
-  :group 'llm)
-
-;; Buffer name variables -----------------------------------------------------
+;;; Buffer name variables
 
 (defvar llm-ask-buffer-name     "*llm-ask*"
   "Name of the buffer to display the LLM ask output.")
@@ -87,7 +79,7 @@
 (defvar llm-diff-buffer-name    "*llm-diff*"
   "Name of the buffer to display LLM diffs.")
 
-;; Other configuration -------------------------------------------------------
+;;; Other configuration
 
 (defvar llm-preserve-temp-files nil
   "Whether to preserve temporary files created during diffing.")
@@ -95,28 +87,29 @@
 (defvar llm-git-merge-format "git merge-file -p \"%s\" /dev/null \"%s\""
   "Format string for the git merge command used in diffing.")
 
-(defvar llm-prompt-history '()
+(defvar llm-prompt-history nil
   "History of prompts used with LLM functions.")
 
-;; Utility functions ---------------------------------------------------------
+;;; Utility functions
 
 (defun llm-get-user-prompt (prompt)
   "Prompt the user for a prompt, using `llm-prompt-history` for completion."
   (let ((completion-ignore-case t))
-    (completing-read prompt llm-prompt-history nil t)))
+    (read-string "Prompt: "
+                 (if (not llm-prompt-history) "" (concat (car llm-prompt-history) " ")))))
 
-;; User commands -------------------------------------------------------------
+;;; User commands
 
 (defun llm-ask (prompt &optional start end)
   "Write a new buffer based on PROMPT and the current region, or an empty string if no region is active.
-The result is displayed in a buffer named `llm-ask-buffer-name`."
+The result is displayed in a buffer named \\[llm-ask-buffer-name]]."
   (interactive (list (llm-get-user-prompt "Ask: ") (region-beginning) (region-end)))
   (unless (and start end)
     (setq start (point-min)
           end   (point-min)))
   (push prompt llm-prompt-history)
   (llm-region-internal
-   "ask" llm-default-via llm-default-model-type (llm-mode-text-type)
+   "ask" (llm-mode-text-type)
    prompt start end llm-ask-buffer-name nil nil))
 
 (defun llm-summarize-buffer (prompt)
@@ -124,7 +117,7 @@ The result is displayed in a buffer named `llm-ask-buffer-name`."
   (interactive (list (llm-get-user-prompt "Summarize Buffer Prompt: ")))
   (push prompt llm-prompt-history)
   (llm-region-internal
-   "summarize" llm-default-via llm-default-model-type (llm-mode-text-type)
+   "summarize" (llm-mode-text-type)
    prompt (point-min) (point-max) llm-summary-buffer-name nil nil))
 
 (defun llm-insert (prompt &optional start end)
@@ -136,25 +129,26 @@ If no region is active, the input is an empty string."
           end   (point-min)))
   (let ((llm-write-buffer-name t))      ; insert into current buffer
     (llm-region-internal
-     "write" llm-default-via llm-default-model-type (llm-mode-text-type)
+     "write" (llm-mode-text-type)
      prompt start end llm-write-buffer-name nil nil)))
 
+;;; Not yet implemented: llm-complete
 (defun llm-complete (prompt start end)
   "Generate additional text following the selected region using PROMPT and insert it at END."
   (interactive (list (llm-get-user-prompt "Complete Prompt: ") (region-beginning) (region-end)))
   (let ((n-predict 32))                 ; number of tokens to generate
     (push prompt llm-prompt-history)
-    (llm-complete-internal prompt llm-default-via llm-default-model-type start end n-predict)))
+    (llm-complete-internal prompt start end n-predict)))
 
 (defun llm-write (prompt &optional start end)
-  "Write a new buffer based on PROMPT and the current region, and display the result in `llm-write-buffer-name`."
+  "Write a new buffer based on PROMPT and the current region, and display the result in \\[llm-write-buffer-name\\[."
   (interactive (list (llm-get-user-prompt "Write Prompt: ") (region-beginning) (region-end)))
   (unless (and start end)
     (setq start (point-min)
           end   (point-min)))
   (push prompt llm-prompt-history)
   (llm-region-internal
-   "write" llm-default-via llm-default-model-type (llm-mode-text-type)
+   "write" (llm-mode-text-type)
    prompt start end llm-write-buffer-name nil nil))
 
 (defun llm-rewrite (prompt start end)
@@ -163,7 +157,7 @@ The region is replaced with the LLM's output, and the changes are shown in merge
   (interactive (list (llm-get-user-prompt "Rewrite Prompt: ") (region-beginning) (region-end)))
   (push prompt llm-prompt-history)
   (llm-region-internal
-   "rewrite" llm-default-via llm-default-model-type (llm-mode-text-type)
+   "rewrite" (llm-mode-text-type)
    prompt start end nil t t))
 
 (defun llm-todo (prompt start end)
@@ -172,9 +166,14 @@ The region is replaced with the LLM's output, and the changes are shown in merge
   (interactive (list (llm-get-user-prompt "Todo Prompt: ") (region-beginning) (region-end)))
   (push prompt llm-prompt-history)
   (llm-region-internal
-   "todo" llm-default-via llm-default-model-type (llm-mode-text-type)
+   "todo" (llm-mode-text-type)
    prompt start end nil t t))
 
+;; This function is used in comint-mode to understand and explain the output in an
+;; interactive way. It prompts the user with a default question, "What line
+;; number contains the proximal error?", or a custom prompt if provided. It
+;; then uses the output between the last two output boundaries to generate an
+;; explanation through the llm-ask function.
 (defun llm-explain-output (prompt)
   "Explain the most recent comint output using PROMPT.
 If PROMPT is omitted or empty, the default question \"What line number contains the proximal error?\" is used."
@@ -189,7 +188,7 @@ If PROMPT is omitted or empty, the default question \"What line number contains 
     (push prompt llm-prompt-history)
     (llm-ask prompt start end)))
 
-;; Internal helper functions -------------------------------------------------
+;;; Internal helper functions
 
 (defun llm-infer-command-internal (&rest args)
   "Construct the command string for invoking the external LLM script.
@@ -200,27 +199,27 @@ to prevent shell injection."
    " "
    (mapconcat #'(lambda (arg) (shell-quote-argument (format "%s" arg))) args " ")))
 
-(defun llm-region-internal (use-case via model-type major-mode-name prompt start end output-buffer-name replace-p diff-p)
+(defun llm-region-internal (use-case major-mode-name prompt start end output-buffer-name replace-p diff-p)
   "Run the external LLM script on the current buffer or the selected region.
-The command is built from USE‑CASE, VIA, MODEL‑TYPE, MAJOR‑MODE‑NAME, and PROMPT.
+The command is built from USE‑CASE, MAJOR‑MODE‑NAME, and PROMPT.
 If START and END are nil, the entire buffer is used.
 OUTPUT‑BUFFER‑NAME is the buffer where the script output will be sent; if nil, a new buffer is created.
 If REPLACE‑P is non‑nil, the region is replaced with the script output (or with the string \"t\" if the original code is kept for compatibility).
-If DIFF‑P is non‑nil and REPLACE‑P is non‑nil, the changes are shown in merge‑file format using `smerge-mode`.
+If DIFF‑P is non‑nil and REPLACE‑P is non‑nil, the changes are shown in merge‑file format using \\[[smerge-mode]].
 The function sets `max-mini-window-height` to 0.0 to suppress window height adjustments for large outputs."
   (let ((max-mini-window-height 0.0)
         (output-buffer-name (if replace-p (buffer-name (current-buffer)) output-buffer-name))
         (region-noncontiguous-p nil))
     (cond ((and replace-p diff-p)
-           (llm-region-as-diff-internal start end (llm-infer-command-internal use-case via model-type major-mode-name prompt)))
+           (llm-region-as-diff-internal start end (llm-infer-command-internal use-case major-mode-name prompt)))
           (t
            (shell-command-on-region start end
-                                    (llm-infer-command-internal use-case via model-type major-mode-name prompt)
+                                    (llm-infer-command-internal use-case major-mode-name prompt)
                                     output-buffer-name replace-p
                                     llm-error-buffer-name t region-noncontiguous-p)))))
 
 (defun llm-region-as-diff-internal (start end command)
-  "Run the external LLM script on the region between START and END and pass the result to `llm-diff-region-with-string`."
+  "Run the external LLM script on the region between START and END and pass the result to \\[[llm-diff-region-with-string]]."
   (let* ((original-string (buffer-substring start end))
          (llm-output (with-temp-buffer
                        (insert original-string)
@@ -231,7 +230,7 @@ The function sets `max-mini-window-height` to 0.0 to suppress window height adju
 
 (defun llm-diff-region-with-string (start end new-string)
   "Show the differences between the current buffer region and NEW-STRING in merge‑file format.
-The differences are inserted into a temporary buffer named `llm-diff-buffer-name` and displayed in `smerge-mode`."
+The differences are inserted into a temporary buffer named `llm-diff-buffer-name` and displayed in \\[[smerge-mode]]."
   (let* ((current-buffer-content (buffer-substring-no-properties start end))
          (temp-file-before (make-temp-file "emacs-diff-before-"))
          (temp-file-after  (make-temp-file "emacs-diff-after-"))
@@ -244,6 +243,7 @@ The differences are inserted into a temporary buffer named `llm-diff-buffer-name
     (with-temp-file temp-file-after
       (insert new-string))
 
+    ;; Run the diff command and capture the output in the *llm-diff* buffer
     (let ((result (shell-command-to-string diff-command)))
       (erase-buffer)
       (insert result)
@@ -255,12 +255,13 @@ The differences are inserted into a temporary buffer named `llm-diff-buffer-name
       (delete-file temp-file-before)
       (delete-file temp-file-after)))
 
-(defun llm-complete-internal (prompt via model-type start end n-predict)
+;;; Not yet implemented: llm-complete
+(defun llm-complete-internal (prompt start end n-predict)
   "Generate additional text following the region from START to END using PROMPT.
 The external script is called with the \"complete\" use‑case and the specified MODEL‑TYPE.
 The number of tokens to generate is N‑PREDICT."
   (let* ((use-case "complete")
-         (command (llm-infer-command-internal "complete" via model-type "--n-predict" n-predict (llm-mode-text-type) prompt)))
+         (command (llm-infer-command-internal "complete" "--n-predict" n-predict (llm-mode-text-type) prompt)))
     (message "llm-complete-internal: %s" command)
     (let ((old-text (buffer-substring start end)))
       (shell-command-on-region start end command nil t llm-error-buffer-name t nil)
@@ -304,10 +305,11 @@ returned by the script."
         (end (point-max)))
     (list start end)))
 
+;;; Not yet implemented: Query Replace
 (defun llm-query-replace (regex prompt)
   "Query replace occurrences matching REGEX with text generated by LLM using PROMPT.
 
-This function is similar to `query-replace-regexp`, but instead of replacing
+This function is similar to \\[[query-replace-regexp]], but instead of replacing
 with a fixed string, it uses an LLM to generate the replacement text based on
 the provided prompt and the matched text.
 
@@ -325,7 +327,7 @@ Usage:
 6. If you agree, it will generate the replacement text using the LLM and replace the match.
 
 Note:
-- Ensure that the LLM function `llm-function` is already defined and available.
+- Ensure that the LLM function \\[[llm-function]] is already defined and available.
 - The replacement is undoable using the standard undo functionality in Emacs."
   (interactive "sRegex: \nsLLM Prompt: ")
   (let ((replacer (lambda (match)
@@ -336,14 +338,14 @@ Note:
 
 (defun llm-quick (question)
   "Ask a short question and insert a concise answer at point.
-The function prompts for QUESTION, then calls `llm-insert` with a prompt
+The function prompts for QUESTION, then calls \\[[llm-insert]] with a prompt
 that instructs the LLM to write a brief response to QUESTION and nothing else."
   (interactive "sQuestion: ")
   (llm-insert (format "briefly write %s and nothing else" question)))
 
 (defun llm-apropos (apropos-match question)
   "Search for symbols matching APPROPOS-MATCH and ask the LLM a QUESTION about the results.
-The function first calls `apropos` to display matching symbols, then runs `llm-ask` with QUESTION on the displayed information."
+The function first calls \\[apropos]] to display matching symbols, then runs \\[[llm-ask]] with QUESTION on the displayed information."
   (interactive "sApropos: \nsQuestion: ")
   (save-excursion
     (apropos apropos-match)
@@ -351,7 +353,7 @@ The function first calls `apropos` to display matching symbols, then runs `llm-a
 
 (defun llm-describe-function (function-name question)
   "Display the documentation for FUNCTION-NAME and ask the LLM a QUESTION about it.
-The function calls `describe-function` and then runs `llm-ask` with QUESTION on the resulting help buffer."
+The function calls \\[[describe-function]] and then runs \\[[llm-ask]] with QUESTION on the resulting help buffer."
   (interactive
    (list (intern (completing-read "Function: " obarray 'fboundp))
          (read-string "Question: ")))
@@ -362,7 +364,7 @@ The function calls `describe-function` and then runs `llm-ask` with QUESTION on 
 
 (defun llm-describe-variable (variable-name question)
   "Display the documentation for VARIABLE-NAME and ask the LLM a QUESTION about it.
-The function calls `describe-variable` and then runs `llm-ask` with QUESTION on the resulting help buffer."
+The function calls \\[[describe-variable]] and then runs \\[[llm-ask]] with QUESTION on the resulting help buffer."
   (interactive
    (list (intern (completing-read "Variable: " obarray 'boundp))
          (read-string "Question: ")))
@@ -371,7 +373,7 @@ The function calls `describe-variable` and then runs `llm-ask` with QUESTION on 
     (set-buffer (help-buffer))
     (llm-ask question (point-min) (point-max))))
 
-;; Keybindings --------------------------------------------------------------
+;; Keybindings
 
 (global-set-key (kbd "M-s a") 'llm-ask)
 (global-set-key (kbd "M-s $") 'llm-summarize-buffer)
@@ -381,15 +383,16 @@ The function calls `describe-variable` and then runs `llm-ask` with QUESTION on 
 (global-set-key (kbd "M-s i") 'llm-insert)
 (global-set-key (kbd "M-s c") 'llm-complete)
 
-;; Hooks ---------------------------------------------------------------------
+;; Hooks
 
 (defun llm-smerge-mode-hook ()
-  "Set up convenient keybindings for `smerge-mode`."
+  "Set up convenient keybindings for \\[[smerge-mode]]."
   (local-set-key (kbd "C-S-n") 'smerge-next)
   (local-set-key (kbd "C-S-p") 'smerge-prev)
   (local-set-key (kbd "C-S-u") 'smerge-keep-upper)
   (local-set-key (kbd "C-S-l") 'smerge-keep-lower))
+
 (add-hook 'smerge-mode-hook 'llm-smerge-mode-hook)
 
 (provide 'llm)
-;;; llm.el ends here
+

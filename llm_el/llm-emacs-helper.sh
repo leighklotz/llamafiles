@@ -2,7 +2,6 @@
 
 # Script to interface with an LLM from Emacs major modes for code/text manipulation.
 # Handles use cases like rewriting, summarizing, completion, and question answering.
-# Features context length estimation and optional code reordering with comments.
 #
 # Copyright (C) 2024-2025 Leigh L. Klotz, Jr.
 # Licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3, 19 November 2007.
@@ -17,7 +16,7 @@ if [ -n "${DEBUG}" ]; then
     (env; printf "\n%s\n" "${*}")
 fi
 
-# Usage: llm-emacs-helper.sh use-case model-type via [options] input
+# Usage: llm-emacs-helper.sh use-case [options] input
 # Input can be stdin or a file piped to this script.
 # Example: cat foo.sh | ./llm-emacs-helper.sh ask api mixtral bash "improve this code"
 
@@ -28,8 +27,6 @@ if [[ $# -lt 3 ]]; then
 fi
 
 USE_CASE="$1"; shift
-VIA="$1"; shift
-MODEL_TYPE="$1"; shift
 
 MAJOR_MODE=""
 PROMPT=""
@@ -87,10 +84,8 @@ function calculate_comment_prefix {
 
 # Usage function
 function usage {
-  echo "Usage: $0 use-case model-type via [options] input"
+  echo "Usage: $0 use-case [options] input"
   echo "  use-case:  One of: rewrite, ask, write, summarize, complete, todo, -h"
-  echo "  model-type: The LLM model to use (e.g., mixtral, llama2)."
-  echo "  via:       The API endpoint (e.g., api, cli)."
   echo "  options:   -n_predict <tokens> - --raw-input"
   echo "  input:     The text or code to process (piped or file)."
 }
@@ -152,12 +147,8 @@ INPUT_TEMPFILE=$(mktemp)
 trap "rm \"${INPUT_TEMPFILE}\"" EXIT
 cat > "${INPUT_TEMPFILE}"
 
-# Estimate context length (limited to 2048-32768 characters)
-context_length=$(( $(wc -c < "${INPUT_TEMPFILE}") / 3 ))
-context_length=$((context_length < 2048 ? 2048 : context_length > 32768 ? 32768 : context_length))
-
 # Execute the LLM script and capture the result.
-result="$(cat "${INPUT_TEMPFILE}" | ${LLM_SH} --via "${VIA}" -m "${MODEL_TYPE}" ${DEBUG} --context-length "${context_length}" --stdin ${RAW_FLAG} ${N_PREDICT} "${PROMPT}")"
+result="$(cat "${INPUT_TEMPFILE}" | ${LLM_SH} ${DEBUG} --stdin ${RAW_FLAG} ${N_PREDICT} "${PROMPT}")"
 
 # If the LLM script returns an empty result, exit with an error.
 if [ -z "${result}" ]; then
