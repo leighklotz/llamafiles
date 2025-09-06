@@ -269,13 +269,6 @@ $ ./scripts/install-scripts.sh ~/bin --downlink
 
 Beware that playwright installs a significant number of dependencies.
 
-## Mac Specifics
-You will need to do this on MacOS:
-```
-$ cd ~/wip/llamafiles
-$ xattr -dr com.apple.quarantine models/*.llamafile models/*/*.llamafile lib/*
-```
-
 # References
 ## Used directly
 - https://justine.lol/oneliners/
