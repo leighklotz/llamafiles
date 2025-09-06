@@ -90,11 +90,11 @@ $
 ```
 
 ### help.sh LSHW Example
-The Codebooga llamafile I'm using doesn't yet support --silent-prompt so I elided the re-printed prompt manually.
+
 ```
 sudo lshw | wc 
     727    2411   31214
-$ sudo lshw | help.sh 'Summarize the following lshw output:\n\n'
+$ sudo lshw | help.sh 'Summarize the following lshw output:'
 
 	This output shows information about the hardware components of a
 	computer system, including the motherboard, CPU, memory, storage
@@ -111,7 +111,6 @@ $ sudo lshw | help.sh 'Summarize the following lshw output:\n\n'
 
 ### help.sh Raspberry Pi 5 lspci with Rocket model
 ```
-klotz@rpi5:~ $ export MODEL_TYPE=rocket
 klotz@rpi5:~ $ help.sh lspci
 LSPCI, or List PCI Devices, is a command used in Linux to display information about all the PCI devices connected to the system's motherboard. It provides details such as device vendor and product IDs, memory sizes, and supported devices. This command can be executed in the terminal of a Linux system with root privileges. For example, to list all PCI devices, you would type `lspci` in the terminal and press Enter. The output will display the information about each device.
 klotz@rpi5:~ $ lspci | help.sh "explain this lspci output"
@@ -164,37 +163,6 @@ $
 # llm_el for Emacs
 There are many LLM integrations for Emacs; mine is here: [llm_el](llm_el).
 
-# LLamafile binaries
-Get these files from (https://github.com/Mozilla-Ocho/llamafile)[https://github.com/Mozilla-Ocho/llamafile].
-They go in `lib/`:
-
-- `llamafile-0.2.1.zip`
-- `llamafile-llava-cli-0.2.1`
-- `llamafile-llava-quantize-0.2.1`
-- `llamafile-main-0.2.1`
-- `llamafile-quantize-0.2.1`
-- `llamafile-server-0.2.1`
-- `zipalign-0.2.1`
-
-# Models and all-in-one
-You need to download these from https://huggingface.co/jartine and other places on HF.
-todo: script to do this
-
-## Desktop and GPU models
-Each model-type directory has one or more `.gguf` or `.llamafile` models and a `function.sh` file.
-
-These go in `models/*`:
-- dolphin: `dolphin-2.5-mixtral-8x7b.Q4_K_M.llamafile`
-- llava: `llava-v1.5-7b-q4-main.llamafile`, `llava-v1.5-7b-q4-server.llamafile`
-- mistral: `mistral-7b-instruct-v0.2.Q4_K_M.llamafile`
-
-## RPI5 and other small models
-These go in `models/*`:
-- mistral: `mistral-7b-instruct-v0.2.Q3_K_M.llamafile`
-- mixtral: `mixtral_7bx2_moe.Q3_K_M.gguf`
-- phi: `phi-2.Q5_K_M.llamafile`, `phi-2.Q6_K.llamafile`
-- rocket: `rocket-3b.Q4_K_M.llamafile`
-
 # Scripts and Files
 These files are in [scripts](scripts). You might want to symlink some to your bin directory.
 You can also copy [scripts/env.sh.example](scripts/env.sh.example) to `scripts/env.sh` and edit it to set default values.
@@ -215,15 +183,6 @@ You can also copy [scripts/env.sh.example](scripts/env.sh.example) to `scripts/e
 - nvfree.sh - check your GPU usage
 - codeblock.sh [lang] [cmd] - Pipe to help.sh to wrap output of cmd in a codeblock of type lang.
 - bashblock.sh [cmd] - Pipe to help.sh to wrap output of cmd in a bash-like template.
-
-## images
-These are less developed.
-- image-name.sh - Simple script using LLAVA to geneate image name
-- rename-pictures.sh [adapted from https://gist.github.com/jart/bd2f603aefe6ac8004e6b709223881c0 and included here under Apache 2.0 license]
-- llava-cli.sh 
-
-## internals
-- create-chat-templates.py: wip to statically create models/*/functions.sh prompt processing
 
 # llm.sh Details
 The help and summary scripts invoke `llm.sh`, but you can use it yourself directly as well.
@@ -274,16 +233,13 @@ See [env.sh.example](env.sh.example).
 The script [scripts/llm.sh](scripts/llm.sh) controls almost text-based access OpenAPI inference. 
 
 The [scripts/via.sh](via.sh) CLI tool provides access to server-specific commands, such as listing models and model types.
-Uses Oobabooga/text-generation-webui API to remotely load models in the `--via api` case.
+It uses Oobabooga/text-generation-webui API to remotely load models.
 
 If the server is not local, set the environment variable `VIA_API_CHAT_BASE`, which defaults to `http://localhost:5000`.
 
 You can run `llamafiles` in server mode with [scripts/start-server.sh](scripts/start-server.sh) or by using Oobabooga/text-generation-webui (see #References).
 
 The [scripts/via.sh](via.sh) CLI tool provides access to server-specific commands, such as model loading and unloading.
-
-## Image Usage
-Image pipelines are handled solely by @jartine https://justine.lol/oneliners/ and https://github.com/Mozilla-Ocho/llamafile directly, with a few minor changes copied here for convenience, and are not yet integrated into the LLM.sh.
 
 ## Program Flow
 1. If there are any arguments, `--` or any non-hyphen word, terminate the arguments and start the question. 

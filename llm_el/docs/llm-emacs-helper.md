@@ -5,7 +5,7 @@ llm-emacs-helper.sh - Interface for LLM interaction from Emacs
 
 ## SYNOPSIS
 ```
-llm-emacs-helper.sh use-case model-type via [options] input
+llm-emacs-helper.sh use-case [options] input
 ```
 
 ## DESCRIPTION

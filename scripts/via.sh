@@ -9,7 +9,7 @@ status=0
 [ -z "${IN_LLM_SH_ENV}" ] && [ -f "${SCRIPT_DIR}/env.sh" ] && source "${SCRIPT_DIR}/env.sh"
 
 function usage {
-    echo "usage: $(basename "$0") [--via] [api|cli|--api|--cli] [--get-model-name] [--list-models [ match words ]] [--load-model model-name] [--unload-model] [--list-model-types] [--get-via] [--help]" >> /dev/stderr
+    echo "usage: $(basename "$0") [--get-model-name] [--list-models [ match words ]] [--load-model model-name] [--unload-model] [--help]" >> /dev/stderr
     if [ -n "$1" ];
     then
        echo "       $1" >> /dev/stderr
@@ -19,16 +19,6 @@ function usage {
 
 # fixme: better arg handling
 function main {
-    # first arg or two are optional: [--via] [api|cli|--api|--cli]
-    while true;
-    do
-        case "$1" in
-            --via) shift; ;;
-            --api|--cli|api|cli) VIA="${1#--}"; shift ;;
-            *) break ;;
-        esac
-    done
-
     # Load the functions for specified $VIA
     VIA_FUNCTIONS_PATH="$(realpath "${SCRIPT_DIR}/../via/functions.sh")"
     source "${VIA_FUNCTIONS_PATH}"
@@ -60,13 +50,6 @@ function main {
             --list-models)
                 list_models "${@}"
                 status=$?
-                break ;;
-            --list-model-types)
-                list_model_types
-                status=$?
-                break ;;
-            --get-via)
-                printf "%s\n" "${VIA}"
                 break ;;
             --help)
                 usage ;;

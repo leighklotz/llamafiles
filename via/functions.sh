@@ -7,7 +7,6 @@ umask 077
 # todo: fix the many global variable dependencies in this file
 VIA_DIRECTORY="$(realpath "${SCRIPT_DIR}/../via")"
 VIA_API_FUNCTIONS_PATH="$(realpath "${VIA_DIRECTORY}/api/functions.sh")"
-MODELS_DIRECTORY="$(realpath "${SCRIPT_DIR}/../models")"
 TMPFILES_TO_DELETE=""
 
 # Check if the script is being sourced or directly executed

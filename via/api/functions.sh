@@ -15,10 +15,6 @@ VIA_API_LOAD_MODEL_ENDPOINT="${VIA_API_CHAT_BASE}/v1/internal/model/load"
 VIA_API_UNLOAD_MODEL_ENDPOINT="${VIA_API_CHAT_BASE}/v1/internal/model/unload"
 AUTHORIZATION_PARAMS=()
 
-# LLM_LIB_DIR="$(realpath "${SCRIPT_DIR}/../lib")"
-# LLM_MODELS_DIR="$(realpath "${SCRIPT_DIR}/../models")"
-: "${SEED:=NaN}"
-
 # TODO: sampling order:  CFG -> Penalties -> top_k -> tfs_z -> typical_p -> top_p -> min_p -> temperature
 # todo: Sampling order appears to be a key differentiator for results from llamafile vs ooba but it's ununnvestigagted
 : "${TOP_K:=-20}"
@@ -26,23 +22,7 @@ AUTHORIZATION_PARAMS=()
 : "${MIN_P:-0.1}"
 
 # --grammar-file support is spotty in non-gguf models so default to off
-: "${VIA_API_USE_GRAMMAR:=}"
 
-# fixme: some models support the system role API and some do not.
-# looks like MODEL_MODE must be "instruct" to use
-# system-message; otherwise it's a mix of context, characters,
-# and presets, best avoided for now.
-#
-# todo: query ooba API to find the model behind the api,
-# and add put a new function to each model/*/*functions.sh
-# to determinue USE_SYSTEM_ROLE properly for each model type.
-#
-# workaround: for now use `export USE_SYSTEM_ROLE=1` if you need it.
-# mixtral-7b-instruct-v0.1: no
-# dolphin-2.6-mistral-7b-dpo: yes
-# dolphin-2.7-mixtral: yes
-USE_SYSTEM_ROLE="${USE_SYSTEM_ROLE:-}"
-REASONING_EFFORT="${REASONING_EFFORT:-low}"
 
 # auto_max_new_tokens seems to work only with HF loaders
 # max_tokens should be set to lower if the model has low context (i.e. 2k)
@@ -77,7 +57,6 @@ else
 fi
 
 SYSTEM_ROLE_TEMPLATE="{
-    model: \$model_name,
     messages: [
       {
         role: \"system\",
@@ -94,7 +73,6 @@ SYSTEM_ROLE_TEMPLATE="{
 # sampling order:  CFG -> Penalties -> top_k -> tfs_z -> typical_p -> top_p -> min_p -> temperature 
 
 NO_SYSTEM_ROLE_TEMPLATE="{
-    model: \$model_name,
     messages: [
       {
         role: \"user\",
@@ -116,27 +94,6 @@ function prepare_prompt {
     fi
 }
 
-# fixme: does not accept options yet
-# fixme: other env are pre-calculated; try to move them here
-# fixme: these are fixed and not variable
-# fixme: these parameters are set in model loading and cannot be accomodated here
-# ${N_PREDICT} ${BATCH_SIZE}
-# fixme: what do do about this parameter for API-bound fields?
-# ${LLM_ADDITIONAL_ARGS}
-function via_set_options {
-    repeat_penalty="1"
-    penalize_nl="false"
-    MODEL_MODE="${MODEL_MODE:-instruct}"
-}
-
-
-# todo: make this be run only on mixtral, use as test case to separate api impl from model quirks
-# fix mistral "\_" and "\*"
-# https://www.reddit.com/r/LocalLLaMA/comments/1agrddy/has_anyone_encountered_mistrals_tendency_to_use/
-function via_api_mistral_output_fixup {
-    sed -e 's/\\_/_/g' | sed -e 's/\\\*/*/g'
-}
-
 function string_trim() {
     local s="$1"
     # Remove leading whitespace
@@ -148,13 +105,13 @@ function string_trim() {
 
 # todo: make common with cli_perform_inference by splitting out all
 #       non-inference settings to the prepare_model
-# via_api_perform_inference "$MODEL_TYPE" "$INFERENCE_MODE" "$SYSTEM_MESSAGE" "$QUESTION" "$GRAMMAR_FILE"
+# via_api_perform_inference "$INFERENCE_MODE" "$SYSTEM_MESSAGE" "$QUESTION" "$GRAMMAR_FILE"
 # todo: so many files and strings back and forth
 function via_api_perform_inference() {
-    local model_type="$1" inference_mode="$2" system_message="$3" question="$4" grammar_file="$5"
-    local temperature="$6" repetition_penalty="$7" penalize_nl="$8" n_predict="$9"
+    local inference_mode="$1" system_message="$2" question="$3" grammar_file="$4"
+    local temperature="$5" repetition_penalty="$6" penalize_nl="$7" n_predict="$8"
 
-    if [ -z "$grammar_file" ] || [ -z "${VIA_API_USE_GRAMMAR}" ]; then
+    if [ -z "$grammar_file" ] || [ -z "${USE_GRAMMAR}" ]; then
         grammar_file="/dev/null"
     fi
 
@@ -212,7 +169,6 @@ function via_api_perform_inference() {
               --argjson top_k ${TOP_K:-NaN} \
               --argjson top_p ${TOP_P:-NaN} \
               --argjson min_p ${MIN_P:-NaN} \
-              --arg model_name "${model_type}" \
               --argjson max_new_tokens ${max_new_tokens} \
               --rawfile system_message "${system_message_file}" \
               --rawfile question "${question_file}" \
@@ -251,33 +207,11 @@ function via_api_perform_inference() {
     fi
 
     # Output if we succeeded
-    printf "%s\n" "${output}" | via_api_mistral_output_fixup
+    printf "%s\n" "${output}"
     return $s
 }
 
-function set_model_name {
-    model_name="$(get_model_name)"
-    if [ "$model_name" == "None" ];
-    then
-        log_and_exit 2 "No model loaded via --api"
-    fi
-    log_info "Setting model_name to ${model_name}"
-}
-
-function init_via_model {
-    # could verify that there is a model loaded
-    true
-}
-
-function prepare_model {
-    set_model_name
-    prepare_prompt
-}
-
 function get_model_name {
-    # curl prints
-    # `{"model_name":"LoneStriker_dolphin-2.7-mixtral-8x7b-3.75bpw-h6-exl2","lora_names":[]}`
-    # set -euo pipefail
     (curl -s "${VIA_API_MODEL_INFO_ENDPOINT}" "${AUTHORIZATION_PARAMS[@]}" | jq -e -r .model_name 2> /dev/null) | sed -e "s/null/${MODEL_NAME_OVERRIDE:-None}/"
 }
 
@@ -300,10 +234,6 @@ function list_models {
 
         list_models | grep -i $grep_pattern
     fi
-}
-
-function list_model_types() {
-    echo any
 }
 
 ## fixme: overloads models/function.sh, which is really via/llamafile/function.sh

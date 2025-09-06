@@ -2,7 +2,7 @@
 
 SCRIPT_DIR="$(dirname "$(realpath "${BASH_SOURCE}")")"
 
-USAGE='[-m|--model-type model-type] [--stdin|--interactive|-i] [--raw-input] \
+USAGE='[--stdin|--interactive|-i] [--raw-input] \
 [--process-question-escapes|-e] [--temperature temp] [--n-predict n] \
 [--grammar-file file.gbnf] [--info] [--verbose|-v] [--debug] [--noerror] [--] QUESTION*'
 
@@ -25,7 +25,6 @@ function parse_args() {
                     exit 0
                     ;;
                 # --via removed
-                --model-type|-m) shift; MODEL_TYPE="$1" ;;
                 --inference-mode) shift; INFERENCE_MODE="$1" ;;
                 # Logging
                 --info) INFO=1 ;;
@@ -66,19 +65,24 @@ parse_args "${@}"
 ##############################################################################
 #  Process flags and environment variables
 ##############################################################################
-: "${MODEL_TYPE:=mistral}"
-: "${INFERENCE_MODE:=chat-instruct}"
-# Logging
+# Logging options
 : "${INFO:=${VERBOSE}}"
 : "${VERBOSE:=}"
 : "${DEBUG:=}"
 : "${LOG_DISABLE:=--log-disable}"   # use space ' ' to override
 : "${KEEP_PROMPT_TEMP_FILE:=ALL}" # "NONE"|"ERROR"|"ALL"
 # Generation options
+: "${INFERENCE_MODE:=instruct}"
 : "${TEMPERATURE:=}"
 : "${N_PREDICT:=}"
-: "${SYSTEM_MESSAGE:=}"  # default: “Answer the following user question:”
+: "${SYSTEM_MESSAGE:=}"
+: "${USE_GRAMMAR:=}"
 : "${GRAMMAR_FILE:=}"
+: "${SEED:=NaN}"
+: "${REPEAT_PENALTY:=1}"
+: "${PENALIZE_NL:=false}"
+: "${USE_SYSTEM_ROLE:=}"
+: "${REASONING_EFFORT:=low}"
 
 ##############################################################################
 #  Load shared functions
@@ -91,9 +95,8 @@ source "${FUNCTIONS_PATH}"
 #  Perform Inference
 ##############################################################################
 function perform_inference {
-    via_set_options
-    via_api_perform_inference "${MODEL_TYPE}" "${INFERENCE_MODE}" "${SYSTEM_MESSAGE}" \
-        "${PROMPT}" "${GRAMMAR_FILE}" "${TEMPERATURE}" "${repeat_penalty}" "${penalize_nl}" "${N_PREDICT}"
+    via_api_perform_inference "${INFERENCE_MODE}" "${SYSTEM_MESSAGE}" \
+        "${PROMPT}" "${GRAMMAR_FILE}" "${TEMPERATURE}" "${REPEAT_PENALTY}" "${PENALIZE_NL}" "${N_PREDICT}"
     status=$?
     return $status
 }
@@ -121,16 +124,10 @@ function process_stdin() {
 }
 
 
-###
+##############################################################################
 ### Debug and log
-###
-
+##############################################################################
 function set_verbose_debug {
-    # Set verbose and debug last
-    if [ -n "${DEBUG}" ] || [ -n "${INFO}" ] || [ -n "${VERBOSE}" ];
-    then
-        log_info "Parameters: ngl=${NGL} context_length=${CONTEXT_LENGTH} est_len=${PROMPT_LENGTH_EST}"
-    fi
     if [ -n "${DEBUG}" ];
     then
         set -x
@@ -161,8 +158,7 @@ process_question_escapes
 log_info "process_stdin"
 process_stdin
 log_info "process_stdin done"
-prepare_model
-log_info "MODEL_PATH=${MODEL_PATH}"
+prepare_prompt
 set_verbose_debug
 log_info "perform_inference"
 perform_inference; STATUS=$?
@@ -170,4 +166,3 @@ log_info "perform_inference done"
 report_success_or_fail $STATUS
 cleanup_temp_files $STATUS
 exit $STATUS
-
