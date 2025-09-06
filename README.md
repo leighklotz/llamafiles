@@ -237,7 +237,7 @@ It uses Oobabooga/text-generation-webui API to remotely load models.
 
 If the server is not local, set the environment variable `VIA_API_CHAT_BASE`, which defaults to `http://localhost:5000`.
 
-You can run `llamafiles` in server mode with [scripts/start-server.sh](scripts/start-server.sh) or by using Oobabooga/text-generation-webui (see #References).
+You can run `llama.cpp` in server mode with [scripts/start-server.sh](scripts/start-server.sh) or by using Oobabooga/text-generation-webui (see #References).
 
 The [scripts/via.sh](via.sh) CLI tool provides access to server-specific commands, such as model loading and unloading.
 

@@ -1,5 +1,12 @@
 #!/bin/bash -e
 
+# Iterates through all files tracked by git in the current repository
+# and prints their contents to standard output,
+# formatted for use in Markdown documents.
+# Skips binary files.
+#
+# `./scripts/repofiles.sh`
+
 SCRIPT_DIR="$(dirname "$(realpath "${BASH_SOURCE[0]}")")"
 
 VERBOSE=""
@@ -29,5 +36,3 @@ done
 
 # find sometimes gives weird exit codes
 exit 0
-
-
