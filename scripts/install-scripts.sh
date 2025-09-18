@@ -1,6 +1,7 @@
 #!/bin/bash
 
-# This script symlinks useful shell scripts to a destination directory.
+# This script symlinks useful shell scripts to a destination directory
+# It tries to add the destination directory to your .bashrc
 # e.g.: ./install-scripts.sh ~/wip/llamafiles/bin
 # It also optionally sets up a python virtual environment for 'downlink.py'.
 
@@ -81,8 +82,14 @@ do
     lnf "${SCRIPT_DIR}/${file}" "${DEST_DIR}/${file}"
 done
 
-# Install bash aliases
-# --- install aliases into ~/.bash.d; only touch ~/.bashrc if we create ~/.bash.d ---
+# Add $DEST_DIR to PATH in .bashrc if it's not already there
+if ! grep -q "$DEST_DIR" ~/.bashrc; then
+  echo "* Adding $DEST_DIR to PATH in ~/.bashrc"
+  echo "export PATH=\"$DEST_DIR:\$PATH\"" >> ~/.bashrc
+fi
+
+# Install aliases into ~/.bash.d
+# Add support for ~/.bash.d to ~/.bashrc if we created ~/.bash.d
 if [[ ! -d "$BASH_D" ]]; then
   mkdir -p "$BASH_D"
   echo "* Created $BASH_D"
