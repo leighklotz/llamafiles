@@ -1,12 +1,13 @@
 #!/bin/bash
 
 # This script symlinks useful shell scripts to a destination directory.
+# e.g.: ./install-scripts.sh ~/wip/llamafiles/bin
 # It also optionally sets up a python virtual environment for 'downlink.py'.
 
 SCRIPT_DIR="$(dirname "$(realpath "${BASH_SOURCE}")")"
 
-FILES="bashblock.sh codeblock.sh help-commit.sh machelp.sh manhelp.sh nvfree.sh onsubnet.sh peas.sh repofiles.sh scuttle.sh summarize-directory-files.sh summarize.sh systype.sh unfence.sh via.sh"
-SH_FILES="ask.sh help.sh write.sh"
+FILES="ask.sh bashblock.sh codeblock.sh help-commit.sh machelp.sh manhelp.sh nvfree.sh onsubnet.sh peas.sh repofiles.sh scuttle.sh summarize-directory-files.sh summarize.sh systype.sh unfence.sh via.sh"
+SH_FILES="help.sh write.sh"
 
 DEST_DIR=""
 DOWNLINK_MODE=false
@@ -68,6 +69,8 @@ function lnf {
     fi
 }
 
+mkdir -p "${DEST_DIR}"
+
 for file in ${FILES}
 do
     lnf "${SCRIPT_DIR}/${file}" "${DEST_DIR}/${file%.sh}"
@@ -80,8 +83,6 @@ done
 
 # Install bash aliases
 # --- install aliases into ~/.bash.d; only touch ~/.bashrc if we create ~/.bash.d ---
-
-
 if [[ ! -d "$BASH_D" ]]; then
   mkdir -p "$BASH_D"
   echo "* Created $BASH_D"
