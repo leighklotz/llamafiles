@@ -5,11 +5,14 @@
 
 SCRIPT_DIR="$(dirname "$(realpath "${BASH_SOURCE}")")"
 
-FILES="ask.sh bashblock.sh codeblock.sh help-commit.sh machelp.sh manhelp.sh nvfree.sh onsubnet.sh peas.sh repofiles.sh scuttle.sh summarize-directory-files.sh summarize.sh systype.sh unfence.sh via.sh"
-SH_FILES="help.sh write.sh"
+FILES="bashblock.sh codeblock.sh help-commit.sh machelp.sh manhelp.sh nvfree.sh onsubnet.sh peas.sh repofiles.sh scuttle.sh summarize-directory-files.sh summarize.sh systype.sh unfence.sh via.sh"
+SH_FILES="ask.sh help.sh write.sh"
 
 DEST_DIR=""
 DOWNLINK_MODE=false
+
+BASH_D="$HOME/.bash.d"
+BASHRC="$HOME/.bashrc"
 
 usage() {
   echo "Usage: $0 [--downlink] <dest-dir>"
@@ -75,7 +78,21 @@ do
     lnf "${SCRIPT_DIR}/${file}" "${DEST_DIR}/${file}"
 done
 
-# Install python .venv for downlink.py
+# Install bash aliases
+# --- install aliases into ~/.bash.d; only touch ~/.bashrc if we create ~/.bash.d ---
+
+
+if [[ ! -d "$BASH_D" ]]; then
+  mkdir -p "$BASH_D"
+  echo "* Created $BASH_D"
+  source_line='for f in "$HOME"/.bash.d/*.sh; do [ -r "$f" ] && . "$f"; done'
+  printf '\n# Source per-user scripts in ~/.bash.d\n%s\n' "$source_line" >> "$BASHRC"
+  echo "* Appended ~/.bash.d sourcing line to $BASHRC"
+fi
+
+lnf "${SCRIPT_DIR}/llamafiles-aliases.sh" "$BASH_D/llamafiles-aliases.sh"
+
+# # Install python .venv for downlink.py
 if $DOWNLINK_MODE; then
     # install in script dir, not dest_dir, for now
     echo "* Installing downlink dependencies in ${SCRIPT_DIR}/.venv"
