@@ -1,4 +1,4 @@
-klotz@tensor:~/wip/solon$ nvidia-smi |help.sh explain
+klotz@tensor:~/wip/solon$ nvidia-smi |help explain
 Okay, let's break down what this `nvidia-smi` output is telling us. This is a snapshot of your NVIDIA GPU's status as of May 2nd, 2025. Here’s a detailed explanation:
 
 *   **`NVIDIA-SMI 560.35.05`**:  This indicates you're using NVIDIA System Management Interface version 560.35.05. This is the tool used to query and manage NVIDIA GPUs.

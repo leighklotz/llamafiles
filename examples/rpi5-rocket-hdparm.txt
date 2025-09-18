@@ -1,4 +1,4 @@
-klotz@rpi5:~/wip/llamafiles/examples $ (systype; code hdparm sudo hdparm -t --direct /dev/nvme0n1) | help.sh --verbose -m rocket are these good results for nvme drive on rpi5 with pcie_x1 gen=3
+klotz@rpi5:~/wip/llamafiles/examples $ (systype; code hdparm sudo hdparm -t --direct /dev/nvme0n1) | help --verbose -m rocket are these good results for nvme drive on rpi5 with pcie_x1 gen=3
 * PROMPT_LENGTH_EST=180
 * Model /home/klotz/wip/llamafiles/models/rocket-3b.Q4_K_M.llamafile
 * Paramters: ngl=-ngl 0 context_length=-c 2048 est_len=181:

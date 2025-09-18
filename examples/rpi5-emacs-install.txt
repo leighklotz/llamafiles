@@ -1,6 +1,6 @@
 mistral-7b-instruct-v0.2.Q3_K_S.llamafile 
 
-klotz@raspberrypi:~/dotfiles $ ~/wip/llamafiles/help.sh -m mistral raspberry pi 5 emacs installation
+klotz@raspberrypi:~/dotfiles $ ~/wip/llamafiles/help -m mistral raspberry pi 5 emacs installation
 I'm assuming you meant Raspberry Pi 5's Emacs installation since there isn't a Raspberry Pi 5 model yet. Here's a step-by-step guide to install Emacs on a Raspberry Pi using the terminal.
 
 1. Update your Raspberry Pi system:

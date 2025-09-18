@@ -2,7 +2,7 @@ klotz@tensor:~$ function whatsty() {
  screen -S "$1" -X hardcopy "/tmp/hc.$$"; cat "/tmp/hc.$$"; rm "/tmp/hc.$$"
 }
 
-klotz@tensor:~$ whatsty solon | help.sh 'What is going on in this Linux `screen`'
+klotz@tensor:~$ whatsty solon | help 'What is going on in this Linux `screen`'
 Based on the output you've provided, it looks like you have a Linux `screen` session running with two main processes or tasks: `solon` and `text-generation-webui`. Here's a breakdown of what's happening:
 
 1. **`solon` Process:**
@@ -25,7 +25,7 @@ Based on the output you've provided, it looks like you have a Linux `screen` ses
 
 Overall, it seems like you are running two processes related to text generation and processing in a `screen` session, with detailed logs and performance metrics being outputted. If you need more specific information or help with any particular aspect, feel free to ask!
 
-klotz@tensor:~$ whatsty nvtop | help.sh 'What is going on in this Linux `screen`'
+klotz@tensor:~$ whatsty nvtop | help 'What is going on in this Linux `screen`'
 Based on the provided output, here's what's happening in your Linux `screen` session:
 
 1. **GPU Information**:

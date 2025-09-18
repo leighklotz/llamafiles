@@ -1,4 +1,4 @@
-klotz@tensor:~/wip/llamafile$ help.sh -m mixtral "What's the difference between ISO 8601 and RFC 3339 Date Formats?"
+klotz@tensor:~/wip/llamafile$ help -m mixtral "What's the difference between ISO 8601 and RFC 3339 Date Formats?"
  ISO 8601 and RFC 3339 are both standardized date and time formats, and they are very similar, but there are some differences between them.
 
 ISO 8601 is an international standard covering the exchange of date and time-related data, produced by the International Organization for Standardization (ISO). It was issued in 1988 and last updated in 2019.

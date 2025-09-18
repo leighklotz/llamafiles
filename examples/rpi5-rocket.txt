@@ -1,4 +1,4 @@
-klotz@raspberrypi:~/wip/llamafiles $ man less | grep -i color | ./help.sh --stdin -m rocket 'how do I enable ANSI colors in the input. Man page follows'
+klotz@raspberrypi:~/wip/llamafiles $ man less | grep -i color | ./help --stdin -m rocket 'how do I enable ANSI colors in the input. Man page follows'
 To enable ANSI colors in the input, you can use the `--color` or `-D` options in your command line interface. These options change the color of different parts of the displayed text. 
 
 The `--color` option works as follows:

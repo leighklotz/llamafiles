@@ -1,6 +1,6 @@
 This example fails to put the --exclude options first, uses the odd '*' instead of '.', and produces the output in the input directory.
 
-    $ help.sh  'i want to tar up the current directory $(pwd) but skip any `*.gguf` or `*.llamafile` files'
+    $ help  'i want to tar up the current directory $(pwd) but skip any `*.gguf` or `*.llamafile` files'
     You can achieve this by using the `tar` command with the `--exclude` option. Here's an example of how to do it:
 
     ```bash

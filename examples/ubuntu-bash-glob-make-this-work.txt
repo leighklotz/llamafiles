@@ -1,4 +1,4 @@
-$ help.sh -i make this work for me
+$ help -i make this work for me
 Give input followed by Ctrl-D:
     if [ -x "$file" ] || [ "$file" == "*.gguf" ] ; then
       [ $VERBOSE ] && echo "* Accepting Model $file" >> /dev/stderr

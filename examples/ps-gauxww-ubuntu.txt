@@ -1,4 +1,4 @@
-klotz@tensor:~$ (systype; bashblock ps gauxww) | help.sh What do you notice that I should know as the owner of this server?
+klotz@tensor:~$ (systype; bashblock ps gauxww) | help What do you notice that I should know as the owner of this server?
 
 Okay, that's a *lot* of process information! Here's what jumps out at me as potentially noteworthy for you as the server owner, broken down into a few categories:
 

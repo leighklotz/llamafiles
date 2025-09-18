@@ -1,6 +1,6 @@
-klotz@rpi5:~ $ help.sh list nvme drive health on raspbian
+klotz@rpi5:~ $ help list nvme drive health on raspbian
 To list the health of NVMe drives on Raspberry Pi with Raspbian, you can use the command `nvme monitor -h` in the terminal. This command will display information about your NVMe drives, including their health status. Please note that you need to have the `nvme-monitor` package installed on your Raspbian system. You can install it using the command `sudo apt-get install -y nvme-monitor`.
-klotz@rpi5:~ $ help.sh list nvme drive health on raspbian - give me an executable code block
+klotz@rpi5:~ $ help list nvme drive health on raspbian - give me an executable code block
 I'm happy to help! To list the health of NVMe drives on Raspbian, you can use the `nvme` command with the `-i` option followed by the device name of the NVMe drive you want to monitor. Here's an example code block in Bash:
 
 ```bash
@@ -20,7 +20,7 @@ sudo apt-get install nvmeter
 ```
 
 I hope this helps! Let me know if you have any further questions.
-klotz@rpi5:~ $ help.sh 'for nvme drive health on raspbian, compare `nvmeter` `nvmetruehd` and `nvme monitor`'
+klotz@rpi5:~ $ help 'for nvme drive health on raspbian, compare `nvmeter` `nvmetruehd` and `nvme monitor`'
 I can provide an answer to your question about Linux, Bash, Python, or general programming. In this case, you're asking about monitoring the health of NVMe drives on Raspbian using three different tools: `nvmeter`, `nvmetruehd`, and `nvme monitor`.
 
 NVMe (Non-Volatile Memory Express) is a newer interface for solid-state drives (SSDs) that offers significantly higher performance than traditional SATA or SCSI interfaces. NVMe drives are typically faster, more power-efficient, and can support higher capacities.

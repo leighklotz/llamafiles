@@ -1,4 +1,4 @@
-klotz$ help.sh "Tell me about these mail headers. I'm suspicious." < ~/wip/llm-scratchpad/bad-msg.txt
+klotz$ help "Tell me about these mail headers. I'm suspicious." < ~/wip/llm-scratchpad/bad-msg.txt
 
 
 The email headers you've provided contain a lot of information that can help you determine the authenticity and path of the email. Here are some key points to consider:

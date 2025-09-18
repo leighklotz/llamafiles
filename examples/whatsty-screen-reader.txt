@@ -1,3 +1,3 @@
-klotz@tensor:~$ whatsty solon|help.sh is the download done
+klotz@tensor:~$ whatsty solon|help is the download done
 Based on the provided output, the download of the model is still in progress as it indicates that the download is at 25%. The download will continue until the entire model file "mistralai_Mistral-Small-3.1-24B-Instruct-2503-Q6_K_L.gguf" is downloaded. The download should be complete once the progress bar reaches 100%.
 klotz@tensor:~$

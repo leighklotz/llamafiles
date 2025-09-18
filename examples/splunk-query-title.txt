@@ -1,16 +1,16 @@
-$ cat spl-question-license-usage.txt | help.sh answer
+$ cat spl-question-license-usage.txt | help answer
 This query appears to be a Splunk search command used to analyze and visualize the volume of data indexed by Splunk over the past week, specifically focusing on license usage logs. It calculates the volume of indexed data in megabytes (MB) and charts this information over time for different indexes (`idx`).
 
 Given its functionality, a suitable name for this query could be **"Weekly Index Volume Report"**. This name reflects that the query is used to generate a report on the volume of data indexed by Splunk over a weekly period, which can be crucial for monitoring license usage and managing data volume effectively.
 
-$ cat spl-question-license-usage.txt | help.sh answer in json object with field title
+$ cat spl-question-license-usage.txt | help answer in json object with field title
 ```json
 {
   "title": "Splunk Query for Weekly License Usage Monitoring"
 }
 ```
 
-$ help.sh answer in json:  "$(cat spl-question-license-usage.txt )"
+$ help answer in json:  "$(cat spl-question-license-usage.txt )"
 ```json
 {
   "query_name": "Weekly License Usage Volume Report by Index",
@@ -21,7 +21,7 @@ $ help.sh answer in json:  "$(cat spl-question-license-usage.txt )"
 $ cat spl-question-license-usage.txt 
 Please name this query, considering the task it performs and what it might be used for: ```index=_internal source=*license_usage.log type="Usage" splunk_server=* earliest=-1w@d | eval Date=strftime(_time, "%Y/%m/%d") | eventstats sum(b) as volume by idx, Date | eval MB=round(volume/1024/1024,5)| timechart first(MB) AS volume by idx```
 
-$ help.sh  "$(cat spl-question-license-usage.txt )"
+$ help  "$(cat spl-question-license-usage.txt )"
 This query appears to be a Splunk search command. Given its functionality, which involves aggregating and charting data related to license usage over a specific time period, a suitable name for this query could be:
 
 **"Weekly License Usage Volume Report"**

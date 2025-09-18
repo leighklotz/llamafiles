@@ -34,7 +34,7 @@ $ system_profiler -detailLevel mini -json SPDisplaysDataType
     }
   ]
 }
-$ system_profiler -detailLevel mini -json SPDisplaysDataType | help.sh jq extract spci_model
+$ system_profiler -detailLevel mini -json SPDisplaysDataType | help jq extract spci_model
 1. Extract `spci_model` using `jq`:
 
 ```bash

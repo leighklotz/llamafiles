@@ -1,4 +1,4 @@
-klotz@raspberrypi:~/wip/llamafiles $ ./help.sh -m rocket "is there a bash or other Linux program to display load average as a sparkline in the terminal?"
+klotz@raspberrypi:~/wip/llamafiles $ ./help -m rocket "is there a bash or other Linux program to display load average as a sparkline in the terminal?"
 , as of my knowledge, there isn't a built-in bash or Linux program to directly display load average as a sparkline in the terminal. However, you can use a combination of tools and scripts to achieve this.
 
 Here's a step-by-step guide on how to do it:

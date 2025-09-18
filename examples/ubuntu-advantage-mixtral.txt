@@ -7,7 +7,7 @@ Get another security update through Ubuntu Pro with 'esm-apps' enabled:
   libcjson1
 Learn more about Ubuntu Pro at https://ubuntu.com/pro
 0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
-$ ( systype; bashblock sudo apt upgrade 2>&1 ) | help.sh how can i get the esm apps enabled
+$ ( systype; bashblock sudo apt upgrade 2>&1 ) | help how can i get the esm apps enabled
  To get ESM (Enterprise Security Module) apps enabled on your Ubuntu 22.04 system, you need to follow these steps:
 
 1. Subscribe to Ubuntu Pro: Ubuntu Pro is a paid subscription service from Canonical that provides additional security and enterprise features, including ESM apps. You can sign up for a free trial or purchase a subscription from the Ubuntu Pro website.

@@ -1,7 +1,7 @@
 $ via --api --get-model-name
 turboderp_command-r-v01-35B-exl2_3.75bpw
 
-$ systype | help.sh how do I set default timezone to San Francisco on this ubuntu system via cli
+$ systype | help how do I set default timezone to San Francisco on this ubuntu system via cli
 You can set the timezone by using the `timedatectl` command. Here's how you can set the timezone to America/Los_Angeles which is San Francisco's timezone:
 ```bash
 sudo timedatectl set-timezone America/Los_Angeles
@@ -16,7 +16,7 @@ For America, select 5 for New York (which is in the same timezone as San Francis
 After setting the timezone, the system files will be updated, but you might need to reboot the system for some applications to pick up the changes.
 $ 
 
-klotz@nuc1:~$ systype | help.sh how do I set default timezone on this ubuntu system via cli.
+klotz@nuc1:~$ systype | help how do I set default timezone on this ubuntu system via cli.
 You can use the `timedatectl` command to set the timezone. Here's how you can set the timezone to Asia/Jerusalem:
 ```bash
 sudo timedatectl set-timezone Asia/Jerusalem
@@ -30,9 +30,9 @@ Africa/Abidjan
 ... 550 lines omitted ...
 PRC
 
-klotz@nuc1:~$ timedatectl list-timezones |help.sh "Which timezone for San Francisco?"
+klotz@nuc1:~$ timedatectl list-timezones |help "Which timezone for San Francisco?"
 The timezone for San Francisco is America/Los_Angeles.
-klotz@nuc1:~$ systype | help.sh how do I set default timezone on this ubuntu system via cli.
+klotz@nuc1:~$ systype | help how do I set default timezone on this ubuntu system via cli.
 You can set the default timezone on your Ubuntu system via CLI by using the `timedatectl` command, which is a utility for controlling the system time and date on Linux.
 
 To see the current system timezone, you can run:

@@ -39,4 +39,4 @@
 - [Ubuntu Advantage ESM Apps Enablement](ubuntu-advantage-mixtral.txt): Learn how to get the esm-apps enabled for additional security updates.
 - [Upgrade Required Packages](apt-held-back.txt): Packages that need to be upgraded but are being held back.
 - [Using 24-bit Color in iTerm2 for Emacs](mac-iterm2-emacs.txt): Configure iTerm2 and Emacs for 24-bit color support.
-- [Manhelp](manhelp-ack-egg.txt): convenient script to do `man | help.sh`
+- [Manhelp](manhelp-ack-egg.txt): convenient script to do `man | help`
