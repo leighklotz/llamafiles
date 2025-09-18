@@ -7,7 +7,7 @@ This repository provides an LLM Help CLI for Linux and Mac systems to provide he
 ```bash
 $ via --get-model-name
 gemma-3-27b-it-Q4_K_M.gguf
-$ help.sh what do you do
+$ help what do you do
 As an AI bot, I'm designed to be a versatile assistant! I can help with a lot of different things. Here’s a breakdown of what I do:
 
 * **Answer Questions:** I can provide information on a wide range of topics, drawing from a massive knowledge base. Just ask!
@@ -42,7 +42,7 @@ $
 ## Brief Usage examples
 Examples can be found below and in the [examples](examples) directory.
 
-## help.sh usage and examples
+## help usage and examples
 USAGE="[--stdin|--interactive|-i] [--temperature temp] [--n-predict n] [--debug] [--verbose] [--] QUESTION*"
 
 Uses question words and stdin, if any, to create the model prompt.
@@ -55,22 +55,22 @@ Uses question words and stdin, if any, to create the model prompt.
 
 Below are a few examples. More are in [examples](examples).
 
-### help.sh Bash Coding Example
+### help Bash Coding Example
 ```
-$ help.sh "split bash argument array into left and right with double hyphen as the separator using special bash builtin functions or operators as needed "
-```
-
-### help.sh General Linux Example
-```
-$ help.sh what is my ip address
+$ help "split bash argument array into left and right with double hyphen as the separator using special bash builtin functions or operators as needed "
 ```
 
-### help.sh JQ Example
+### help General Linux Example
+```
+$ help what is my ip address
+```
+
+### help JQ Example
 This example takes a live JSON input and shows how to extract a slightly tricky value. As a bonus, the model gives the value of the field.
 
 ```
 $ ./llama.cpp/gguf-py/scripts/gguf-dump.py ./models/dolphin/dolphin-2.7-mixtral-8x7b.Q4_K_M.gguf --no-tensors --json | \
-   help.sh 'give me a jq cli to get the value of the named `llama.context_length` (note the dot is part of the field name) in the following JSON:'
+   help 'give me a jq cli to get the value of the named `llama.context_length` (note the dot is part of the field name) in the following JSON:'
 
 To get the value of `llama.context_length` using jq, you can use the following command:
 
@@ -89,12 +89,12 @@ $ ./llama.cpp/gguf-py/scripts/gguf-dump.py ./models/dolphin/dolphin-2.7-mixtral-
 $
 ```
 
-### help.sh LSHW Example
+### help LSHW Example
 
 ```
 sudo lshw | wc 
     727    2411   31214
-$ sudo lshw | help.sh 'Summarize the following lshw output:'
+$ sudo lshw | help 'Summarize the following lshw output:'
 
 	This output shows information about the hardware components of a
 	computer system, including the motherboard, CPU, memory, storage
@@ -109,11 +109,11 @@ $ sudo lshw | help.sh 'Summarize the following lshw output:'
 	USB ports, audio devices, and an SMBus controller.  [end of text]
 ```
 
-### help.sh Raspberry Pi 5 lspci with Rocket model
+### help Raspberry Pi 5 lspci with Rocket model
 ```
-klotz@rpi5:~ $ help.sh lspci
+klotz@rpi5:~ $ help lspci
 LSPCI, or List PCI Devices, is a command used in Linux to display information about all the PCI devices connected to the system's motherboard. It provides details such as device vendor and product IDs, memory sizes, and supported devices. This command can be executed in the terminal of a Linux system with root privileges. For example, to list all PCI devices, you would type `lspci` in the terminal and press Enter. The output will display the information about each device.
-klotz@rpi5:~ $ lspci | help.sh "explain this lspci output"
+klotz@rpi5:~ $ lspci | help "explain this lspci output"
 Sure, I can help you understand the LSPCI (List PCI Devices) output you provided.
 
 LSPCI is a command in Linux that lists all PCI devices in the system. The output you provided is in a format that's easy to read but not very human-friendly. Here's a breakdown of what each line means:
@@ -147,7 +147,7 @@ help-commit --staged
 
 ## write.sh examples
 The `write.sh` command is similar in spirit to the iTerm2 AI command feature which https://gitlab.com/gnachman/iterm2/-/issues/11475
-But it is not hardwared to OpenAI and does not execute the code. It differs from `help.sh` only in the default prompt.
+But it is not hardwared to OpenAI and does not execute the code. It differs from `help` only in the default prompt.
 
 ```bash
 $ write.sh show git commit message for 70eab9e
@@ -171,18 +171,21 @@ You can also copy [scripts/env.sh.example](scripts/env.sh.example) to `scripts/e
 - llm.sh - the base script that others call
 
 ## user programs
-- help.sh - CLI for Linux help - cann't be shortened to 'help' in bash
-- ask.sh - Like 'help.sh' but not not customized to Linux help - can be shortened to 'ask' in bash
+- help - CLI for Linux help - use `builtin help` to access the built-in Bash help function instead.
+- ask - Like `help` but not not customized to Linux help
+- response - prints the last response from `help` or `ask`, from the environment variable `LLM_RESPONSE`.
 - machelp.sh - CLI for Mac help
 - summarize.sh - CLI to summarize a hyperlink / use '-' for stdin
 - help-commit.sh - CLI to run `git diff` and produce a commit message
 - summarize-directory-files.sh - summarize directory files as markdown
 
 ## user utilities
-- systype.sh - Pipe to help.sh to provide context for distro-specific questions
+- systype.sh - Pipe to `help` to provide context for distro-specific questions
 - nvfree.sh - check your GPU usage
-- codeblock.sh [lang] [cmd] - Pipe to help.sh to wrap output of cmd in a codeblock of type lang.
-- bashblock.sh [cmd] - Pipe to help.sh to wrap output of cmd in a bash-like template.
+- codeblock.sh [lang] [cmd] - Pipe to `help` to wrap output of cmd in a codeblock of type lang.
+- bashblock.sh [cmd] - Pipe to `help` to wrap output of cmd in a bash-like template.
+- unfence - Pipe response to unfence to extract content, usually code, between triple-backquotes.
+
 
 # llm.sh Details
 The help and summary scripts invoke `llm.sh`, but you can use it yourself directly as well.
@@ -204,11 +207,11 @@ In CLI prompt, be sure to use apostrophe quotes if your prompt contains backquot
 
 For example, this is good:
 ```bash
-$ help.sh 'How can I use the `yes` command in bash?'
+$ help 'How can I use the `yes` command in bash?'
 ```
 but this is bad:
 ```bash
-$ help.sh "How can I use the `yes` command in bash?"
+$ help "How can I use the `yes` command in bash?"
 ```
 
 ## Environment Variables
