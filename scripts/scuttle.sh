@@ -116,5 +116,5 @@ SCUTTLE_POST_PROMPT="Read the above web page article from ${LINK} and ignore web
 
 ( printf "# Text of link %s\n" "${LINK}"; "${FETCHER_COMMAND}" "${LINK}" | ${CAPTURE_COMMAND}; \
   printf "\n# Instructions\n%b\n%b\n" "${SCUTTLE_POST_PROMPT}" "${POST_PROMPT_ARG}" ) | \
-    "${SCRIPT_DIR}/llm.sh" --long ${GRAMMAR_FLAG} ${ARGS} "${LINKS_PRE_PROMPT}" | \
+    "${SCRIPT_DIR}/llm.sh" ${GRAMMAR_FLAG} ${ARGS} "${LINKS_PRE_PROMPT}" | \
     postprocess
