@@ -40,6 +40,7 @@ while [[ $# -gt 0 ]]; do
     *)
       if [ -z "$DEST_DIR" ]; then
         DEST_DIR="$1"
+        DEST_DIR="$(realpath "$1")"
       else
         echo "Error: Too many arguments."
         usage
