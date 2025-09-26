@@ -15,14 +15,12 @@ VIA_API_LOAD_MODEL_ENDPOINT="${VIA_API_CHAT_BASE}/v1/internal/model/load"
 VIA_API_UNLOAD_MODEL_ENDPOINT="${VIA_API_CHAT_BASE}/v1/internal/model/unload"
 AUTHORIZATION_PARAMS=()
 
-# TODO: sampling order:  CFG -> Penalties -> top_k -> tfs_z -> typical_p -> top_p -> min_p -> temperature
-# todo: Sampling order appears to be a key differentiator for results from llamafile vs ooba but it's ununnvestigagted
 : "${TOP_K:=-20}"
 : "${TOP_P:-0.95}"
 : "${MIN_P:-0.1}"
 
 # --grammar-file support is spotty in non-gguf models so default to off
-
+: "${USE_GRAMMAR:-}"
 
 # auto_max_new_tokens seems to work only with HF loaders
 # max_tokens should be set to lower if the model has low context (i.e. 2k)
@@ -31,10 +29,11 @@ AUTHORIZATION_PARAMS=()
 TEMPLATE_SETTINGS="
     temperature: \$temperature,
     seed: \$seed,
-    max_new_tokens: \$max_new_tokens,
-    max_tokens: 4096"
+    max_new_tokens: \$max_new_tokens"
 if [ -n "${OPENAI_API_KEY}" ]; then
     AUTHORIZATION_PARAMS=(-H "Authorization: Bearer ${OPENAI_API_KEY}")
+    TEMPLATE_SETTINGS="${TEMPLATE_SETTINGS},
+        model: \"gpt-5\""
 else
     TEMPLATE_SETTINGS="${TEMPLATE_SETTINGS},
     tools: [],
@@ -71,6 +70,7 @@ SYSTEM_ROLE_TEMPLATE="{
 }"
 
 # sampling order:  CFG -> Penalties -> top_k -> tfs_z -> typical_p -> top_p -> min_p -> temperature 
+# todo: Sampling order appears to be a key differentiator for results from llamafile vs ooba but it's un-investigated
 
 NO_SYSTEM_ROLE_TEMPLATE="{
     messages: [
@@ -119,11 +119,10 @@ function via_api_perform_inference() {
         temperature=null
     fi
 
-    # fixme: not all models support the system role in the API, and there's no way to tell afaik
-    # workaround: if $USE_SYSTEM_ROLE is non-empty, prepend system_message to question
+    # Not all models support the system role in the API, and there's no way to tell
+    # if $USE_SYSTEM_ROLE is empty, prepend system_message to question
     if [ -z "${USE_SYSTEM_ROLE}" ]; then
         TEMPLATE="${NO_SYSTEM_ROLE_TEMPLATE}"
-        #question=$(printf "%s\n%s\n" "${system_message%$'\n'}" "${question}")
         printf -v question "%s\n%s\n" "${system_message%$'\n'}" "${question}"
         system_message=""
     else
@@ -150,8 +149,8 @@ function via_api_perform_inference() {
     log_info "writing question to ${question_file}"
     printf "%s" "$question" >> "${question_file}"
 
-    # hack: Drop empty string, and null parameters. NaN seems to show as null.
-    #       sadly seed must be a number
+    # Drop empty string, and null parameters. NaN seems to show as null.
+    # Seed must be a number
     temperature=${temperature:-NaN}
 
     local max_new_tokens="${n_predict}"
@@ -190,7 +189,7 @@ function via_api_perform_inference() {
     result=$(printf "%s" "${data}" | curl -s "${VIA_API_CHAT_COMPLETIONS_ENDPOINT}" -H 'Content-Type: application/json' "${AUTHORIZATION_PARAMS[@]}" -d @-)
     s=$?
     if [ "$s" -ne 0 ]; then
-        log_and_exit $s "via --api perform inference cannot curl"
+        log_and_exit $s "inference cannot curl"
     fi
 
     if [ -n "${INFO}" ]; then
@@ -236,8 +235,6 @@ function list_models {
     fi
 }
 
-## fixme: overloads models/function.sh, which is really via/llamafile/function.sh
-## and this is really via/api/function.sh.
 function load_model {
     local model_path="$1"
     local data
