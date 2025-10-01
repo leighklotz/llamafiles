@@ -34,7 +34,7 @@ function log_with_icon {
     local icon="$1"
     local message="$2"
     local timestamp="$(date -u +"%Y-%m-%d %H:%M:%S.%3NZ")"
-    printf "%s %s %b\n" "${icon}" "${timestamp}" "${message}" > /dev/stderr
+    printf "%s %s %b\n" "${icon}" "${timestamp}" "${message}" | tee /dev/stdout > /dev/stderr
 }
 
 function log_verbose {
@@ -81,6 +81,6 @@ function log_and_exit {
     local code="$1"
     local message="$2"
     log_with_icon "⛔" "${COLOR_RED}ERROR in ${prog}:${NOCOLOR} ${message}"
-    [ -n "${PRINT_STACK_TRACE}" ] && printf "%s\n" "$(stack_trace "$code")" > /dev/stderr
+    [ -n "${PRINT_STACK_TRACE}" ] && printf "%s\n" "$(stack_trace "$code")" | tee /dev/stdout > /dev/stderr
     [[ "${code}" =~ ^[0-9]+$ ]] && exit "${code}" || exit 1
 }

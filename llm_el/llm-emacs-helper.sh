@@ -19,6 +19,12 @@ fi
 # Usage: llm-emacs-helper.sh use-case [options] input
 # Input can be stdin or a file piped to this script.
 # Example: cat foo.sh | ./llm-emacs-helper.sh ask api mixtral bash "improve this code"
+function usage {
+  echo "Usage: $0 use-case [options] input"
+  echo "  use-case:  One of: rewrite, ask, write, summarize, complete, todo, -h"
+  echo "  options:   -n_predict <tokens> - --raw-input"
+  echo "  input:     The text or code to process (piped or file)."
+}
 
 # Argument parsing with more robust error handling
 if [[ $# -lt 3 ]]; then
@@ -80,14 +86,6 @@ function calculate_comment_prefix {
         c\+\+-mode)   echo "// "  ;;
         *)            echo "// "  ;;
     esac
-}
-
-# Usage function
-function usage {
-  echo "Usage: $0 use-case [options] input"
-  echo "  use-case:  One of: rewrite, ask, write, summarize, complete, todo, -h"
-  echo "  options:   -n_predict <tokens> - --raw-input"
-  echo "  input:     The text or code to process (piped or file)."
 }
 
 # Process the use case and set the system message accordingly.
