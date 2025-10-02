@@ -277,13 +277,13 @@ The user is prompted to select a model name from the list of available models
 returned by the script."
   (interactive)
   (let* ((model-names (with-temp-buffer
-                        (when (call-process llm-via-script-path nil t nil "--api" "--list-models")
+                        (when (call-process llm-via-script-path nil t nil "--list-models")
                           (split-string (buffer-string) "\n" t))))
          (model-name (completing-read "Model: " model-names)))
     (when model-name
       (let ((results
              (with-temp-buffer
-               (call-process llm-via-script-path nil t nil "--api" "--load-model" model-name)
+               (call-process llm-via-script-path nil t nil "--load-model" model-name)
                (split-string (buffer-string) "\n" t))))
         (message "model-name=%s results=%s" model-name results)))))
 
