@@ -22,7 +22,6 @@ function source_functions {
         log_and_exit 3 "* $0: ERROR: source_functions path is empty"
     elif [ -f "${functions_path}" ]; then
         log_verbose "* sourcing ${functions_path}"
-        [ -n "${VERBOSE}" ] && [ -n "${PRINT_STACK_TRACE}" ] && log_verbose "* $0: stack trace:\n%s\n" "$(stack_trace $code)"
         source "${functions_path}"
     elif [ -z "${functions_path}" ]; then
         log_and_exit 3 "* $0: ERROR: functions_path is empty"

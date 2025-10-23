@@ -91,7 +91,7 @@ function postprocess() {
                           remove_code_fence | replace_smart_quotes | extract_output
     fi
     s=$?
-    [ $? != 0 ] && log_error "postprocess"
+    [ $s != 0 ] && log_error "postprocess"
     return $s
 }
 

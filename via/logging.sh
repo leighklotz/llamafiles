@@ -14,8 +14,7 @@ NOCOLOR='\e[0m'
 
 # RWK: https://gist.github.com/akostadinov/33bb2606afe1b334169dfbf202991d36?permalink_comment_id=4962266#gistcomment-4962266
 function stack_trace() {
-    local status_code="${1}"
-    local -a stack=("Stack trace of error code '${status_code}':")
+    local -a stack=("Stack trace:")
     local stack_size=${#FUNCNAME[@]}
     local -i i
     local indent="    "
@@ -63,17 +62,15 @@ function log_info {
 
 function log_warn {
     local prog="$(basename "$0")"
-    local code=$1
-    local message="$2"
-    log_with_icon "⚠️" "${COLOR_YELLOW}WARN ${prog} (${code}):${NOCOLOR} ${message}"
+    local message="$1"
+    log_with_icon "⚠️" "${COLOR_YELLOW}WARN ${prog}:${NOCOLOR} ${message}"
 }
 
 function log_error {
     local prog="$(basename "$0")"
     local message="$1"
-    local code=$?
     log_with_icon "❌" "${COLOR_RED}ERROR in ${prog}:${NOCOLOR} ${message}"
-    [ -n "${PRINT_STACK_TRACE}" ] && printf "%s\n" "$(stack_trace $code)" > /dev/stderr
+    [ -n "${PRINT_STACK_TRACE}" ] && printf "%s\n" "$(stack_trace)" > /dev/stderr
 }
 
 function log_and_exit {
@@ -81,6 +78,6 @@ function log_and_exit {
     local code="$1"
     local message="$2"
     log_with_icon "⛔" "${COLOR_RED}ERROR in ${prog}:${NOCOLOR} ${message}"
-    [ -n "${PRINT_STACK_TRACE}" ] && printf "%s\n" "$(stack_trace "$code")" | tee /dev/stdout > /dev/stderr
+    [ -n "${PRINT_STACK_TRACE}" ] && printf "Error %code:\n%s\n" "$(stack_trace)" | tee /dev/stdout > /dev/stderr
     [[ "${code}" =~ ^[0-9]+$ ]] && exit "${code}" || exit 1
 }

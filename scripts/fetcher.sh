@@ -70,7 +70,7 @@ case "${FETCHER}" in
         links -codepage utf-8 -force-html -width 72 -dump -http.fake-user-agent "${USER_AGENT}" -http.fake-referer "${REFERER}" "${URL}"
         ;;
     *)
-        log_and_exit "NOLINKS: FETCHER=$FETCHER"
+        log_and_exit 1 "NOLINKS: FETCHER=$FETCHER"
         exit 1
         ;;
 esac
