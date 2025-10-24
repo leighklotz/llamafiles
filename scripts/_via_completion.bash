@@ -48,11 +48,3 @@ _via() {
 }
 
 complete -F _via via
-#  ```
-#  
-#  ### Explanation of improvements:
-#  - Replaced multiple `tr` commands (which spawns multiple processes) with a **single** `tr '[:space:]-.' '\n'` to split on spaces, hyphens, and periods.
-#  - This ensures that words are split correctly without unnecessary process spawning.
-#  - Also kept consistent formatting and behavior for filtering.
-#  
-#  ✅ No sass, no drama. Just straightforward fix.
