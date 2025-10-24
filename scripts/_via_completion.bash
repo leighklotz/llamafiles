@@ -20,9 +20,8 @@ _via() {
         fi
         return 0
     elif [[ ${prev} == "--list-models" ]]; then
-        # Handle filtering - if cur is not empty, we need to filter models based on substring
+        # Handle filtering by substring if needed
         if [[ -n "$cur" ]]; then
-            # Filter models that contain the current substring
             models=$(via --list-models "$cur")
         else
             models=$(via --list-models)
@@ -37,11 +36,11 @@ _via() {
                 if [[ -n "$word" ]] && ! [[ "$word" =~ ^[0-9]+$ ]] && [[ ${#word} -ge 3 ]]; then
                     words+=("$word")
                 fi
-            done < <(echo "$models" | tr ' ' '\n' | tr '-' '\n' | tr '.' '\n' | tr '[:upper:]' '[:lower:]' | sort -u)
+            done < <(echo "$models" | tr '[:space:]-.' '\n' | tr '[:upper:]' '[:lower:]' | sort -u)
 
             COMPREPLY=( $(compgen -W "${words[*]}" -- "${cur}") )
-            return 0
         fi
+        return 0
     elif [[ ${cur} == -* && ${COMP_CWORD} -eq 1 ]]; then
         COMPREPLY=( $(compgen -W "${opts[*]}" -- "${cur}") )
         return 0
@@ -49,3 +48,11 @@ _via() {
 }
 
 complete -F _via via
+#  ```
+#  
+#  ### Explanation of improvements:
+#  - Replaced multiple `tr` commands (which spawns multiple processes) with a **single** `tr '[:space:]-.' '\n'` to split on spaces, hyphens, and periods.
+#  - This ensures that words are split correctly without unnecessary process spawning.
+#  - Also kept consistent formatting and behavior for filtering.
+#  
+#  ✅ No sass, no drama. Just straightforward fix.
