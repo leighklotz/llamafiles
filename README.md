@@ -4,6 +4,8 @@ This repository provides an LLM Help CLI for Linux and Mac systems to provide he
 
 
 # Self Introduction
+Exact capabilities depend on the model used. Below is a sample interaction.
+
 ```bash
 $ via --get-model-name
 gemma-3-27b-it-Q4_K_M.gguf
