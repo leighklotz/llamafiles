@@ -5,7 +5,6 @@ _via() {
     prev=${COMP_WORDS[COMP_CWORD-1]}
     
     opts=(
-        "--get-via"
         "--get-model-name"
         "--list-models"
         "--load-model"
@@ -16,10 +15,14 @@ _via() {
     
     if [[ ${prev} == "--load-model" ]]; then
         models=$(via --list-models)
-        COMPREPLY=( $(compgen -W "${models}" -- ${cur}) )
+        COMPREPLY=( $(compgen -W "${models}" -- "${cur}") )
+        return 0
+    elif [[ ${prev} == "--list-models" ]]; then
+        models=$(via --list-models)
+        COMPREPLY=( $(compgen -W "${models}" -- "${cur}") )
         return 0
     elif [[ ${cur} == -* && ${COMP_CWORD} -eq 1 ]]; then
-        COMPREPLY=( $(compgen -W "${opts[*]}" -- ${cur}) )
+        COMPREPLY=( $(compgen -W "${opts[*]}" -- "${cur}") )
         return 0
     fi
 }
