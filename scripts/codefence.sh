@@ -15,4 +15,8 @@ if [ ! -r "${fn}" ]; then
 fi
 
 ft="$("$SCRIPT_DIR/filetype.sh" "${fn}")"
-printf '```%s\n%s\n```\n' "${ft}" "$(cat "${fn}")"
+printf $'```#%s:
+%s
+%s
+```
+' "${fn}" "${ft}" "$(cat "${fn}")"

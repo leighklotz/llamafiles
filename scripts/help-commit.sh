@@ -75,7 +75,7 @@ export SYSTEM_MESSAGE="${SYSTEM_MESSAGE:-${default_system_message}}"
 PROMPT="Describe the changes listed in the unified \`git diff\` below and output a ready-to-execute ${MESSAGE_LINE} for the changes. In your output, pay attention to bash quoting syntax.\n"
 
 if [ -z "${QUIET}" ]; then
-    printf "%b\n" "${PROMPT}"
+    printf "🤖 %b\n" "${PROMPT}"
 fi
 
 if [ -z "${INHIBIT_GRAMMAR}" ]; then
