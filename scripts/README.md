@@ -1,7 +1,7 @@
 # Files in scripts
 - [ask.sh: Bash Script for User Instruction Execution](ask.sh): LLM questiion and answer with mininal prompting.
-- [Bash Script for Executing Commands and Displaying Output](bashblock.sh): This is a simple Bash script that takes a full command-line, executes it, and embeds the output a `bash` Markdown code block.
-- [Bash Script for Executing Commands and Displaying Output](codefence.sh): This is a simple Bash script that takes a full command-line, executes it, and embeds the output a `bash` Markdown code block.
+- [Bash Script for Executing Commands and Displaying Output](bashblock.sh): takes a full command-line, executes it, and embeds the output a `bash` markdown code fence.
+- [Bash Script for Executing Commands and Displaying Output](codefence.sh): takes a filename, and embeds the output an approprpriate markdown code fence.
 - [Script for Environment Configuration (env.sh)](env.sh): This is a Bash script used for setting environment variables. It is customized and not committed to the Git repository.
 - [Script for setting environment variables in Linux (env.sh.example)](env.sh.example): This is a Bash script example for setting environment variables in a Linux environment. Copy to `env.sh` and edit.
 - [Help Commit Script](help-commit.sh): A bash script for creating Git commit messages with options for specifying a multi-line message, file changes, and help options. This script uses the Git `diff` command to determine the changed files and their differences.
