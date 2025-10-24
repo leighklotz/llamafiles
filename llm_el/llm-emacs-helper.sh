@@ -20,8 +20,8 @@ fi
 # Input can be stdin or a file piped to this script.
 # Example: cat foo.sh | ./llm-emacs-helper.sh ask api mixtral bash "improve this code"
 function usage {
-  echo "Usage: $0 use-case [options] input"
-  echo "  use-case:  One of: rewrite, ask, write, summarize, complete, todo, -h"
+  echo "Usage: $0 -h | use-case [options] input"
+  echo "  use-case:  One of: rewrite, ask, write, summarize, complete, todo"
   echo "  options:   -n_predict <tokens> - --raw-input"
   echo "  input:     The text or code to process (piped or file)."
 }
@@ -84,7 +84,7 @@ function calculate_comment_prefix {
         python*-mode) echo "# "   ;;
         c-mode)       echo "// "  ;;
         c\+\+-mode)   echo "// "  ;;
-        *)            echo "// "  ;;
+        *)            echo "// [$major_mode] "  ;;
     esac
 }
 
