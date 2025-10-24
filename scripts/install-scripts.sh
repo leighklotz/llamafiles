@@ -100,6 +100,7 @@ if [[ ! -d "$BASH_D" ]]; then
 fi
 
 lnf "${SCRIPT_DIR}/llamafiles-aliases.sh" "$BASH_D/llamafiles-aliases.sh"
+lnf "${SCRIPT_DIR}/_via_completion.sh" "$BASH_D/_via_completion.sh"
 
 # # Install python .venv for downlink.py
 if $DOWNLINK_MODE; then
