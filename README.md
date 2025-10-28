@@ -267,9 +267,11 @@ $ ./scripts/install-scripts.sh ~/bin
 
 Case 2: Install the scripts for playwright headless browser usage:
 
-If you want to use playwright to fetch web pages, give the `--downlink` final argument to `install-scripts.sh`
+If you want to use playwright to fetch web pages, install [/leighklotz/downlink](downlink)`.
 ```bash
-$ ./scripts/install-scripts.sh ~/bin --downlink
+$ git clone https://github.com/leighklotz/downlink
+$ cd downlink
+$ ./install.sh ~/.local/bin
 ```
 
 Beware that playwright installs a significant number of dependencies.

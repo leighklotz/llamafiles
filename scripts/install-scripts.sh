@@ -3,7 +3,6 @@
 # This script symlinks useful shell scripts to a destination directory
 # It tries to add the destination directory to your .bashrc
 # e.g.: ./install-scripts.sh ~/wip/llamafiles/bin
-# It also optionally sets up a python virtual environment for 'downlink.py'.
 
 SCRIPT_DIR="$(dirname "$(realpath "${BASH_SOURCE}")")"
 
@@ -11,19 +10,16 @@ FILES="ask.sh bashblock.sh codefence.sh help-commit.sh machelp.sh manhelp.sh nvf
 SH_FILES="help.sh write.sh"
 
 DEST_DIR=""
-DOWNLINK_MODE=false
 
 BASH_D="$HOME/.bash.d"
 BASHRC="$HOME/.bashrc"
 
 usage() {
-  echo "Usage: $0 [--downlink] <dest-dir>"
+  echo "Usage: $0 <dest-dir>"
   echo ""
   echo "  <dest-dir>      The destination directory to symlink scripts to."
-  echo "  --downlink      Install downlink fetcher: requires Python virtual environment and dependencies."
   echo ""
   echo "Example: $0 ~/bin"
-  echo "Example: $0 --downlink ~/bin"
   exit 1
 }
 
@@ -32,10 +28,6 @@ while [[ $# -gt 0 ]]; do
   case "$1" in
     --help)
       usage
-      ;;
-    --downlink)
-      DOWNLINK_MODE=true
-      shift
       ;;
     *)
       if [ -z "$DEST_DIR" ]; then
@@ -102,14 +94,9 @@ fi
 lnf "${SCRIPT_DIR}/llamafiles-aliases.sh" "$BASH_D/llamafiles-aliases.sh"
 lnf "${SCRIPT_DIR}/_via_completion.sh" "$BASH_D/_via_completion.sh"
 
-# # Install python .venv for downlink.py
-if $DOWNLINK_MODE; then
-    # install in script dir, not dest_dir, for now
-    echo "* Installing downlink dependencies in ${SCRIPT_DIR}/.venv"
-    cd "${SCRIPT_DIR}" || exit 1
-    python3 -m venv .venv
-    . .venv/bin/activate
-    pip3 install -r "${SCRIPT_DIR}/requirements.txt" #Use SCRIPT_DIR for requirements
-    playwright install
-    echo "* Downlink dependencies installed in ${SCRIPT_DIR}/.venv"
-fi
+# # Install python .venv for yq
+echo "* Installing yq dependencies in ${SCRIPT_DIR}/.venv"
+cd "${SCRIPT_DIR}" || exit 1
+python3 -m venv .venv
+. .venv/bin/activate
+pip3 install -r "${SCRIPT_DIR}/requirements.txt" #Use SCRIPT_DIR for requirements
