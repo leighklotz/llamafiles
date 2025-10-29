@@ -19,6 +19,8 @@
 - [Git Log Options Explained](explain-the-options.txt): Details the use of `oneline`, `graph`, and `decorate` options in `git log` command
 - [Git Log Output](nuextract-dwim.txt): Displays the last 3 commits with their SHA, author, date, and commit message in JSON format.
 - [Graflex Camera Resource](sumarize.txt): A website promoting and preserving classic Graflex cameras, with articles, resources, and community support for Speed Graphic, Graflex Reflex, and large-format cameras.
+- [Help History](help-history.md): Using `help` to investigate `history`
+- [Help Self History](help-self-history.md): Using `help` to investigate `history` of using `help`
 - [Image Format Change in html_generator.py](git-diff-upstream.txt): Now saves images in RGBA format, which may affect transparency.
 - [LICENSE](nuextract-ls.txt): License information for the project.
 - [Merge Remote Branch](git-fu-2.txt): Resolve conflicts between local and remote changes`
