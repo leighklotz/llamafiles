@@ -250,11 +250,11 @@ The differences are inserted into a temporary buffer named `llm-diff-buffer-name
       (insert result)
       (smerge-mode)
       (diff-auto-refine-mode 1)
-      (goto-char (point-min))))
+      (goto-char (point-min)))
 
     (unless llm-preserve-temp-files
       (delete-file temp-file-before)
-      (delete-file temp-file-after)))
+      (delete-file temp-file-after))))
 
 ;;; Not yet implemented: llm-complete
 (defun llm-complete-internal (prompt start end n-predict)
