@@ -91,13 +91,11 @@
   "History of prompts used with LLM functions.")
 
 ;;; Utility functions
-
-;; todo: I want the default prompt to be empty
 (defun llm-get-user-prompt (label)
   "Prompt the user for a prompt, using `llm-prompt-history` for completion."
   (let ((completion-ignore-case t))
     (read-string "Prompt: "
-                 (if (not llm-prompt-history) "" (concat (car llm-prompt-history) " ")))))
+                 (if (not llm-prompt-history) "" (car llm-prompt-history) ))))
 
 ;;; User commands
 
