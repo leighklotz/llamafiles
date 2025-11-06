@@ -189,7 +189,7 @@ function via_api_perform_inference() {
     result=$(printf "%s" "${data}" | curl -s "${VIA_API_CHAT_COMPLETIONS_ENDPOINT}" -H 'Content-Type: application/json' "${AUTHORIZATION_PARAMS[@]}" -d @-)
     s=$?
     if [ "$s" -ne 0 ]; then
-        log_and_exit $s "inference cannot curl"
+        log_and_exit $s "Inference cannot curl VIA_API_CHAT_COMPLETIONS_ENDPOINT=$VIA_API_CHAT_COMPLETIONS_ENDPOINT"
     fi
 
     if [ -n "${INFO}" ]; then

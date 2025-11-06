@@ -78,6 +78,6 @@ function log_and_exit {
     local code="$1"
     local message="$2"
     log_with_icon "⛔" "${COLOR_RED}ERROR in ${prog}:${NOCOLOR} ${message}"
-    [ -n "${PRINT_STACK_TRACE}" ] && printf "Error %code:\n%s\n" "$(stack_trace)" | tee /dev/stdout > /dev/stderr
+    [ -n "${PRINT_STACK_TRACE}" ] && printf "Error code %s %s\n" "$code" "$(stack_trace)" | tee /dev/stdout > /dev/stderr
     [[ "${code}" =~ ^[0-9]+$ ]] && exit "${code}" || exit 1
 }
