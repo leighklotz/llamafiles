@@ -88,6 +88,13 @@ function to_link() {
     cat | "${JQYQ}" --arg xspace "%20" --arg plus "+" --arg xcomma "%2[cC]" --arg comma "," -r '.keywords |= if(type == "array") then join(",") else . end | "https://scuttle.klotz.me/bookmarks/klotz?action=add&address=\(.link|@uri|gsub($xspace; $plus)|gsub($xcomma; $comma))&description=\(.description|@uri|gsub($xspace; $plus)|gsub($xcomma; $comma))&title=\(.title|@uri|gsub($xspace; $plus)|gsub($xcomma; $comma))&tags=\(.keywords|@uri|gsub($xspace; $plus)|gsub($xcomma; $comma))"'
 }
 
+function capture() {
+    if [[ $? -ne 0 ]]; then
+        log_and_exit "$?" "$(cat)"
+    fi
+  ${CAPTURE_COMMAND}
+}
+
 function postprocess() {
     if [ -n "$VERBOSE" ]; then
         tee /dev/stderr | remove_code_fence | replace_smart_quotes | extract_output
@@ -118,7 +125,7 @@ POST_PROMPT_ARG="Respond with only a short ${INTERMEDIATE_FORMAT} object with th
 LINKS_PRE_PROMPT="Below is a web page article from the specified link address. If retrieval failed, report on the failure. Otherwise, follow the instructions after the article."
 SCUTTLE_POST_PROMPT="Read the above web page article from ${LINK} and ignore website header at the start and look for the main article. If there are retrieval failures, just report on the failures."
 
-( printf "# Text of link %s\n" "${LINK}"; "${FETCHER_COMMAND}" "${LINK}" | ${CAPTURE_COMMAND}; \
+( printf "# Text of link %s\n" "${LINK}"; "${FETCHER_COMMAND}" "${LINK}" | capture; \
   printf "\n# Instructions\n%b\n%b\n" "${SCUTTLE_POST_PROMPT}" "${POST_PROMPT_ARG}" ) | \
     "${SCRIPT_DIR}/llm.sh" ${GRAMMAR_FLAG} ${ARGS} "${LINKS_PRE_PROMPT}" | \
     postprocess
