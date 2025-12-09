@@ -6,7 +6,7 @@
 
 SCRIPT_DIR="$(dirname "$(realpath "${BASH_SOURCE}")")"
 
-FILES="ask.sh bashblock.sh codefence.sh help-commit.sh machelp.sh manhelp.sh nvfree.sh onsubnet.sh repofiles.sh scuttle.sh summarize.sh systype.sh unfence.sh via.sh"
+FILES="ask.sh bashblock.sh codefence.sh help-commit.sh lx.sh machelp.sh manhelp.sh nvfree.sh onsubnet.sh repofiles.sh scuttle.sh summarize.sh systype.sh unfence.sh via.sh"
 SH_FILES="help.sh write.sh"
 
 DEST_DIR=""
