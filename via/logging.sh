@@ -63,7 +63,7 @@ function log_info {
 function log_warn {
     local prog="$(basename "$0")"
     local message="$1"
-    log_with_icon "⚠️" "${COLOR_YELLOW}WARN ${prog}:${NOCOLOR} ${message}"
+    log_with_icon "⚠️"" "${COLOR_YELLOW}WARN ${prog}:${NOCOLOR} ${message}"
 }
 
 function log_error {
