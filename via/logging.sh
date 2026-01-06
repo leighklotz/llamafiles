@@ -40,7 +40,7 @@ function log_verbose {
     local prog="$(basename "$0")"
     local message="$1"
     if [ -n "${VERBOSE}" ]; then
-        log_with_icon "📣" "${prog}: ${message}"
+        log_with_icon '📣' "${prog}: ${message}"
     fi
 }
 
@@ -48,7 +48,7 @@ function log_debug {
     local prog="$(basename "$0")"
     local message="$1"
     if [ -n "${DEBUG}" ]; then
-        log_with_icon "🐞" "${COLOR_BLUE}${prog}:${NOCOLOR} ${message}"
+        log_with_icon '🐞' "${COLOR_BLUE}${prog}:${NOCOLOR} ${message}"
     fi
 }
 
@@ -56,20 +56,20 @@ function log_info {
     local prog="$(basename "$0")"
     local message="$1"
     if [ -n "${INFO}" ]; then
-        log_with_icon "✅" "${COLOR_GREEN}INFO ${prog}:${NOCOLOR} ${message}"
+        log_with_icon '✅' "${COLOR_GREEN}INFO ${prog}:${NOCOLOR} ${message}"
     fi
 }
 
 function log_warn {
     local prog="$(basename "$0")"
     local message="$1"
-    log_with_icon "⚠️"" "${COLOR_YELLOW}WARN ${prog}:${NOCOLOR} ${message}"
+    log_with_icon '⚠️' "${COLOR_YELLOW}WARN ${prog}:${NOCOLOR} ${message}" # note there is another single hidden by the icon
 }
 
 function log_error {
     local prog="$(basename "$0")"
     local message="$1"
-    log_with_icon "❌" "${COLOR_RED}ERROR in ${prog}:${NOCOLOR} ${message}"
+    log_with_icon '❌' "${COLOR_RED}ERROR in ${prog}:${NOCOLOR} ${message}"
     [ -n "${PRINT_STACK_TRACE}" ] && printf "%s\n" "$(stack_trace)" > /dev/stderr
 }
 
@@ -77,7 +77,7 @@ function log_and_exit {
     local prog="$(basename "$0")"
     local code="$1"
     local message="$2"
-    log_with_icon "⛔" "${COLOR_RED}ERROR in ${prog}:${NOCOLOR} ${message}"
+    log_with_icon '⛔' "${COLOR_RED}ERROR in ${prog}:${NOCOLOR} ${message}"
     [ -n "${PRINT_STACK_TRACE}" ] && printf "Error code %s %s\n" "$code" "$(stack_trace)" | tee /dev/stdout > /dev/stderr
     [[ "${code}" =~ ^[0-9]+$ ]] && exit "${code}" || exit 1
 }
