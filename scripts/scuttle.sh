@@ -117,11 +117,13 @@ else
     GRAMMAR_FLAG=""
 fi
 
-POST_PROMPT_ARG="Respond with only a short ${INTERMEDIATE_FORMAT} object with these 4 fields: "'`link`, `title`, `description`, and `keywords` array'
-LINKS_PRE_PROMPT="Below is a web page article from the specified link address. If retrieval failed, report on the failure. Otherwise, follow the instructions after the article."
-SCUTTLE_POST_PROMPT="Read the above web page article from ${LINK} and ignore website header at the start and look for the main article. If there are retrieval failures, just report on the failures."
+: "${LINKS_FETCH_PROMPT:=Below is the text of a web page article from the specified link address. If retrieval failed, report on the failure. Otherwise:}"
+: "${SCUTTLE_ARTICLE_PROMPT:=Read the web page article from ${LINK} and ignore website header at the start and look for the main article.}"
+: "${RESPONSE_FORMAT_PROMPT:=Respond with only a short ${INTERMEDIATE_FORMAT} object with these 4 fields: link, title, description, keywords (array)}"
 
-( printf "# Text of link %s\n" "${LINK}"; "${FETCHER_COMMAND}" "${LINK}" | capture; \
-  printf "\n# Instructions\n%b\n%b\n" "${SCUTTLE_POST_PROMPT}" "${POST_PROMPT_ARG}" ) | \
-    "${SCRIPT_DIR}/llm.sh" ${GRAMMAR_FLAG} ${ARGS} "${LINKS_PRE_PROMPT}" | \
-    postprocess
+printf -v INITIAL_PROMPT "\n# Instructions\n- %b\n- %b\n- %b\n" "${LINKS_FETCH_PROMPT}" "${SCUTTLE_ARTICLE_PROMPT}" "${RESPONSE_FORMAT_PROMPT}"
+
+printf "# Text of link %s\n%s" "${LINK}" "$("${FETCHER_COMMAND}" "${LINK}")" | \
+        capture | \
+        "${SCRIPT_DIR}/llm.sh" ${GRAMMAR_FLAG} ${ARGS} "${INITIAL_PROMPT}" | \
+        postprocess

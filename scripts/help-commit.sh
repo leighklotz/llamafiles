@@ -6,7 +6,6 @@ HELP_SH='help.sh'
 GRAMMAR_FILE_FLAG=""
 HELP_SH_OPTIONS=""
 GIT_DIFF_OPTIONS=""
-GIT_LOG_OPTIONS="--oneline"
 : "${OUTPUT_TYPE:=\`git commit\` command}"
 : "${LINE_TYPE:=one-line}"
 LINE_TYPE=""
@@ -98,8 +97,6 @@ function get_results {
     # set globals
     DIFF_COMMAND="git diff ${options}${options:+ } ${GIT_DIFF_OPTIONS} "
     DIFF_OUTPUT="$($DIFF_COMMAND)"
-    GIT_LOG_COMMAND="git log ${options}${options:+ } ${GIT_LOG_OPTIONS} "
-    GIT_LOG_OUTPUT="$($GIT_LOG_COMMAND)"
 }
 
 get_results
@@ -115,16 +112,13 @@ fi
 
 # remove triple-backquote from the diff output since we're enclosing the body in that
 diff_output_sanitized="$(printf "%s" "${DIFF_OUTPUT}" | sed -e 's/```/`_`_`/g')"
-log_output_sanitized="$(printf "%s" "${GIT_LOG_OUTPUT}" | sed -e 's/```/`_`_`/g')"
 
 TEMPLATE='```sh
-$ %s
-%s
 $ %s
 %s
 ```\n'
 
 # Pipeline to send 'git diff' out to 'help.sh' input with prompt
-printf -v INPUT "${TEMPLATE}" "${DIFF_COMMAND}" "${GIT_LOG_COMMAND}""${log_output_sanitized}" "${diff_output_sanitized}"
+printf -v INPUT "${TEMPLATE}" "${DIFF_COMMAND}" "${diff_output_sanitized}"
 # Pass along all args still unprocessed
 printf "%s\n" "${INPUT}" | ${HELP_SH} ${*} ${GRAMMAR_FILE_FLAG} -e -- "${PROMPT}"
