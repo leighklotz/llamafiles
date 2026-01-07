@@ -96,9 +96,9 @@ function get_results {
     fi
     local options="$1"
     # set globals
-    DIFF_COMMAND="git diff ${options}${options:+ } ${GIT_DIFF_OPTIONS}"
+    DIFF_COMMAND="git diff ${options}${options:+ } ${GIT_DIFF_OPTIONS} "
     DIFF_OUTPUT="$($DIFF_COMMAND)"
-    GIT_LOG_COMMAND="git log ${options}${options:+ } ${GIT_LOG_OPTIONS}"
+    GIT_LOG_COMMAND="git log ${options}${options:+ } ${GIT_LOG_OPTIONS} "
     GIT_LOG_OUTPUT="$($GIT_LOG_COMMAND)"
 }
 
