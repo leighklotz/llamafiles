@@ -9,6 +9,8 @@ GIT_DIFF_OPTIONS=""
 : "${OUTPUT_TYPE:=\`git commit\` command}"
 : "${LINE_TYPE:=one-line}"
 LINE_TYPE=""
+DIFF_COMMAND=""
+DIFF_NAME_STATUS_COMMAND=""
 
 # INHIBIT_GRAMMAR=1		# if it's not working in the model you use, turn it off
 
@@ -75,7 +77,7 @@ export SYSTEM_MESSAGE="${SYSTEM_MESSAGE:-${default_system_message}}"
 PROMPT="Describe the changes listed in the unified \`git diff\` below and output a ready-to-execute ${MESSAGE_LINE} for the changes. In your output, pay attention to bash quoting syntax.\n"
 
 if [ -z "${QUIET}" ]; then
-    printf "🤖 %b\n" "${PROMPT}"
+    printf "🤖 %b" "${PROMPT}"
 fi
 
 if [ -z "${INHIBIT_GRAMMAR}" ]; then
@@ -94,12 +96,18 @@ function get_results {
 	exit 1
     fi
     local options="$1"
+
     # set globals
-    DIFF_COMMAND="git diff ${options}${options:+ }${GIT_DIFF_OPTIONS}"
+    DIFF_NAME_STATUS_COMMAND="git diff --name-status ${options} ${GIT_DIFF_OPTIONS}"
+    DIFF_COMMAND="git diff ${options} ${GIT_DIFF_OPTIONS}"
+
+    # Execute commands and capture output
+    DIFF_NAME_STATUS_OUTPUT="$($DIFF_NAME_STATUS_COMMAND)"
     DIFF_OUTPUT="$($DIFF_COMMAND)"
 }
 
 get_results
+
 if [ -z "${DIFF_OUTPUT}" ]; then
     echo "No staged changes, looking for unstaged" >&2
     get_results --staged
@@ -112,13 +120,17 @@ fi
 
 # remove triple-backquote from the diff output since we're enclosing the body in that
 diff_output_sanitized="$(printf "%s" "$DIFF_OUTPUT" | sed -e 's/```/`_`_`/g')"
+diff_name_status_output_sanitized="$(printf "%s" "$DIFF_NAME_STATUS_OUTPUT" | sed -e 's/```/`_`_`/g')"
 
 TEMPLATE='```sh
+$ %s
+%s
 $ %s
 %s
 ```\n'
 
 # Pipeline to send 'git diff' out to 'help.sh' input with prompt
-printf -v INPUT "${TEMPLATE}" "${DIFF_COMMAND}" "${diff_output_sanitized}"
+printf -v INPUT "${TEMPLATE}" "${DIFF_NAME_STATUS_COMMAND}" "${diff_name_status_output_sanitized}" "${DIFF_COMMAND}" "${diff_output_sanitized}"
+printf "%s\n" "${diff_name_status_output_sanitized}"
 # Pass along all args still unprocessed
 printf "%s\n" "${INPUT}" | ${HELP_SH} ${*} ${GRAMMAR_FILE_FLAG} -e -- "${PROMPT}"
