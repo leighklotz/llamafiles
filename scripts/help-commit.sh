@@ -74,7 +74,7 @@ printf -v MESSAGE_LINE '%s%s' "${OUTPUT_TYPE}" "${LINE_TYPE:+ with a $LINE_TYPE 
 default_system_message="$(printf "%b" "You are an expert in Linux, Bash, Python, general programming, and related topics.\n")"
 export SYSTEM_MESSAGE="${SYSTEM_MESSAGE:-${default_system_message}}"
 
-PROMPT="Describe the changes listed in the unified \`git diff\` below and output a ready-to-execute ${MESSAGE_LINE} for the changes. In your output, pay attention to bash quoting syntax.\n"
+PROMPT="Describe the changes listed in the unified \`git diff\` below and output a ready-to-execute ${MESSAGE_LINE} for the changes. Use bash quoting syntax accurately.\n"
 
 if [ -z "${QUIET}" ]; then
     printf "🤖 %b" "${PROMPT}"
