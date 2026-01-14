@@ -121,7 +121,14 @@ fi
 : "${SCUTTLE_ARTICLE_PROMPT:=Read the web page article from ${LINK} and ignore website header at the start and look for the main article.}"
 : "${RESPONSE_FORMAT_PROMPT:=Respond with only a short ${INTERMEDIATE_FORMAT} object with these 4 fields: link, title, description, keywords (array)}"
 
-printf -v INITIAL_PROMPT "\n# Instructions\n- %b\n- %b\n- %b\n" "${LINKS_FETCH_PROMPT}" "${SCUTTLE_ARTICLE_PROMPT}" "${RESPONSE_FORMAT_PROMPT}"
+printf -v INITIAL_PROMPT "
+# Instructions
+- %b
+- %b
+- %b
+" "${LINKS_FETCH_PROMPT}" \
+  "${SCUTTLE_ARTICLE_PROMPT}" \
+  "${RESPONSE_FORMAT_PROMPT}"
 
 printf "# Text of link %s\n%s" "${LINK}" "$("${FETCHER_COMMAND}" "${LINK}")" | \
         capture | \
