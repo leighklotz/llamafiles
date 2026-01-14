@@ -7,6 +7,7 @@ HELP_SH_OPTIONS=""
 GIT_DIFF_OPTIONS=""
 DIFF_COMMAND=""
 DIFF_NAME_STATUS_COMMAND=""
+UNSTAGED=""
 
 function usage() {
     local p=$(basename "$0")
@@ -44,14 +45,15 @@ while [[ $# -gt 0 ]]; do
 done
 
 # Construct prompt
-default_system_message="$(printf "%b" "You are an expert in Linux, Bash, Python, general programming, and related topics.\n")"
-export SYSTEM_MESSAGE="${SYSTEM_MESSAGE:-${default_system_message}}"
+#default_system_message="$(printf "%b" "You are an expert in Linux, Bash, Python, general programming, and related topics.\n")"
+#export SYSTEM_MESSAGE="${SYSTEM_MESSAGE:-${default_system_message}}"
 
-PROMPT='Below is the output of `git diff -stat` and `git diff`. Read and then briefly output a code fence containing semicolon-separated git commands to make one commit with changes, using one or more git commit messages (`-m "..." -m "..."`) as appropriate.\n'
 
-if [ -z "${QUIET}" ]; then
-    printf '1. 🤖 %b' "${PROMPT}\n"
-fi
+# TODO: we may need a better way, for example separately tracking staged and unstaged changes
+# simply by doing two llm invocations and teeing the staged commit output to the unstaged
+# input.
+STAGED_PROMPT="Below is the output of \`git diff --numstat\` and \`git diff\`. Read the output and then briefly output a code fence containing a corresponding \`git commit\` command, using multiple \`-m\` commit messages.\n"
+UNSTAGED_PROMPT="Below is the output of \`git diff --numstat\` and \`git diff\`. Read the output and then briefly output a code fence containing a corresponding \`git commit -a\` command, using one or more dash-m commit messages as appropriate for the change.\n"
 
 function get_results {
     if ! git rev-parse --is-inside-work-tree > /dev/null 2>&1; then
@@ -61,7 +63,7 @@ function get_results {
     local options="$1"
 
     # set globals
-    DIFF_NAME_STATUS_COMMAND="git diff --stat ${options} ${GIT_DIFF_OPTIONS}"
+    DIFF_NAME_STATUS_COMMAND="git diff --numstat ${options} ${GIT_DIFF_OPTIONS}"
     DIFF_COMMAND="git diff ${options} ${GIT_DIFF_OPTIONS}"
 
     # Execute commands and capture output
@@ -72,14 +74,18 @@ function get_results {
 get_results
 
 if [ -z "${DIFF_OUTPUT}" ]; then
-    echo "No staged changes, looking for unstaged" >&2
     get_results --staged
+    UNSTAGED=1
+else
+    UNSTAGED=""
 fi
 
 if [ -z "${DIFF_OUTPUT}" ]; then
     echo "No changes seen" >&2
     exit 1
 fi
+
+echo "** UNSTAGED=$UNSTAGED" >&2
 
 function sanitize_output {
     local output="$1"
@@ -96,6 +102,19 @@ TEMPLATE='```sh\n$ %s\n%s\n$ %s\n%s\n```'
 printf -v INPUT "${TEMPLATE}" \
        "${DIFF_NAME_STATUS_COMMAND}" "${diff_name_status_output_sanitized}" \
        "${DIFF_COMMAND}" "${diff_output_sanitized}"
+
+# Pick prompt
+if [ -n "${UNSTAGED}" ]; then
+    echo "PROMPT=UNSTAGED_PROMPT UNSTAGED=$UNSTAGED" >> /dev/stderr
+    PROMPT="${UNSTAGED_PROMPT}"
+else
+    echo "PROMPT=STAGED_PROMPT UNSTAGED=$UNSTAGED" >> /dev/stderr
+    PROMPT="${STAGED_PROMPT}"    
+fi
+
+if [ -z "${QUIET}" ]; then
+    printf '🤖 %b' "${PROMPT}\n"
+fi
 
 # Pass HELP_SH_OPTIONS as multiple args
 # use -e to let llm.sh expand the backslahes and such in the prompt
