@@ -6,6 +6,10 @@ FETCHER_COMMAND="${SCRIPT_DIR}/fetcher.sh"
 
 . "${SCRIPT_DIR}/../via/functions.sh"
 
+if [ -f "${SCRIPT_DIR}/.venv/bin/activate" ]; then
+    . "${SCRIPT_DIR}/.venv/bin/activate"
+fi
+
 if command -v "yq" >/dev/null 2>&1; then
     JQYQ="yq"
     INTERMEDIATE_FORMAT="YAML"
