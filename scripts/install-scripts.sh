@@ -94,11 +94,8 @@ fi
 lnf "${SCRIPT_DIR}/llamafiles-aliases.sh" "$BASH_D/llamafiles-aliases.sh"
 lnf "${SCRIPT_DIR}/_via_completion.sh" "$BASH_D/_via_completion.sh"
 
-# # Install python .venv for yq
+# Check for yq (https://github.com/mikefarah/yq/) version v4.49.2
 if ! command -v "yq" >/dev/null 2>&1; then
-    echo "* Installing python yq in ${SCRIPT_DIR}/.venv"
-    cd "${SCRIPT_DIR}" || exit 1
-    python3 -m venv .venv
-    . .venv/bin/activate
-    pip3 install yq
+    echo "* You need to install yq"
+    exit 1
 fi

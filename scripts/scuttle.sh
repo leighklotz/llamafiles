@@ -84,11 +84,20 @@ function to_link() {
   + "&title="       + (.title       | formenc)
   + "&tags="        + (csv_tags     | formenc)
 '
+<<<<<<< HEAD
   yaml=$(cat)
   log_verbose "yaml=$yaml"
   printf '%s\n' "$yaml" \
       | yq -r '.' -o=json \
       | jq -r "$jq_filter"
+=======
+
+    printf '%s\n' "$yaml" \
+        | yq -o=json -r '.' \
+        | jq -r "$jq_filter"
+    cat | yq -o=json -r '.' | jq -r "$jq_filter"
+
+>>>>>>> f426c04 (chore: Remove python yq installation and dependencies)
 }
 
 function capture() {
