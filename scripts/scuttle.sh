@@ -123,16 +123,8 @@ fi
 
 SCUTTLE_PROMPT="# Instructions\nRead the web page article from ${LINK} and ignore website header at the start and look for the main article. If there are retrieval failures, just report on the failures. Otherwise, respond with only a short ${INTERMEDIATE_FORMAT} object with these 4 fields: "'`link`, `title`, `description`, and `keywords` array.'
 
-printf -v INITIAL_PROMPT "
-# Instructions
-- %b
-- %b
-- %b
-" "${LINKS_FETCH_PROMPT}" \
-  "${SCUTTLE_ARTICLE_PROMPT}" \
-  "${RESPONSE_FORMAT_PROMPT}"
-
-printf "# Text of link %s\n%s" "${LINK}" "$("${FETCHER_COMMAND}" "${LINK}")" | \
-        capture | \
-        "${SCRIPT_DIR}/llm.sh" ${GRAMMAR_FLAG} ${ARGS} "${INITIAL_PROMPT}" | \
-        postprocess
+( printf "# Text of link %s\n" "${LINK}";
+  "${FETCHER_COMMAND}" "${LINK}" | ${CAPTURE_COMMAND};
+  printf "%b\n" "${SCUTTLE_PROMPT}" ) | \
+    "${SCRIPT_DIR}/llm.sh" ${GRAMMAR_FLAG} ${ARGS} -- "${SCUTTLE_PROMPT}" | \
+    postprocess
