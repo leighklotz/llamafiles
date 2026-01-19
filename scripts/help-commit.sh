@@ -85,8 +85,6 @@ if [ -z "${DIFF_OUTPUT}" ]; then
     exit 1
 fi
 
-echo "** UNSTAGED=$UNSTAGED" >&2
-
 function sanitize_output {
     local output="$1"
     printf '%s' "$output" | sed -e $'s/```/`_`_`/g'
@@ -105,10 +103,8 @@ printf -v INPUT "${TEMPLATE}" \
 
 # Pick prompt
 if [ -n "${UNSTAGED}" ]; then
-    echo "PROMPT=UNSTAGED_PROMPT UNSTAGED=$UNSTAGED" >> /dev/stderr
     PROMPT="${UNSTAGED_PROMPT}"
 else
-    echo "PROMPT=STAGED_PROMPT UNSTAGED=$UNSTAGED" >> /dev/stderr
     PROMPT="${STAGED_PROMPT}"    
 fi
 
@@ -119,5 +115,3 @@ fi
 # Pass HELP_SH_OPTIONS as multiple args
 # use -e to let llm.sh expand the backslahes and such in the prompt
 printf '%s\n' "${INPUT}" | ${HELP_SH} "${HELP_SH_OPTIONS[@]}" -- -e "${PROMPT}"
-
- 
