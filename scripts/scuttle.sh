@@ -123,14 +123,8 @@ fi
 
 SCUTTLE_PROMPT="# Instructions\nRead the web page article from ${LINK} and ignore website header at the start and look for the main article. If there are retrieval failures, just report on the failures. Otherwise, respond with only a short ${INTERMEDIATE_FORMAT} object with these 4 fields: "'`link`, `title`, `description`, and `keywords` array.'
 
-<<<<<<< HEAD
-( printf "# Text of link %s\n" "${LINK}"; "${FETCHER_COMMAND}" "${LINK}" | capture; \
-  printf "\n# Instructions\n%b\n%b\n" "${SCUTTLE_POST_PROMPT}" "${POST_PROMPT_ARG}" ) | \
-    "${SCRIPT_DIR}/llm.sh" ${GRAMMAR_FLAG} ${ARGS} "${LINKS_PRE_PROMPT}" | \
-=======
 ( printf "# Text of link %s\n" "${LINK}";
   "${FETCHER_COMMAND}" "${LINK}" | ${CAPTURE_COMMAND};
   printf "%b\n" "${SCUTTLE_PROMPT}" ) | \
     "${SCRIPT_DIR}/llm.sh" ${GRAMMAR_FLAG} ${ARGS} -- "${SCUTTLE_PROMPT}" | \
->>>>>>> 4718fef (Refactor Markdown extraction and Scuttle prompt)
     postprocess
