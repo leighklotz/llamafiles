@@ -95,8 +95,10 @@ lnf "${SCRIPT_DIR}/llamafiles-aliases.sh" "$BASH_D/llamafiles-aliases.sh"
 lnf "${SCRIPT_DIR}/_via_completion.sh" "$BASH_D/_via_completion.sh"
 
 # # Install python .venv for yq
-echo "* Installing yq dependencies in ${SCRIPT_DIR}/.venv"
-cd "${SCRIPT_DIR}" || exit 1
-python3 -m venv .venv
-. .venv/bin/activate
-pip3 install -r "${SCRIPT_DIR}/requirements.txt" #Use SCRIPT_DIR for requirements
+if ! command -v "yq" >/dev/null 2>&1; then
+    echo "* Installing python yq in ${SCRIPT_DIR}/.venv"
+    cd "${SCRIPT_DIR}" || exit 1
+    python3 -m venv .venv
+    . .venv/bin/activate
+    pip3 install yq
+fi
