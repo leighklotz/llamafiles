@@ -55,6 +55,11 @@ else
     skip_special_tokens: false"
 fi
 
+if [ -n "${LLAMA_SERVER_MODEL}" ]; then
+    TEMPLATE_SETTINGS="${TEMPLATE_SETTINGS},
+    model: \"${LLAMA_SERVER_MODEL}\""
+fi
+
 SYSTEM_ROLE_TEMPLATE="{
     messages: [
       {
