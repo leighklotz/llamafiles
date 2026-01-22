@@ -386,10 +386,10 @@ The function calls \\[[describe-variable]] and then runs \\[[llm-ask]] with QUES
 
 (defun llm-smerge-mode-hook ()
   "Set up convenient keybindings for \\[[smerge-mode]]."
-  (local-set-key (kbd "C-S-n") 'smerge-next)
-  (local-set-key (kbd "C-S-p") 'smerge-prev)
-  (local-set-key (kbd "C-S-u") 'smerge-keep-upper)
-  (local-set-key (kbd "C-S-l") 'smerge-keep-lower))
+  (local-set-key [M-down] 'smerge-next)
+  (local-set-key [M-up] 'smerge-prev)
+  (local-set-key [C-down] 'smerge-keep-lower)
+  (local-set-key [C-up] 'smerge-keep-upper))
 
 (add-hook 'smerge-mode-hook 'llm-smerge-mode-hook)
 
