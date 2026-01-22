@@ -88,6 +88,7 @@ Reflective function for asking about Emacs symbols, for programming and using Em
 Implemented in the obvious way, calling the underlying Emacs `apropos` function and operating on the output.
 
 ![docs/llm-apropos.png](docs/llm-apropos.png)
+![docs/llm-apropos2.png](docs/llm-apropos2.png)
 
 ### `llm-describe-function`
 Reflective function for asking about Emacs symbols, for programming and using Emacs Lisp and M-X commands.
