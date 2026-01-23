@@ -29,7 +29,8 @@ AUTHORIZATION_PARAMS=()
 TEMPLATE_SETTINGS="
     temperature: \$temperature,
     seed: \$seed,
-    max_new_tokens: \$max_new_tokens"
+    max_new_tokens: \$n_predict,
+    n_predict: \$n_predict"
 if [ -n "${OPENAI_API_KEY}" ]; then
     AUTHORIZATION_PARAMS=(-H "Authorization: Bearer ${OPENAI_API_KEY}")
     TEMPLATE_SETTINGS="${TEMPLATE_SETTINGS},
@@ -153,9 +154,9 @@ function via_api_perform_inference() {
     # Seed must be a number
     temperature=${temperature:-NaN}
 
-    local max_new_tokens="${n_predict}"
-    if [ -z "$max_new_tokens" ]; then
-        max_new_tokens=null
+    local n_predict="${n_predict}"
+    if [ -z "$n_predict" ]; then
+        n_predict=null
     fi
 
     data=$(jq --raw-input --raw-output  --compact-output -n \
@@ -168,7 +169,7 @@ function via_api_perform_inference() {
               --argjson top_k ${TOP_K:-NaN} \
               --argjson top_p ${TOP_P:-NaN} \
               --argjson min_p ${MIN_P:-NaN} \
-              --argjson max_new_tokens ${max_new_tokens} \
+              --argjson n_predict ${n_predict} \
               --rawfile system_message "${system_message_file}" \
               --rawfile question "${question_file}" \
               --rawfile grammar_string "${grammar_file}" \
