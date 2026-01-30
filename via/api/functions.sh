@@ -186,7 +186,7 @@ function via_api_perform_inference() {
     # Invoke via the HTTP API endpoint
     # todo might need to do `set -o pipefail` here.
     #set -x
-    result=$(printf "%s" "${data}" | curl -s "${VIA_API_CHAT_COMPLETIONS_ENDPOINT}" -H 'Content-Type: application/json' "${AUTHORIZATION_PARAMS[@]}" -d @-)
+    result=$(printf "%s" "${data}" | curl -s -X 'POST' "${VIA_API_CHAT_COMPLETIONS_ENDPOINT}" -H 'Content-Type: application/json' "${AUTHORIZATION_PARAMS[@]}" -d @-)
     s=$?
     if [ "$s" -ne 0 ]; then
         log_and_exit $s "Inference cannot curl VIA_API_CHAT_COMPLETIONS_ENDPOINT=$VIA_API_CHAT_COMPLETIONS_ENDPOINT"
@@ -265,16 +265,18 @@ function load_model {
     local model_path="$1"
     local data
     printf -v data '{ "model_name": "%s", "settings": {}, "args": {} }' "${model_path}"
-    # use no quotes on AUTHORIZATION_PARAMS so it expands into nothing if unset, or multiple tokens if set
-    result=$(printf "%s" "${data}" | curl -s "${VIA_API_LOAD_MODEL_ENDPOINT}" -H 'Content-Type: application/json' ${AUTHORIZATION_PARAMS[0]} -d @- || { log_and_exit $? "via --api --load-model cannot curl"; return 1; })
-    [ -n "${INFO}" ] && log_info "load_model result= ${result}"
+    [ -n "${INFO}" ] && log_info "load_model ${VIA_API_LOAD_MODEL_ENDPOINT}"
+    [ -n "${DEBUG}" ] && log_debug "data=${data}"
+    result=$(printf "%s" "${data}" | curl -s -X POST "${VIA_API_LOAD_MODEL_ENDPOINT}" -H 'Content-Type: application/json' -H 'accept: application/json' "${AUTHORIZATION_PARAMS[@]}" -d @- || { log_and_exit $? "via --load-model cannot curl: ${VIA_API_LOAD_MODEL_ENDPOINT}"; return 1; })
+    [ -n "${INFO}" ] && log_info "load_model result=${result}"
     grep -s "OK" <<< "${result}"
     local s=$?
     [ $s -ne 0 ] && log_error "load_model result=${result}"
+    set +x
     return $s;
 }
 
 function unload_model {
-    result=$(printf "%s" "${data}" | curl -s "${VIA_API_UNLOAD_MODEL_ENDPOINT}" "${AUTHORIZATION_PARAMS[@]}" -d '' || log_and_exit $? "via --api --unload-model cannot curl")
+    result=$(printf "%s" "${data}" | curl -X POST -s "${VIA_API_UNLOAD_MODEL_ENDPOINT}" "${AUTHORIZATION_PARAMS[@]}" -d '' || log_and_exit $? "via --unload-model cannot curl: ${VIA_API_UNLOAD_MODEL_ENDPOINT}")
     printf "%s\n" "$result"
 }
