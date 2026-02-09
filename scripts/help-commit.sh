@@ -113,5 +113,4 @@ if [ -z "${QUIET}" ]; then
 fi
 
 # Pass HELP_SH_OPTIONS as multiple args
-# use -e to let llm.sh expand the backslahes and such in the prompt
-printf '%s\n' "${INPUT}" | ${HELP_SH} "${HELP_SH_OPTIONS[@]}" -- -e "${PROMPT}"
+printf '%s\n' "${INPUT}" | ${HELP_SH} "${HELP_SH_OPTIONS[@]}" "${PROMPT}"
