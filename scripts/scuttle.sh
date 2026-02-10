@@ -28,7 +28,6 @@ while true; do
             OUTPUT_MODE='YAML'
             shift
             ;;
-            ;;
         "--capture-file")
             shift
             printf -v CAPTURE_COMMAND "tee %b" "$1"
