@@ -91,6 +91,8 @@ function to_link() {
 
     if [ "$INTERMEDIATE_FORMAT" == "YAML" ]; then
         yaml=$(cat)
+        # expecting something like /snap/bin/yq
+        # yq (https://github.com/mikefarah/yq) version v4.49.2
         log_info "yq=`which yq`"
         log_info "jq=`which jq`"
         log_info "yaml=$yaml"
