@@ -28,9 +28,6 @@ while true; do
             OUTPUT_MODE='YAML'
             shift
             ;;
-        "--json")
-            OUTPUT_MODE='JSON'
-            shift
             ;;
         "--capture-file")
             shift
@@ -52,10 +49,6 @@ fi
 
 function extract_output() {
     case "$OUTPUT_MODE" in
-        "JSON")
-            # awk out just the JSON '{}' objects.
-            awk '/{/{f=1} f; /}/{f=0}'
-            ;;
         "YAML")
             cat
             ;;
@@ -99,10 +92,6 @@ function to_link() {
 
         printf '%s\n' "$yaml" \
             | yq -o=json -r '.' \
-            | jq -r "$jq_filter"
-    elif [ "$INTERMEDIATE_FORMAT" == "JSON" ]; then
-        json=$(cat)
-        printf '%s\n' "$json" \
             | jq -r "$jq_filter"
     else
         log_and_exit 1 "INTERMEDIATE_FORMAT=$INTERMEDIATE_FORMAT not recognized"
