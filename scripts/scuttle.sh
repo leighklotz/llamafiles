@@ -12,6 +12,7 @@ if [ -f "${SCRIPT_DIR}/.venv/bin/activate" ]; then
 fi
 
 OUTPUT_MODE='LINK'
+INTERMEDIATE_FORMAT='YAML'
 
 while true; do
     case "$1" in
@@ -21,6 +22,14 @@ while true; do
             ;;
         "--link")
             OUTPUT_MODE='LINK'
+            shift
+            ;;
+        "--yaml")
+            OUTPUT_MODE='YAML'
+            shift
+            ;;
+        "--json")
+            OUTPUT_MODE='JSON'
             shift
             ;;
         "--capture-file")
@@ -80,11 +89,22 @@ function to_link() {
   + "&tags="        + (csv_tags     | formenc)
 '
 
-    printf '%s\n' "$yaml" \
-        | yq -o=json -r '.' \
-        | jq -r "$jq_filter"
-    cat | yq -o=json -r '.' | jq -r "$jq_filter"
+    if [ "$INTERMEDIATE_FORMAT" == "YAML" ]; then
+        yaml=$(cat)
+        log_info "yq=`which yq`"
+        log_info "jq=`which jq`"
+        log_info "yaml=$yaml"
 
+        printf '%s\n' "$yaml" \
+            | yq -o=json -r '.' \
+            | jq -r "$jq_filter"
+    elif [ "$INTERMEDIATE_FORMAT" == "JSON" ]; then
+        json=$(cat)
+        printf '%s\n' "$json" \
+            | jq -r "$jq_filter"
+    else
+        log_and_exit 1 "INTERMEDIATE_FORMAT=$INTERMEDIATE_FORMAT not recognized"
+    fi
 }
 
 function capture() {
