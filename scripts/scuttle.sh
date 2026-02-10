@@ -12,7 +12,11 @@ if [ -f "${SCRIPT_DIR}/.venv/bin/activate" ]; then
 fi
 
 OUTPUT_MODE='LINK'
-INTERMEDIATE_FORMAT='YAML'
+
+# expecting something like /snap/bin/yq
+# yq (https://github.com/mikefarah/yq) version v4.49.2
+# log_info "yq=$(which yq)"
+# log_info "jq=$(which jq)"
 
 while true; do
     case "$1" in
@@ -80,21 +84,11 @@ function to_link() {
   + "&title="       + (.title       | formenc)
   + "&tags="        + (csv_tags     | formenc)
 '
-
-    if [ "$INTERMEDIATE_FORMAT" == "YAML" ]; then
-        yaml=$(cat)
-        # expecting something like /snap/bin/yq
-        # yq (https://github.com/mikefarah/yq) version v4.49.2
-        log_info "yq=`which yq`"
-        log_info "jq=`which jq`"
-        log_info "yaml=$yaml"
-
-        printf '%s\n' "$yaml" \
-            | yq -o=json -r '.' \
-            | jq -r "$jq_filter"
-    else
-        log_and_exit 1 "INTERMEDIATE_FORMAT=$INTERMEDIATE_FORMAT not recognized"
-    fi
+  yaml=$(cat)
+  log_verbose "yaml=$yaml"
+  printf '%s\n' "$yaml" \
+      | yq -r '.' -o=json \
+      | jq -r "$jq_filter"
 }
 
 function capture() {
@@ -131,7 +125,7 @@ else
 fi
 
 # Prompt is used twice, once before the text of link and once after.
-SCUTTLE_PROMPT="# Instructions\nRead the web page article from ${LINK} and ignore website header at the start and look for the main article. If there are retrieval failures, just report on the failures. Otherwise, respond with only a short ${INTERMEDIATE_FORMAT} object with these 4 fields: "'`link`, `title`, `description`, and `keywords` array.'
+SCUTTLE_PROMPT="# Instructions\nRead the web page article from ${LINK} and ignore website header at the start and look for the main article. If there are retrieval failures, just report on the failures. Otherwise, respond with only a properly-quoted YAML stanza with these 4 fields: "'`link`, `title`, `description`, and `keywords` array.'
 
 ( printf "# Text of link %s\n\n---\n\n%s\n" "${LINK}" "${SCUTTLE_PROMPT}";
   "${FETCHER_COMMAND}" "${LINK}" | ${CAPTURE_COMMAND};
