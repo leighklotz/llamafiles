@@ -244,7 +244,7 @@ The differences are inserted into a temporary buffer named `llm-diff-buffer-name
 
     ;; Run the diff command and capture the output in the *llm-diff* buffer
     (let ((result (shell-command-to-string diff-command)))
-      (erase-buffer)
+      (delete-region)
       (insert result)
       (smerge-mode)
       (diff-auto-refine-mode 1)
