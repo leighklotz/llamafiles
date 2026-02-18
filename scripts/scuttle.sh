@@ -12,7 +12,6 @@ if [ -f "${SCRIPT_DIR}/.venv/bin/activate" ]; then
 fi
 
 OUTPUT_MODE='LINK'
-INTERMEDIATE_FORMAT='YAML'
 
 # expecting something like /snap/bin/yq
 # yq (https://github.com/mikefarah/yq) version v4.49.2
@@ -85,10 +84,7 @@ function to_link() {
   + "&title="       + (.title       | formenc)
   + "&tags="        + (csv_tags     | formenc)
 '
-    yaml=$(cat)
-    printf '%s\n' "$yaml" \
-        | yq -o=json -r '.' \
-        | jq -r "$jq_filter"
+  yaml=$(cat)
 }
 
 function capture() {
