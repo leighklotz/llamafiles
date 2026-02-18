@@ -4,24 +4,19 @@ SCRIPT_DIR="$(dirname "$(realpath "${BASH_SOURCE}")")"
 CAPTURE_COMMAND="cat"
 FETCHER_COMMAND="${SCRIPT_DIR}/fetcher.sh"
 
+# Requires snap/golang yq for yaml->json, and regular jq to extract
 . "${SCRIPT_DIR}/../via/functions.sh"
 
 if [ -f "${SCRIPT_DIR}/.venv/bin/activate" ]; then
     . "${SCRIPT_DIR}/.venv/bin/activate"
 fi
 
-if command -v "yq" >/dev/null 2>&1; then
-    JQYQ="yq"
-    INTERMEDIATE_FORMAT="YAML"
-elif command -v "jq" >/dev/null 2>&1; then
-    JQYQ="jq"
-    INTERMEDIATE_FORMAT="json"
-else
-    log_error 'Error: cannot find jq or yq: do `pip install yq` and do not use yq snap'
-    exit 1
-fi
-
 OUTPUT_MODE='LINK'
+
+# expecting something like /snap/bin/yq
+# yq (https://github.com/mikefarah/yq) version v4.49.2
+# log_info "yq=$(which yq)"
+# log_info "jq=$(which jq)"
 
 while true; do
     case "$1" in
@@ -34,15 +29,7 @@ while true; do
             shift
             ;;
         "--yaml")
-            JQYQ="yq"
             OUTPUT_MODE='YAML'
-            INTERMEDIATE_FORMAT='YAML'
-            shift
-            ;;
-        "--json")
-            JQYQ="jq"
-            OUTPUT_MODE='JSON'
-            INTERMEDIATE_FORMAT='JSON'
             shift
             ;;
         "--capture-file")
@@ -59,18 +46,12 @@ while true; do
     esac
 done
 
-log_info "JQYQ=$JQYQ"
-
 if [ -z "$LINK" ]; then
     usage "NOLINK"
 fi
 
 function extract_output() {
     case "$OUTPUT_MODE" in
-        "JSON")
-            # awk out just the JSON '{}' objects.
-            awk '/{/{f=1} f; /}/{f=0}'
-            ;;
         "YAML")
             cat
             ;;
@@ -85,7 +66,29 @@ function extract_output() {
 
 function to_link() {
     # <https://scuttle.klotz.me/bookmarks/klotz?action=add&address=https://example.com&title=Example+Website+&description=This+is+an+example+website&tags=example,website,canonical+page>
-    cat | "${JQYQ}" --arg xspace "%20" --arg plus "+" --arg xcomma "%2[cC]" --arg comma "," -r '.keywords |= if(type == "array") then join(",") else . end | "https://scuttle.klotz.me/bookmarks/klotz?action=add&address=\(.link|@uri|gsub($xspace; $plus)|gsub($xcomma; $comma))&description=\(.description|@uri|gsub($xspace; $plus)|gsub($xcomma; $comma))&title=\(.title|@uri|gsub($xspace; $plus)|gsub($xcomma; $comma))&tags=\(.keywords|@uri|gsub($xspace; $plus)|gsub($xcomma; $comma))"'
+    jq_filter='
+ def formenc:
+    @uri
+    | gsub("%20"; "+")
+    | gsub("%2C"; ",");
+
+  def csv_tags:
+    if .keywords == null then ""
+    elif (.keywords | type) == "array" then (.keywords | join(","))
+    else .keywords
+    end;
+
+  "https://scuttle.klotz.me/bookmarks/klotz?action=add"
+  + "&address="     + (.link        | formenc)
+  + "&description=" + (.description | formenc)
+  + "&title="       + (.title       | formenc)
+  + "&tags="        + (csv_tags     | formenc)
+'
+  yaml=$(cat)
+  log_verbose "yaml=$yaml"
+  printf '%s\n' "$yaml" \
+      | yq -r '.' -o=json \
+      | jq -r "$jq_filter"
 }
 
 function capture() {
@@ -115,16 +118,11 @@ function replace_smart_quotes() {
     cat | sed -e 's/[“”]/"/g'
 }
 
-if [ -z "${INHIBIT_GRAMMAR}" ] && [ "${OUTPUT_MODE}" != "YAML" ]; then
-    GRAMMAR_FLAG="--grammar-file ${SCRIPT_DIR}/json3.gbnf"
-else
-    GRAMMAR_FLAG=""
-fi
+# Prompt is used twice, once before the text of link and once after.
+SCUTTLE_PROMPT="# Instructions\nRead the web page article from ${LINK} and ignore website header at the start and look for the main article. If there are retrieval failures, just report on the failures. Otherwise, respond with only a properly-quoted YAML stanza with these 4 fields: "'`link`, `title`, `description`, and `keywords` array.'
 
-SCUTTLE_PROMPT="# Instructions\nRead the web page article from ${LINK} and ignore website header at the start and look for the main article. If there are retrieval failures, just report on the failures. Otherwise, respond with only a short ${INTERMEDIATE_FORMAT} object with these 4 fields: "'`link`, `title`, `description`, and `keywords` array.'
-
-( printf "# Text of link %s\n" "${LINK}";
+( printf "# Text of link %s\n\n---\n\n%s\n" "${LINK}" "${SCUTTLE_PROMPT}";
   "${FETCHER_COMMAND}" "${LINK}" | ${CAPTURE_COMMAND};
-  printf "%b\n" "${SCUTTLE_PROMPT}" ) | \
-    "${SCRIPT_DIR}/llm.sh" ${GRAMMAR_FLAG} ${ARGS} -- "${SCUTTLE_PROMPT}" | \
+  printf "%b\n" "${SCUTTLE_PROMPT}" ) | 
+    "${SCRIPT_DIR}/llm.sh" ${ARGS} -- "${SCUTTLE_PROMPT}" | 
     postprocess
