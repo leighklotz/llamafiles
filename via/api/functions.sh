@@ -15,7 +15,7 @@ VIA_API_LOAD_MODEL_ENDPOINT="${VIA_API_CHAT_BASE}/v1/internal/model/load"
 VIA_API_UNLOAD_MODEL_ENDPOINT="${VIA_API_CHAT_BASE}/v1/internal/model/unload"
 AUTHORIZATION_PARAMS=()
 
-: "${TOP_K:=-20}"
+: "${TOP_K:-20}"
 : "${TOP_P:-0.95}"
 : "${MIN_P:-0.1}"
 
