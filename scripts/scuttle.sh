@@ -85,6 +85,10 @@ function to_link() {
   + "&tags="        + (csv_tags     | formenc)
 '
   yaml=$(cat)
+  log_verbose "yaml=$yaml"
+  printf '%s\n' "$yaml" \
+      | yq -r '.' -o=json \
+      | jq -r "$jq_filter"
 }
 
 function capture() {
