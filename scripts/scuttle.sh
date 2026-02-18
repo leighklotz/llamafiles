@@ -118,11 +118,17 @@ function replace_smart_quotes() {
     cat | sed -e 's/[“”]/"/g'
 }
 
+if [ -z "${INHIBIT_GRAMMAR}" ] && [ "${OUTPUT_MODE}" != "YAML" ]; then
+    GRAMMAR_FLAG="--grammar-file ${SCRIPT_DIR}/json3.gbnf"
+else
+    GRAMMAR_FLAG=""
+fi
+
 # Prompt is used twice, once before the text of link and once after.
 SCUTTLE_PROMPT="# Instructions\nRead the web page article from ${LINK} and ignore website header at the start and look for the main article. If there are retrieval failures, just report on the failures. Otherwise, respond with only a properly-quoted YAML stanza with these 4 fields: "'`link`, `title`, `description`, and `keywords` array.'
 
 ( printf "# Text of link %s\n\n---\n\n%s\n" "${LINK}" "${SCUTTLE_PROMPT}";
   "${FETCHER_COMMAND}" "${LINK}" | ${CAPTURE_COMMAND};
-  printf "%b\n" "${SCUTTLE_PROMPT}" ) | 
-    "${SCRIPT_DIR}/llm.sh" ${ARGS} -- "${SCUTTLE_PROMPT}" | 
+  printf "%b\n" "${SCUTTLE_PROMPT}" ) | \
+    "${SCRIPT_DIR}/llm.sh" ${GRAMMAR_FLAG} ${ARGS} -- "${SCUTTLE_PROMPT}" | \
     postprocess
