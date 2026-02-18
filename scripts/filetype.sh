@@ -5,9 +5,6 @@ convert_filetype() {
     local file=$1
     local output=$(file --mime-type -b "$file")
     case "$output" in
-        text/plain)
-            echo "plaintext"
-            ;;
         text/x-java)
             echo "java"
             ;;
@@ -25,6 +22,13 @@ convert_filetype() {
             ;;
         text/x-shellscript)
             echo "sh"
+            ;;
+        text/plain)
+            ext="${file##*.}"
+            case "$ext" in
+                md) echo "markdown" ;;
+                *) echo "plaintext" ;;
+            esac
             ;;
         # Add more cases as needed
         *)

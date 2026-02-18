@@ -86,9 +86,9 @@ keybinding gives manual, rahter than automatic, control over access to Emacs `M-
 ### `llm-apropos`
 Reflective function for asking about Emacs symbols, for programming and using Emacs Lisp and M-X commands.
 Implemented in the obvious way, calling the underlying Emacs `apropos` function and operating on the output.
-<<<<<<< HEAD
 
 ![docs/llm-apropos.png](docs/llm-apropos.png)
+![docs/llm-apropos2.png](docs/llm-apropos2.png)
 
 ### `llm-describe-function`
 Reflective function for asking about Emacs symbols, for programming and using Emacs Lisp and M-X commands.

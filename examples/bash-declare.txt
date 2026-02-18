@@ -1,4 +1,4 @@
-~$ help.sh how do I show a bash function definition using declare
+~$ help how do I show a bash function definition using declare
 To show the definition of a bash function using the `declare` command, you can use the `-f` option with the `declare` command. The `-f` option tells `declare` to display function definitions.
 
 Here is how you can do it:

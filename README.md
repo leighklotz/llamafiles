@@ -1,68 +1,55 @@
 # LLM Help CLI for Linux and Mac
 
-Using https://github.com/Mozilla-Ocho/llamafile and https://github.com/jart models and scripts, and offering support for https://github.com/oobabooga/text-generation-webui and other API providers.
+This repository provides an LLM Help CLI for Linux and Mac systems to provide help, summarization, coding assistance, system information queries, etc., using OpenAPI providers.
 
-This repository provides an LLM Help CLI for Linux and Mac systems to provide help, summarization, coding assistance, system information queries, image renaming, etc. Similar to https://justine.lol/oneliners/ and other resources.
 
 # Self Introduction
+Exact capabilities depend on the model used. Below is a sample interaction.
+
 ```bash
 $ via --get-model-name
-cognitivecomputations_dolphin-2.8-mistral-7b-v02.Q6_K.gguf
-$ help.sh what can you do
-```
->Here are a few things you can do with various technologies:
->
->- Linux:
->    - Operate a Linux-based operating system for desktop, server, or containerized applications.
->    - Customize and manage system settings and hardware.
->    - Install and maintain software packages and applications.
->    - Configure networking, security, and performance.
->
->- Bash:
->    - Create and run shell scripts to automate tasks or simply shorten repetitive commands.
->    - Customize the command-line interface (CLI) shell experience with scripts, shortcuts, and personalized configurations.
->    - Navigate directories, manage files and permissions, and handle data manipulation from the command line.
->
->- Python:
->    - Implement and run Python scripts for rapid application development in various fields such as web development, data analysis, machine learning, and automated tasks.
->    - Leverage Python's extensive libraries like NumPy, Pandas, Matplotlib, Django, Flask, etc. for specific tasks.
->    - Develop applications or interact with existing ones through APIs, scripts, or GUI interfaces.
->
->- General programming:
->    - Design, write, test, and debug code using various programming languages and tools.
->    - Collaborate with other developers on projects, communicate technical concepts, and contribute to open-source communities.
->    - Learn, understand, and apply programming patterns, best practices, and algorithms to solve real-world problems.
->    - Stay updated with the latest technologies, frameworks, and trends in the software industry.
+gemma-3-27b-it-Q4_K_M.gguf
+$ help what do you do
+As an AI bot, I'm designed to be a versatile assistant! I can help with a lot of different things. Here’s a breakdown of what I do:
 
+* **Answer Questions:** I can provide information on a wide range of topics, drawing from a massive knowledge base. Just ask!
+* **Provide Explanations:** Need something explained simply? I can break down complex subjects.
+* **Generate Text:** I can write different kinds of creative text formats, like poems, code, scripts, musical pieces, email, letters, etc.
+* **Technical Assistance:** I particularly excel with:
+    * **Linux & Bash:** I can help with commands, scripting, troubleshooting.
+    * **Python:** I can assist with code snippets, explanations, debugging.
+    * **General Programming:**  I understand programming concepts and can help with logic or syntax (in many languages).
+* **Execute Commands (in a conceptual way):** While I can't *actually* run commands on your system, I can *tell* you what commands would do, or help you construct them. I can also show you the likely output of a command.
+
+**Important:** Remember our interactions are one-shot. I don't have memory of previous turns. Each question needs to be self-contained.
+$ ask what do you do
+I'm Gemma, a large language model created by the Gemma team at Google DeepMind. I'm an open-weights AI assistant, which means I'm widely available to the public. 
+
+I take text *and* images as inputs and generate text as output. Basically, you can give me a prompt (text or an image!), and I'll do my best to give you a helpful and informative response. 
+
+Here are some things I can do:
+
+*   **Generate creative text formats:** like poems, code, scripts, musical pieces, email, letters, etc.
+*   **Answer your questions:** I'll try to provide comprehensive and informative answers.
+*   **Summarize text:** I can condense long pieces of text into shorter, more manageable summaries.
+*   **Translate languages:** I can translate text from one language to another.
+*   **Follow your instructions and complete your requests thoughtfully.**
+
+I'm still under development, but I'm learning new things every day!
+
+You can find more information about me here: [https://ai.google.dev/gemma](https://ai.google.dev/gemma)
+$
+```
 
 ## Brief Usage examples
-Below are brief examples to show you what these tools do.
+Examples can be found below and in the [examples](examples) directory.
 
-Instal llinks to the scripts you want to use in your home bin directory. In the example below, symlink names have been shortened.
-
-```shell
-$ help.sh -- "Split bash argument array into left and right with double hyphen as the separator using special bash builtin functions or operators"
-$ help.sh what is my ip
-$ help.sh -m dolphin 'Give me a JQ cli to get the value of the field named `llama.context_length`'
-$ ask dolphin ...
-$ man xxd | help.sh "print file contents with xxd without the address column"
-$ help-commit --oneline
-$ codeblock jq cat foo.jq | help.sh '"Explain this:'
-$ codeblock xslt cat redir/target.xslt | help.sh explain
-$ write.sh write.sh find and list empty directories in .
-$ summarize https://graflex.org --via api | ask nuextract '{ "link": "", "title": "", "summary": "", "keywords": ["", "", ...] }'
-$ ls -l | ask nuextract '[{ "filename": "", "metadata": { ... } }, ...]'
-```
-
-More examples can be found below and in the [examples](examples) directory.
-
-## help.sh usage and examples
-USAGE="[-m|--model-type model-type] [--stdin|--interactive|-i] [--fast | --long] [--temperature temp] [--context-length|-c n] [--ngl n] [--n-predict n] [--debug] [--verbose] [--] QUESTION*"
+## help usage and examples
+USAGE="[--stdin|--interactive|-i] [--temperature temp] [--n-predict n] [--debug] [--verbose] [--] QUESTION*"
 
 Uses question words and stdin, if any, to create the model prompt.
 
-- `-m`, `--model-type`: defaults if not specified. Available options are: `mixtral`, `dolphin`, `mistral`, `codebooga`, `deepseek`, `rocket`, and `phi`.
-- `--stdin|--interactive|-i`: if input is a terminal, asks user for input and interpolates stdin into prompt 
+- `--stdin|--interactive|-i`: if input is a terminal, asks user for input and interpolates stdin into prompt; defaults to on if used in a pipe
 - `--`: unambiguously terminate args
 - `QUESTION`: word or words, can be quoted or not, can be multiline (but also see `--stdin`)
 - [other options]: See source
@@ -70,22 +57,22 @@ Uses question words and stdin, if any, to create the model prompt.
 
 Below are a few examples. More are in [examples](examples).
 
-### help.sh Bash Coding Example
+### help Bash Coding Example
 ```
-$ help.sh -m codebooga -- "split bash argument array into left and right with double hyphen as the separator using special bash builtin functions or operators as needed "
-```
-
-### help.sh General Linux Example
-```
-$ help.sh what is my ip address
+$ help "split bash argument array into left and right with double hyphen as the separator using special bash builtin functions or operators as needed "
 ```
 
-### help.sh JQ Example
+### help General Linux Example
+```
+$ help what is my ip address
+```
+
+### help JQ Example
 This example takes a live JSON input and shows how to extract a slightly tricky value. As a bonus, the model gives the value of the field.
 
 ```
 $ ./llama.cpp/gguf-py/scripts/gguf-dump.py ./models/dolphin/dolphin-2.7-mixtral-8x7b.Q4_K_M.gguf --no-tensors --json | \
-   help.sh -m dolphin 'give me a jq cli to get the value of the named `llama.context_length` (note the dot is part of the field name) in the following JSON:'
+   help 'give me a jq cli to get the value of the named `llama.context_length` (note the dot is part of the field name) in the following JSON:'
 
 To get the value of `llama.context_length` using jq, you can use the following command:
 
@@ -104,12 +91,12 @@ $ ./llama.cpp/gguf-py/scripts/gguf-dump.py ./models/dolphin/dolphin-2.7-mixtral-
 $
 ```
 
-### help.sh LSHW Example
-The Codebooga llamafile I'm using doesn't yet support --silent-prompt so I elided the re-printed prompt manually.
+### help LSHW Example
+
 ```
 sudo lshw | wc 
     727    2411   31214
-$ sudo lshw | help.sh -c 16384 -m codebooga --stdin -- 'Summarize the following lshw output:\n\n'
+$ sudo lshw | help 'Summarize the following lshw output:'
 
 	This output shows information about the hardware components of a
 	computer system, including the motherboard, CPU, memory, storage
@@ -124,12 +111,11 @@ $ sudo lshw | help.sh -c 16384 -m codebooga --stdin -- 'Summarize the following 
 	USB ports, audio devices, and an SMBus controller.  [end of text]
 ```
 
-### help.sh Raspberry Pi 5 lspci with Rocket model
+### help Raspberry Pi 5 lspci with Rocket model
 ```
-klotz@rpi5:~ $ export MODEL_TYPE=rocket
-klotz@rpi5:~ $ help.sh lspci
+klotz@rpi5:~ $ help lspci
 LSPCI, or List PCI Devices, is a command used in Linux to display information about all the PCI devices connected to the system's motherboard. It provides details such as device vendor and product IDs, memory sizes, and supported devices. This command can be executed in the terminal of a Linux system with root privileges. For example, to list all PCI devices, you would type `lspci` in the terminal and press Enter. The output will display the information about each device.
-klotz@rpi5:~ $ lspci | help.sh --stdin "explain this lspci output"
+klotz@rpi5:~ $ lspci | help "explain this lspci output"
 Sure, I can help you understand the LSPCI (List PCI Devices) output you provided.
 
 LSPCI is a command in Linux that lists all PCI devices in the system. The output you provided is in a format that's easy to read but not very human-friendly. Here's a breakdown of what each line means:
@@ -161,15 +147,9 @@ For example, to create an oneline commit message for staged changes, use the fol
 help-commit --staged
 ```
 
-To create multi-line commit message using the mixtral model with a long context, do this:
-
-```bash
-help-commit -- -m mixtral --long
-```
-
 ## write.sh examples
 The `write.sh` command is similar in spirit to the iTerm2 AI command feature which https://gitlab.com/gnachman/iterm2/-/issues/11475
-But it is not hardwared to OpenAI and does not execute the code. It differs from `help.sh` only in the default prompt.
+But it is not hardwared to OpenAI and does not execute the code. It differs from `help` only in the default prompt.
 
 ```bash
 $ write.sh show git commit message for 70eab9e
@@ -182,118 +162,8 @@ git show 70eab9e --pretty=%s</s>
 $ 
   ```
 
-# ask examples
-
-Ask uses a brief system prompt and allows you to conveniently/ direct your query to a specific local model, or just use
-`any` for the model name in the `-via api` case.
-
-```
-ask phi3 2+3=
-```
-
-or
-```
-export VIA=api
-ask any 2+3=
-```
-
-## ask nuextract to convert to JSON
-You can use ask with the `nuextract` model, which provides its own system prompt.
-
-
-The nuextract model is limited to 2048 token context, so it's best used in pipelines, e.g.:
-
-```bash
-$ summarize https://graflex.org --via api | ask nuextract '{ "link": "", "title": "", "summary": "", "keywords": ["", "", ...] }'
-
-{
-    "link": "Graflex.org",
-    "title": "Graflex.org is a website dedicated to Graflex Speed Graphics and other classic large-format cameras",
-    "summary": "The site aims to promote their use and preservation",
-    "keywords": [
-        "Graflex",
-        "Speed Graphics",
-        "classic",
-        "large-format",
-        "cameras",
-        "photography",
-        "Articles",
-        "Help Board",
-        "Q&A",
-        "Camera Information",
-        "Technical Information",
-        "Related Websites",
-        "News"
-    ]
-}
-```
-
-With the nuextract model  limited (DWIM)[https://en.wikipedia.org/wiki/DWIM] seems to work for the JSON structure.
-Feel free to try with regular instruct-trained models as well.
-
-```bash
-$ git log -3 | ask nuextract 'appropriate JSON structure'
-
-{
-    "commit": [
-        {
-            "sha": "dbf2ab43732fc364539bb5d7fcc5f7c0f16ddac9",
-            "author": "Leigh L. Klotz, Jr.",
-            "date": "Thu Aug 22 15:03:28 2024 -0700",
-            "message": "merge pull request #9 from leighklotz/nemo"
-        },
-        {
-            "sha": "ea62e09c37b599c9c1067f7dc507fecbec7226f9",
-            "author": "Leigh Klotz",
-            "date": "Thu Aug 22 15:02:32 2024 -0700",
-            "message": "nemo: split out nemo fom mistral"
-        },
-        {
-            "sha": "4c4202f3bd93f459add366f0094890d615a9c8fd",
-            "author": "Leigh Klotz",
-            "date": "Thu Aug 22 14:11:35 2024 -0700",
-            "message": "nuextract: add example with 'ls'"
-        }
-    ]
-}
-```
-
-
-
-
 # llm_el for Emacs
 There are many LLM integrations for Emacs; mine is here: [llm_el](llm_el).
-
-# LLamafile binaries
-Get these files from (https://github.com/Mozilla-Ocho/llamafile)[https://github.com/Mozilla-Ocho/llamafile].
-They go in `lib/`:
-
-- `llamafile-0.2.1.zip`
-- `llamafile-llava-cli-0.2.1`
-- `llamafile-llava-quantize-0.2.1`
-- `llamafile-main-0.2.1`
-- `llamafile-quantize-0.2.1`
-- `llamafile-server-0.2.1`
-- `zipalign-0.2.1`
-
-# Models and all-in-one
-You need to download these from https://huggingface.co/jartine and other places on HF.
-todo: script to do this
-
-## Desktop and GPU models
-Each model-type directory has one or more `.gguf` or `.llamafile` models and a `function.sh` file.
-
-These go in `models/*`:
-- dolphin: `dolphin-2.5-mixtral-8x7b.Q4_K_M.llamafile`
-- llava: `llava-v1.5-7b-q4-main.llamafile`, `llava-v1.5-7b-q4-server.llamafile`
-- mistral: `mistral-7b-instruct-v0.2.Q4_K_M.llamafile`
-
-## RPI5 and other small models
-These go in `models/*`:
-- mistral: `mistral-7b-instruct-v0.2.Q3_K_M.llamafile`
-- mixtral: `mixtral_7bx2_moe.Q3_K_M.gguf`
-- phi: `phi-2.Q5_K_M.llamafile`, `phi-2.Q6_K.llamafile`
-- rocket: `rocket-3b.Q4_K_M.llamafile`
 
 # Scripts and Files
 These files are in [scripts](scripts). You might want to symlink some to your bin directory.
@@ -303,27 +173,21 @@ You can also copy [scripts/env.sh.example](scripts/env.sh.example) to `scripts/e
 - llm.sh - the base script that others call
 
 ## user programs
-- help.sh - CLI for Linux help - cann't be shortened to 'help' in bash
-- ask.sh - like 'help.sh -m $1' - can be shortened to 'ask' in bash
+- help - CLI for Linux help - use `builtin help` to access the built-in Bash help function instead.
+- ask - Like `help` but not not customized to Linux help
+- response - prints the last response from `help` or `ask`, from the environment variable `LLM_RESPONSE`.
 - machelp.sh - CLI for Mac help
 - summarize.sh - CLI to summarize a hyperlink / use '-' for stdin
 - help-commit.sh - CLI to run `git diff` and produce a commit message
 - summarize-directory-files.sh - summarize directory files as markdown
 
 ## user utilities
-- systype.sh - Pipe to help.sh to provide context for distro-specific questions
+- systype.sh - Pipe to `help` to provide context for distro-specific questions
 - nvfree.sh - check your GPU usage
-- codeblock.sh [lang] [cmd] - Pipe to help.sh to wrap output of cmd in a codeblock of type lang.
-- bashblock.sh [cmd] - Pipe to help.sh to wrap output of cmd in a bash-like template.
+- codeblock.sh [lang] [cmd] - Pipe to `help` to wrap output of cmd in a codeblock of type lang.
+- bashblock.sh [cmd] - Pipe to `help` to wrap output of cmd in a bash-like template.
+- unfence - Pipe response to unfence to extract content, usually code, between triple-backquotes.
 
-## images
-These are less developed.
-- image-name.sh - Simple script using LLAVA to geneate image name
-- rename-pictures.sh [adapted from https://gist.github.com/jart/bd2f603aefe6ac8004e6b709223881c0 and included here under Apache 2.0 license]
-- llava-cli.sh 
-
-## internals
-- create-chat-templates.py: wip to statically create models/*/functions.sh prompt processing
 
 # llm.sh Details
 The help and summary scripts invoke `llm.sh`, but you can use it yourself directly as well.
@@ -331,14 +195,8 @@ The help and summary scripts invoke `llm.sh`, but you can use it yourself direct
 ## Command Line Flags
 `llm.sh` accepts the following command line flags:
 
-- `-m` or `--model-type`: specifies the type of model to use. The available options are `mixtral`, `dolphin`, `mistral`, `codebooga`, `deepseek`, `
-rocket`, and `phi`.
-- `--fast`: sets the priority to speed (more GGUF GPU layers, less context)
-- `--long`: sets the priority to length (max context, fewer GGUF GPU layers)
 - `--temperature`: sets the temperature of the model.
 - `--verbose`: enables verbose mode.
-- `-c` or `--context-length`: sets the context length.
-- `--ngl`: sets the number of gradient layers.
 - `--n-predict`: sets the number of tokens to predict.
 - `--debug`: enables debug mode.
 - `--noerror`: disables error output.
@@ -351,33 +209,23 @@ In CLI prompt, be sure to use apostrophe quotes if your prompt contains backquot
 
 For example, this is good:
 ```bash
-$ help.sh 'How can I use the `yes` command in bash?'
+$ help 'How can I use the `yes` command in bash?'
 ```
 but this is bad:
 ```bash
-$ help.sh "How can I use the `yes` command in bash?"
+$ help "How can I use the `yes` command in bash?"
 ```
 
 ## Environment Variables
 
 In addition to these command line flags, the script also checks for several environment variables to configure its behavior. Variables with effect in CLI-only are marked as such.
 
-- `VIA`: The type of model runner, `api` or `cli`. Also see `--via` flag.
-- `MODEL_TYPE`: The default model type to use if none is specified via the `-m` or `--model-type` flag. (cli)
 - `TEMPERATURE`: The default temperature parameter for the model if none is specified via the `--temperature` flag.
-  `TOP_K`: TOP_K. Currently only set for api models.
-  `TOP_P`: TOP_P. Currently only set for api models.
-  `MIN_P`: MIN_P. Currently only set for api models.
-- `CONTEXT_LENGTH`: The default context length for the model if none is specified via the `--context-length` or `-c` flag. (cli)
+  `TOP_K`: TOP_K
+  `TOP_P`: TOP_P
+  `MIN_P`: MIN_P
 - `N_PREDICT`: The default number of tokens to predict if none is specified via the `--n-predict` flag.
 - `SYSTEM_MESSAGE`: The default system message to use if none is specified via the command line.
-- `MODEL_RUNNER`: The program used to run the model. Defaults to `/usr/bin/env` and automatically set to `llamafile...` if needed. See also `FORCE_MODEL_RUNNER` (cli)
-- `LLM_ADDITIONAL_ARGS`: Value is interpolated into the call to LLM at the end of the CLI invocation. (cli)
-- `FORCE_MODEL_RUNNER`: Force usage of MODEL_RUNNER, for example to override `llamafile...` with llama.cpp set in in `MODEL_RUNNER` (cli)
-- `THREADS`: The number of threads to use for the model. Defaults to the number of CPU cores. (cli)
-- `NGL`: Number of GPU layers, same as `--ngl` (cli)
-- `GPU`: auto, none, nvidia, ... (cli)
-- `PRIORITY`: speed|length|manual controlling balance of GPU memory and context length (cli)
 - `GRAMMAR_FILE`: Same as `--grammar-file`
 - `DEBUG`: same as --debug
 - `VERBOSE`: same as --verbose
@@ -387,28 +235,16 @@ See [env.sh.example](env.sh.example).
 
 ## Basic Inference Script
 
-The script [scripts/llm.sh](scripts/llm.sh) controls almost text-based access to LLamafiles and to OpenAPI inference. 
-
-Choose a model type (API or Local LLama) by by setting environment variable `export VIA=api` or `export VIA=cli`,  or `llm.sh` flag flag `--via api`.
-
-You can control the default model by specifying environment variable `$MODEL_TYPE`, for example in your shell or in [scripts/env.sh](scripts/env.sh). If `$MODEL_TYPE` or the `-m ` argument to `llm.sh` is one of the model types in [models](models), then `llm.sh` will use the largest executable `.llamafile` or GGUF file.
-
-Todo: Document LLAMAFILE_RUNNER here.
+The script [scripts/llm.sh](scripts/llm.sh) controls almost text-based access OpenAPI inference. 
 
 The [scripts/via.sh](via.sh) CLI tool provides access to server-specific commands, such as listing models and model types.
-Although it can use Oobabooga/text-generation-webui API to remotey load models in the `--via api` case,  there is no facility to `load` a LLamafile model in the `--via cli` case; instead set `MODEL_TYPE` or use the `-m` flag.
+It uses Oobabooga/text-generation-webui API to remotely load models.
 
-## Open API Usage
-You can skip using a local `GGUF` or `llamafile` executable and instead use an Open API compatible LLM server.
+If the server is not local, set the environment variable `VIA_API_CHAT_BASE`, which defaults to `http://localhost:5000`.
 
-Do this by setting `VIA` environment variable or CLI flag `--via` to `api'.  If the server is not local, set the environment variable `VIA_API_CHAT_BASE`, which defaults to `http://localhost:5000`.
-
-You can run `llamafiles` in server mode with [scripts/start-server.sh](scripts/start-server.sh) or by using Oobabooga/text-generation-webui (see #References).
+You can run `llama.cpp` in server mode with [scripts/start-server.sh](scripts/start-server.sh) or by using Oobabooga/text-generation-webui (see #References).
 
 The [scripts/via.sh](via.sh) CLI tool provides access to server-specific commands, such as model loading and unloading.
-
-## Image Usage
-Image pipelines are handled solely by @jartine https://justine.lol/oneliners/ and https://github.com/Mozilla-Ocho/llamafile directly, with a few minor changes copied here for convenience, and are not yet integrated into the LLM.sh.
 
 ## Program Flow
 1. If there are any arguments, `--` or any non-hyphen word, terminate the arguments and start the question. 
@@ -431,22 +267,17 @@ $ ./scripts/install-scripts.sh ~/bin
 
 Case 2: Install the scripts for playwright headless browser usage:
 
-If you want to use playwright to fetch web pages, give the `--downlink` final argument to `install-scripts.sh`
+If you want to use playwright to fetch web pages, install [/leighklotz/downlink](downlink)`.
 ```bash
-$ ./scripts/install-scripts.sh ~/bin --downlink
+$ git clone https://github.com/leighklotz/downlink
+$ cd downlink
+$ ./install.sh ~/.local/bin
 ```
 
-## Mac Specifics
-You will need to do this on MacOS:
-```
-$ cd ~/wip/llamafiles
-$ xattr -dr com.apple.quarantine models/*.llamafile models/*/*.llamafile lib/*
-```
+Beware that playwright installs a significant number of dependencies.
 
 # References
 ## Used directly
-- https://github.com/Mozilla-Ocho/llamafile 
-- https://github.com/klotz/llamafiles
 - https://justine.lol/oneliners/
 
 ## Similar packages
@@ -468,10 +299,3 @@ Many of these are better than this package. Please try them out.
 - https://github.com/ggerganov/llama.cpp
 - https://github.com/Mozilla-Ocho/llamafile
 - OpenAI API - partial support
-
-## Special-purpose LLM Inference models
-- https://huggingface.co/numind/NuExtract
-
-# TODO
-- prompt caching
-- quoting safety

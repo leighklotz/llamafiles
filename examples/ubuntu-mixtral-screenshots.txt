@@ -1,4 +1,4 @@
-$ help.sh where does ubuntu 22 store screenshots
+$ help where does ubuntu 22 store screenshots
  In Ubuntu 22.04, and previous versions, the default location for saving screenshots taken using the keyboard shortcut (Ctrl + PrtSc or PrtSc) is in the ~/Pictures/Screenshots/ directory. This behavior is set by the Gnome desktop environment, which Ubuntu uses by default.
 
 However, if you're taking screenshots using specific tools like the `screencapture` command in a terminal or other applications, the location might vary depending on the tool or script used.

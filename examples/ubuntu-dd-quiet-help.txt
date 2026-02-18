@@ -1,4 +1,4 @@
-$ dd --help | help.sh i want the flag to be quiet
+$ dd --help | help i want the flag to be quiet
  To make the `dd` command quiet, you can use the `status=none` option. This will suppress all information messages, except for error messages. Here's an example:
 
 ```bash

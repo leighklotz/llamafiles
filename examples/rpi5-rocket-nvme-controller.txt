@@ -1,4 +1,4 @@
-klotz@rpi5:~ $ help.sh how can i find out what controller is used on an nvme drive
+klotz@rpi5:~ $ help how can i find out what controller is used on an nvme drive
 To find out which controller is used for an NVMe drive in Linux, you can use the command `lspci` to list all the PCI devices on your system. Look for the line that starts with '01:00' or '00:01', which represents the NVMe drives. The controller information will be displayed in the next line, typically starting with 'Vendor' and 'Product'. 
 
 Here's an example:

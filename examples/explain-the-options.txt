@@ -1,5 +1,5 @@
-$ help.sh explain the options in "!!"
-help.sh explain the options in "git log --oneline --graph --decorate grammar-fixes..main"
+$ help explain the options in "!!"
+help explain the options in "git log --oneline --graph --decorate grammar-fixes..main"
 The command git log --oneline --graph --decorate grammar-fixes..main is used to display a graphically-enhanced log of commits with a focus on the 'grammar-fixes' branch and the 'main' branch. Here's an explanation of each option:
 
 -oneline: This option displays each commit as a single line, containing the commit hash, author, date, and a brief description of the changes.

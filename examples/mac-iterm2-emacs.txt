@@ -1,5 +1,5 @@
 
-klotz@core:~/wip/llamafiles/bin$ machelp.sh -m dolphin iterm2 use 24-bit color for emacs in terminal
+klotz@core:~/wip/llamafiles/bin$ machelp -m dolphin iterm2 use 24-bit color for emacs in terminal
 
 To use 24-bit color in iTerm2 for Emacs, you'll need to configure both iTerm2 and Emacs. Here's a step-by-step guide:
 

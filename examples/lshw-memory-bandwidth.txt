@@ -1,4 +1,4 @@
-klotz@edge:~$ (systype; sudo lshw) | help.sh what is the memory bandwidth
+klotz@edge:~$ (systype; sudo lshw) | help what is the memory bandwidth
 [sudo] password for klotz:
 Okay, let's break down the memory bandwidth for this system. Based on the provided `lshw` output, we have the following key details:
 
@@ -28,7 +28,7 @@ Converting to GB/s:
 klotz@edge:~$
 
 
-klotz@tensor:~/wip/llamafiles$ (systype; sudo lshw) | help.sh what is the memory bandwidth
+klotz@tensor:~/wip/llamafiles$ (systype; sudo lshw) | help what is the memory bandwidth
 [sudo] password for klotz:
 Based on the system information provided, calculating memory bandwidth requires knowing the memory configuration and timings. You have 64GiB of RAM consisting of two 32GiB DDR4 modules running at 3600MHz with a 64-bit width.
 

@@ -1,4 +1,4 @@
-klotz@raspberrypi:~/wip/llamafiles $ ./help.sh -m mistral "is there a bash or other Linux program to display load average as a sparkline in the terminal?"
+klotz@raspberrypi:~/wip/llamafiles $ ./help -m mistral "is there a bash or other Linux program to display load average as a sparkline in the terminal?"
  There isn't a built-in Bash or Linux program to display load average as a sparkline directly in the terminal. Sparklines are a type of data visualization that is typically used to represent trends over time, and they are not a standard feature of Linux command-line tools.
 
 However, you can create a custom solution using a combination of tools. For example, you can use `awk` to extract load average data from `/proc/loadavg` and `gnuplot` to generate the sparkline. Here's an example command:

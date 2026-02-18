@@ -1,3 +1,4 @@
-$ history|tail -100 | help.sh what was i doing
+`$ history|tail -100 | help what was i doing`
 
 Based on the command history provided, it seems that you were working on a script called `downlink.py` to fetch and convert webpages to Markdown, and another script called `summarize.sh` to summarize webpages. You were also working on setting up a virtual environment, installing necessary Python packages like `requests_html`, `markdownify`, and `lxml_html_clean`, and updating your `requirements.txt` file. Additionally, you were experimenting with different tools to view Markdown files, such as `glow`, and were making changes to your Git repository, including resolving merge conflicts and pushing your changes.
+`$ `

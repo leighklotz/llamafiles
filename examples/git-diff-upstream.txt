@@ -1,4 +1,4 @@
-klotz@tensor:~/wip/oobabooga/text-generation-webui$ git diff cbd65ba7..bd71a504 | help.sh --length -m mixtral explain the update
+klotz@tensor:~/wip/oobabooga/text-generation-webui$ git diff cbd65ba7..bd71a504 | help --length -m mixtral explain the update
  This is a series of updates in a number of Python files and a requirements file related to a machine learning or artificial intelligence project. I'll try to summarize the most significant changes:
 
 1. `html_generator.py`: In this file, the way an image is saved has been changed. Earlier, the image was saved in RGB format, but now it's being saved in RGBA format. This could affect the transparency of the images.

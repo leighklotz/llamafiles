@@ -52,7 +52,7 @@ def main():
     url = f"{VIA_API_CHAT_BASE}/v1/chat/completions"
 
     try:
-        # print((url, data))
+        print((url, data))
         response = requests.post(url, json=data)
         response.raise_for_status()  # Raise HTTPError for bad responses (4xx or 5xx)
         print(response.text)

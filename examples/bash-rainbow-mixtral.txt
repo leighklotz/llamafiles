@@ -1,8 +1,8 @@
-bash-3.2$ ./colortest-24bit.sh | help.sh what does this output to a color terminal 
+bash-3.2$ ./colortest-24bit.sh | help what does this output to a color terminal 
 It looks like this output represents a colorful pattern using Linux/Bash ANSI escape codes for changing text color. These codes alternate between changing the background color and then the text color, creating an effect similar to a rainbow gradient pattern. All of the numbers between [48;2;...;...m and [38;2;...;...m correspond to RGB color values that determine the displayed colors.
 
 This rainbow gradient pattern is often used in terminal systems for aesthetic purposes. The more color-capable the terminal, the more accurate the displayed colors will resemble the desired RGB values.
-bash-3.2$ bashblock cat ~/bin/colortest-24bit.sh | help.sh what does this output to a color terminal 
+bash-3.2$ bashblock cat ~/bin/colortest-24bit.sh | help what does this output to a color terminal 
 The script you posted creates and displays a gradient color pattern in a terminal that supports 24-bit colors. The output will be a colorful gradient that stretches across the terminal. The colors change progressively, starting with white on one edge of your terminal (the top or bottom, depending on the orientation) and finally merging into black on the opposite edge of the terminal. The whole gradient is created using Unicode characters and ANSI escape codes for setting colors in a terminal. Note that this script should be run in a terminal that supports 24-bit colors.
 bash-3.2$ cat ~/bin/colortest-24bit.sh 
 #!/bin/sh

@@ -1,4 +1,4 @@
-klotz@tensor:~/wip/solon$ (bashblock cat solon.py; whatsty solon) | help.sh tell me how to fix what happened to these two classification jobs overnight
+klotz@tensor:~/wip/solon$ (bashblock cat solon.py; whatsty solon) | help tell me how to fix what happened to these two classification jobs overnight
 
 
 Okay, I've analyzed the logs. It appears the two classification jobs

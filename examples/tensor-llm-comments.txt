@@ -1,3 +1,3 @@
-klotz@tensor:~/wip/llamafiles$ codeblock.sh bash cat llm.sh | help.sh -i -m mixtral --context-length 8192 'is there any commented-out code in this bash script?'
+klotz@tensor:~/wip/llamafiles$ codeblock.sh bash cat llm.sh | help -i -m mixtral --context-length 8192 'is there any commented-out code in this bash script?'
  No, there is no commented-out code in this Bash script. Comments in Bash are denoted by the `#` symbol, and there are no lines in this script that begin with `#` that are not already being used for comments.
 klotz@tensor:~/wip/llamafiles$ 

@@ -1,4 +1,4 @@
-klotz@core:~$ help.sh what cli is like top and pstree combined
+klotz@core:~$ help what cli is like top and pstree combined
  There isn't a single CLI (Command-Line Interface) tool that directly merges the functionalities of `top` and `pstree` with an exact match, but you can achieve similar results by using a combination of these two commands or other tools like `htop` or `gpstree`.
 
 `top` displays the running processes along with their system resources usage like CPU, memory, and process IDs. On the other hand, `pstree` shows the hierarchical tree representation of the currently running processes, including their parent-child relationships.

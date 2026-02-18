@@ -1,4 +1,4 @@
-$ help.sh -i -m mixtral 'How do I fix this Ubuntu apt update issue?'
+$ help -i -m mixtral 'How do I fix this Ubuntu apt update issue?'
 Give input followed by Ctrl-D:
 Fetched 16.8 kB in 14s (1,196 B/s)
 Reading package lists... Done

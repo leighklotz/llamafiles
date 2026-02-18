@@ -1,4 +1,4 @@
-klotz@tensor:~/wip$ help.sh decode < google.cert
+klotz@tensor:~/wip$ help decode < google.cert
 The text you provided is a PEM-encoded X.509 certificate. PEM stands for Privacy Enhanced Mail, a standard for storing and transmitting certificates, keys, and other cryptographic items. This format is widely used because it can be easily transmitted and stored as text.
 The certificate is base64-encoded and includes header and footer lines that indicate the start and end of the certificate data:
 

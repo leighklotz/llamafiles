@@ -1,4 +1,4 @@
-$ git diff --staged | help.sh "write a git commit message for the following. cluster into functional changes"
+$ git diff --staged | help "write a git commit message for the following. cluster into functional changes"
  Commit Message:
 
 Refactor script to find first existing executable or GGUF in the list using find_first_model function.

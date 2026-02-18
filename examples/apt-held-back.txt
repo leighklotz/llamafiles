@@ -1,4 +1,4 @@
-$ help.sh -i how do i troubleshoot this
+$ help -i how do i troubleshoot this
 Give input followed by Ctrl-D:
 ```bash
 $ sudo apt upgrade
