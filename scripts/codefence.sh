@@ -15,7 +15,7 @@ if [ ! -r "${fn}" ]; then
 fi
 
 ft="$("$SCRIPT_DIR/filetype.sh" "${fn}")"
-printf $'```#%s:
+printf $'```%s
 %s
 %s
 ```
