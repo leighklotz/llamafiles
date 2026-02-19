@@ -5,7 +5,6 @@ set -euo pipefail
 # Fixes: skip non-regular files (directories), avoid indexing associative array
 # with empty keys, safer stdin collection.
 
-#QUESTION: can I use `file -b --mime-type $file` to get the codefence name?
 declare -A ext_langs=(
   [go]=go [py]=python [js]=javascript [jsx]=jsx
   [ts]=typescript [tsx]=tsx [rs]=rust [java]=java
