@@ -4,6 +4,7 @@ set -euo pipefail
 # lx.sh - minimal reliable wrapper: print files inside fenced code blocks.
 # Fixes: skip non-regular files (directories), avoid indexing associative array
 # with empty keys, safer stdin collection.
+# Inspired by a subset of <https://github.com/rasros/lx> but vibe coded in bash
 
 declare -A ext_langs=(
   [go]=go [py]=python [js]=javascript [jsx]=jsx
