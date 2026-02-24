@@ -17,7 +17,8 @@ usage() {
     exit 1
 }
 
-URL="$1"
+# Get URL and drop any fragment
+URL=${1%#*}
 
 if [ -z "$URL" ]; then
     usage
