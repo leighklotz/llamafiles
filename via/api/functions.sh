@@ -34,7 +34,7 @@ TEMPLATE_SETTINGS="
 if [ -n "${OPENAI_API_KEY}" ]; then
     AUTHORIZATION_PARAMS=(-H "Authorization: Bearer ${OPENAI_API_KEY}")
     TEMPLATE_SETTINGS="${TEMPLATE_SETTINGS},
-        model: \"gpt-5\""
+        model: \"gpt-5.1\""
 else
     TEMPLATE_SETTINGS="${TEMPLATE_SETTINGS},
     tools: [],
