@@ -107,4 +107,5 @@ Implemented in the obvious way, calling the underlying Emacs `describe-variable`
 ### `llm-view-lossage`
 Gives Emacs editing adviced based on your recent keystroke. 
 Implemented in the obvious way, calling the underlying Emacs `view-lossage` and operating on the output.
+
 ![docs/llm-view-lossage.png](docs/llm-view-lossage.png)
