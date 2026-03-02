@@ -67,6 +67,12 @@ Here is an example of how to use the `llm-rewrite` function:
 
 This will rewrite the current region using the LLM, replacing the region with the LLM's output.
 
+### `llm-load-model`
+`M-x llm-load-model` loads the specified LLM.
+
+### `llm-query-replace`
+`M-x llm-query-replace` uses the LLM to generate replacement text for occurrences matching a specified regular expression in the buffer, based on a user-provided prompt.
+
 ### `llm-explain-output`
 
 The `llm-explain-output` function is used in `comint-mode` to understand and explain the output in
@@ -91,11 +97,14 @@ Implemented in the obvious way, calling the underlying Emacs `apropos` function 
 ![docs/llm-apropos2.png](docs/llm-apropos2.png)
 
 ### `llm-describe-function`
-Reflective function for asking about Emacs symbols, for programming and using Emacs Lisp and M-X commands.
+Reflective function for asking about Emacs functions, for programming and using Emacs Lisp and M-X commands.
 Implemented in the obvious way, calling the underlying Emacs `describe-function` and operating on the output.
 
-### `llm-load-model`
-`M-x llm-load-model` loads the specified LLM.
+### `llm-describe-variable`
+Reflective function for asking about Emacs variables, for programming and using Emacs Lisp and M-X commands.
+Implemented in the obvious way, calling the underlying Emacs `describe-variable` and operating on the output.
 
-### `llm-query-replace`
-`M-x llm-query-replace` uses the LLM to generate replacement text for occurrences matching a specified regular expression in the buffer, based on a user-provided prompt.
+### `llm-view-lossage`
+Gives Emacs editing adviced based on your recent keystroke. 
+Implemented in the obvious way, calling the underlying Emacs `view-lossage` and operating on the output.
+![docs/llm-view-lossage.png](docs/llm-view-lossage.png)
