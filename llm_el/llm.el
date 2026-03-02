@@ -36,6 +36,19 @@
 ;;;   - M-x llm-quick
 ;;;     Answer a question concisely and insert answer at point.
 ;;;
+;;; Commands about Emacs
+;;;
+;;;   - M-x llm-apropos
+;;;     Ask a question about M-x apropos and summarize or ask about the results
+;;;     history via M-x view-lossage
+;;;   - M-x llm-describe-function
+;;;     Ask a question about the function description.
+;;;   - M-x llm-describe-variable
+;;;     Ask a qusetion about the variable description.
+;;;   - M-x llm-view-lossage
+;;;     Gives Emacs editing adviced based on your recent keystroke
+
+;;;
 ;;; Some commands will use empty string if there is not a region, but other commands will error.
 ;;;
 ;;; Dependencies:
@@ -91,11 +104,11 @@
   "History of prompts used with LLM functions.")
 
 ;;; Utility functions
-(defun llm-get-user-prompt (label)
+(defun llm-get-user-prompt (label &optional default)
   "Prompt the user for a prompt, using `llm-prompt-history` for completion."
   (let ((completion-ignore-case t))
     (read-string "Prompt: "
-                 (if (not llm-prompt-history) "" (car llm-prompt-history) ))))
+                 (or default (if (not llm-prompt-history) "" (car llm-prompt-history) )))))
 
 ;;; User commands
 
@@ -371,6 +384,15 @@ The function calls \\[[describe-variable]] and then runs \\[[llm-ask]] with QUES
     (describe-variable variable-name)
     (set-buffer (help-buffer))
     (llm-ask question (point-min) (point-max))))
+
+(defun llm-view-lossage (prompt)
+  "Generate suggestions based on the captured keystrokes and display them."
+  (interactive (list (llm-get-user-prompt
+                      "Advice: "
+                      "Based on the keystrokes, suggest improvements for Emacs usage.")))
+  (view-lossage)
+  (with-current-buffer (help-buffer) 
+    (llm-ask prompt (point-min) (point-max))))
 
 ;; Keybindings
 
