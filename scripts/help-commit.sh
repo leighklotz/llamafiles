@@ -32,7 +32,6 @@ while [[ $# -gt 0 ]]; do
             ;;
         --)
             shift
-            # Assign as array and fix users.
             # The array elements each map to CLI parameters
             HELP_SH_OPTIONS=("$@")
             break
