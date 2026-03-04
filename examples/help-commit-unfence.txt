@@ -16,4 +16,6 @@ klotz@core:~/wip/astroboy$ help-commit | unfence | tee | bash
  1 file changed, 75 insertions(+), 1 deletion(-)
 klotz@core:~/wip/astroboy$ ls -l README.md 
 -rw-r--r-- 1 klotz user 2549 Mar  4 10:13 README.md
-klotz@core:~/wip/astroboy$
+klotz@core:~/wip/astroboy$ (bashblock ls -l ; lx README.md) | help give a working cli call to label_starts.py to run immediately | unfence
+python label_stars.py --image jupiter-in-gemini.jpg
+klotz@core:~/wip/astroboy$ 
