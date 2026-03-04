@@ -1,0 +1,19 @@
+klotz@core:~/wip/astroboy$ ls -l
+total 312
+-rw-r--r-- 1 klotz user 294418 Mar  4 10:11 jupiter-in-gemini.jpg
+-rw-r--r-- 1 klotz user   8388 Mar  4 10:11 label_stars.py
+-rw-r--r-- 1 klotz user   1076 Mar  4 10:11 LICENSE
+-rw-r--r-- 1 klotz user     27 Mar  4 10:11 README.md
+-rw-r--r-- 1 klotz user     69 Mar  4 10:11 requirements.txt
+klotz@core:~/wip/astroboy$ lx README.md requirements.txt label_stars.py | help write a new README > README-2.md
+klotz@core:~/wip/astroboy$ mv README-2.md README.md
+klotz@core:~/wip/astroboy$ git add README.md 
+klotz@core:~/wip/astroboy$ git status
+## copilot/add-astrometry-functionality...origin/copilot/add-astrometry-functionality [ahead 1]
+M  README.md
+klotz@core:~/wip/astroboy$ help-commit | unfence | tee | bash
+[copilot/add-astrometry-functionality e6de89a] feat: Add detailed README with installation, usage, and troubleshooting guide
+ 1 file changed, 75 insertions(+), 1 deletion(-)
+klotz@core:~/wip/astroboy$ ls -l README.md 
+-rw-r--r-- 1 klotz user 2549 Mar  4 10:13 README.md
+klotz@core:~/wip/astroboy$
