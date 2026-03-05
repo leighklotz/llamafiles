@@ -10,6 +10,7 @@ fi
 VIA_API_CHAT_COMPLETIONS_ENDPOINT="${VIA_API_CHAT_BASE}/v1/chat/completions"
 VIA_API_TOKEN_COUNT_ENDPOINT="${VIA_API_CHAT_BASE}/v1/chat/token-count"
 VIA_API_MODEL_INFO_ENDPOINT="${VIA_API_CHAT_BASE}/v1/internal/model/info"
+VIA_API_MODEL_INFO_ENDPOINT_LL="${VIA_API_CHAT_BASE}/models"
 VIA_API_MODEL_LIST_ENDPOINT="${VIA_API_CHAT_BASE}/v1/internal/model/list"
 VIA_API_LOAD_MODEL_ENDPOINT="${VIA_API_CHAT_BASE}/v1/internal/model/load"
 VIA_API_UNLOAD_MODEL_ENDPOINT="${VIA_API_CHAT_BASE}/v1/internal/model/unload"
@@ -18,6 +19,10 @@ AUTHORIZATION_PARAMS=()
 : "${TOP_K:-20}"
 : "${TOP_P:-0.95}"
 : "${MIN_P:-0.1}"
+: "${TYPICAL_P:-1.000}"
+: "${REPEAT_LAST_N:-1024}"
+: "${FREQUENCY_PENALTY:-0.000}"
+: "${PRESENCE_PENALTY:-0.000}"
 
 # --grammar-file support is spotty in non-gguf models so default to off
 : "${USE_GRAMMAR:-}"
@@ -48,8 +53,8 @@ else
     penalize_nl: \$penalize_nl,
     grammar_string: \$grammar_string,
     seed: \$seed,
-    repeat_last_n: 64, frequency_penalty: 0.000, presence_penalty: 0.000,
-    top_k: \$top_k, tfs_z: 1.000, top_p: \$top_p, min_p: \$min_p, typical_p: 1.000,
+    repeat_last_n: \$repeat_last_n, frequency_penalty: \$frequency_penalty, presence_penalty: \$presence_penalty,
+    top_k: \$top_k, tfs_z: 1.000, top_p: \$top_p, min_p: \$min_p, typical_p: \$typical_p,
     mirostat: 0, 
     n_keep: 1,
     auto_max_new_tokens: true,
@@ -167,14 +172,18 @@ function via_api_perform_inference() {
     data=$(jq --raw-input --raw-output  --compact-output -n \
               --arg inference_mode "${inference_mode}" \
               --arg reasoning_effort "${REASONING_EFFORT}" \
-              --argjson temperature ${temperature} \
-              --argjson repetition_penalty ${repetition_penalty} \
-              --argjson penalize_nl ${penalize_nl} \
-              --argjson seed ${SEED:-NaN} \
-              --argjson top_k ${TOP_K:-NaN} \
-              --argjson top_p ${TOP_P:-NaN} \
-              --argjson min_p ${MIN_P:-NaN} \
-              --argjson n_predict ${n_predict} \
+              --argjson frequency_penalty "${FREQUENCY_PENALTY:-NaN}" \
+              --argjson min_p "${MIN_P:-NaN}" \
+              --argjson n_predict "${N_PREDICT:-NaN}" \
+              --argjson penalize_nl "${penalize_nl:-NaN}" \
+              --argjson presence_penalty "${PRESENCE_PENALTY:-NaN}" \
+              --argjson repeat_last_n "${REPEAT_LAST_N:-NaN}" \
+              --argjson repetition_penalty "${repetition_penalty:-NaN}" \
+              --argjson seed "${SEED:-NaN}" \
+              --argjson temperature "${temperature}" \
+              --argjson top_k "${TOP_K:-NaN}" \
+              --argjson top_p "${TOP_P:-NaN}" \
+              --argjson typical_p "${TYPICAL_P:-NaN}" \
               --rawfile system_message "${system_message_file}" \
               --rawfile question "${question_file}" \
               --rawfile grammar_string "${grammar_file}" \
@@ -243,7 +252,13 @@ function via_api_perform_inference() {
 }
 
 function get_model_name {
-    (curl -s "${VIA_API_MODEL_INFO_ENDPOINT}" "${AUTHORIZATION_PARAMS[@]}" | jq -e -r .model_name 2> /dev/null) | sed -e "s/null/${MODEL_NAME_OVERRIDE:-None}/"
+    local model_name=$(curl -s "${VIA_API_MODEL_INFO_ENDPOINT}" "${AUTHORIZATION_PARAMS[@]}" | jq -e -r .model_name 2> /dev/null) | sed -e "s/null/${MODEL_NAME_OVERRIDE:-None}/"
+    if [ "${model_name}" == "None" ] || [ -z "${model_name}" ]; then
+        # hack for now for llama-server vs. oobabooga
+        model_name="$(curl -s "${VIA_API_MODEL_INFO_ENDPOINT_LL}" "${AUTHORIZATION_PARAMS[@]}"models | jq -r '.data[0].id' | sed -e 's/-/_/g' | sed -e 's/\.gguf//')"
+    fi
+    printf "%s\n" "${model_name}"
+    return 0
 }
 
 function list_models {
@@ -263,7 +278,7 @@ function list_models {
             fi
         done
 
-        list_models | grep -i $grep_pattern
+        list_models | grep -i "${grep_pattern}"
     fi
 }
 
