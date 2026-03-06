@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # First version, requires API
-URL="http://tensor-psy.klotz.me:5000/v1/internal/token-count"
+URL="http://tensor.klotz.me:5000/v1/internal/token-count"
 
 # Escape double quotes for JSON using jq.  This is safer than relying on shell escaping.
 # Send the JSON payload to the API using curl, piping the JSON directly.
