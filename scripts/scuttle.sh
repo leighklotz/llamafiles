@@ -124,8 +124,7 @@ else
     GRAMMAR_FLAG=""
 fi
 
-# Prompt is used twice, once before the text of link and once after.
-SCUTTLE_PROMPT="# Instructions\nRead the web page article from ${LINK} and ignore website header at the start and look for the main article. If there are retrieval failures, just report on the failures. Otherwise, respond with only a properly-quoted YAML stanza with these 4 fields: "'`link`, `title`, `description`, and `keywords` array.'
+SCUTTLE_PROMPT="# Instructions\nRead the web page article from ${LINK} and ignore website header at the start and look for the main article. If there are retrieval failures, just report on the failures. Otherwise, respond with only a YAML file with these 4 fields: \`link\`, \`title\`, \`description\`, and \`keywords\` array. For the \`description\` field, use the YAML literal block scalar format (starting with the \`|\` symbol). Do NOT put quotes around the block scalar content."
 
 ( printf "# Text of link %s\n\n---\n\n%s\n" "${LINK}" "${SCUTTLE_PROMPT}";
   "${FETCHER_COMMAND}" "${LINK}" | ${CAPTURE_COMMAND};
