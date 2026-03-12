@@ -107,7 +107,7 @@
 (defun llm-get-user-prompt (label &optional default)
   "Prompt the user for a prompt, using `llm-prompt-history` for completion."
   (let ((completion-ignore-case t))
-    (read-string "Prompt: "
+    (read-string label
                  (or default (if (not llm-prompt-history) "" (car llm-prompt-history) )))))
 
 ;;; User commands
@@ -394,6 +394,58 @@ The function calls \\[[describe-variable]] and then runs \\[[llm-ask]] with QUES
   (with-current-buffer (help-buffer) 
     (llm-ask prompt (point-min) (point-max))))
 
+;;; Emacs Vibe
+(defun llm-vibe-emacs (prompt start end)
+  "Rewrite the selected region using PROMPT and the external LLM script.
+The region is replaced with the LLM's output, and the changes are shown in merge‑file format."
+  (interactive (list (llm-get-user-prompt "Vibe Prompt: ") (region-beginning) (region-end)))
+  (push prompt llm-prompt-history)
+  (llm-region-internal "vibe-emacs" (llm-mode-text-type) prompt start end "*vibe-emacs*" nil nil))
+
+
+;;; utils
+(defun llm-unlx ()
+  "Extracts a file from a 'lx' archive in the current buffer (or region) to a string.
+The archive format is assumed to be lines starting with '# file <filename>'
+followed by a fenced code block (lines starting with '```') containing the file content."
+  (interactive)
+  (let* ((target-file (read-string "Filename to extract: "))
+         (buffer-string (buffer-string))
+         (in-fence nil)
+         (want nil)
+         (buf "")
+         (result ""))
+    (save-excursion
+      (goto-char (point-min))
+      (while (not (eobp))
+        (let ((line (buffer-substring-no-properties (line-beginning-position) (line-end-position))))
+          (cond
+           ((string-prefix-p "# file" line)
+            (let ((marker (replace-regexp-in-string "# file[[:space:]]+" "" line)))
+              (setq marker (string-trim marker))
+              (setq want (string= marker target-file)))
+            (forward-line 1))
+           ((string= line "```")
+            (if (not in-fence)
+                (progn
+                  (setq in-fence t)
+                  (setq buf ""))
+              (progn
+                (setq in-fence nil)
+                (if want
+                    (setq result (concat result buf)))
+                (setq want nil)))
+            (forward-line 1))
+           (in-fence
+            (setq buf (concat buf line "\n"))
+            (forward-line 1)))
+          )
+        )
+      )
+
+    (if result
+        (message "%s" result)
+      (message "File '%s' not found in the buffer." target-file))))
 ;; Keybindings
 
 (global-set-key (kbd "M-s a") 'llm-ask)
@@ -403,6 +455,7 @@ The function calls \\[[describe-variable]] and then runs \\[[llm-ask]] with QUES
 (global-set-key (kbd "M-s t") 'llm-todo)
 (global-set-key (kbd "M-s i") 'llm-insert)
 (global-set-key (kbd "M-s c") 'llm-complete)
+(global-set-key (kbd "M-s v") 'llm-vibe-emacs)
 
 ;; Hooks
 
@@ -412,6 +465,7 @@ The function calls \\[[describe-variable]] and then runs \\[[llm-ask]] with QUES
   (local-set-key [M-up] 'smerge-prev)
   (local-set-key [C-down] 'smerge-keep-lower)
   (local-set-key [C-up] 'smerge-keep-upper))
+  
 
 (add-hook 'smerge-mode-hook 'llm-smerge-mode-hook)
 
