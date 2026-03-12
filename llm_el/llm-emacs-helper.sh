@@ -120,6 +120,12 @@ case "$USE_CASE" in
     printf -v SYSTEM_MESSAGE "Write a response according to user instructions and the following %s:\n" "${MAJOR_MODE}"
     ;;
 
+  vibe-emacs)
+    # args: major_mode prompt*
+    MAJOR_MODE=$1; shift; PROMPT="${*}"
+    printf -v SYSTEM_MESSAGE "Write and output an Emacs Lisp S-expression response that will carry out the following user instructions on the %s mode buffer. Use Emacs Lisp comments for any text that is not the code to execute.\n" "${MAJOR_MODE}"
+    ;;
+
   summarize)
     # args: major_mode prompt*
     MAJOR_MODE=$1; shift; PROMPT="${*}"
