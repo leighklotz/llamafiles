@@ -27,7 +27,7 @@ else
   hostname -I | tr -s " " "\012" | grep -Fv 127.0.0. | grep -Eq "$regexp"
 fi
 
-if [[ $? == 0 ]]; then 
+if [[ $? == 0 ]]; then
   exit $on
 else
   exit $off
