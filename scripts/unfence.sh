@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
 # extract content, usually code, between triple-backquotes
-# opposite of codeblock.sh
+# opposite of codefence.sh, bashblock.sh etc.
 
 awk '
 {
