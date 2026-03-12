@@ -17,6 +17,5 @@ fi
 ft="$("$SCRIPT_DIR/filetype.sh" "${fn}")"
 printf $'```%s
 %s
-%s
 ```
-' "${fn}" "${ft}" "$(cat "${fn}")"
+' "${ft}" "$(cat "${fn}")"
