@@ -39,6 +39,7 @@ PROMPT=""
 RAW_FLAG=""
 N_PREDICT=""
 REORDER_CODE=0 #Use numeric for boolean flags
+UNFENCE_CODE=0 #Use numeric for boolean flags
 
 # Parse optional arguments
 while [[ $# -gt 0 ]]; do
@@ -73,6 +74,11 @@ function reorder_code {
       }
     }
   '
+}
+
+# Function to unfence code and ignore the rest
+function unfence_code {
+    awk '/^```.*$/ { flag = 1; next } /^```$/ { flag = 0; next } flag { print }'
 }
 
 # Function to calculate the comment prefix based on the major mode.
@@ -122,7 +128,7 @@ case "$USE_CASE" in
 
   vibe-emacs)
     # args: major_mode prompt*
-    MAJOR_MODE=$1; shift; PROMPT="${*}"
+    MAJOR_MODE=$1; shift; PROMPT="${*}"; UNFENCE_CODE=1
     printf -v SYSTEM_MESSAGE "Write and output an Emacs Lisp S-expression response that will carry out the following user instructions on the %s mode buffer. Use Emacs Lisp comments for any text that is not the code to execute.\n" "${MAJOR_MODE}"
     ;;
 
@@ -164,6 +170,8 @@ fi
 if [ "$REORDER_CODE" -eq 1 ]; then
   comment_prefix=$(calculate_comment_prefix "${MAJOR_MODE}")
   printf "%s\n" "${result}" | reorder_code "${comment_prefix}"
+elif [ "$UNFENCE_CODE" -eq 1 ]; then
+  printf "%s\n" "${result}" | unfence_code
 else
   printf "%s\n" "${result}"
 fi
