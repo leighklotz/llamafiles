@@ -4,4 +4,9 @@
 # opposite of codefence.sh, bashblock.sh etc.
 # If you use `lx` you will have extra `---` in your output; use `unlx` unstead of unfence
 
-awk '/^```.*$/ { flag = 1; next } /^```$/ { flag = 0; next } flag { print }'
+awk '
+  /^```$/          { flag = 0; next }   # closing fence – turn flag off
+  /^```.+$/        { flag = 1; next }   # opening fence – turn flag on
+  flag             { print }           # inside a fence
+'
+
