@@ -93,6 +93,7 @@ fi
 
 lnf "${SCRIPT_DIR}/llamafiles-aliases.sh" "$BASH_D/llamafiles-aliases.sh"
 lnf "${SCRIPT_DIR}/_via_completion.sh" "$BASH_D/_via_completion.sh"
+lnf "${SCRIPT_DIR}/pipetest.sh" "$BASH_D/pipetest.sh"
 
 # Check for yq (https://github.com/mikefarah/yq/) version v4.49.2
 if ! command -v "yq" >/dev/null 2>&1; then
