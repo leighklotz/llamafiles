@@ -106,7 +106,7 @@ function perform_inference {
 # STDIN is never processed for escapes.
 function process_question_escapes() {
     if [ -n "${PROCESS_QUESTION_ESCAPES}" ]; then
-        log_verbose "Processing escape sequences in QUESTION"
+        log_debug "Processing escape sequences in QUESTION"
         printf -v QUESTION "%b" "$QUESTION"
     fi
 }

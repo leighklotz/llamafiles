@@ -21,7 +21,7 @@ function source_functions {
     if [ -z "${functions_path}" ]; then
         log_and_exit 3 "* $0: ERROR: source_functions path is empty"
     elif [ -f "${functions_path}" ]; then
-        log_verbose "* sourcing ${functions_path}"
+        log_debug "* sourcing ${functions_path}"
         source "${functions_path}"
     elif [ -z "${functions_path}" ]; then
         log_and_exit 3 "* $0: ERROR: functions_path is empty"
