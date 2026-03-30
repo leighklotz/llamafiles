@@ -11,8 +11,8 @@ Okay, here's a summary of the uses of the `help`, `help-commit`, and `ask` scrip
     *   Understanding why something fails
     *   Explaining code
     *   Analyzing apache logs (`help.sh -i analyze this apache log and look for vulnerability scanners`)
-*   **Code Improvement:** Used to request improvements to code.  Notably, there were multiple instances of using `bashblock` to pipe code *to* the `help` script for analysis and suggestions: `bashblock cat ./llm-emacs-helper.sh | help write the usage function`
-*   **Summarization:** Used with `bashblock` to summarize bash history:  `history|help.sh 'summarize the various activities'`
+*   **Code Improvement:** Used to request improvements to code.  Notably, there were multiple instances of using `bx` to pipe code *to* the `help` script for analysis and suggestions: `bx cat ./llm-emacs-helper.sh | help write the usage function`
+*   **Summarization:** Used with `bx` to summarize bash history:  `history|help.sh 'summarize the various activities'`
 *   **Specific Tool Interaction:** Used with `flatpak` to ask for help wrapping logic in an if statement, or how many updates there are.
 *   **Brief Response/Headers:** Used to request a brief response or response headers from curl to understand server interactions.
 *   **General Usage:** Used to request information on problems
@@ -31,6 +31,6 @@ Okay, here's a summary of the uses of the `help`, `help-commit`, and `ask` scrip
 
 **In Summary**
 
-The `help` script is the dominant script used, functioning as a general-purpose assistant for questions, code analysis, summarization, and fetching information. `help-commit` is specialized for crafting git commit messages. `ask` appears to be a less frequently used alias for similar functionality to `help`. A lot of the workflow uses `bashblock` to feed the scripts with blocks of text.
+The `help` script is the dominant script used, functioning as a general-purpose assistant for questions, code analysis, summarization, and fetching information. `help-commit` is specialized for crafting git commit messages. `ask` appears to be a less frequently used alias for similar functionality to `help`. A lot of the workflow uses `bx` to feed the scripts with blocks of text.
 
 `klotz@core:~/wip/llamafiles$`
