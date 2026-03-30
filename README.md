@@ -185,9 +185,9 @@ You can also copy [scripts/env.sh.example](scripts/env.sh.example) to `scripts/e
 - systype.sh - Pipe to `help` to provide context for distro-specific questions
 - nvfree.sh - check your GPU usage
 - codeblock.sh [lang] [cmd] - Pipe to `help` to wrap output of cmd in a codeblock of type lang.
-- bashblock.sh [cmd] - Pipe to `help` to wrap output of cmd in a bash-like template.
+- bx [cmd ...] - Run command in a bash codefence. You can pipe the result to `help` to wrap output of cmd in a bash-like template.
 - unfence - Pipe response to unfence to extract content, usually code, between triple-backquotes.
-- [lx.sh]: `lx.sh` is a bash script that prints multiple files inside fenced code blocks.
+- [lx]: `lx.sh` is a bash script that prints multiple files inside fenced code blocks.
 
 # llm.sh Details
 The help and summary scripts invoke `llm.sh`, but you can use it yourself directly as well.

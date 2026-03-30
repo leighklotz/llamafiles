@@ -1,4 +1,4 @@
-klotz@tensor:~$ (systype; bashblock ps gauxww) | help What do you notice that I should know as the owner of this server?
+klotz@tensor:~$ (systype; bx ps gauxww) | help What do you notice that I should know as the owner of this server?
 
 Okay, that's a *lot* of process information! Here's what jumps out at me as potentially noteworthy for you as the server owner, broken down into a few categories:
 
@@ -13,7 +13,7 @@ Okay, that's a *lot* of process information! Here's what jumps out at me as pote
 
 *   **Heavy shell/scripting activity:** You (user `klotz`) are running a *lot* of shell commands, scripts, and tools, including multiple `screen` and `bash` sessions. This is fine, but indicates a lot of active development/administration.  I see `emacs`, `nvtop`, and scripts related to your LLM ( `llamafiles`).
 *   **LLM interaction:** You're actively interacting with your LLM via a script (`./llm.sh`). The question you're posing *to* the LLM is being piped into it.
-*   **`bashblock` script:** You're using a `bashblock` script (PID 14891) with `ps gauxww`. This likely serves to monitor system processes, perhaps for security or performance purposes.
+*   **`bx` script:** You're using a `bx` script (PID 14891) with `ps gauxww`. This likely serves to monitor system processes, perhaps for security or performance purposes.
 *   **Multiple terminal sessions:** You have several active terminal sessions (`pts/0`, `pts/5`, `pts/7`, `pts/9`).
 
 **3. System Services:**

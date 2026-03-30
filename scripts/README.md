@@ -1,6 +1,6 @@
 # Files in scripts
 - [ask: Bash Script for User Instruction Execution](ask): LLM questiion and answer with mininal prompting.
-- [Bash Script for Executing Commands and Displaying Output](bashblock): takes a full command-line, executes it, and embeds the output a `bash` markdown code fence.
+- [Bash Script for Executing Commands and Displaying Output](bx): takes a full command-line, executes it, and embeds the output a `bash` markdown code fence.
 - [Bash Script for Executing Commands and Displaying Output](codefence): takes a filename, and embeds the output an approprpriate markdown code fence.
 - [Script for Environment Configuration (env.sh)](env.sh): This is a Bash script used for setting environment variables. It is customized and not committed to the Git repository.
 - [Script for setting environment variables in Linux (env.sh.example)](env.sh.example): This is a Bash script example for setting environment variables in a Linux environment. Copy to `env.sh` and edit.
