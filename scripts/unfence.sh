@@ -5,8 +5,7 @@
 # If you use `lx` you will have extra `---` in your output; use `unlx` unstead of unfence
 
 awk '
-  /^```$/          { flag = 0; next }   # closing fence – turn flag off
-  /^```.+$/        { flag = 1; next }   # opening fence – turn flag on
+  /^```/          { flag = !flag; next }
   flag             { print }           # inside a fence
 '
 
