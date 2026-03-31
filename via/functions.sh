@@ -64,7 +64,7 @@ function cleanup_temp_files() {
             if [ "$status" -ne 0 ]; then
                 log_warn "Leaving temporary files: ${TMPFILES_TO_DELETE}"
             elif [ -n "${TMPFILES_TO_DELETE}" ]; then
-                log_info "Cleaning up temporary files: ${TMPFILES_TO_DELETE}"
+                log_debug "Cleaning up temporary files: ${TMPFILES_TO_DELETE}"
                 for file in ${TMPFILES_TO_DELETE}; do
                     cleanup_file "$file"
                 done
@@ -72,7 +72,7 @@ function cleanup_temp_files() {
             ;;
         NONE)
             if [ -n "${TMPFILES_TO_DELETE}" ]; then
-                log_info "Cleaning up temporary files: ${TMPFILES_TO_DELETE}"
+                log_debug "Cleaning up temporary files: ${TMPFILES_TO_DELETE}"
                 for file in ${TMPFILES_TO_DELETE}; do
                     cleanup_file "$file"
                 done
