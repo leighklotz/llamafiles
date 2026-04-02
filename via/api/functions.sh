@@ -62,7 +62,10 @@ else
     mirostat: 0, 
     n_keep: 1,
     auto_max_new_tokens: true,
-    skip_special_tokens: false"
+    skip_special_tokens: false,
+    reasoning_format: null,
+    chat_template_kwargs: { enable_thinking: false },
+    reasoning_budget: 0"
 fi
 
 if [ -n "${LLAMA_SERVER_MODEL}" ]; then
@@ -256,13 +259,6 @@ function via_api_perform_inference() {
 }
 
 function get_model_name {
-# local model_name=$(curl -s "${VIA_API_MODEL_INFO_ENDPOINT}" "${AUTHORIZATION_PARAMS[@]}" | jq -e -r .model_name 2> /dev/null) | sed -e "s/null/${MODEL_NAME_OVERRIDE:-None}/"
-#     if [ "${model_name}" == "None" ] || [ -z "${model_name}" ]; then
-#         # hack for now for llama-server vs. oobabooga
-#         model_name="$(curl -s "${VIA_API_MODEL_INFO_ENDPOINT_LL}" "${AUTHORIZATION_PARAMS[@]}"models | jq -r '.data[0].id' | sed -e 's/-/_/g' | sed -e 's/\.gguf//')"
-#     fi
-#     printf "%s\n" "${model_name}"
-#     return 0
     local model_name
     model_name="$(curl -s "${VIA_API_MODEL_PROPS_ENDPOINT}" "${AUTHORIZATION_PARAMS[@]}" | jq -e -r .model_alias 2> /dev/null)"
     if [ -z "$model_name" ]; then
