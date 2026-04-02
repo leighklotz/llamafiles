@@ -267,10 +267,12 @@ function get_model_name {
     model_name="$(curl -s "${VIA_API_MODEL_PROPS_ENDPOINT}" "${AUTHORIZATION_PARAMS[@]}" | jq -e -r .model_alias 2> /dev/null)"
     if [ -z "$model_name" ]; then
         model_name=$(curl -s "${VIA_API_MODEL_INFO_ENDPOINT}" "${AUTHORIZATION_PARAMS[@]}" | jq -e -r .model_name 2> /dev/null)
+        
     fi
     if [ "${model_name}" == "null" ]; then
         model_name="${MODEL_NAME_OVERRIDE:-None}"
     fi
+    model_name="$(printf "%s" "${model_name}"| sed -e 's/-/_/g' | sed -e 's/\.gguf//')"
     printf "%s\n" "${model_name}" 
     return 0
 }
