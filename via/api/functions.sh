@@ -7,6 +7,7 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
 fi
 
 : "${VIA_API_CHAT_BASE:=http://localhost:5000}"
+# oobabooga endpoints
 VIA_API_CHAT_COMPLETIONS_ENDPOINT="${VIA_API_CHAT_BASE}/v1/chat/completions"
 VIA_API_TOKEN_COUNT_ENDPOINT="${VIA_API_CHAT_BASE}/v1/chat/token-count"
 VIA_API_MODEL_INFO_ENDPOINT="${VIA_API_CHAT_BASE}/v1/internal/model/info"
@@ -14,6 +15,9 @@ VIA_API_MODEL_INFO_ENDPOINT_LL="${VIA_API_CHAT_BASE}/models"
 VIA_API_MODEL_LIST_ENDPOINT="${VIA_API_CHAT_BASE}/v1/internal/model/list"
 VIA_API_LOAD_MODEL_ENDPOINT="${VIA_API_CHAT_BASE}/v1/internal/model/load"
 VIA_API_UNLOAD_MODEL_ENDPOINT="${VIA_API_CHAT_BASE}/v1/internal/model/unload"
+# llama.cpp endpoints
+VIA_API_MODEL_PROPS_ENDPOINT="${VIA_API_CHAT_BASE}/props"
+
 AUTHORIZATION_PARAMS=()
 
 : "${TOP_K:-20}"
@@ -252,12 +256,22 @@ function via_api_perform_inference() {
 }
 
 function get_model_name {
-    local model_name=$(curl -s "${VIA_API_MODEL_INFO_ENDPOINT}" "${AUTHORIZATION_PARAMS[@]}" | jq -e -r .model_name 2> /dev/null) | sed -e "s/null/${MODEL_NAME_OVERRIDE:-None}/"
-    if [ "${model_name}" == "None" ] || [ -z "${model_name}" ]; then
-        # hack for now for llama-server vs. oobabooga
-        model_name="$(curl -s "${VIA_API_MODEL_INFO_ENDPOINT_LL}" "${AUTHORIZATION_PARAMS[@]}"models | jq -r '.data[0].id' | sed -e 's/-/_/g' | sed -e 's/\.gguf//')"
+# local model_name=$(curl -s "${VIA_API_MODEL_INFO_ENDPOINT}" "${AUTHORIZATION_PARAMS[@]}" | jq -e -r .model_name 2> /dev/null) | sed -e "s/null/${MODEL_NAME_OVERRIDE:-None}/"
+#     if [ "${model_name}" == "None" ] || [ -z "${model_name}" ]; then
+#         # hack for now for llama-server vs. oobabooga
+#         model_name="$(curl -s "${VIA_API_MODEL_INFO_ENDPOINT_LL}" "${AUTHORIZATION_PARAMS[@]}"models | jq -r '.data[0].id' | sed -e 's/-/_/g' | sed -e 's/\.gguf//')"
+#     fi
+#     printf "%s\n" "${model_name}"
+#     return 0
+    local model_name
+    model_name="$(curl -s "${VIA_API_MODEL_PROPS_ENDPOINT}" "${AUTHORIZATION_PARAMS[@]}" | jq -e -r .model_alias 2> /dev/null)"
+    if [ -z "$model_name" ]; then
+        model_name=$(curl -s "${VIA_API_MODEL_INFO_ENDPOINT}" "${AUTHORIZATION_PARAMS[@]}" | jq -e -r .model_name 2> /dev/null)
     fi
-    printf "%s\n" "${model_name}"
+    if [ "${model_name}" == "null" ]; then
+        model_name="${MODEL_NAME_OVERRIDE:-None}"
+    fi
+    printf "%s\n" "${model_name}" 
     return 0
 }
 
