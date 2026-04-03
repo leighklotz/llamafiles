@@ -144,6 +144,11 @@ For example, to create an oneline commit message, use the following command:
 help-commit
 ```
 
+To show the commit message and conditionally execute the (presumably sole) code fence:
+```bash
+$ help-commit | pipetest | unfence | bash
+```
+
 ## write examples
 The `write` command differs from `help` only in the default prompt.
 
