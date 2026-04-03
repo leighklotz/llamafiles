@@ -11,7 +11,8 @@ TMPFILES_TO_DELETE=""
 
 # Check if the script is being sourced or directly executed
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-    log_and_exit 1 "This script is intended to be sourced, not executed directly."
+    echo  "This script is intended to be sourced, not executed directly." >> /dev/stderr
+    exit 1
 fi
 
 source "${VIA_DIRECTORY}/logging.sh"
