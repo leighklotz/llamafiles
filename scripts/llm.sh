@@ -34,11 +34,13 @@ function parse_args() {
                     ;;
                 --noerror) ERROR_OUTPUT="/dev/null" ;;
                 # Generation options
+                --seed) shift; SEED="$1" ;;
                 --n-predict) shift; N_PREDICT="$1" ;;
                 --temperature) shift; TEMPERATURE="$1" ;;
                 --grammar-file) shift; GRAMMAR_FILE="$1" ;;
                 --enable-thinking) ENABLE_THINKING="true" ;;
                 --reasoning-effort) shift; REASONING_EFFORT:="$1" ;;
+                --reasoning-budget) shift; REASONING_BUDGET:="$1" ;;
                 # Input options
                 --stdin|--interactive|-i) DO_STDIN=1 ;;
                 --raw-input) RAW_FLAG="--raw-input" ;;
@@ -71,6 +73,7 @@ parse_args "${@}"
 : "${INFO:=${VERBOSE}}"
 : "${VERBOSE:=}"
 : "${DEBUG:=}"
+: "${DEBUG_SHOW_JSON:=}"
 : "${LOG_DISABLE:=--log-disable}"   # use space ' ' to override
 : "${KEEP_PROMPT_TEMP_FILE:=ALL}" # "NONE"|"ERROR"|"ALL"
 # Generation options

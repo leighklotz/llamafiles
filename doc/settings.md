@@ -6,12 +6,12 @@
 | `INFERENCE_MODE`    | `--inference-mode`   | `instruct` | Mode of inference (e.g., instruct, chat).    |
 | `TEMPERATURE`       | `--temperature`      |            | Sampling temperature.                        |
 | `N_PREDICT`         | `--n-predict`        |            | Maximum number of tokens to generate.        |
-| `SEED`              | N/A                  | `NaN`      | Random seed for generation.                  |
+| `SEED`              | `--seed`             |            | Random seed for generation.                  |
 | `REPEAT_PENALTY`    | N/A                  | `1`        | Penalty for repeating tokens.                |
 | `PENALIZE_NL`       | N/A                  | `false`    | Whether to penalize newlines.                |
 | `REASONING_EFFORT`  | `--reasoning-effort` | `low`      | Effort level for reasoning models.           |
-| `REASONING_BUDGET`  | N/A                  | `2048`     | Token budget for reasoning.                  |
-| `ENABLE_THINKING`   | `--enable-thinking`  | `false`    | Enable "thinking" capabilities in the model. |
+| `REASONING_BUDGET`  | `--reasoning-budget` | `2048`     | Token budget for reasoning.                  |
+| `ENABLE_THINKING`   | `--enable-thinking`  |            | Enable "thinking" capabilities in the model. |
 | `TOP_K`             | N/A                  | `20`       | Top-K sampling limit.                        |
 | `TOP_P`             | N/A                  | `0.95`     | Nucleus sampling probability.                |
 | `MIN_P`             | N/A                  | `0.1`      | Minimum probability for sampling.            |

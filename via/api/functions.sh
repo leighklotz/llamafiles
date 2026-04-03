@@ -126,6 +126,7 @@ function string_trim() {
 #       non-inference settings to the prepare_model
 # via_api_perform_inference "$INFERENCE_MODE" "$SYSTEM_MESSAGE" "$QUESTION" "$GRAMMAR_FILE"
 # todo: so many files and strings back and forth
+
 function via_api_perform_inference() {
     local inference_mode="$1" system_message="$2" question="$3" grammar_file="$4"
     local temperature="$5" repetition_penalty="$6" penalize_nl="$7" n_predict="$8"
@@ -184,7 +185,7 @@ function via_api_perform_inference() {
               --arg inference_mode "${inference_mode}" \
               --arg enable_thinking "${ENABLE_THINKING:-false}" \
               --arg reasoning_effort "${REASONING_EFFORT:-low}" \
-              --argjson reasoning_budget "${REASONING_BUDGET:-0}" \
+              --argjson reasoning_budget "${REASONING_BUDGET:-2048}" \
               --argjson frequency_penalty "${FREQUENCY_PENALTY:-NaN}" \
               --argjson min_p "${MIN_P:-NaN}" \
               --argjson n_predict "${N_PREDICT:-NaN}" \
