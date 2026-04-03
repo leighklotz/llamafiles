@@ -94,9 +94,9 @@ parse_args "${@}"
 ##############################################################################
 #  Load shared functions
 ##############################################################################
-FUNCTIONS_PATH="$(realpath "${SCRIPT_DIR}/../via/functions.sh")"
+VIA_FUNCTIONS_PATH="$(realpath "${SCRIPT_DIR}/../via/functions.sh")"
 VIA_API_FUNCTIONS_PATH="$(realpath "${SCRIPT_DIR}/../via/api/functions.sh")"
-source "${FUNCTIONS_PATH}"
+source "${VIA_FUNCTIONS_PATH}"
 
 ##############################################################################
 #  Perform Inference

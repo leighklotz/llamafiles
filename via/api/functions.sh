@@ -113,15 +113,6 @@ function prepare_prompt {
     fi
 }
 
-function string_trim() {
-    local s="$1"
-    # Remove leading whitespace
-    s="${s#"${s%%[![:space:]]*}"}"
-    # Remove trailing whitespace
-    s="${s%"${s##*[![:space:]]}"}"
-    printf '%s' "$s"
-}
-
 # todo: make common with cli_perform_inference by splitting out all
 #       non-inference settings to the prepare_model
 # via_api_perform_inference "$INFERENCE_MODE" "$SYSTEM_MESSAGE" "$QUESTION" "$GRAMMAR_FILE"

@@ -15,7 +15,6 @@ fi
 
 declare -a TMPFILES_TO_DELETE=()
 
-
 function register_temp_file {
     local fn=$1
     if [ -z "$fn" ]; then
@@ -66,4 +65,13 @@ function cleanup_file() {
     [[ "$file" == "/dev/null" ]] && return 0
     [[ -d "$file" ]] && { log_warn "cleanup_file: skipping dir $file"; return 1; }
     rm -f "$file" || log_error "Error Removing $file" $?
+}
+
+function string_trim() {
+    local s="$1"
+    # Remove leading whitespace
+    s="${s#"${s%%[![:space:]]*}"}"
+    # Remove trailing whitespace
+    s="${s%"${s##*[![:space:]]}"}"
+    printf '%s' "$s"
 }
