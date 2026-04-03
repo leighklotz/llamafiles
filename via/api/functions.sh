@@ -27,7 +27,7 @@ AUTHORIZATION_PARAMS=()
 : "${REPEAT_LAST_N:-1024}"
 : "${FREQUENCY_PENALTY:-0.000}"
 : "${PRESENCE_PENALTY:-0.000}"
-
+: "${ENBABLE_THINKING:false}"
 # --grammar-file support is spotty in non-gguf models so default to off
 : "${USE_GRAMMAR:-}"
 
@@ -63,9 +63,10 @@ else
     n_keep: 1,
     auto_max_new_tokens: true,
     skip_special_tokens: false,
-    reasoning_format: null,
-    chat_template_kwargs: { enable_thinking: false },
-    reasoning_budget: 0"
+    reasoning_format: \"deepseek\",
+    chat_template_kwargs: { \"enable_thinking\": \$enable_thinking },
+    verbose: 1,
+    reasoning_budget: \$reasoning_budget"
 fi
 
 if [ -n "${LLAMA_SERVER_MODEL}" ]; then
@@ -128,6 +129,9 @@ function string_trim() {
 function via_api_perform_inference() {
     local inference_mode="$1" system_message="$2" question="$3" grammar_file="$4"
     local temperature="$5" repetition_penalty="$6" penalize_nl="$7" n_predict="$8"
+    local enable_thinking="${9:-${ENABLE_THINKING}}"
+    local reasoning_effort="${10:-${REASONING_EFFORT}}"
+    local reasoning_budget="${11:-${REASONING_BUDGET}}"
 
     if [ -z "$grammar_file" ] || [ -z "${USE_GRAMMAR}" ]; then
         grammar_file="/dev/null"
@@ -178,7 +182,9 @@ function via_api_perform_inference() {
 
     data=$(jq --raw-input --raw-output  --compact-output -n \
               --arg inference_mode "${inference_mode}" \
-              --arg reasoning_effort "${REASONING_EFFORT}" \
+              --arg enable_thinking "${ENABLE_THINKING:-false}" \
+              --arg reasoning_effort "${REASONING_EFFORT:-low}" \
+              --argjson reasoning_budget "${REASONING_BUDGET:-0}" \
               --argjson frequency_penalty "${FREQUENCY_PENALTY:-NaN}" \
               --argjson min_p "${MIN_P:-NaN}" \
               --argjson n_predict "${N_PREDICT:-NaN}" \
@@ -234,7 +240,6 @@ function via_api_perform_inference() {
 
     # TODO: If the API returned a "thinking" response, split it out here
     ###                   <|channel|>analysis<|message|>We just need to answer 5.<|end|><|start|>assistant<|channel|>final<|message|>2 + 3 = 5.
-
     # TODO: If the API returned a "thinking" response, split it out here
     # EXAMPLE: <|channel|>analysis<|message|>We just need to answer 5.<|end|><|start|>assistant<|channel|>final<|message|>2 + 3 = 5.
     if [[ $output == *$'\xC2\xA0'* || $output == *$'\xE2\x80\xAF'* ]]; then

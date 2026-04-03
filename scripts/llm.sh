@@ -37,6 +37,8 @@ function parse_args() {
                 --n-predict) shift; N_PREDICT="$1" ;;
                 --temperature) shift; TEMPERATURE="$1" ;;
                 --grammar-file) shift; GRAMMAR_FILE="$1" ;;
+                --enable-thinking) ENABLE_THINKING="true" ;;
+                --reasoning-effort) shift; REASONING_EFFORT:="$1" ;;
                 # Input options
                 --stdin|--interactive|-i) DO_STDIN=1 ;;
                 --raw-input) RAW_FLAG="--raw-input" ;;
@@ -83,6 +85,8 @@ parse_args "${@}"
 : "${PENALIZE_NL:=false}"
 : "${USE_SYSTEM_ROLE:=}"
 : "${REASONING_EFFORT:=low}"
+: "${ENABLE_THINKING:=false}"
+: "${REASONING_BUDGET:-2048}"
 
 ##############################################################################
 #  Load shared functions
@@ -95,8 +99,12 @@ source "${FUNCTIONS_PATH}"
 #  Perform Inference
 ##############################################################################
 function perform_inference {
-    via_api_perform_inference "${INFERENCE_MODE}" "${SYSTEM_MESSAGE}" \
-        "${PROMPT}" "${GRAMMAR_FILE}" "${TEMPERATURE}" "${REPEAT_PENALTY}" "${PENALIZE_NL}" "${N_PREDICT}"
+    via_api_perform_inference \
+        "${INFERENCE_MODE}" "${SYSTEM_MESSAGE}" \
+        "${PROMPT}" "${GRAMMAR_FILE}" "${TEMPERATURE}" "${REPEAT_PENALTY}" "${PENALIZE_NL}" "${N_PREDICT}" \
+        "${ENABLE_THINKING}" "${REASONING_EFFORT}"
+    
+    
     status=$?
     return $status
 }
