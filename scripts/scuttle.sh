@@ -5,7 +5,7 @@ CAPTURE_COMMAND="cat"
 FETCHER_COMMAND="${SCRIPT_DIR}/fetcher.sh"
 
 # Requires snap/golang yq for yaml->json, and regular jq to extract
-. "${SCRIPT_DIR}/../via/functions.sh"
+source "${SCRIPT_DIR}/../via/logging.sh"
 
 if [ -f "${SCRIPT_DIR}/.venv/bin/activate" ]; then
     . "${SCRIPT_DIR}/.venv/bin/activate"
