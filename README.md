@@ -133,7 +133,7 @@ More examples are in the [examples](examples) directory.
 
 ## help-commit.sh usage and examples
 
-This script uses llm.sh to generate commit messages from the current directory.
+This script uses llm.sh to generate commit messages from the current directory, based on `git diff` output.
 
 ```bash
 $ help-commit [--quiet] [-- [llm.sh options]]
