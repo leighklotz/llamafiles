@@ -103,8 +103,6 @@ function perform_inference {
         "${INFERENCE_MODE}" "${SYSTEM_MESSAGE}" \
         "${PROMPT}" "${GRAMMAR_FILE}" "${TEMPERATURE}" "${REPEAT_PENALTY}" "${PENALIZE_NL}" "${N_PREDICT}" \
         "${ENABLE_THINKING}" "${REASONING_EFFORT}"
-    
-    
     status=$?
     return $status
 }
