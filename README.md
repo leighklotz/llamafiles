@@ -173,21 +173,22 @@ You can also copy [scripts/env.sh.example](scripts/env.sh.example) to `scripts/e
 - llm.sh - the base script that others call
 
 ## user programs
-- help - CLI for Linux help - use `builtin help` to access the built-in Bash help function instead.
 - ask - Like `help` but not not customized to Linux help
-- response - prints the last response from `help` or `ask`, from the environment variable `LLM_RESPONSE`.
-- machelp.sh - CLI for Mac help
-- summarize.sh - CLI to summarize a hyperlink / use '-' for stdin
-- help-commit.sh - CLI to run `git diff` and produce a commit message
+- bx [cmd ...] - Run command and show output in a bash codefence. You can pipe the result to `help`
+- codefence [filename] - Pipe to `help` to wrap file in a codeblock
+- help - CLI for Linux help - use `builtin help` to access the built-in Bash help function instead
+- help-commit - CLI to run `git diff` and produce a commit message
+- lx - prints multiple files inside markdown in a named, fenced code block.
+- machelp - CLI for Mac help
+- nvfree - check your GPU usage
+- nvpower - Monitor and set NVIDIA GPU power draw and limits
+- onsubnet - Check if the local IP address matches a specific subnet prefix
+- scuttle - Summarize a webpage into a bookmark link or YAML format
 - summarize-directory-files.sh - summarize directory files as markdown
-
-## user utilities
-- systype.sh - Pipe to `help` to provide context for distro-specific questions
-- nvfree.sh - check your GPU usage
-- codeblock.sh [lang] [cmd] - Pipe to `help` to wrap output of cmd in a codeblock of type lang.
-- bx [cmd ...] - Run command in a bash codefence. You can pipe the result to `help` to wrap output of cmd in a bash-like template.
-- unfence - Pipe response to unfence to extract content, usually code, between triple-backquotes.
-- [lx]: `lx.sh` is a bash script that prints multiple files inside fenced code blocks.
+- summarize - CLI to summarize a hyperlink / use '-' for stdin
+- systype - Pipe to `help` to provide context for distro-specific questions
+- unfence - Pipe response to `unfence` to extract content, usually code, between triple-backquotes.
+- unlx - Extract a specific file's content from an `lx` formatted archive (stdin to stdout)
 
 # llm.sh Details
 The help and summary scripts invoke `llm.sh`, but you can use it yourself directly as well.

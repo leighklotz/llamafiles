@@ -1,6 +1,6 @@
 # Files in scripts
-- [ask: Bash Script for User Instruction Execution](ask): LLM questiion and answer with mininal prompting.
-- [Bash Script for Executing Commands and Displaying Output](bx): takes a full command-line, executes it, and embeds the output a `bash` markdown code fence.
+- [ask](ask): LLM questiion and answer with mininal prompting.
+- [bx](bx): takes a full command-line, executes it, and embeds the output a `bash` markdown code fence.
 - [Bash Script for Executing Commands and Displaying Output](codefence): takes a filename, and embeds the output an approprpriate markdown code fence.
 - [Script for Environment Configuration (env.sh)](env.sh): This is a Bash script used for setting environment variables. It is customized and not committed to the Git repository.
 - [Script for setting environment variables in Linux (env.sh.example)](env.sh.example): This is a Bash script example for setting environment variables in a Linux environment. Copy to `env.sh` and edit.
@@ -18,5 +18,6 @@
 - [Admin client for OpenAPI-compatible LLM server (via)](via): This is a bash script that serves as an administrative client for an OpenAPI-compatible Language Model (LLM) server. It is tested with Oobabooga Text Generation Webui. The script sources environment variables from `env.sh` if it exists, and sets the `VIA` variable to `api` if not provided.
 - [Subnet Check](onsubnet): bash utility that checks whether the local machine’s IP address belongs to a specified subnet prefix.  
 - [write.sh: Bash Script for System-Dependent Commands](write.sh): This bash script is designed to execute system-dependent commands suitable for copy/pasting into various shells on different operating systems. It first determines the script directory using the `dirname` and `realpath` commands. If the file `/etc/os-release` exists, it checks the operating system and potentially executes system-specific commands. The script seems to be intended for use with a proprietary OpenAI Help feature in iTerm2.
-- [lx]: `lx` is a bash script that prints multiple files inside fenced code blocks.
+- [lx]: `lx` is a bash script that prints multiple files inside markdown with named, fenced code blocks.
 - [unlx]: `unlx` extracts the filename from lx
+- [unfence]: `unfence` extracts the content of codeblocks from stdin
