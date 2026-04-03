@@ -16,20 +16,6 @@ fi
 
 source "${VIA_DIRECTORY}/logging.sh"
 
-function source_functions {
-    local functions_path="$1"
-    if [ -z "${functions_path}" ]; then
-        log_and_exit 3 "* $0: ERROR: source_functions path is empty"
-    elif [ -f "${functions_path}" ]; then
-        log_debug "* sourcing ${functions_path}"
-        source "${functions_path}"
-    elif [ -z "${functions_path}" ]; then
-        log_and_exit 3 "* $0: ERROR: functions_path is empty"
-    else
-        log_and_exit 3 "* $0: ERROR: Cannot find functions: ${functions_path}"
-    fi
-}
-
 # caller should add result to $TMPFILES_TO_DELETE
 function mktemp_file {
     local prefix="$1"
