@@ -48,7 +48,7 @@ function log_debug {
     local prog="$(basename "$0")"
     local message="$1"
     if [ -n "${DEBUG}" ]; then
-        log_with_icon '🐞' "${COLOR_BLUE}${prog}:${NOCOLOR} ${message}"
+        log_with_icon '🐞' "${COLOR_BLUE}DEBUG ${prog}:${NOCOLOR} ${message}"
     fi
 }
 
