@@ -159,7 +159,6 @@ function via_api_perform_inference() {
         system_message=${system_message##[[:space:]]}
         system_message=${system_message%%[[:space:]]}
         system_message_file=$(mktemp_file sysmsg)
-        register_temp_file "${system_message_file}"
         printf "%s\n" "${system_message%$'\n'}" >> "${system_message_file}"
     else
         system_message_file="/dev/null"
@@ -167,7 +166,7 @@ function via_api_perform_inference() {
 
     read -r -d '' question <<<"$question"   # removes trailing newlines
     question="$(string_trim "$question")"
-    question_file="$(mktemp /tmp/quest.XXXXXX)"
+    question_file="$(mktemp_file quest)"
     register_temp_file "${question_file}"
     log_debug "writing question to ${question_file}"
     printf "%s" "$question" >> "${question_file}"
