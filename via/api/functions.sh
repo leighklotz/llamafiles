@@ -173,7 +173,7 @@ function via_api_perform_inference() {
 
     data=$(jq --raw-input --raw-output  --compact-output -n \
               --arg inference_mode "${inference_mode}" \
-              --arg enable_thinking "${ENABLE_THINKING:-false}" \
+              --argjson enable_thinking "${ENABLE_THINKING:-false}" \
               --arg reasoning_effort "${REASONING_EFFORT:-low}" \
               --argjson reasoning_budget "${REASONING_BUDGET:-2048}" \
               --argjson frequency_penalty "${FREQUENCY_PENALTY:-NaN}" \
