@@ -5,7 +5,7 @@ CAPTURE_COMMAND="cat"
 FETCHER_COMMAND="${SCRIPT_DIR}/fetcher.sh"
 
 # Requires snap/golang yq for yaml->json, and regular jq to extract
-. "${SCRIPT_DIR}/../via/functions.sh"
+source "${SCRIPT_DIR}/../via/logging.sh"
 
 if [ -f "${SCRIPT_DIR}/.venv/bin/activate" ]; then
     . "${SCRIPT_DIR}/.venv/bin/activate"
@@ -124,7 +124,7 @@ else
     GRAMMAR_FLAG=""
 fi
 
-SCUTTLE_PROMPT="# Instructions\nRead the web page article from ${LINK} and ignore website header at the start and look for the main article. If the page loaded normally, respond with only a YAML file with these 4 fields: \`link\`, \`title\`, \`description\`, and \`keywords\` array. For the \`description\` field, write roughly 50 to 150 words and use the YAML literal block scalar format (starting with the \`|\` symbol). Put quotes around the `title`. Do NOT put quotes around the block scalar content. If there are retrieval failures, failed JavaScript, or Captcha challenges, just report on the failures in YAML using \`link\` and \`error\` fields. Use YAML block scalar for error."
+SCUTTLE_PROMPT='# Instructions\nRead the web page article from ${LINK} and ignore website header at the start and look for the main article. If the page loaded normally, respond with only a YAML file with these 4 fields: \`link\`, \`title\`, \`description\`, and \`keywords\` array. For the \`description\` field, write roughly 50 to 150 words and use the YAML literal block scalar format (starting with the \`|\` symbol). Put quotes around the `title`. Do NOT put quotes around the block scalar content. If there are retrieval failures, failed JavaScript, or Captcha challenges, just report on the failures in YAML using \`link\` and \`error\` fields. Use YAML block scalar for error.'
 
 ( printf "# Text of link %s\n\n---\n\n%s\n" "${LINK}" "${SCUTTLE_PROMPT}";
   "${FETCHER_COMMAND}" "${LINK}" | ${CAPTURE_COMMAND};

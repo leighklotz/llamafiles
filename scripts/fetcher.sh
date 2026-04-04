@@ -4,7 +4,7 @@
 
 SCRIPT_DIR="$(dirname "$(realpath "${BASH_SOURCE}")")"
 VENV_ACTIVATE="${SCRIPT_DIR}/.venv/bin/activate"
-. "${SCRIPT_DIR}/../via/functions.sh"
+source "${SCRIPT_DIR}/../via/logging.sh"
 
 DEFAULT_USER_AGENT='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36'
 USER_AGENT="${USER_AGENT:-${DEFAULT_USER_AGENT}}"

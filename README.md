@@ -133,26 +133,27 @@ More examples are in the [examples](examples) directory.
 
 ## help-commit.sh usage and examples
 
-This script uses llm.sh to generate commit messages from the current directory.
+This script uses llm.sh to generate commit messages from the current directory, based on `git diff` output.
 
 ```bash
-$ help-commit [--oneline|--multiline] [--staged] [git diff options] [-- llm.sh options]
+$ help-commit [--quiet] [-- [llm.sh options]]
+
+For example, to create an oneline commit message, use the following command:
+
+```bash
+help-commit
 ```
 
-You can choose to provide `--oneline` or `--multiline` flags to control the format of the commit message. Using `--oneline` (or default) will create a single line commit message, and `--multiline` will create a multi-line one. The script uses `git diff --staged` first, then `git diff`.
-
-For example, to create an oneline commit message for staged changes, use the following command:
-
+To show the commit message and conditionally execute the (presumably sole) code fence:
 ```bash
-help-commit --staged
+$ help-commit | pipetest | unfence | bash
 ```
 
-## write.sh examples
-The `write.sh` command is similar in spirit to the iTerm2 AI command feature which https://gitlab.com/gnachman/iterm2/-/issues/11475
-But it is not hardwared to OpenAI and does not execute the code. It differs from `help` only in the default prompt.
+## write examples
+The `write` command differs from `help` only in the default prompt.
 
 ```bash
-$ write.sh show git commit message for 70eab9e
+$ write show git commit message for 70eab9e
 # Set the Git repository directory to /path/to/your/repo
 # Change this to the actual path of your Git repository
 cd /path/to/your/repo
@@ -173,21 +174,22 @@ You can also copy [scripts/env.sh.example](scripts/env.sh.example) to `scripts/e
 - llm.sh - the base script that others call
 
 ## user programs
-- help - CLI for Linux help - use `builtin help` to access the built-in Bash help function instead.
 - ask - Like `help` but not not customized to Linux help
-- response - prints the last response from `help` or `ask`, from the environment variable `LLM_RESPONSE`.
-- machelp.sh - CLI for Mac help
-- summarize.sh - CLI to summarize a hyperlink / use '-' for stdin
-- help-commit.sh - CLI to run `git diff` and produce a commit message
+- bx [cmd ...] - Run command and show output in a bash codefence. You can pipe the result to `help`
+- codefence [filename] - Pipe to `help` to wrap file in a codeblock
+- help - CLI for Linux help - use `builtin help` to access the built-in Bash help function instead
+- help-commit - CLI to run `git diff` and produce a commit message
+- lx - prints multiple files inside markdown in a named, fenced code block.
+- machelp - CLI for Mac help
+- nvfree - check your GPU usage
+- nvpower - Monitor and set NVIDIA GPU power draw and limits
+- onsubnet - Check if the local IP address matches a specific subnet prefix
+- scuttle - Summarize a webpage into a bookmark link or YAML format
 - summarize-directory-files.sh - summarize directory files as markdown
-
-## user utilities
-- systype.sh - Pipe to `help` to provide context for distro-specific questions
-- nvfree.sh - check your GPU usage
-- codeblock.sh [lang] [cmd] - Pipe to `help` to wrap output of cmd in a codeblock of type lang.
-- bx [cmd ...] - Run command in a bash codefence. You can pipe the result to `help` to wrap output of cmd in a bash-like template.
-- unfence - Pipe response to unfence to extract content, usually code, between triple-backquotes.
-- [lx]: `lx.sh` is a bash script that prints multiple files inside fenced code blocks.
+- summarize - CLI to summarize a hyperlink / use '-' for stdin
+- systype - Pipe to `help` to provide context for distro-specific questions
+- unfence - Pipe response to `unfence` to extract content, usually code, between triple-backquotes.
+- unlx - Extract a specific file's content from an `lx` formatted archive (stdin to stdout)
 
 # llm.sh Details
 The help and summary scripts invoke `llm.sh`, but you can use it yourself directly as well.
@@ -219,32 +221,19 @@ $ help "How can I use the `yes` command in bash?"
 ## Environment Variables
 
 In addition to these command line flags, the script also checks for several environment variables to configure its behavior. Variables with effect in CLI-only are marked as such.
-
-- `TEMPERATURE`: The default temperature parameter for the model if none is specified via the `--temperature` flag.
-  `TOP_K`: TOP_K
-  `TOP_P`: TOP_P
-  `MIN_P`: MIN_P
-- `N_PREDICT`: The default number of tokens to predict if none is specified via the `--n-predict` flag.
-- `SYSTEM_MESSAGE`: The default system message to use if none is specified via the command line.
-- `GRAMMAR_FILE`: Same as `--grammar-file`
-- `DEBUG`: same as --debug
-- `VERBOSE`: same as --verbose
-- `KEEP_PROMPT_TEMP_FILE`: in what case to keep the prompt text file: NONE, ERROR, or ALL
-
-See [env.sh.example](env.sh.example).
+- See [docs/settings.md](docs/settings.md) for a full list.
+- See [env.sh.example](env.sh.example) for example settings.
 
 ## Basic Inference Script
 
-The script [scripts/llm.sh](scripts/llm.sh) controls almost text-based access OpenAPI inference. 
+The script [scripts/llm.sh](scripts/llm.sh) offers LLM inference.
 
 The [scripts/via.sh](via.sh) CLI tool provides access to server-specific commands, such as listing models and model types.
 It uses Oobabooga/text-generation-webui API to remotely load models.
 
 If the server is not local, set the environment variable `VIA_API_CHAT_BASE`, which defaults to `http://localhost:5000`.
 
-You can run `llama.cpp` in server mode with [scripts/start-server.sh](scripts/start-server.sh) or by using Oobabooga/text-generation-webui (see #References).
-
-The [scripts/via.sh](via.sh) CLI tool provides access to server-specific commands, such as model loading and unloading.
+The [scripts/via.sh](via.sh) CLI tool provides access to server-specific commands, such as model loading and unloading, for certain LLM inference backends.
 
 ## Program Flow
 1. If there are any arguments, `--` or any non-hyphen word, terminate the arguments and start the question. 
@@ -276,12 +265,9 @@ $ ./install.sh ~/.local/bin
 
 Beware that playwright installs a significant number of dependencies.
 
-# References
-## Used directly
-- https://justine.lol/oneliners/
-
-## Similar packages
+# Similar packages
 Many of these are better than this package. Please try them out.
+- https://justine.lol/oneliners/
 - https://github.com/rendezqueue/rendezllama
 - https://llm.datasette.io/
 - https://github.com/simonw/llm-cmd
@@ -296,6 +282,5 @@ Many of these are better than this package. Please try them out.
 
 ## Compatible LLM Inference Providers
 - https://github.com/oobabooga/text-generation-webui
-- https://github.com/ggerganov/llama.cpp
-- https://github.com/Mozilla-Ocho/llamafile
+- https://github.com/ggerganov/llama.cpp - llama-server
 - OpenAI API - partial support
