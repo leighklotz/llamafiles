@@ -11,7 +11,8 @@
 | `PENALIZE_NL`       | N/A                  | `false`    | Whether to penalize newlines.                |
 | `REASONING_EFFORT`  | `--reasoning-effort` | `low`      | Effort level for reasoning models.           |
 | `REASONING_BUDGET`  | `--reasoning-budget` | `2048`     | Token budget for reasoning.                  |
-| `ENABLE_THINKING`   | `--enable-thinking`  |            | Enable "thinking" capabilities in the model. |
+| `ENABLE_THINKING`   | `--enable-thinking   |            | Enable "thinking" capabilities in the model. |
+| `ENABLE_THINKING`   | `--think             |            | Same as `--enable-thinking`                  |          
 | `TOP_K`             | N/A                  | `20`       | Top-K sampling limit.                        |
 | `TOP_P`             | N/A                  | `0.95`     | Nucleus sampling probability.                |
 | `MIN_P`             | N/A                  | `0.1`      | Minimum probability for sampling.            |

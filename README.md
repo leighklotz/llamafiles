@@ -8,37 +8,16 @@ Exact capabilities depend on the model used. Below is a sample interaction.
 
 ```bash
 $ via --get-model-name
-gemma-3-27b-it-Q4_K_M.gguf
-$ help what do you do
-As an AI bot, I'm designed to be a versatile assistant! I can help with a lot of different things. Here’s a breakdown of what I do:
+unsloth_gemma_4_26B_A4B_it_UD_Q4_K_M
+$ help --think what can you do?
+I can assist with a wide range of tasks, including:
 
-* **Answer Questions:** I can provide information on a wide range of topics, drawing from a massive knowledge base. Just ask!
-* **Provide Explanations:** Need something explained simply? I can break down complex subjects.
-* **Generate Text:** I can write different kinds of creative text formats, like poems, code, scripts, musical pieces, email, letters, etc.
-* **Technical Assistance:** I particularly excel with:
-    * **Linux & Bash:** I can help with commands, scripting, troubleshooting.
-    * **Python:** I can assist with code snippets, explanations, debugging.
-    * **General Programming:**  I understand programming concepts and can help with logic or syntax (in many languages).
-* **Execute Commands (in a conceptual way):** While I can't *actually* run commands on your system, I can *tell* you what commands would do, or help you construct them. I can also show you the likely output of a command.
-
-**Important:** Remember our interactions are one-shot. I don't have memory of previous turns. Each question needs to be self-contained.
-$ ask what do you do
-I'm Gemma, a large language model created by the Gemma team at Google DeepMind. I'm an open-weights AI assistant, which means I'm widely available to the public. 
-
-I take text *and* images as inputs and generate text as output. Basically, you can give me a prompt (text or an image!), and I'll do my best to give you a helpful and informative response. 
-
-Here are some things I can do:
-
-*   **Generate creative text formats:** like poems, code, scripts, musical pieces, email, letters, etc.
-*   **Answer your questions:** I'll try to provide comprehensive and informative answers.
-*   **Summarize text:** I can condense long pieces of text into shorter, more manageable summaries.
-*   **Translate languages:** I can translate text from one language to another.
-*   **Follow your instructions and complete your requests thoughtfully.**
-
-I'm still under development, but I'm learning new things every day!
-
-You can find more information about me here: [https://ai.google.dev/gemma](https://ai.google.dev/gemma)
-$
+*   **Programming:** Writing, debugging, and optimizing code in languages such as Python, Bash, C++, JavaScript, etc.
+*   **Linux/Systems Administration:** Explaining commands, writing shell scripts, managing permissions, and configuring environments.
+*   **Technical Support:** Answering questions about computer science concepts, data structures, and algorithms.
+*   **Data Processing:** Writing scripts for data manipulation, parsing files, and automation.
+*   **General Knowledge:** Providing information on diverse subjects including mathematics, science, history, and literature.
+*   **Content Creation:** Generating documentation, README files, and technical explanations.
 ```
 
 ## Brief Usage examples
