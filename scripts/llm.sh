@@ -2,12 +2,29 @@
 
 SCRIPT_DIR="$(dirname "$(realpath "${BASH_SOURCE}")")"
 
-USAGE='[--stdin|--interactive|-i] [--raw-input] \
-[--process-question-escapes|-e] [--temperature temp] [--n-predict n] \
-[--grammar-file file.gbnf] [--info] [--verbose|-v] [--debug] [--noerror] [--] QUESTION*'
-
 function usage {
-    printf "Usage: %s %s\n" "$0" "${USAGE}" >> /dev/stderr
+local usage="[--debug] \
+[--enable-thinking] \
+[--grammar-file file.gbnf] \
+[--grammar-file] \
+[--inference-mode instruct|chat|chat-instruct] \
+[--info] \
+[--n-predict n] \
+[--n-predict n] \
+[--noerror] \
+[--process-question-escapes|-e] \
+[--raw-input] \
+[--raw-input] \
+[--reasoning-budget n] \
+[--reasoning-effort low|medium|high] \
+[--seed n] \
+[--stdin|--interactive|-i] \
+[--stdin|--interactive|-i] \
+[--temperature n] \
+[--temperature temp] \
+[--verbose|-v] \
+[--] QUESTION*"
+    printf "Usage: %s %s\n" "$0" "${usage}" >> /dev/stderr
 }
 
 ### If there are any args, require “--” or any non‑hyphen word to terminate args
@@ -24,8 +41,6 @@ function parse_args() {
                     usage
                     exit 0
                     ;;
-                # --via removed
-                --inference-mode) shift; INFERENCE_MODE="$1" ;;
                 # Logging
                 --info) INFO=1 ;;
                 --verbose|-v) VERBOSE=1 ;;
@@ -34,6 +49,7 @@ function parse_args() {
                     ;;
                 --noerror) ERROR_OUTPUT="/dev/null" ;;
                 # Generation options
+                --inference-mode) shift; INFERENCE_MODE="$1" ;;
                 --seed) shift; SEED="$1" ;;
                 --n-predict) shift; N_PREDICT="$1" ;;
                 --temperature) shift; TEMPERATURE="$1" ;;
