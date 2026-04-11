@@ -27,7 +27,8 @@ AUTHORIZATION_PARAMS=()
 : "${REPEAT_LAST_N:-1024}"
 : "${FREQUENCY_PENALTY:-0.000}"
 : "${PRESENCE_PENALTY:-0.000}"
-: "${ENBABLE_THINKING:false}"
+: "${ENABLE_THINKING:false}"
+: "${SHOW_THINKING:true}"
 # --grammar-file support is spotty in non-gguf models so default to off
 : "${USE_GRAMMAR:-}"
 
@@ -249,8 +250,8 @@ function via_api_perform_inference() {
         fi
     fi
 
-    if [ -n "$thinking" ]; then
-       log_with_icon "🤔" "$thinking"
+    if [ "${SHOW_THINKING}" == "true" ] && [ -n "$thinking" ]; then
+       log_with_icon "🤔" "Thinking:\n$thinking"
     fi
     # Output if we succeeded
     printf "%s\n" "${output}"

@@ -34,7 +34,7 @@ function log_with_icon {
     local message="$2"
     local timestamp="$(date -u +"%Y-%m-%d %H:%M:%S.%3NZ")"
     local formatted_message
-    formatted_message="$(echo -e "$message" | sed "s/^/${COLOR_YELLOW}|/")"
+    formatted_message="$(echo -e "$message" | sed "s/^/${COLOR_YELLOW}/")"
     printf "%b %b %b${NOCOLOR}\n" "${icon}" "${timestamp}" "${formatted_message}" > /dev/stderr
 }
 

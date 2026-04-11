@@ -6,6 +6,7 @@ function usage {
 local usage="[--debug] \
 [--enable-thinking|--think] \
 [--disable-thinking] \
+[--show-thinking] \
 [--grammar-file file.gbnf] \
 [--grammar-file] \
 [--inference-mode instruct|chat|chat-instruct] \
@@ -57,6 +58,7 @@ function parse_args() {
                 --grammar-file) shift; GRAMMAR_FILE="$1" ;;
                 --enable-thinking|--think) ENABLE_THINKING="true" ;;
                 --disable-thinking) ENABLE_THINKING="false" ;;
+                --show-thinking) SHOW_THINKING="true" ;;
                 --reasoning-effort) shift; REASONING_EFFORT:="$1" ;;
                 --reasoning-budget) shift; REASONING_BUDGET:="$1" ;;
                 # Input options
@@ -107,6 +109,7 @@ parse_args "${@}"
 : "${USE_SYSTEM_ROLE:=}"
 : "${REASONING_EFFORT:=low}"
 : "${ENABLE_THINKING:=false}"
+: "${SHOW_THINKING:=false}"
 : "${REASONING_BUDGET:-2048}"
 
 ##############################################################################
