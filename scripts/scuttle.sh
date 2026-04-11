@@ -124,7 +124,10 @@ else
     GRAMMAR_FLAG=""
 fi
 
-SCUTTLE_PROMPT='# Instructions\nRead the web page article from ${LINK} and ignore website header at the start and look for the main article. If the page loaded normally, respond with only a YAML file with these 4 fields: \`link\`, \`title\`, \`description\`, and \`keywords\` array. For the \`description\` field, write roughly 50 to 150 words and use the YAML literal block scalar format (starting with the \`|\` symbol). Put quotes around the `title`. Do NOT put quotes around the block scalar content. If there are retrieval failures, failed JavaScript, or Captcha challenges, just report on the failures in YAML using \`link\` and \`error\` fields. Use YAML block scalar for error.'
+SCUTTLE_PROMPT='# Instructions\nRead the web page article from ${LINK} and ignore website header at the start and look for the main article. If the page loaded normally, respond with only a YAML file with these 4 fields: \`link\`, \`title\`, \`description\`, and \`keywords\` array. Fir the description, For description, write an article summary in markdown with plain bold-free / header-free style, best for a feed sidebar or "Latest Posts" list. Include a list of main topocs or points if it is a salient addition to the description sans duplication. For the \`description\` field, use the YAML literal block scalar format (starting with the \`|\` symbol). Put quotes around the `title`. Do NOT put quotes around the block scalar content. If there are retrieval failures, failed JavaScript, or Captcha challenges, just report on the failures in YAML using \`link\` and \`error\` fields. Use YAML block scalar for error.'
+
+# shorten this description a Technical/Developer-Focused article summary on my feed. include a list of topics covered. Minimalist (Best for a sidebar or "Latest Posts" list). separately output a list of keywords. Write your response in Yaml.
+
 
 ( printf "# Text of link %s\n\n---\n\n%s\n" "${LINK}" "${SCUTTLE_PROMPT}";
   "${FETCHER_COMMAND}" "${LINK}" | ${CAPTURE_COMMAND};
