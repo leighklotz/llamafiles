@@ -218,37 +218,40 @@ function via_api_perform_inference() {
 
     if [ -n "${DEBUG_SHOW_JSON}" ]; then
         log_debug "API response: ${result}"
-        ### ✅ 2025-10-01 19:04:08.990Z INFO llm.sh: API response: {"id":"chatcmpl-1759345446829761536","object":"chat.completion","created":1759345446,"model":"gpt-oss-120b-Q4_K_M-00001-of-00002.gguf","choices":[{"index":0,"finish_reason":"stop","message":{"role":"assistant","content":"<|channel|>analysis<|message|>We just need to answer 5.<|end|><|start|>assistant<|channel|>final<|message|>2 + 3 = 5."},"tool_calls":[]}],"usage":{"prompt_tokens":128,"completion_tokens":27,"total_tokens":155}}
     fi
-    output="$(printf "%s" "${result}" | jq --raw-output '.choices[].message.content')"
-    log_debug "Output: ${output}"
-    ### ✅ 2025-10-01 19:04:08.995Z INFO llm.sh: Output: <|channel|>analysis<|message|>We just need to answer 5.<|end|><|start|>assistant<|channel|>final<|message|>2 + 3 = 5.
+    output="$(printf "%s" "${result}" | jq --raw-output '.choices[0].message.content // empty')"
     s=$?
+
     # exit if we failed to parse
     if [ "$s" != 0 ]; then
         log_and_exit $s "via api perform_inference cannot parse result=${result}"
     fi
 
-    # TODO: If the API returned a "thinking" response, split it out here
-    ###                   <|channel|>analysis<|message|>We just need to answer 5.<|end|><|start|>assistant<|channel|>final<|message|>2 + 3 = 5.
-    # TODO: If the API returned a "thinking" response, split it out here
-    # EXAMPLE: <|channel|>analysis<|message|>We just need to answer 5.<|end|><|start|>assistant<|channel|>final<|message|>2 + 3 = 5.
+    thinking="$(printf "%s" "${result}" | jq -r '.choices[0].message.reasoning_content // empty')"
+    log_debug "output=${output} thinking=${thinking}"
+
     if [[ $output == *$'\xC2\xA0'* || $output == *$'\xE2\x80\xAF'* ]]; then
         log_debug "Replacing gpt‑oss fake spaces with real spaces."
         # Replace every C2 A0 (nbsp) and E2 80 AF (hair‑space) with a normal space
         output="${output//[$'\xC2\xA0\xE2\x80\xAF']/ }"
     fi
 
-    log_debug "Checking for thinking response"
-    if [[ "$output" =~ ^\<\|channel\|\>analysis\<\|message\|\>(.*)\<\|end\|\> ]]; then
-        thinking="${BASH_REMATCH[1]}"
-        log_with_icon "🤔" "$thinking"
-    fi
-    #   <|start|>assistant<|channel|>final<|message|>…  
-    if [[ "$output" =~ \<\|start\|\>assistant\<\|channel\|\>final\<\|message\|\>(.*) ]]; then
-        output="${BASH_REMATCH[1]}"
+    # If we have no JSON-based reasoning content,
+    # check if the API returned an inline "thinking" response and split it out here
+    if [ -z "$thinking" ]; then
+        log_debug "Checking for thinking response in ${output}"
+        if [[ "$output" =~ ^\<\|channel\|\>analysis\<\|message\|\>(.*)\<\|end\|\> ]]; then
+            thinking="${BASH_REMATCH[1]}"
+        fi
+
+        if [[ "$output" =~ \<\|start\|\>assistant\<\|channel\|\>final\<\|message\|\>(.*) ]]; then
+            output="${BASH_REMATCH[1]}"
+        fi
     fi
 
+    if [ -n "$thinking" ]; then
+       log_with_icon "🤔" "$thinking"
+    fi
     # Output if we succeeded
     printf "%s\n" "${output}"
     return $s

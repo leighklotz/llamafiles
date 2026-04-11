@@ -94,7 +94,24 @@ function calculate_comment_prefix {
     esac
 }
 
+# Function to calculate the language name based on the major mode.
+function calculate_mode_lang {
+    local major_mode="$1"
+    case "$major_mode" in
+        sh-mode)      echo "Shell"   ;;
+        emacs-lisp-mode)  echo "Emacs Lisp" ;;
+        *lisp*-mode)  echo "Lisp" ;;
+        python*-mode) echo "Python"   ;;
+        c-mode)       echo "C"  ;;
+        c\+\+-mode)   echo "C+"  ;;
+        *)            echo "${major_mode/-mode/}"  ;;
+    esac
+}
+
 # Process the use case and set the system message accordingly.
+MAJOR_MODE=$1; shift
+MODE_LANG="$(calculate_mode_lang "${MODE_LANG}")"
+
 case "$USE_CASE" in
   -h)
     usage
@@ -102,50 +119,50 @@ case "$USE_CASE" in
     ;;
   rewrite)
     # args: major_mode prompt*
-    MAJOR_MODE=$1; shift; PROMPT="${*}"
-    printf -v SYSTEM_MESSAGE "Re-write the following %s according to user instructions:\n" "${MAJOR_MODE}"
+    PROMPT="${*}"
+    printf -v SYSTEM_MESSAGE 'Re-write the following Emacs `%s` buffer contents according to user instructions:\n' "${MODE_LANG}"
     REORDER_CODE=1
     ;;
 
   todo)
     # args: major_mode prompt*
-    MAJOR_MODE=$1; shift; PROMPT="${*}"
-    printf -v SYSTEM_MESSAGE "Re-write the following %s to address the 'todo' items, following user instructions:\n" "${MAJOR_MODE}"
+    PROMPT="${*}"
+    printf -v SYSTEM_MESSAGE 'Re-write the following Emacs `%s` to address the 'todo' items, following user instructions:\n' "${MODE_LANG}"
     REORDER_CODE=1
     ;;
 
   ask)
     # args: major_mode prompt*
-    MAJOR_MODE=$1; shift; PROMPT="${*}"
-    printf -v SYSTEM_MESSAGE "Answer the user question about the following %s content:\n" "${MAJOR_MODE}"
+    PROMPT="${*}"
+    printf -v SYSTEM_MESSAGE 'Answer the user question about the following Emacs `%s` buffer content:\n' "${MODE_LANG}"
     ;;
 
   write)
     # args: major_mode prompt*
-    MAJOR_MODE=$1; shift; PROMPT="${*}"
-    printf -v SYSTEM_MESSAGE "Write a response according to user instructions and the following %s:\n" "${MAJOR_MODE}"
+    PROMPT="${*}"
+    printf -v SYSTEM_MESSAGE 'Write a response according to user instructions and the following Emacs `%s` buffer contents:\n' "${MODE_LANG}"
     ;;
 
   vibe-emacs)
     # args: major_mode prompt*
-    MAJOR_MODE=$1; shift; PROMPT="${*}"; UNFENCE_CODE=1
-    printf -v SYSTEM_MESSAGE "Write and output an Emacs Lisp S-expression response that will carry out the following user instructions on the %s mode buffer. Use Emacs Lisp comments for any text that is not the code to execute.\n" "${MAJOR_MODE}"
+    PROMPT="${*}"; UNFENCE_CODE=1
+    printf -v SYSTEM_MESSAGE 'Write and output an Emacs Lisp S-expression response that will carry out the following user instructions on the Emacs `%s` mode buffer. Use Emacs Lisp comments for any text that is not the code to execute.\n' "${MODE_LANG}"
     ;;
 
   summarize)
     # args: major_mode prompt*
-    MAJOR_MODE=$1; shift; PROMPT="${*}"
-    printf -v SYSTEM_MESSAGE "Summarize the following %s:" "${MAJOR_MODE}"
+    PROMPT="${*}"
+    printf -v SYSTEM_MESSAGE 'Summarize the following Emacs `%s` buffer text:' "${MODE_LANG}"
     ;;
 
   complete)
     # args: major_mode prompt* [--n-predict] [--raw-flag]
-    MAJOR_MODE=$1; shift; PROMPT="${*}"
-    printf -v SYSTEM_MESSAGE "Complete the %s code:\n%s\n" "${MAJOR_MODE}" "${PROMPT}"
+    PROMPT="${*}"
+    printf -v SYSTEM_MESSAGE 'Complete the Emacs buffer `%s` code:\n%s\n' "${MODE_LANG}" "${PROMPT}"
     ;;
 
   *)
-    echo "ERROR: unknown use case $USE_CASE"
+    printf 'ERROR: MAJOR_MODE=%s; MODEL_LANG=%s; unknown use case=%s\n' "$1" "${MODE_LANG}" "${USE_CASE}"
     exit 1
     ;;
 esac
