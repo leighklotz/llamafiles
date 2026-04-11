@@ -51,8 +51,8 @@ done
 # TODO: we may need a better way, for example separately tracking staged and unstaged changes
 # simply by doing two llm invocations and teeing the staged commit output to the unstaged
 # input.
-STAGED_PROMPT="Below is the output of \`git diff --numstat\` and \`git diff\`. Read the output and then briefly output a code fence containing a corresponding \`git commit\` command, using using one or more dash-m commit messages as appropriate for the change.\n"
-UNSTAGED_PROMPT="Below is the output of \`git diff --numstat\` and \`git diff\`. Read the output and then briefly output a code fence containing a corresponding \`git commit -a\` command, using one or more dash-m commit messages as appropriate for the change.\n"
+STAGED_PROMPT='Below is the output of `git diff --numstat` and `git diff`. Read the output and then briefly output a code fence containing a corresponding `git commit` command, using using one or more dash-m commit messages as appropriate for the change. Consider using `-a` if necessary.\n'
+UNSTAGED_PROMPT='Below is the output of `git diff --numstat` and `git diff`. Read the output and then briefly output a code fence containing a corresponding `git commit -a` command, using one or more dash-m commit messages as appropriate for the change.\n'
 
 function get_results {
     if ! git rev-parse --is-inside-work-tree > /dev/null 2>&1; then

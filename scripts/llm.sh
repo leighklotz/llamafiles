@@ -4,9 +4,7 @@ SCRIPT_DIR="$(dirname "$(realpath "${BASH_SOURCE}")")"
 
 function usage {
 local usage="[--debug] \
-[--enable-thinking|--think] \
-[--disable-thinking] \
-[--show-thinking] \
+[--enable-thinking|--think][--disable-thinking][--show-thinking] [--hide-thinking] \
 [--grammar-file file.gbnf] \
 [--grammar-file] \
 [--inference-mode instruct|chat|chat-instruct] \
@@ -56,7 +54,8 @@ function parse_args() {
                 --n-predict) shift; N_PREDICT="$1" ;;
                 --temperature) shift; TEMPERATURE="$1" ;;
                 --grammar-file) shift; GRAMMAR_FILE="$1" ;;
-                --enable-thinking|--think) ENABLE_THINKING="true" ;;
+                --enable-thinking) ENABLE_THINKING="true" ;;
+                --think) ENABLE_THINKING="true"; SHOW_THINKING="true" ;;
                 --disable-thinking) ENABLE_THINKING="false" ;;
                 --show-thinking) SHOW_THINKING="true" ;;
                 --reasoning-effort) shift; REASONING_EFFORT:="$1" ;;
