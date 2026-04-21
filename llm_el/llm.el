@@ -463,6 +463,7 @@ followed by a fenced code block (lines starting with '```') containing the file 
 (global-set-key (kbd "M-s i") 'llm-insert)
 (global-set-key (kbd "M-s c") 'llm-complete)
 (global-set-key (kbd "M-s v") 'llm-vibe-emacs)
+(global-set-key (kbd "M-s q") 'llm-quick)
 
 ;;; Hooks
 (defun llm-smerge-mode-hook ()
