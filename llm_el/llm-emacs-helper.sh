@@ -91,7 +91,7 @@ function calculate_comment_prefix {
         c-mode)       echo "// "  ;;
         c\+\+-mode)   echo "// "  ;;
         markdown-mode) echo "🤖 " ;;
-        *)            echo "// [$major_mode] "  ;;
+        *) echo "🤖 " ;;
     esac
 }
 
