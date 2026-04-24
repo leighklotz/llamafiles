@@ -1,5 +1,4 @@
-;;;-*-EMACS-LISP-*-
-
+;;; -*-Mode: emacs-lisp-*-
 ;;; llm.el - LLM-based rewriting and summarization functions for Emacs buffers
 ;;;
 ;;; Copyright (C) 2024, 2025 Leigh Klotz <klotz@klotz.me>
@@ -44,7 +43,7 @@
 ;;;   - M-x llm-describe-function
 ;;;     Ask a question about the function description.
 ;;;   - M-x llm-describe-variable
-;;;     Ask a qusetion about the variable description.
+;;;     Ask a question about the variable description.
 ;;;   - M-x llm-view-lossage
 ;;;     Gives Emacs editing adviced based on your recent keystroke
 
@@ -113,12 +112,12 @@
 ;;; User commands
 
 (defun llm-ask (prompt &optional start end)
+  ;; TODO: it is failing with "list: The mark is not set now, so there is no region" if there is no region active
   "Write a new buffer based on PROMPT and the current region, or an empty string if no region is active.
 The result is displayed in a buffer named \\[llm-ask-buffer-name]]."
-  (interactive (list (llm-get-user-prompt "Ask: ") (region-beginning) (region-end)))
-  (unless (and start end)
-    (setq start (point-min)
-          end   (point-min)))
+  (interactive (list (llm-get-user-prompt "Ask: ") 
+                     (if (use-region-p) (region-beginning) (point-min))
+                     (if (use-region-p) (region-end) (point-max))))
   (push prompt llm-prompt-history)
   (llm-region-internal
    "ask" (llm-mode-text-type)
@@ -135,7 +134,9 @@ The result is displayed in a buffer named \\[llm-ask-buffer-name]]."
 (defun llm-insert (prompt &optional start end)
   "Insert the LLM's response to PROMPT at point, using the selected region as input.
 If no region is active, the input is an empty string."
-  (interactive (list (llm-get-user-prompt "Insert Prompt: ") (region-beginning) (region-end)))
+  (interactive (list (llm-get-user-prompt "Insert Prompt: ") 
+                     (if (use-region-p) (region-beginning) (point-min))
+                     (if (use-region-p) (region-end) (point-max))))
   (unless (and start end)
     (setq start (point-min)
           end   (point-min)))
@@ -147,14 +148,18 @@ If no region is active, the input is an empty string."
 ;;; Not yet implemented: llm-complete
 (defun llm-complete (prompt start end)
   "Generate additional text following the selected region using PROMPT and insert it at END."
-  (interactive (list (llm-get-user-prompt "Complete Prompt: ") (region-beginning) (region-end)))
+  (interactive (list (llm-get-user-prompt "Complete Prompt: ") 
+                     (if (use-region-p) (region-beginning) (point-min))
+                     (if (use-region-p) (region-end) (point-max))))
   (let ((n-predict 32))                 ; number of tokens to generate
     (push prompt llm-prompt-history)
     (llm-complete-internal prompt start end n-predict)))
 
 (defun llm-write (prompt &optional start end)
   "Write a new buffer based on PROMPT and the current region, and display the result in \\[llm-write-buffer-name\\[."
-  (interactive (list (llm-get-user-prompt "Write Prompt: ") (region-beginning) (region-end)))
+  (interactive (list (llm-get-user-prompt "Write Prompt: ") 
+                     (if (use-region-p) (region-beginning) (point-min))
+                     (if (use-region-p) (region-end) (point-max))))
   (unless (and start end)
     (setq start (point-min)
           end   (point-min)))
@@ -166,7 +171,9 @@ If no region is active, the input is an empty string."
 (defun llm-rewrite (prompt start end)
   "Rewrite the selected region using PROMPT and the external LLM script.
 The region is replaced with the LLM's output, and the changes are shown in merge‑file format."
-  (interactive (list (llm-get-user-prompt "Rewrite Prompt: ") (region-beginning) (region-end)))
+  (interactive (list (llm-get-user-prompt "Rewrite Prompt: ") 
+                     (if (use-region-p) (region-beginning) (point-min))
+                     (if (use-region-p) (region-end) (point-max))))
   (push prompt llm-prompt-history)
   (llm-region-internal
    "rewrite" (llm-mode-text-type)
@@ -175,7 +182,9 @@ The region is replaced with the LLM's output, and the changes are shown in merge
 (defun llm-todo (prompt start end)
   "Process 'todo' items in the selected region using PROMPT and the external LLM script.
 The region is replaced with the LLM's output, and the changes are shown in merge‑file format."
-  (interactive (list (llm-get-user-prompt "Todo Prompt: ") (region-beginning) (region-end)))
+  (interactive (list (llm-get-user-prompt "Todo Prompt: ") 
+                     (if (use-region-p) (region-beginning) (point-min))
+                     (if (use-region-p) (region-end) (point-max))))
   (push prompt llm-prompt-history)
   (llm-region-internal
    "todo" (llm-mode-text-type)
@@ -398,7 +407,9 @@ The function calls \\[[describe-variable]] and then runs \\[[llm-ask]] with QUES
 (defun llm-vibe-emacs (prompt start end)
   "Rewrite the selected region using PROMPT and the external LLM script.
 The region is replaced with the LLM's output, and the changes are shown in merge‑file format."
-  (interactive (list (llm-get-user-prompt "Vibe Prompt: ") (region-beginning) (region-end)))
+  (interactive (list (llm-get-user-prompt "Vibe Prompt: ") 
+                     (if (use-region-p) (region-beginning) (point-min))
+                     (if (use-region-p) (region-end) (point-max))))
   (push prompt llm-prompt-history)
   (llm-region-internal "vibe-emacs" (llm-mode-text-type) prompt start end "*vibe-emacs*" nil nil))
 
