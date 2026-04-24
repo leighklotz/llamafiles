@@ -1,4 +1,4 @@
-;;; -*-Mode: emacs-lisp-*-
+;;; -*-Mode: emacs-lisp -*-
 ;;; llm.el - LLM-based rewriting and summarization functions for Emacs buffers
 ;;;
 ;;; Copyright (C) 2024, 2025, 2026 Leigh Klotz <klotz@klotz.me>
@@ -36,7 +36,7 @@
 ;;; * `llm-ask`: Asks a question about a region; results appear in a new buffer.
 ;;; * `llm-write`: Generates a response to a prompt based on a region into a new buffer.
 ;;; * `llm-insert`: Inserts the LLM's response directly at point.
-;;; * `llm-quick`: A shortcut to ask a question and insert a concise answer immediately.
+;;; * `llm-quick`: A shortcut to ask a context-free question and insert a concise answer at point immediately.
 ;;; * `llm-complete`: (Experimental) Generates text to follow the current region.
 ;;; * `llm-todo`: Processes "todo" items in a region and replaces them with output.
 ;;; * `llm-unlx`: Utility to extract files from a "# file <name>" formatted buffer.
@@ -151,15 +151,15 @@ The result is displayed in a buffer named \\[llm-ask-buffer-name]]."
 
 (defun llm-insert (prompt &optional start end)
   "Insert the LLM's response to PROMPT at point, using the selected region as input.
-If no region is active, the input is an empty string."
+If no region is active, the input is the entire buffer."
   (interactive (llm-interactive-prompt "Insert Prompt: "))
   (unless (and start end)
-    (setq start (point-min)
-          end   (point-max)))
+    (setq start (if (use-region-p) (region-beginning) (point-min))
+          end   (if (use-region-p) (region-end) (point-max))))
   (let ((llm-write-buffer-name t))      ; insert into current buffer
     (llm-region-internal
      "write" (llm-mode-text-type)
-     prompt start end llm-write-buffer-name nil nil)))
+     prompt start end llm-write-buffer-name t nil)))
 
 ;;; Not yet implemented: llm-complete
 (defun llm-complete (prompt start end)
@@ -372,12 +372,17 @@ Note:
                       llm-output))))
     (query-replace-regexp regex replacer)))
 
+;;; TODO: llm-quick should not insert a trailing newline. If that's too hard, have llm-quick remove a trailing newline after llm-insert.
 (defun llm-quick (question)
   "Ask a short question and insert a concise answer at point.
 The function prompts for QUESTION, then calls \\[[llm-insert]] with a prompt
 that instructs the LLM to write a brief response to QUESTION and nothing else."
   (interactive "sQuestion: ")
-  (llm-insert (format "briefly write %s and nothing else" question)))
+  ;; provide no input
+  (let ((current-point (point)))
+    (llm-insert (format "Briefly write %s and nothing else." question) 
+                current-point current-point)
+    (when (bolp) (delete-char -1))))
 
 (defun llm-apropos (apropos-match question)
   "Search for symbols matching APPROPOS-MATCH and ask the LLM a QUESTION about the results.

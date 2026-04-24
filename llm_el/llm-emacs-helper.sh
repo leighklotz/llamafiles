@@ -121,14 +121,14 @@ case "$USE_CASE" in
   rewrite)
     # args: major_mode prompt*
     PROMPT="${*}"
-    printf -v SYSTEM_MESSAGE 'Re-write the following Emacs `%s` buffer contents according to user instructions:\n' "${MODE_LANG}"
+    printf -v SYSTEM_MESSAGE 'Re-write the following Emacs `%s` buffer contents according to user instructions. Do not make unrelated changes.\n' "${MODE_LANG}"
     REORDER_CODE=1
     ;;
 
   todo)
     # args: major_mode prompt*
     PROMPT="${*}"
-    printf -v SYSTEM_MESSAGE 'Re-write the following Emacs `%s` to address the 'todo' items, following user instructions:\n' "${MODE_LANG}"
+    printf -v SYSTEM_MESSAGE 'Re-write the following Emacs `%s` to address the 'todo' items, following user instructions. Do not make unrelated changes.\n' "${MODE_LANG}"
     REORDER_CODE=1
     ;;
 
