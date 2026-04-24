@@ -246,15 +246,22 @@ The function sets `max-mini-window-height` to 0.0 to suppress window height adju
            (shell-command-on-region start end
                                     (llm-infer-command-internal use-case major-mode-name prompt)
                                     output-buffer-name replace-p
-                                    llm-error-buffer-name t region-noncontiguous-p)))))
+                                    llm-error-buffer-name t region-noncontiguous-p)
+           ;; If we just created/targeted an llm buffer, make it markdown
+           (when (and output-buffer-name 
+                      (string-match-p "^\\*llm-" (buffer-name (get-buffer output-buffer-name))))
+             (with-current-buffer (get-buffer output-buffer-name)
+               (markdown-mode)))))))
 
 (defun llm-region-as-diff-internal (start end command)
   "Run the external LLM script on the region between START and END and pass the result to \\[[llm-diff-region-with-string]]."
   (let* ((original-string (buffer-substring start end))
-         (llm-output (with-temp-buffer
-                       (insert original-string)
-                       (shell-command-on-region (point-min) (point-max) command (current-buffer) t llm-error-buffer-name t nil)
-                       (buffer-string))))
+         (llm-output
+          (with-temp-buffer
+            (insert original-string)
+            (shell-command-on-region (point-min) (point-max) command (current-buffer) t llm-error-buffer-name t nil)
+            (markdown-mode)
+            (buffer-string))))
     (message "llm-diff-region-with-string %d %d %s" start end llm-output)
     (llm-diff-region-with-string start end llm-output)))
 
@@ -351,7 +358,7 @@ Parameters:
 Usage:
 1. Call the function with M-x llm-query-replace.
 2. Enter the regular expression when prompted.
-3. Enter the LLM prompt, ensuring it includes `%s` where the matched text will be inserted.
+3. Enter the LLM prompt, ensuring it includes `%s` where the text will be inserted.
 4. The function will find all occurrences of the regex in the buffer.
 5. For each match, it will ask if you want to replace it with LLM-generated text.
 6. If you agree, it will generate the replacement text using the LLM and replace the match.
@@ -474,9 +481,9 @@ followed by a fenced code block (lines starting with '```') containing the file 
 (global-set-key (kbd "M-s i") 'llm-insert)
 (global-set-key (kbd "M-s c") 'llm-complete)
 (global-set-key (kbd "M-s v") 'llm-vibe-emacs)
+(global-set-key (kbd "M-s q") 'llm-quick)
 
 ;;; Hooks
-
 (defun llm-smerge-mode-hook ()
   "Set up convenient keybindings for \\[[smerge-mode]]."
   (local-set-key [M-down] 'smerge-next)
@@ -484,8 +491,6 @@ followed by a fenced code block (lines starting with '```') containing the file 
   (local-set-key [C-down] 'smerge-keep-lower)
   (local-set-key [C-up] 'smerge-keep-upper))
   
-
 (add-hook 'smerge-mode-hook 'llm-smerge-mode-hook)
 
 (provide 'llm)
-

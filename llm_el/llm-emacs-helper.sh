@@ -90,7 +90,8 @@ function calculate_comment_prefix {
         python*-mode) echo "# "   ;;
         c-mode)       echo "// "  ;;
         c\+\+-mode)   echo "// "  ;;
-        *)            echo "// [$major_mode] "  ;;
+        markdown-mode) echo "🤖" ;;
+        *) echo "🤖" ;;
     esac
 }
 
@@ -183,7 +184,7 @@ if [ -z "${result}" ]; then
     exit 1
 fi
 
-# Reorder code with comments if the REORDER_CODE flag is set.
+# Reorder code with comments if theR EORDER_CODE flag is set.
 if [ "$REORDER_CODE" -eq 1 ]; then
   comment_prefix=$(calculate_comment_prefix "${MAJOR_MODE}")
   printf "%s\n" "${result}" | reorder_code "${comment_prefix}"
