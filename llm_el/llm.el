@@ -133,7 +133,6 @@
 ;;; User commands
 
 (defun llm-ask (prompt &optional start end)
-  ;; TODO: it is failing with "list: The mark is not set now, so there is no region" if there is no region active
   "Write a new buffer based on PROMPT and the current region, or an empty string if no region is active.
 The result is displayed in a buffer named \\[llm-ask-buffer-name]]."
   (interactive (llm-interactive-prompt "Ask: "))
@@ -156,7 +155,7 @@ If no region is active, the input is an empty string."
   (interactive (llm-interactive-prompt "Insert Prompt: "))
   (unless (and start end)
     (setq start (point-min)
-          end   (point-min)))
+          end   (point-max)))
   (let ((llm-write-buffer-name t))      ; insert into current buffer
     (llm-region-internal
      "write" (llm-mode-text-type)
@@ -494,3 +493,4 @@ followed by a fenced code block (lines starting with '```') containing the file 
 (add-hook 'smerge-mode-hook 'llm-smerge-mode-hook)
 
 (provide 'llm)
+
