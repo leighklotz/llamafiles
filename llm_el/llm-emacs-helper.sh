@@ -38,8 +38,8 @@ MAJOR_MODE=""
 PROMPT=""
 RAW_FLAG=""
 N_PREDICT=""
-REORDER_CODE=0 #Use numeric for boolean flags
-UNFENCE_CODE=0 #Use numeric for boolean flags
+REORDER_CODE=0
+UNFENCE_CODE=0
 
 # Parse optional arguments
 while [[ $# -gt 0 ]]; do
@@ -187,6 +187,7 @@ fi
 # Reorder code with comments if theR EORDER_CODE flag is set.
 if [ "$REORDER_CODE" -eq 1 ]; then
   comment_prefix=$(calculate_comment_prefix "${MAJOR_MODE}")
+  # printf "before reorder: result=%s\n" "${result}"
   printf "%s\n" "${result}" | reorder_code "${comment_prefix}"
 elif [ "$UNFENCE_CODE" -eq 1 ]; then
   printf "%s\n" "${result}" | unfence_code
