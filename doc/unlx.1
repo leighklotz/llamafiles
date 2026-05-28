@@ -1,0 +1,49 @@
+UNLX(1)                          User Commands                         UNLX(1)
+
+NAME
+       unlx - extract a specific file from an lx archive via stdin
+
+SYNOPSIS
+       unlx <filename>
+
+DESCRIPTION
+       unlx reads an lx-formatted archive from standard input and extracts 
+       the contents of the specified <filename> to standard output.
+
+       The script parses the archive by looking for metadata markers in the 
+       form of `# file <filename>` followed by a code block delimited by 
+       triple backticks (```). When a match is found, the content within 
+       the subsequent code block is printed.
+
+OPTIONS
+       <filename>
+              The exact name of the file to be extracted from the archive.
+
+EXIT STATUS
+       0      Success.
+
+       1      An error occurred (e.g., no filename was provided as an 
+              argument). A usage message is printed to stderr.
+
+EXAMPLES
+       Extracting 'config.json' from a local lx archive:
+             cat archive.lx | unlx config.json
+
+       Redirecting the output to a file:
+             unlx script.py < archive.lx > script.py
+
+NOTES
+       The utility expects input in the following format:
+       # file filename_here
+       ```
+       content...
+       ```
+
+AUTHOR
+       Klotz
+
+SEE ALSO
+       awk(1), bash(1)
+
+Linux                           August 2023                      UNLX(1)
+
