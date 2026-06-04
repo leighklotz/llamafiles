@@ -1,50 +1,43 @@
-#!/usr/bin/env bash
+pipetest () 
+{ 
+    local user_query="$*";
+    local tmpfile;
+    if ! tmpfile=$(mktemp --tmpdir="$(mktemp -d)" pipetest.XXXXXX 2> /dev/null); then
+        printf "pipetest: could not create temporary file\n" 1>&2;
+        exit 1;
+    fi;
+    trap 'rm -f "$tmpfile"' EXIT;
+    cat > "$tmpfile";
+    
+    local reply;
+    local pager;
 
-# pipetest alias – forward piped data after a Y/N confirmation
-# -----------------------------------------------------------------------
-#   Read all data from standard input (the "pipe").
-#   Ask the user "Y or N? " (case‑insensitive, newline required).
-#   If the answer starts with "y" (or "yes") the data is forwarded
-#   to stdout.  Otherwise nothing is written.
-# -----------------------------------------------------------------------
-
-# This file is intended to be *sourced*.
-if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-  echo "ERROR: This script must be sourced, not executed."
-  exit 1
-fi
-
-function pipetest() {
-    local user_query="$*"
-
-    # 1. Capture stdin into a temporary file – this allows very large input.
-    local tmpfile
-    if ! tmpfile=$(mktemp --tmpdir="$(mktemp -d)" pipetest.XXXXXX 2>/dev/null) ; then
-        printf >&2 "pipetest: could not create temporary file\n"
-        exit 1
-    fi
-    trap 'rm -f "$tmpfile"' EXIT
-
-    cat > "$tmpfile"
-
-    # 3. Prompt from stderr (visible in the terminal) and read a full line.
-    local reply
-    local pager
-    pager="${PAGER:-batcat}"
-
-    (printf "🤖 "; "$pager" "$tmpfile"; printf "🤖 %s: Y or N? " "$user_query") >&2 
-    read -r -t 0 -s reply < /dev/tty     # non‑blocking: only keep the first char
-
-    # If the first char is not a 'y'/'Y', read the rest of the line to discard it.
-    if [[ ! "${reply}" =~ ^[yY]$ ]] ; then
-        # Drain the remainder of the line (including the newline)
-        read -r reply < /dev/tty
-    fi
-    printf "\n" >&2
-
-    # 4. If the first character is 'y' or 'Y', output the captured data.
-    case "${reply,,}" in
-        y*) cat "$tmpfile" ;;
-        *) printf "🚫 discarded\n" >&2 ;;
+    # Auto-detect the best available viewing tool
+    if [ -n "${PAGER}" ]; then
+        pager="${PAGER}"
+    elif command -v batcat >/dev/null 2>&1; then
+        pager="batcat --style=numbers,grid"
+    elif command -v bat >/dev/null 2>&1; then
+        pager="bat --style=numbers,grid"
+    elif command -v less >/dev/null 2>&1; then
+        pager="less -R"
+    else
+        pager="cat"
+    fi;
+    
+    # Render file content directly to stderr
+    ${pager} "$tmpfile" 1>&2
+    
+    # Safe interactive prompt from /dev/tty (avoids the racing subshell read)
+    read -r -p "🤖 ${user_query}: Y or N? " reply < /dev/tty;
+    
+    printf "\n" 1>&2;
+    case "${reply,,}" in 
+        y*)
+            cat "$tmpfile"
+        ;;
+        *)
+            printf "🚫 discarded\n" 1>&2
+        ;;
     esac
 }
