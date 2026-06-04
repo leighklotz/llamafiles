@@ -25,13 +25,16 @@ function pipetest() {
     fi
     trap 'rm -f "$tmpfile"' EXIT
 
-    cat >"$tmpfile"
-
+    cat > "$tmpfile"
 
     # 3. Prompt from stderr (visible in the terminal) and read a full line.
     local reply
-    (printf "🤖 "; head -10 "$tmpfile"; printf "🤖 %s: Y or N? " "$user_query") >&2 
+    local pager
+    pager="${PAGER:-batcat}"
+
+    (printf "🤖 "; "$pager" "$tmpfile"; printf "🤖 %s: Y or N? " "$user_query") >&2 
     read -r -t 0 -s reply < /dev/tty     # non‑blocking: only keep the first char
+
     # If the first char is not a 'y'/'Y', read the rest of the line to discard it.
     if [[ ! "${reply}" =~ ^[yY]$ ]] ; then
         # Drain the remainder of the line (including the newline)
