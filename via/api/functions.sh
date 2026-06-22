@@ -66,7 +66,7 @@ else
     skip_special_tokens: false,
     reasoning_format: \"deepseek\",
     chat_template_kwargs: { \"enable_thinking\": \$enable_thinking },
-    verbose: 1,
+    verbose: true,
     reasoning_budget: \$reasoning_budget"
 fi
 
