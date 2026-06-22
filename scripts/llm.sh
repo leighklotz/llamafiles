@@ -183,14 +183,14 @@ function report_success_or_fail {
 source "${VIA_API_FUNCTIONS_PATH}"
 
 process_question_escapes
-log_info "process_stdin"
+log_verbose "process_stdin"
 process_stdin
-log_info "process_stdin done"
+log_verbose "process_stdin done"
 prepare_prompt
 set_verbose_debug
-log_info "perform_inference"
+log_verbose "perform_inference"
 perform_inference; STATUS=$?
-log_info "perform_inference done"
+log_verbose "perform_inference done"
 report_success_or_fail $STATUS
 cleanup_temp_files $STATUS
 exit $STATUS
