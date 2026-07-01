@@ -90,7 +90,7 @@ function calculate_comment_prefix {
         python*-mode) echo "# "   ;;
         c-mode)       echo "// "  ;;
         c\+\+-mode)   echo "// "  ;;
-        markdown-mode) echo "🤖" ;;
+        markdown-mode) echo "" ;;
         *) echo "🤖" ;;
     esac
 }
