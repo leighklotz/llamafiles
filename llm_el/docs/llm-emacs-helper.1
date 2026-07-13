@@ -1,93 +1,92 @@
-.TH LLM-EMACS-HELPER.SH 1 "2024" "Version 0.1" "User Commands"
+.TH LLM-EMACS-HELPER.SH 1 "2025" "Version 0.2" "User Commands"
 .SH NAME
 llm-emacs-helper.sh \- Interface for LLM interaction from Emacs
 .SH SYNOPSIS
 .B llm-emacs-helper.sh
-.I use-case
-[
-.I options
-]
-.I input
+\fIuse_case\fR [$\fIoptions\fR] $\fImajor_mode\fR $\fPrompts...\fR
 .SH DESCRIPTION
 .B llm-emacs-helper.sh
-is a Bash script designed to interface with large language models (LLMs) from within Emacs. It provides a bridge between Emacs and external LLM tools, enabling tasks such as code rewriting, summarization, question answering, and code completion through standardized prompts and processing.
+is a Bash script designed to interface with large language models (LLMs) from within Emacs. It provides a bridge between Emacs and external LLM tools, enabling tasks such as code rewriting, summarization, question answering, and Lisp S-expression generation through standardized prompts.
 
-The script accepts input via stdin and outputs results to stdout, making it suitable for integration with Emacs Lisp functions via shell commands.
+The script accepts input via stdin and outputs results to stdout. For certain use cases like \fBrewrite\fR or \fBtodo\fR, the script automatically adds comments (based on the major mode) before each line of code in the response to preserve buffer structure.
 .SH USE CASES
-The script supports multiple use cases:
+The script supports several distinct modes:
 .IP \(bu 2
 .B rewrite
-- Re-write code or text according to user instructions
-.IP \(bu 2
-.B ask
-- Answer questions about input content
-.IP \(bu 2
-.B write
-- Generate new content based on input and a prompt
-.IP \(bu 2
-.B summarize
-- Generate a summary of the input content
-.IP \(bu 2
-.B complete
-- Complete code based on partial input and prompt
+Re-write text/code according to instructions; outputs with comment prefixes for structural preservation.
 .IP \(bu 2
 .B todo
-- Process todo items in the input
+Process "todo" items within the input buffer based on user instruction.
 .IP \(bu 2
-.B \-h
-- Display help message
+.B ask
+Answer questions about the provided content.
+.IP \(bu 2
+.B write
+Generate new content or a response according to instructions and context.
+.IP \(bu 2
+.B summarize
+Summarize the input text.
+.IP \(bu 2
+.B complete
+Complete code/text based on partial input and a prompt.
+.IP \(bu 2
+.B vibe-emacs
+Generate an Emacs Lisp S-expression response; automatically strips markdown code fences (unfences) from the output.
+.SH ARGUMENTS
+The command follows this positional order:
+.TP
+.I use_case
+One of: \fBrewrite\fR, \fBask\fR, \fBwrite\fR, \fBsummarize\fR, \fBcomplete\fR, \fBtodo\fR, or \fBvibe-emacs\fR.
+.TP
+.I major_mode
+The Emacs major mode (e.g., \fBpython-mode\fR, \fBsh-mode\fR). This determines how the system prompt is formatted and which comment character is used for code preservation. 
+.TP
+.I prompt
+A string containing instructions or questions sent to the LLM.
+
 .SH OPTIONS
+Note: To be parsed as functional arguments rather than text within the prompt, options must appear \fBbefore\fR the $\fImajor_mode\fR argument.
 .TP
-.B \-n_predict
-Specify the number of tokens to predict. Useful for controlling generation length.
+.B -n_predict <tokens>
+Specify the number of tokens to predict (generation length).
 .TP
-.B \-\-raw-input
-Pass input directly to LLM without processing (useful for specific cases).
-.TP
-.B \-\-help
-Display usage information and exit.
-.SH INPUT
-Input is read from stdin, allowing for piped content or direct buffer content from Emacs.
-.SH OUTPUT
-Output is written to stdout. For rewrite and todo operations, code lines are prefixed with comments to preserve structure.
+.B --raw-input
+Pass input directly to the LLM without any internal processing or sanitization.
+.SH INPUT/OUTPUT
+The script reads from $\fIstdin\fR and writes results to $\fIstdout\fR. 
+If a use case requires code preservation (like \fBrewrite\fR), the output will be prefixed with comment characters specific to your major mode (e.g., \# for shell, // for C++).
 .SH EXAMPLES
 .nf
-.RS
-# Ask a question about shell script content
-cat my_script.sh | ./llm-emacs-helper.sh ask api mixtral bash "What does this code do?"
+# Ask a question about Python code (Note: 'python-mode' is mandatory)
+cat script.py | ./llm-emacs-helper.sh ask python-mode "What does this function do?"
 
-# Rewrite code with a prompt
-cat my_file.py | ./llm-emacs-helper.sh rewrite cli llama2 python "Improve this code structure"
+# Rewrite code with specific length constraints 
+# (Option must come before the mode to be parsed correctly)
+cat file.js | ./llm-emacs-helper.sh rewrite -n_predict 50 javascript-mode "Refactor for performance"
 
-# Complete code based on a partial input
-echo "def hello_world():" | ./llm-emacs-helper.sh complete api phi "finish the function"
+# Complete a line of code in Emacs Lisp style
+echo "(defun test ()" | ./llm-emacs-helper.sh complete emacs-lisp-mode "complete this function definition"
+
+# Use vibe-emacs to get clean Lisp S-expressions without markdown fences
+cat context.txt | ./llm-emacs-helper.sh vibe-emacs lisp-mode "Generate a command to open a buffer"
 .RE
 .fi
 .SH ENVIRONMENT
 .TP
 .B DEBUG
-If set, enables debug output showing all arguments and environment variables.
+If set, enables debug output showing all arguments and environment variables being passed to the underlying LLM script.
 .TP
 .B LLM_SH
-Path to the LLM execution script (default: ${SCRIPT_DIR}/../scripts/llm.sh)
+The path to the primary execution script (defaults to \fI../scripts/llm.sh\fR).
 .SH EXIT STATUS
 .TP
 .B 0
-Success - LLM completed and output was generated
+Success - Output was generated successfully.
 .TP
 .B 1
-Failure - Invalid arguments, insufficient input, or LLM returned no output
-.TP
-.B 2
-Help requested (\-h option)
-.SH FILES
-.I ${SCRIPT_DIR}/llm-emacs-helper.sh
-.I ${SCRIPT_DIR}/../scripts/llm.sh
-.SH SEE ALSO
-llm.el(1), llm.sh(1)
+Failure - Invalid arguments, missing mode, or LLM returned empty result.
+.IP \(bu 2
+Help requested (\-h option) / Usage error.
+
 .SH AUTHORS
 Leigh L. Klotz, Jr.
-.SH COPYRIGHT
-Copyright (C) 2024-2025 Leigh L. Klotz, Jr. Licensed under GNU AFFERO GENERAL PUBLIC LICENSE Version 3.
-.SH BUGS
-Report bugs to the maintainer.
