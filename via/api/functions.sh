@@ -66,7 +66,7 @@ else
     skip_special_tokens: false,
     reasoning_format: \"deepseek\",
     chat_template_kwargs: { \"enable_thinking\": \$enable_thinking },
-    verbose: 1,
+    verbose: true,
     reasoning_budget: \$reasoning_budget"
 fi
 
@@ -211,6 +211,11 @@ function via_api_perform_inference() {
     s=$?
     if [ "$s" -ne 0 ]; then
         log_and_exit $s "Inference cannot curl VIA_API_CHAT_COMPLETIONS_ENDPOINT=$VIA_API_CHAT_COMPLETIONS_ENDPOINT"
+    fi
+
+    error_message="$(printf "%s" "${result}" | jq -r '.error.message // empty')"
+    if [ -n "$error_message" ]; then
+        log_and_exit $s "Inference failed: error_message=${error_message}\nresult=${result}"
     fi
 
     if [ -n "${INFO}" ]; then
