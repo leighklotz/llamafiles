@@ -7,18 +7,28 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
 fi
 
 : "${VIA_API_CHAT_BASE:=http://localhost:5000}"
+# oobabooga endpoints
 VIA_API_CHAT_COMPLETIONS_ENDPOINT="${VIA_API_CHAT_BASE}/v1/chat/completions"
 VIA_API_TOKEN_COUNT_ENDPOINT="${VIA_API_CHAT_BASE}/v1/chat/token-count"
 VIA_API_MODEL_INFO_ENDPOINT="${VIA_API_CHAT_BASE}/v1/internal/model/info"
+VIA_API_MODEL_INFO_ENDPOINT_LL="${VIA_API_CHAT_BASE}/models"
 VIA_API_MODEL_LIST_ENDPOINT="${VIA_API_CHAT_BASE}/v1/internal/model/list"
 VIA_API_LOAD_MODEL_ENDPOINT="${VIA_API_CHAT_BASE}/v1/internal/model/load"
 VIA_API_UNLOAD_MODEL_ENDPOINT="${VIA_API_CHAT_BASE}/v1/internal/model/unload"
+# llama.cpp endpoints
+VIA_API_MODEL_PROPS_ENDPOINT="${VIA_API_CHAT_BASE}/props"
+
 AUTHORIZATION_PARAMS=()
 
 : "${TOP_K:-20}"
 : "${TOP_P:-0.95}"
 : "${MIN_P:-0.1}"
-
+: "${TYPICAL_P:-1.000}"
+: "${REPEAT_LAST_N:-1024}"
+: "${FREQUENCY_PENALTY:-0.000}"
+: "${PRESENCE_PENALTY:-0.000}"
+: "${ENABLE_THINKING:false}"
+: "${SHOW_THINKING:true}"
 # --grammar-file support is spotty in non-gguf models so default to off
 : "${USE_GRAMMAR:-}"
 
@@ -34,7 +44,7 @@ TEMPLATE_SETTINGS="
 if [ -n "${OPENAI_API_KEY}" ]; then
     AUTHORIZATION_PARAMS=(-H "Authorization: Bearer ${OPENAI_API_KEY}")
     TEMPLATE_SETTINGS="${TEMPLATE_SETTINGS},
-        model: \"gpt-5\""
+        model: \"gpt-5.1\""
 else
     TEMPLATE_SETTINGS="${TEMPLATE_SETTINGS},
     tools: [],
@@ -48,12 +58,16 @@ else
     penalize_nl: \$penalize_nl,
     grammar_string: \$grammar_string,
     seed: \$seed,
-    repeat_last_n: 64, frequency_penalty: 0.000, presence_penalty: 0.000,
-    top_k: \$top_k, tfs_z: 1.000, top_p: \$top_p, min_p: \$min_p, typical_p: 1.000,
+    repeat_last_n: \$repeat_last_n, frequency_penalty: \$frequency_penalty, presence_penalty: \$presence_penalty,
+    top_k: \$top_k, tfs_z: 1.000, top_p: \$top_p, min_p: \$min_p, typical_p: \$typical_p,
     mirostat: 0, 
     n_keep: 1,
     auto_max_new_tokens: true,
-    skip_special_tokens: false"
+    skip_special_tokens: false,
+    reasoning_format: \"deepseek\",
+    chat_template_kwargs: { \"enable_thinking\": \$enable_thinking },
+    verbose: true,
+    reasoning_budget: \$reasoning_budget"
 fi
 
 if [ -n "${LLAMA_SERVER_MODEL}" ]; then
@@ -100,22 +114,17 @@ function prepare_prompt {
     fi
 }
 
-function string_trim() {
-    local s="$1"
-    # Remove leading whitespace
-    s="${s#"${s%%[![:space:]]*}"}"
-    # Remove trailing whitespace
-    s="${s%"${s##*[![:space:]]}"}"
-    printf '%s' "$s"
-}
-
 # todo: make common with cli_perform_inference by splitting out all
 #       non-inference settings to the prepare_model
 # via_api_perform_inference "$INFERENCE_MODE" "$SYSTEM_MESSAGE" "$QUESTION" "$GRAMMAR_FILE"
 # todo: so many files and strings back and forth
+
 function via_api_perform_inference() {
     local inference_mode="$1" system_message="$2" question="$3" grammar_file="$4"
     local temperature="$5" repetition_penalty="$6" penalize_nl="$7" n_predict="$8"
+    local enable_thinking="${9:-${ENABLE_THINKING}}"
+    local reasoning_effort="${10:-${REASONING_EFFORT}}"
+    local reasoning_budget="${11:-${REASONING_BUDGET}}"
 
     if [ -z "$grammar_file" ] || [ -z "${USE_GRAMMAR}" ]; then
         grammar_file="/dev/null"
@@ -142,7 +151,6 @@ function via_api_perform_inference() {
         system_message=${system_message##[[:space:]]}
         system_message=${system_message%%[[:space:]]}
         system_message_file=$(mktemp_file sysmsg)
-        register_temp_file "${system_message_file}"
         printf "%s\n" "${system_message%$'\n'}" >> "${system_message_file}"
     else
         system_message_file="/dev/null"
@@ -150,7 +158,7 @@ function via_api_perform_inference() {
 
     read -r -d '' question <<<"$question"   # removes trailing newlines
     question="$(string_trim "$question")"
-    question_file="$(mktemp /tmp/quest.XXXXXX)"
+    question_file="$(mktemp_file quest)"
     register_temp_file "${question_file}"
     log_debug "writing question to ${question_file}"
     printf "%s" "$question" >> "${question_file}"
@@ -166,15 +174,21 @@ function via_api_perform_inference() {
 
     data=$(jq --raw-input --raw-output  --compact-output -n \
               --arg inference_mode "${inference_mode}" \
-              --arg reasoning_effort "${REASONING_EFFORT}" \
-              --argjson temperature ${temperature} \
-              --argjson repetition_penalty ${repetition_penalty} \
-              --argjson penalize_nl ${penalize_nl} \
-              --argjson seed ${SEED:-NaN} \
-              --argjson top_k ${TOP_K:-NaN} \
-              --argjson top_p ${TOP_P:-NaN} \
-              --argjson min_p ${MIN_P:-NaN} \
-              --argjson n_predict ${n_predict} \
+              --argjson enable_thinking "${ENABLE_THINKING:-false}" \
+              --arg reasoning_effort "${REASONING_EFFORT:-low}" \
+              --argjson reasoning_budget "${REASONING_BUDGET:-2048}" \
+              --argjson frequency_penalty "${FREQUENCY_PENALTY:-NaN}" \
+              --argjson min_p "${MIN_P:-NaN}" \
+              --argjson n_predict "${N_PREDICT:-NaN}" \
+              --argjson penalize_nl "${penalize_nl:-NaN}" \
+              --argjson presence_penalty "${PRESENCE_PENALTY:-NaN}" \
+              --argjson repeat_last_n "${REPEAT_LAST_N:-NaN}" \
+              --argjson repetition_penalty "${repetition_penalty:-NaN}" \
+              --argjson seed "${SEED:-NaN}" \
+              --argjson temperature "${temperature}" \
+              --argjson top_k "${TOP_K:-NaN}" \
+              --argjson top_p "${TOP_P:-NaN}" \
+              --argjson typical_p "${TYPICAL_P:-NaN}" \
               --rawfile system_message "${system_message_file}" \
               --rawfile question "${question_file}" \
               --rawfile grammar_string "${grammar_file}" \
@@ -192,10 +206,16 @@ function via_api_perform_inference() {
     # Invoke via the HTTP API endpoint
     # todo might need to do `set -o pipefail` here.
     #set -x
+    log_info "VIA_API_CHAT_COMPLETIONS_ENDPOINT=${VIA_API_CHAT_COMPLETIONS_ENDPOINT}"
     result=$(printf "%s" "${data}" | curl -s -X 'POST' "${VIA_API_CHAT_COMPLETIONS_ENDPOINT}" -H 'Content-Type: application/json' "${AUTHORIZATION_PARAMS[@]}" -d @-)
     s=$?
     if [ "$s" -ne 0 ]; then
         log_and_exit $s "Inference cannot curl VIA_API_CHAT_COMPLETIONS_ENDPOINT=$VIA_API_CHAT_COMPLETIONS_ENDPOINT"
+    fi
+
+    error_message="$(printf "%s" "${result}" | jq -r '.error.message // empty')"
+    if [ -n "$error_message" ]; then
+        log_and_exit $s "Inference failed: error_message=${error_message}\nresult=${result}"
     fi
 
     if [ -n "${INFO}" ]; then
@@ -205,45 +225,58 @@ function via_api_perform_inference() {
 
     if [ -n "${DEBUG_SHOW_JSON}" ]; then
         log_debug "API response: ${result}"
-        ### ✅ 2025-10-01 19:04:08.990Z INFO llm.sh: API response: {"id":"chatcmpl-1759345446829761536","object":"chat.completion","created":1759345446,"model":"gpt-oss-120b-Q4_K_M-00001-of-00002.gguf","choices":[{"index":0,"finish_reason":"stop","message":{"role":"assistant","content":"<|channel|>analysis<|message|>We just need to answer 5.<|end|><|start|>assistant<|channel|>final<|message|>2 + 3 = 5."},"tool_calls":[]}],"usage":{"prompt_tokens":128,"completion_tokens":27,"total_tokens":155}}
     fi
-    output="$(printf "%s" "${result}" | jq --raw-output '.choices[].message.content')"
-    log_debug "Output: ${output}"
-    ### ✅ 2025-10-01 19:04:08.995Z INFO llm.sh: Output: <|channel|>analysis<|message|>We just need to answer 5.<|end|><|start|>assistant<|channel|>final<|message|>2 + 3 = 5.
+    output="$(printf "%s" "${result}" | jq --raw-output '.choices[0].message.content // empty')"
     s=$?
+
     # exit if we failed to parse
     if [ "$s" != 0 ]; then
         log_and_exit $s "via api perform_inference cannot parse result=${result}"
     fi
 
-    # TODO: If the API returned a "thinking" response, split it out here
-    ###                   <|channel|>analysis<|message|>We just need to answer 5.<|end|><|start|>assistant<|channel|>final<|message|>2 + 3 = 5.
+    thinking="$(printf "%s" "${result}" | jq -r '.choices[0].message.reasoning_content // empty')"
+    log_debug "output=${output} thinking=${thinking}"
 
-    # TODO: If the API returned a "thinking" response, split it out here
-    # EXAMPLE: <|channel|>analysis<|message|>We just need to answer 5.<|end|><|start|>assistant<|channel|>final<|message|>2 + 3 = 5.
     if [[ $output == *$'\xC2\xA0'* || $output == *$'\xE2\x80\xAF'* ]]; then
         log_debug "Replacing gpt‑oss fake spaces with real spaces."
         # Replace every C2 A0 (nbsp) and E2 80 AF (hair‑space) with a normal space
         output="${output//[$'\xC2\xA0\xE2\x80\xAF']/ }"
     fi
 
-    log_debug "Checking for thinking response"
-    if [[ "$output" =~ ^\<\|channel\|\>analysis\<\|message\|\>(.*)\<\|end\|\> ]]; then
-        thinking="${BASH_REMATCH[1]}"
-        log_with_icon "🤔" "$thinking"
-    fi
-    #   <|start|>assistant<|channel|>final<|message|>…  
-    if [[ "$output" =~ \<\|start\|\>assistant\<\|channel\|\>final\<\|message\|\>(.*) ]]; then
-        output="${BASH_REMATCH[1]}"
+    # If we have no JSON-based reasoning content,
+    # check if the API returned an inline "thinking" response and split it out here
+    if [ -z "$thinking" ]; then
+        log_debug "Checking for thinking response in ${output}"
+        if [[ "$output" =~ ^\<\|channel\|\>analysis\<\|message\|\>(.*)\<\|end\|\> ]]; then
+            thinking="${BASH_REMATCH[1]}"
+        fi
+
+        if [[ "$output" =~ \<\|start\|\>assistant\<\|channel\|\>final\<\|message\|\>(.*) ]]; then
+            output="${BASH_REMATCH[1]}"
+        fi
     fi
 
+    if [ "${SHOW_THINKING}" == "true" ] && [ -n "$thinking" ]; then
+       log_with_icon "🤔" "Thinking:\n$thinking"
+    fi
     # Output if we succeeded
     printf "%s\n" "${output}"
     return $s
 }
 
 function get_model_name {
-    (curl -s "${VIA_API_MODEL_INFO_ENDPOINT}" "${AUTHORIZATION_PARAMS[@]}" | jq -e -r .model_name 2> /dev/null) | sed -e "s/null/${MODEL_NAME_OVERRIDE:-None}/"
+    local model_name
+    model_name="$(curl -s "${VIA_API_MODEL_PROPS_ENDPOINT}" "${AUTHORIZATION_PARAMS[@]}" | jq -e -r .model_alias 2> /dev/null)"
+    if [ -z "$model_name" ]; then
+        model_name=$(curl -s "${VIA_API_MODEL_INFO_ENDPOINT}" "${AUTHORIZATION_PARAMS[@]}" | jq -e -r .model_name 2> /dev/null)
+        
+    fi
+    if [ "${model_name}" == "null" ]; then
+        model_name="${MODEL_NAME_OVERRIDE:-None}"
+    fi
+    model_name="$(printf "%s" "${model_name}"| sed -e 's/-/_/g' | sed -e 's/\.gguf//')"
+    printf "%s\n" "${model_name}" 
+    return 0
 }
 
 function list_models {
@@ -263,7 +296,7 @@ function list_models {
             fi
         done
 
-        list_models | grep -i $grep_pattern
+        list_models | grep -i "${grep_pattern}"
     fi
 }
 

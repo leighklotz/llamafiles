@@ -1,0 +1,7 @@
+$ sudo dmesg | tail -200 | help find the esp32 usb device
+Your ESP32 is connected and recognized as a serial device at:
+
+**/dev/ttyUSB0**
+
+It is using the **CH341** USB-to-Serial driver with Vendor ID `1a86` and Product ID `7523`.
+$

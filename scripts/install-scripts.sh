@@ -6,7 +6,7 @@
 
 SCRIPT_DIR="$(dirname "$(realpath "${BASH_SOURCE}")")"
 
-FILES="ask.sh bashblock.sh codefence.sh help-commit.sh lx.sh machelp.sh manhelp.sh nvfree.sh onsubnet.sh repofiles.sh scuttle.sh summarize.sh systype.sh unfence.sh unlx.sh via.sh"
+FILES="ask.sh bx.sh codefence.sh help-commit.sh lx.sh machelp.sh manhelp.sh nvfree.sh onsubnet.sh repofiles.sh scuttle.sh summarize.sh systype.sh unfence.sh unlx.sh via.sh"
 SH_FILES="help.sh write.sh"
 
 DEST_DIR=""
@@ -93,6 +93,7 @@ fi
 
 lnf "${SCRIPT_DIR}/llamafiles-aliases.sh" "$BASH_D/llamafiles-aliases.sh"
 lnf "${SCRIPT_DIR}/_via_completion.sh" "$BASH_D/_via_completion.sh"
+lnf "${SCRIPT_DIR}/pipetest.sh" "$BASH_D/pipetest.sh"
 
 # Check for yq (https://github.com/mikefarah/yq/) version v4.49.2
 if ! command -v "yq" >/dev/null 2>&1; then

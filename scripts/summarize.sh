@@ -4,7 +4,7 @@ SCRIPT_DIR="$(dirname "$(realpath "${BASH_SOURCE}")")"
 CAPTURE_COMMAND="cat"
 FETCHER_COMMAND="${SCRIPT_DIR}/fetcher.sh"
 
-. "${SCRIPT_DIR}/../via/functions.sh"
+source "${SCRIPT_DIR}/../via/logging.sh"
 
 if [ -f "${SCRIPT_DIR}/.venv/bin/activate" ]; then
     . "${SCRIPT_DIR}/.venv/bin/activate"

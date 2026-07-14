@@ -6,11 +6,11 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     exit 1
 fi
 
-COLOR_RED='\e[1;31m'
-COLOR_YELLOW='\e[1;33m'
-COLOR_GREEN='\e[1;32m'
-COLOR_BLUE='\e[1;36m'
-NOCOLOR='\e[0m'
+COLOR_RED=$'\e[1;31m'
+COLOR_YELLOW=$'\e[1;33m'
+COLOR_GREEN=$'\e[1;32m'
+COLOR_BLUE=$'\e[1;36m'
+NOCOLOR=$'\e[0m'
 
 # RWK: https://gist.github.com/akostadinov/33bb2606afe1b334169dfbf202991d36?permalink_comment_id=4962266#gistcomment-4962266
 function stack_trace() {
@@ -33,7 +33,9 @@ function log_with_icon {
     local icon="$1"
     local message="$2"
     local timestamp="$(date -u +"%Y-%m-%d %H:%M:%S.%3NZ")"
-    printf "%s %s %b\n" "${icon}" "${timestamp}" "${message}" > /dev/stderr
+    local formatted_message
+    formatted_message="$(echo -e "$message" | sed "s/^/${COLOR_YELLOW}/")"
+    printf "%b %b %b${NOCOLOR}\n" "${icon}" "${timestamp}" "${formatted_message}" > /dev/stderr
 }
 
 function log_verbose {
@@ -48,7 +50,7 @@ function log_debug {
     local prog="$(basename "$0")"
     local message="$1"
     if [ -n "${DEBUG}" ]; then
-        log_with_icon '🐞' "${COLOR_BLUE}${prog}:${NOCOLOR} ${message}"
+        log_with_icon '🐞' "${COLOR_BLUE}DEBUG ${prog}:${NOCOLOR} ${message}"
     fi
 }
 
@@ -56,7 +58,7 @@ function log_info {
     local prog="$(basename "$0")"
     local message="$1"
     if [ -n "${INFO}" ]; then
-        log_with_icon '✅' "${COLOR_GREEN}INFO ${prog}:${NOCOLOR} ${message}"
+        log_with_icon 'ℹ*' "${COLOR_GREEN}INFO ${prog}:${NOCOLOR} ${message}"
     fi
 }
 

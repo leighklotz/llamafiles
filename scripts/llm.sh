@@ -2,12 +2,29 @@
 
 SCRIPT_DIR="$(dirname "$(realpath "${BASH_SOURCE}")")"
 
-USAGE='[--stdin|--interactive|-i] [--raw-input] \
-[--process-question-escapes|-e] [--temperature temp] [--n-predict n] \
-[--grammar-file file.gbnf] [--info] [--verbose|-v] [--debug] [--noerror] [--] QUESTION*'
-
 function usage {
-    printf "Usage: %s %s\n" "$0" "${USAGE}" >> /dev/stderr
+local usage="[--debug] \
+[--enable-thinking|--think][--disable-thinking][--show-thinking] [--hide-thinking] \
+[--grammar-file file.gbnf] \
+[--grammar-file] \
+[--inference-mode instruct|chat|chat-instruct] \
+[--info] \
+[--n-predict n] \
+[--n-predict n] \
+[--noerror] \
+[--process-question-escapes|-e] \
+[--raw-input] \
+[--raw-input] \
+[--reasoning-budget n] \
+[--reasoning-effort low|medium|high] \
+[--seed n] \
+[--stdin|--interactive|-i] \
+[--stdin|--interactive|-i] \
+[--temperature n] \
+[--temperature temp] \
+[--verbose|-v] \
+[--] QUESTION*"
+    printf "Usage: %s %s\n" "$0" "${usage}" >> /dev/stderr
 }
 
 ### If there are any args, require “--” or any non‑hyphen word to terminate args
@@ -24,8 +41,6 @@ function parse_args() {
                     usage
                     exit 0
                     ;;
-                # --via removed
-                --inference-mode) shift; INFERENCE_MODE="$1" ;;
                 # Logging
                 --info) INFO=1 ;;
                 --verbose|-v) VERBOSE=1 ;;
@@ -34,9 +49,17 @@ function parse_args() {
                     ;;
                 --noerror) ERROR_OUTPUT="/dev/null" ;;
                 # Generation options
+                --inference-mode) shift; INFERENCE_MODE="$1" ;;
+                --seed) shift; SEED="$1" ;;
                 --n-predict) shift; N_PREDICT="$1" ;;
                 --temperature) shift; TEMPERATURE="$1" ;;
                 --grammar-file) shift; GRAMMAR_FILE="$1" ;;
+                --enable-thinking) ENABLE_THINKING="true" ;;
+                --think) ENABLE_THINKING="true"; SHOW_THINKING="true" ;;
+                --disable-thinking) ENABLE_THINKING="false" ;;
+                --show-thinking) SHOW_THINKING="true" ;;
+                --reasoning-effort) shift; REASONING_EFFORT:="$1" ;;
+                --reasoning-budget) shift; REASONING_BUDGET:="$1" ;;
                 # Input options
                 --stdin|--interactive|-i) DO_STDIN=1 ;;
                 --raw-input) RAW_FLAG="--raw-input" ;;
@@ -69,6 +92,7 @@ parse_args "${@}"
 : "${INFO:=${VERBOSE}}"
 : "${VERBOSE:=}"
 : "${DEBUG:=}"
+: "${DEBUG_SHOW_JSON:=}"
 : "${LOG_DISABLE:=--log-disable}"   # use space ' ' to override
 : "${KEEP_PROMPT_TEMP_FILE:=ALL}" # "NONE"|"ERROR"|"ALL"
 # Generation options
@@ -83,20 +107,25 @@ parse_args "${@}"
 : "${PENALIZE_NL:=false}"
 : "${USE_SYSTEM_ROLE:=}"
 : "${REASONING_EFFORT:=low}"
+: "${ENABLE_THINKING:=false}"
+: "${SHOW_THINKING:=false}"
+: "${REASONING_BUDGET:-2048}"
 
 ##############################################################################
 #  Load shared functions
 ##############################################################################
-FUNCTIONS_PATH="$(realpath "${SCRIPT_DIR}/../via/functions.sh")"
+VIA_FUNCTIONS_PATH="$(realpath "${SCRIPT_DIR}/../via/functions.sh")"
 VIA_API_FUNCTIONS_PATH="$(realpath "${SCRIPT_DIR}/../via/api/functions.sh")"
-source "${FUNCTIONS_PATH}"
+source "${VIA_FUNCTIONS_PATH}"
 
 ##############################################################################
 #  Perform Inference
 ##############################################################################
 function perform_inference {
-    via_api_perform_inference "${INFERENCE_MODE}" "${SYSTEM_MESSAGE}" \
-        "${PROMPT}" "${GRAMMAR_FILE}" "${TEMPERATURE}" "${REPEAT_PENALTY}" "${PENALIZE_NL}" "${N_PREDICT}"
+    via_api_perform_inference \
+        "${INFERENCE_MODE}" "${SYSTEM_MESSAGE}" \
+        "${PROMPT}" "${GRAMMAR_FILE}" "${TEMPERATURE}" "${REPEAT_PENALTY}" "${PENALIZE_NL}" "${N_PREDICT}" \
+        "${ENABLE_THINKING}" "${REASONING_EFFORT}"
     status=$?
     return $status
 }
@@ -106,7 +135,7 @@ function perform_inference {
 # STDIN is never processed for escapes.
 function process_question_escapes() {
     if [ -n "${PROCESS_QUESTION_ESCAPES}" ]; then
-        log_verbose "Processing escape sequences in QUESTION"
+        log_debug "Processing escape sequences in QUESTION"
         printf -v QUESTION "%b" "$QUESTION"
     fi
 }
@@ -122,7 +151,6 @@ function process_stdin() {
         INPUT="$(cat | tr '\0' ' ')"
     fi
 }
-
 
 ##############################################################################
 ### Debug and log
@@ -155,14 +183,14 @@ function report_success_or_fail {
 source "${VIA_API_FUNCTIONS_PATH}"
 
 process_question_escapes
-log_info "process_stdin"
+log_verbose "process_stdin"
 process_stdin
-log_info "process_stdin done"
+log_verbose "process_stdin done"
 prepare_prompt
 set_verbose_debug
-log_info "perform_inference"
+log_verbose "perform_inference"
 perform_inference; STATUS=$?
-log_info "perform_inference done"
+log_verbose "perform_inference done"
 report_success_or_fail $STATUS
 cleanup_temp_files $STATUS
 exit $STATUS
