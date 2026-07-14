@@ -38,8 +38,8 @@ MAJOR_MODE=""
 PROMPT=""
 RAW_FLAG=""
 N_PREDICT=""
-REORDER_CODE=0
-UNFENCE_CODE=0
+REORDER_CODE=""
+UNFENCE_CODE=""
 
 # Parse optional arguments
 while [[ $# -gt 0 ]]; do
@@ -122,7 +122,7 @@ case "$USE_CASE" in
     # args: major_mode prompt*
     PROMPT="${*}"
     printf -v SYSTEM_MESSAGE 'Re-write the following Emacs `%s` buffer contents according to user instructions. Do not make unrelated changes.\n' "${MODE_LANG}"
-    REORDER_CODE=1
+    REORDER_CODE=""
     ;;
 
   todo)
@@ -185,11 +185,11 @@ if [ -z "${result}" ]; then
 fi
 
 # Reorder code with comments if theR EORDER_CODE flag is set.
-if [ "$REORDER_CODE" -eq 1 ]; then
+if [ -n "$REORDER_CODE" ]; then
   comment_prefix=$(calculate_comment_prefix "${MAJOR_MODE}")
   # printf "before reorder: result=%s\n" "${result}"
   printf "%s\n" "${result}" | reorder_code "${comment_prefix}"
-elif [ "$UNFENCE_CODE" -eq 1 ]; then
+elif [ -n "$UNFENCE_CODE" ]; then
   printf "%s\n" "${result}" | unfence_code
 else
   printf "%s\n" "${result}"
