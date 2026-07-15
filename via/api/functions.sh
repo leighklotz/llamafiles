@@ -207,6 +207,7 @@ function via_api_perform_inference() {
     # todo might need to do `set -o pipefail` here.
     #set -x
     log_info "VIA_API_CHAT_COMPLETIONS_ENDPOINT=${VIA_API_CHAT_COMPLETIONS_ENDPOINT}"
+    log_trace "INFER ${data}"
     result=$(printf "%s" "${data}" | curl -s -X 'POST' "${VIA_API_CHAT_COMPLETIONS_ENDPOINT}" -H 'Content-Type: application/json' "${AUTHORIZATION_PARAMS[@]}" -d @-)
     s=$?
     if [ "$s" -ne 0 ]; then
