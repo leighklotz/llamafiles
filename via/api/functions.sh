@@ -11,12 +11,12 @@ fi
 VIA_API_CHAT_COMPLETIONS_ENDPOINT="${VIA_API_CHAT_BASE}/v1/chat/completions"
 VIA_API_TOKEN_COUNT_ENDPOINT="${VIA_API_CHAT_BASE}/v1/chat/token-count"
 VIA_API_MODEL_INFO_ENDPOINT="${VIA_API_CHAT_BASE}/v1/internal/model/info"
-VIA_API_MODEL_INFO_ENDPOINT_LL="${VIA_API_CHAT_BASE}/models"
 VIA_API_MODEL_LIST_ENDPOINT="${VIA_API_CHAT_BASE}/v1/internal/model/list"
 VIA_API_LOAD_MODEL_ENDPOINT="${VIA_API_CHAT_BASE}/v1/internal/model/load"
 VIA_API_UNLOAD_MODEL_ENDPOINT="${VIA_API_CHAT_BASE}/v1/internal/model/unload"
 # llama.cpp endpoints
 VIA_API_MODEL_PROPS_ENDPOINT="${VIA_API_CHAT_BASE}/props"
+VIA_API_MODELS_ENDPOINT="${VIA_API_CHAT_BASE}/models"
 
 AUTHORIZATION_PARAMS=()
 
@@ -37,6 +37,7 @@ AUTHORIZATION_PARAMS=()
 # but if we do not set it then it defaults to 512, at least for gguf
 
 TEMPLATE_SETTINGS="
+    model: \$model_name,
     temperature: \$temperature,
     seed: \$seed,
     max_new_tokens: \$n_predict,
@@ -44,7 +45,7 @@ TEMPLATE_SETTINGS="
 if [ -n "${OPENAI_API_KEY}" ]; then
     AUTHORIZATION_PARAMS=(-H "Authorization: Bearer ${OPENAI_API_KEY}")
     TEMPLATE_SETTINGS="${TEMPLATE_SETTINGS},
-        model: \"gpt-5.1\""
+        model: \"gpt-3.5\""
 else
     TEMPLATE_SETTINGS="${TEMPLATE_SETTINGS},
     tools: [],
@@ -68,11 +69,6 @@ else
     chat_template_kwargs: { \"enable_thinking\": \$enable_thinking },
     verbose: true,
     reasoning_budget: \$reasoning_budget"
-fi
-
-if [ -n "${LLAMA_SERVER_MODEL}" ]; then
-    TEMPLATE_SETTINGS="${TEMPLATE_SETTINGS},
-    model: \"${LLAMA_SERVER_MODEL}\""
 fi
 
 SYSTEM_ROLE_TEMPLATE="{
@@ -125,6 +121,7 @@ function via_api_perform_inference() {
     local enable_thinking="${9:-${ENABLE_THINKING}}"
     local reasoning_effort="${10:-${REASONING_EFFORT}}"
     local reasoning_budget="${11:-${REASONING_BUDGET}}"
+    local model_name="$(get_model_name)"
 
     if [ -z "$grammar_file" ] || [ -z "${USE_GRAMMAR}" ]; then
         grammar_file="/dev/null"
@@ -173,6 +170,7 @@ function via_api_perform_inference() {
     fi
 
     data=$(jq --raw-input --raw-output  --compact-output -n \
+              --arg model_name "${model_name}" \
               --arg inference_mode "${inference_mode}" \
               --argjson enable_thinking "${ENABLE_THINKING:-false}" \
               --arg reasoning_effort "${REASONING_EFFORT:-low}" \
@@ -267,15 +265,37 @@ function via_api_perform_inference() {
 
 function get_model_name {
     local model_name
-    model_name="$(curl -s "${VIA_API_MODEL_PROPS_ENDPOINT}" "${AUTHORIZATION_PARAMS[@]}" | jq -e -r .model_alias 2> /dev/null)"
-    if [ -z "$model_name" ]; then
-        model_name=$(curl -s "${VIA_API_MODEL_INFO_ENDPOINT}" "${AUTHORIZATION_PARAMS[@]}" | jq -e -r .model_name 2> /dev/null)
-        
+    model_name="$(curl -s VIA_API_MODELS_ENDPOINT "${AUTHORIZATION_PARAMS[@]}" | jq -r '.data[] | select(.status.value == "loaded") | .id')"
+
+    if [ -z "$model_name" ] || [ "$model_name" == "llama-server" ] || [ "${model_name}" == "null" ] || [ "${model_name}" == "None" ]; then
+        model_name="$(curl -s "${VIA_API_MODEL_PROPS_ENDPOINT}" "${AUTHORIZATION_PARAMS[@]}" | jq -e -r .model_alias 2> /dev/null)"
     fi
-    if [ "${model_name}" == "null" ]; then
+
+    if [ -z "$model_name" ] || [ "$model_name" == "llama-server" ] || [ "${model_name}" == "null" ] || [ "${model_name}" == "None" ]; then
+        model_name=$(curl -s "${VIA_API_MODEL_INFO_ENDPOINT}" "${AUTHORIZATION_PARAMS[@]}" | jq -e -r .model_name 2> /dev/null)
+    fi
+
+    if [ -z "$model_name" ] || [ "$model_name" == "llama-server" ] || [ "${model_name}" == "null" ] || [ "${model_name}" == "None" ]; then
         model_name="${MODEL_NAME_OVERRIDE:-None}"
     fi
-    model_name="$(printf "%s" "${model_name}"| sed -e 's/-/_/g' | sed -e 's/\.gguf//')"
+
+    if [ -z "$model_name" ] || [ "$model_name" == "llama-server" ] || [ "${model_name}" == "null" ] || [ "${model_name}" == "None" ]; then
+        local endpoint="${VIA_API_CHAT_BASE}/props"
+        local model_name
+        model_name="$(curl -s "${endpoint}" "${AUTHORIZATION_PARAMS[@]}" | jq -e -r .model_alias 2> /dev/null)"
+        if [ -z "$model_name" ]; then
+            model_name=$(curl -s "${VIA_API_MODEL_INFO_ENDPOINT}" "${AUTHORIZATION_PARAMS[@]}" | jq -e -r .model_name 2> /dev/null)
+        fi
+    fi
+
+    if [ -z "$model_name" ] || [ "$model_name" == "llama-server" ] || [ "${model_name}" == "null" ] || [ "${model_name}" == "None" ]; then
+        model_name="${MODEL_NAME_OVERRIDE:-gpt-3.5}"
+    fi
+
+    if [ "$model_name" == "*.gguf" ]; then
+        model_name="$(printf "%s" "${model_name}"| sed -e 's/-/_/g' | sed -e 's/\.gguf//')"
+    fi
+
     printf "%s\n" "${model_name}" 
     return 0
 }
@@ -312,7 +332,6 @@ function load_model {
     grep -s "OK" <<< "${result}"
     local s=$?
     [ $s -ne 0 ] && log_error "load_model result=${result}"
-    set +x
     return $s;
 }
 
