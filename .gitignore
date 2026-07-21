@@ -6,3 +6,4 @@ private
 *.log
 *~*
 bin
+.hallux/
